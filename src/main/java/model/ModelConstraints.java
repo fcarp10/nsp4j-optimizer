@@ -1,9 +1,9 @@
 package model;
 
-import graph.elements.vertex.VertexElement;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
+import org.graphstream.graph.Node;
 
 public class ModelConstraints {
 
@@ -79,9 +79,9 @@ public class ModelConstraints {
                 for (int d = 0; d < mp.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                     for (int v = 0; v < mp.ip.getServices().get(s).getFunctions().size(); v++) {
                         GRBLinExpr expr = new GRBLinExpr();
-                        for (int n = 0; n < mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getTraversedVertices().size(); n++)
+                        for (int n = 0; n < mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
                             for (int x = 0; x < mp.ip.getServers().size(); x++)
-                                if (mp.ip.getServers().get(x).getVertexParent().equals(mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getTraversedVertices().get(n)))
+                                if (mp.ip.getServers().get(x).getVertexParent().equals(mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
                                     expr.addTerm(1.0, mp.fXSVD[x][s][v][d]);
                         mp.grbModel.addConstr(mp.rSPD[s][p][d], GRB.LESS_EQUAL, expr, "Function placement");
                     }
@@ -121,12 +121,12 @@ public class ModelConstraints {
             for (int d = 0; d < mp.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
                 for (int p = 0; p < mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                     for (int v = 1; v < mp.ip.getServices().get(s).getFunctions().size(); v++) {
-                        for (int n = 0; n < mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getTraversedVertices().size(); n++) {
+                        for (int n = 0; n < mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++) {
                             GRBLinExpr expr = new GRBLinExpr();
                             GRBLinExpr expr2 = new GRBLinExpr();
-                            VertexElement currentNode = mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getTraversedVertices().get(n);
+                            Node currentNode = mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n);
                             for (int pointer = -1; pointer < n; pointer++) {
-                                VertexElement pastNode = mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getTraversedVertices().get(pointer + 1);
+                                Node pastNode = mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(pointer + 1);
                                 for (int x = 0; x < mp.ip.getServers().size(); x++)
                                     if (mp.ip.getServers().get(x).getVertexParent().equals(pastNode))
                                         expr.addTerm(1.0, mp.fXSVD[x][s][v - 1][d]);

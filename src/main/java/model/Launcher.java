@@ -18,7 +18,7 @@ public class Launcher {
             System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
 
         log.info("Initializing NFV framework");
-        InputParameters inputParameters = ConfigFiles.readInputParameters("/config-test.yml");
+        InputParameters inputParameters = ConfigFiles.readInputParameters("/config.yml");
         inputParameters.initializeParameters();
         startLinkOptimization(inputParameters);
     }
@@ -33,7 +33,7 @@ public class Launcher {
             expr.add(model.getExprLinkCosts());
             model.setObjectiveFunction(expr);
             new ModelConstraints(modelParameters, numOfReplicas);
-
+            model.run(numOfReplicas);
         }
     }
 }

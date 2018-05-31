@@ -1,4 +1,4 @@
-networkFile: network-test.txt
+networkFile: network.dgs
 bidirectionalLinks: true
 minReplicas: 0
 maxReplicas: 3
@@ -22,10 +22,9 @@ services:
       load: 0.2
 
 trafficFlows:
-  - source: "N1"
-    destination: "N3"
+  - src: "A"
+    dst: "D"
     serviceId: 0
-
 minDemands: 3
 maxDemands: 3
 minBw: 200

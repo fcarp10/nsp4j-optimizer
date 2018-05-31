@@ -35,10 +35,10 @@ public class Model {
             GRBLinExpr expr = new GRBLinExpr();
             for (int s = 0; s < mp.ip.getServices().size(); s++)
                 for (int p = 0; p < mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
-                    if (!mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).containsEdge(mp.ip.getLinks().get(l)))
+                    if (!mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).contains(mp.ip.getLinks().get(l)))
                         continue;
                     for (int d = 0; d < mp.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        expr.addTerm(mp.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) / mp.ip.getLinks().get(l).getEdgeParams().getMaxCapacity(), mp.rSPD[s][p][d]);
+                        expr.addTerm(mp.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) / (double) mp.ip.getLinks().get(l).getAttribute("capacity"), mp.rSPD[s][p][d]);
                 }
             mp.grbModel.addConstr(expr, GRB.EQUAL, mp.lu[l], "Link Utilization [" + l + "]");
             setLinearCostFunctions(expr, mp.lk[l]);
