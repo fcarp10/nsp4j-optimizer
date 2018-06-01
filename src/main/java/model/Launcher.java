@@ -2,6 +2,7 @@ package model;
 
 import filemanager.ConfigFiles;
 import filemanager.InputParameters;
+import gui.WebApp;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import org.slf4j.Logger;
@@ -20,6 +21,12 @@ public class Launcher {
         log.info("Initializing NFV framework");
         InputParameters inputParameters = ConfigFiles.readInputParameters("/config.yml");
         inputParameters.initializeParameters();
+        new Thread(() -> WebApp.main(new String[]{})).start();
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         startLinkOptimization(inputParameters);
     }
 
