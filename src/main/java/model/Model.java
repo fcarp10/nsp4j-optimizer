@@ -99,10 +99,7 @@ public class Model {
             modelResults.calculateNumberOfReplications();
         }
 
-//        if (ModelLauncher.debugging)
-//            modelResults.printSolution();
-//        else
-        modelResults.printResults(mp.grbModel.get(GRB.DoubleAttr.ObjVal), modelResults);
+        modelResults.printResults(mp.grbModel.get(GRB.DoubleAttr.ObjVal));
 
         return modelResults;
     }

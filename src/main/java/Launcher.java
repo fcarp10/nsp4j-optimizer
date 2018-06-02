@@ -4,6 +4,8 @@ import gui.WebApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static spark.Spark.init;
+import static spark.Spark.port;
 import static spark.Spark.staticFiles;
 
 public class Launcher {
@@ -14,8 +16,9 @@ public class Launcher {
 
         InputParameters inputParameters = ConfigFiles.readInputParameters("/config.yml");
         inputParameters.initializeParameters();
-        //port(8080);
+        port(8080);
         staticFiles.location("/public");
+        init();
         new WebApp(inputParameters);
     }
 }

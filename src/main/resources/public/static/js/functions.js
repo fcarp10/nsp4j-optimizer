@@ -11,7 +11,6 @@ function startLinkOpt() {
             }
         });
         if(message!=null) {
-            loadLog();
             setTimeout(loadLog, 1000);
         }
         return message;
@@ -30,4 +29,22 @@ function loadLog() {
     };
     xhttp.open("GET", "../../mip.log", true);
     xhttp.send();
+    setInterval(updateScroll,1000);
 }
+
+
+var scrolled = false;
+function updateScroll(){
+    if(!scrolled){
+        var element = document.getElementById("logDiv");
+        element.scrollTop = element.scrollHeight;
+    }
+}
+
+$("#logDiv").on('scroll', function(){
+    scrolled=true;
+});
+
+$("#run-button").click(function () {
+    scrolled = false;
+});

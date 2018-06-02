@@ -38,7 +38,8 @@ public class ModelParameters {
 
     public void initializeVariables() throws GRBException {
 
-            grbEnv = new GRBEnv("src/main/resources/public/mip.log");
+            grbEnv = new GRBEnv("src/main/resources/mip.log");
+            grbEnv.set(GRB.IntParam.LogToConsole, 0);
             grbModel = new GRBModel(grbEnv);
             grbModel.getEnv().set(GRB.DoubleParam.MIPGap, ip.getGap());
 

@@ -40,20 +40,28 @@
 
 <div class="container">
     <div id="topologyDiv" class="row">
-        <div class="col-md-7">
+        <div class="col-md-10">
             <h2>Topology</h2>
             <p id="cy"></p>
         </div>
-        <div class="col-md-5">
-            <h2>Log</h2>
+        <div class="col-md-2">
+            <h2>Parameters</h2>
+            <!--<input type="text" id="replicas" placeholder="Number of replcias" onBlur="" />-->
+            <h5>Model</h5>
+            <select type="text" id="opt">
+                <option type="text" value="init">initial placement</option>
+                <option type="text" value="rep">only replicas</option>
+                <option type="text" value="mgr">only migrations</option>
+                <option type="text" value="mgr/rep">migrations and replications</option>
+            </select>
+            <button class="button button-submit" id="run-button" onClick="startLinkOpt()">Run</button>
+        </div>
+    </div>
+
+    <div id="LoggingDiv" class="row">
+        <div class="col-md-12">
+            <h2>Output</h2>
             <div id="logDiv"><p id="log"></p></div>
-            <p>
-            <div class="row">
-                <div class="col-md-6 text-left">
-                    <button onClick="startLinkOpt()" id="startButton" type="button" class="btn btn-success">Start</button>
-                    <button id="stopButton" type="button" class="btn btn-danger">Stop</button>
-                </div>
-            </div>
         </div>
     </div>
 
