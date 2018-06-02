@@ -1,41 +1,39 @@
-function getNodes()
-{
-    try
-    {
+function getNodes() {
+    try {
         var message = null;
         $.ajax
         ({
-            url:   "node",
-            type:  "GET",
+            url: "node",
+            type: "GET",
             async: false,
-            success: function(ans)
-            {
+            success: function (ans) {
                 message = ans;
             }
         });
         return message;
     }
-    catch (e){return 0;}
+    catch (e) {
+        return 0;
+    }
 }
 
-function getLinks()
-{
-    try
-    {
+function getLinks() {
+    try {
         var message = null;
         $.ajax
         ({
-            url:   "link",
-            type:  "GET",
+            url: "link",
+            type: "GET",
             async: false,
-            success: function(ans)
-            {
+            success: function (ans) {
                 message = ans;
             }
         });
         return message;
     }
-    catch (e){return 0;}
+    catch (e) {
+        return 0;
+    }
 }
 
 window.onload = function () {
@@ -119,6 +117,4 @@ window.onload = function () {
     cy.layout({
         name: 'preset'
     }).run();
-
-
 };

@@ -87,7 +87,7 @@ public class Model {
         if (mp.grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
             mp.grbModel.computeIIS();
             log.error("Model is not feasible");
-            System.exit(0);
+            ///System.exit(0);
         }
     }
 
@@ -99,10 +99,10 @@ public class Model {
             modelResults.calculateNumberOfReplications();
         }
 
-        if (Launcher.debugging)
-            modelResults.printSolution();
-        else
-            modelResults.printResults(mp.grbModel.get(GRB.DoubleAttr.ObjVal), modelResults);
+//        if (ModelLauncher.debugging)
+//            modelResults.printSolution();
+//        else
+        modelResults.printResults(mp.grbModel.get(GRB.DoubleAttr.ObjVal), modelResults);
 
         return modelResults;
     }

@@ -1,8 +1,11 @@
 package gui;
 
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import filemanager.GraphManager;
+import filemanager.InputParameters;
+import model.ModelLauncher;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 
@@ -12,25 +15,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static spark.Spark.*;
+import static spark.Spark.get;
+import static spark.Spark.post;
 
 public class WebApp {
 
     private static Map<String, JsonNode> jsonNodes;
     private static Map<String, JsonLink> jsonLinks;
 
-    public static void main(String[] args) {
+    public WebApp(InputParameters inputParameters) {
+        jsonNodes = new HashMap<>();
+        List<Node> nodes = new ArrayList<>(GraphManager.getGraph().getNodeSet());
+        for (Node node : nodes)
+            jsonNodes.put(node.getId(), new JsonNode(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#BDBDBD", node.getId()));
 
-        //GraphManager.importTopology("network.dgs");
+        List<Edge> edges = new ArrayList<>(GraphManager.getGraph().getEdgeSet());
+        jsonLinks = new HashMap<>();
+        for (Edge edge : edges)
+            jsonLinks.put(edge.getId(), new JsonLink(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));
 
-        initializeGraph();
-        port(80);
-        staticFiles.location("/public");
+        interfaces(inputParameters);
+    }
 
+    private static void interfaces(InputParameters inputParameters) {
         post("/node", (request, response) -> {
-
             response.type("application/json");
-
             Type listType = new TypeToken<ArrayList<JsonNode>>() {
             }.getType();
             List<JsonNode> rJsonNodes = new Gson().fromJson(request.body(), listType);
@@ -41,9 +50,7 @@ public class WebApp {
         });
 
         post("/link", (request, response) -> {
-
             response.type("application/json");
-
             Type listType = new TypeToken<ArrayList<JsonLink>>() {
             }.getType();
             List<JsonLink> rJsonLinks = new Gson().fromJson(request.body(), listType);
@@ -55,24 +62,19 @@ public class WebApp {
 
         get("/node", (request, response) -> {
             response.type("application/json");
-            return new Gson().toJson(jsonNodes);
+            return new Gson().toJson(jsonNodes.values());
         });
 
         get("/link", (request, response) -> {
             response.type("application/json");
-            return new Gson().toJson(jsonLinks);
+            return new Gson().toJson(jsonLinks.values());
         });
-    }
 
-    private static void initializeGraph() {
-        jsonNodes = new HashMap<>();
-        List<Node> nodes = new ArrayList<>(GraphManager.getGraph().getNodeSet());
-        for (Node node : nodes)
-            jsonNodes.put(node.getId(), new JsonNode(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#BDBDBD", node.getId()));
+        get("/link-opt", (request, response) -> {
 
-        List<Edge> edges = new ArrayList<>(GraphManager.getGraph().getEdgeSet());
-        jsonLinks = new HashMap<>();
-        for (Edge edge : edges)
-            jsonLinks.put(edge.getId(), new JsonLink(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));
+            ModelLauncher.startLinkOptimization(inputParameters);
+
+            return 200;
+        });
     }
 }

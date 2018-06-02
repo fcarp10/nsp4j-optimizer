@@ -1,0 +1,736 @@
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:27:10 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 32 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      115         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.02 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:27:55 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 32 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      115         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:29:57 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 32 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      115         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:34 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 32 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      115         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.02 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:34 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:35 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:35 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:38 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 32 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      115         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:38 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:38 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:38 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:46 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 32 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      115         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:46 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:46 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:46 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:49 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 32 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      115         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:49 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:49 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:49 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:51 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 32 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      115         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.02 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:51 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:52 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
+
+Gurobi 8.0.0 (mac64, Java) logging started Sat Jun  2 10:30:52 2018
+
+Academic license - for non-commercial use only
+Optimize a model with 115 rows, 82 columns and 358 nonzeros
+Variable types: 24 continuous, 58 integer (58 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+03]
+  Objective range  [0e+00, 0e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [6e-01, 1e+02]
+Presolve removed 33 rows and 30 columns
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+
+Computing Irreducible Inconsistent Subsystem (IIS)...
+
+      Constraints           Bounds       Runtime
+     Min       Max       Min      Max
+------------------------------------------------
+        0      114         0       36         0s
+        3        3         2        2         0s
+
+IIS computed: 3 constraints, 2 bounds
+IIS runtime: 0.01 seconds
