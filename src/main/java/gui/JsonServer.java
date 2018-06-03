@@ -1,13 +1,26 @@
 package gui;
 
 
-public class JsonNode {
+public class JsonServer {
 
     private Position position;
     private Data data;
 
-    public JsonNode(String id, int x, int y, String favecolor, String label){
+    public JsonServer(String id, int x, int y, String favecolor, String label) {
         position = new Position(x, y);
+        data = new Data(id, favecolor, label);
+    }
+
+    public JsonServer(String id, int x, int y, String favecolor, String label, boolean isServer) {
+        int xS, yS;
+        if (Integer.valueOf(id.split("-")[1]) % 2 == 0) {
+            xS = x - 10;
+            yS = y + 20;
+        } else {
+            xS = x + 10;
+            yS = y + 20;
+        }
+        position = new Position(xS, yS);
         data = new Data(id, favecolor, label);
     }
 
@@ -27,7 +40,7 @@ public class JsonNode {
         this.data = data;
     }
 
-    private class Position{
+    private class Position {
         private int x;
         private int y;
 
@@ -53,15 +66,15 @@ public class JsonNode {
         }
     }
 
-    public class Data{
+    public class Data {
         private String id;
         private String favecolor;
         private String label;
 
-        public Data(String id, String favecolor, String label){
+        public Data(String id, String favecolor, String label) {
             this.id = id;
-            this. favecolor = favecolor;
-            this. label = label;
+            this.favecolor = favecolor;
+            this.label = label;
         }
 
         public String getId() {

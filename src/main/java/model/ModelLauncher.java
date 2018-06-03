@@ -19,7 +19,8 @@ public class ModelLauncher {
             expr.add(model.getExprLinkCosts());
             model.setObjectiveFunction(expr);
             new ModelConstraints(modelParameters, numOfReplicas);
-            model.run(numOfReplicas);
+            model.run();
+            model.generateResults(null);
         }
     }
 }

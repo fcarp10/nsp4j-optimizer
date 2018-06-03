@@ -81,7 +81,7 @@ public class ModelConstraints {
                         GRBLinExpr expr = new GRBLinExpr();
                         for (int n = 0; n < mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
                             for (int x = 0; x < mp.ip.getServers().size(); x++)
-                                if (mp.ip.getServers().get(x).getVertexParent().equals(mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
+                                if (mp.ip.getServers().get(x).getNodeParent().equals(mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
                                     expr.addTerm(1.0, mp.fXSVD[x][s][v][d]);
                         mp.grbModel.addConstr(mp.rSPD[s][p][d], GRB.LESS_EQUAL, expr, "Function placement");
                     }
@@ -128,11 +128,11 @@ public class ModelConstraints {
                             for (int pointer = -1; pointer < n; pointer++) {
                                 Node pastNode = mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(pointer + 1);
                                 for (int x = 0; x < mp.ip.getServers().size(); x++)
-                                    if (mp.ip.getServers().get(x).getVertexParent().equals(pastNode))
+                                    if (mp.ip.getServers().get(x).getNodeParent().equals(pastNode))
                                         expr.addTerm(1.0, mp.fXSVD[x][s][v - 1][d]);
                             }
                             for (int x = 0; x < mp.ip.getServers().size(); x++)
-                                if (mp.ip.getServers().get(x).getVertexParent().equals(currentNode))
+                                if (mp.ip.getServers().get(x).getNodeParent().equals(currentNode))
                                     expr.addTerm(-1.0, mp.fXSVD[x][s][v][d]);
 
                             expr2.addConstant(-1);

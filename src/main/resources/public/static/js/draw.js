@@ -1,47 +1,13 @@
-function getNodes() {
-    try {
-        var message = null;
-        $.ajax
-        ({
-            url: "node",
-            type: "GET",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
-        return message;
-    }
-    catch (e) {
-        return 0;
-    }
-}
-
-function getLinks() {
-    try {
-        var message = null;
-        $.ajax
-        ({
-            url: "link",
-            type: "GET",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
-        return message;
-    }
-    catch (e) {
-        return 0;
-    }
-}
+var cy;
 
 window.onload = function () {
+    initializeGraph();
+    updateGraph();
+    setInterval(updateGraph, 3000);
+};
 
-    var nodes = getNodes();
-    var links = getLinks();
-
-    var cy = cytoscape({
+function initializeGraph() {
+    cy = cytoscape({
         container: document.getElementById('cy'),
 
         boxSelectionEnabled: false,
@@ -83,6 +49,14 @@ window.onload = function () {
                 'control-point-step-size': 10
             })
     });
+}
+
+function updateGraph() {
+
+    cy.elements().remove();
+
+    var nodes = getNodes();
+    var links = getLinks();
 
     for (var n = 0; n < nodes.length; n++) {
         cy.add({
@@ -117,4 +91,42 @@ window.onload = function () {
     cy.layout({
         name: 'preset'
     }).run();
-};
+}
+
+function getNodes() {
+    try {
+        var message = null;
+        $.ajax
+        ({
+            url: "node",
+            type: "GET",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+        return message;
+    }
+    catch (e) {
+        return 0;
+    }
+}
+
+function getLinks() {
+    try {
+        var message = null;
+        $.ajax
+        ({
+            url: "link",
+            type: "GET",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+        return message;
+    }
+    catch (e) {
+        return 0;
+    }
+}

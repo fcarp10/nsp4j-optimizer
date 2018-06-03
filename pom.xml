@@ -22,11 +22,12 @@
         <dependency>
             <groupId>de.tubs</groupId>
             <artifactId>nfv-framework</artifactId>
-            <version>0.1</version>
+            <version>0.1.1</version>
         </dependency>
         <dependency>
-            <groupId>de.tubs</groupId>
-            <artifactId>nfv-optimization</artifactId>
+            <groupId>com.gurobi</groupId>
+            <artifactId>gurobi</artifactId>
+            <version>8.0.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/resources/gurobi.jar</systemPath>
         </dependency>
@@ -49,9 +50,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <compilerArgs>
+                        <arg>--add-modules</arg>
+                        <arg>jdk.incubator.httpclient</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

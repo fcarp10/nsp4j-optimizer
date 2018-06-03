@@ -6,6 +6,7 @@ import gurobi.GRBLinExpr;
 import gurobi.GRBVar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import results.ResultsFiles;
 
 public class Model {
 
@@ -81,7 +82,7 @@ public class Model {
         }
     }
 
-    public void run(int numOfReplicas) throws GRBException {
+    public void run() throws GRBException {
 
         mp.grbModel.optimize();
         if (mp.grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
@@ -98,7 +99,7 @@ public class Model {
             modelResults.calculateNumberOfMigrations(initialResults);
             modelResults.calculateNumberOfReplications();
         }
-
+        new ResultsFiles(mp.ip.getNetworkFile(), mp.ip.getAlpha() + "-" + mp.ip.getBeta());
         modelResults.printResults(mp.grbModel.get(GRB.DoubleAttr.ObjVal));
 
         return modelResults;

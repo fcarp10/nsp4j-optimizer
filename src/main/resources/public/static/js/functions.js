@@ -10,8 +10,9 @@ function startLinkOpt() {
                 message = ans;
             }
         });
-        if(message!=null) {
-            setTimeout(loadLog, 1000);
+        if (message != null) {
+            setInterval(updateOutput, 3000);
+            setInterval(updateScroll, 3000);
         }
         return message;
     }
@@ -20,31 +21,44 @@ function startLinkOpt() {
     }
 }
 
-function loadLog() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            document.getElementById("log").innerText = this.responseText;
-        }
-    };
-    xhttp.open("GET", "../../mip.log", true);
-    xhttp.send();
-    setInterval(updateScroll,1000);
+function updateOutput() {
+    var output = getOutput();
+    for (var s = 0; s < output.length; s++) {
+        document.getElementById("output").innerText += output[s];
+    }
 }
 
-
 var scrolled = false;
-function updateScroll(){
-    if(!scrolled){
-        var element = document.getElementById("logDiv");
+function updateScroll() {
+    if (!scrolled) {
+        var element = document.getElementById("outputDiv");
         element.scrollTop = element.scrollHeight;
     }
 }
 
-$("#logDiv").on('scroll', function(){
-    scrolled=true;
+$("#outputDiv").on('scroll', function () {
+    scrolled = true;
 });
 
 $("#run-button").click(function () {
     scrolled = false;
 });
+
+function getOutput() {
+    try {
+        var message = null;
+        $.ajax
+        ({
+            url: "output",
+            type: "GET",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+        return message;
+    }
+    catch (e) {
+        return 0;
+    }
+}

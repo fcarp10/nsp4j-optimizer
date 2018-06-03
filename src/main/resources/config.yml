@@ -1,4 +1,4 @@
-networkFile: network.dgs
+networkFile: network
 bidirectionalLinks: true
 minReplicas: 0
 maxReplicas: 0

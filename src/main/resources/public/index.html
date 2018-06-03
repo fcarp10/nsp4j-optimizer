@@ -40,13 +40,12 @@
 
 <div class="container">
     <div id="topologyDiv" class="row">
-        <div class="col-md-10">
+        <div class="col-md-9">
             <h2>Topology</h2>
             <p id="cy"></p>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <h2>Parameters</h2>
-            <!--<input type="text" id="replicas" placeholder="Number of replcias" onBlur="" />-->
             <h5>Model</h5>
             <select type="text" id="opt">
                 <option type="text" value="init">initial placement</option>
@@ -55,18 +54,21 @@
                 <option type="text" value="mgr/rep">migrations and replications</option>
             </select>
             <button class="button button-submit" id="run-button" onClick="startLinkOpt()">Run</button>
+            <br><br>
+            <h5>Results</h5>
+            Link Utilization (avg - min - max - std):
+            <div class="div div-output" id="lu">0.0 - 0.0 - 0.0 - 0.0</div>
+            Server Utilization (avg - min - max - std):
+            <div class="div div-output" id="xu">0.0 - 0.0 - 0.0 - 0.0</div>
+            Functions (avg - min - max):
+            <div class="div div-output" id="fp">0.0 - 0.0 - 0.0 - 0.0</div>
+            Average path length:
+            <div class="div div-output" id="path">0.0</div>
+            Cost:
+            <div class="div div-output" id="cost">0.0</div>
         </div>
     </div>
-
-    <div id="LoggingDiv" class="row">
-        <div class="col-md-12">
-            <h2>Output</h2>
-            <div id="logDiv"><p id="log"></p></div>
-        </div>
-    </div>
-
     <hr>
-
     <footer>
         <p>Technische Universität Braunschweig 2018</p>
     </footer>

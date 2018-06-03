@@ -20,19 +20,21 @@ import static spark.Spark.post;
 
 public class WebApp {
 
-    private static Map<String, JsonNode> jsonNodes;
+    private static Map<String, JsonServer> jsonNodes;
     private static Map<String, JsonLink> jsonLinks;
+    private static String output;
 
     public WebApp(InputParameters inputParameters) {
         jsonNodes = new HashMap<>();
         List<Node> nodes = new ArrayList<>(GraphManager.getGraph().getNodeSet());
         for (Node node : nodes)
-            jsonNodes.put(node.getId(), new JsonNode(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#BDBDBD", node.getId()));
+            jsonNodes.put(node.getId(), new JsonServer(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#BDBDBD", node.getId()));
 
         List<Edge> edges = new ArrayList<>(GraphManager.getGraph().getEdgeSet());
         jsonLinks = new HashMap<>();
         for (Edge edge : edges)
             jsonLinks.put(edge.getId(), new JsonLink(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));
+
 
         interfaces(inputParameters);
     }
@@ -40,11 +42,11 @@ public class WebApp {
     private static void interfaces(InputParameters inputParameters) {
         post("/node", (request, response) -> {
             response.type("application/json");
-            Type listType = new TypeToken<ArrayList<JsonNode>>() {
+            Type listType = new TypeToken<ArrayList<JsonServer>>() {
             }.getType();
-            List<JsonNode> rJsonNodes = new Gson().fromJson(request.body(), listType);
-            for (JsonNode jsonNode : rJsonNodes)
-                jsonNodes.replace(jsonNode.getData().getId(), jsonNode);
+            List<JsonServer> rJsonServers = new Gson().fromJson(request.body(), listType);
+            for (JsonServer jsonServer : rJsonServers)
+                jsonNodes.put(jsonServer.getData().getId(), jsonServer);
             response.status(201);
             return "";
         });
@@ -71,10 +73,20 @@ public class WebApp {
         });
 
         get("/link-opt", (request, response) -> {
-
             ModelLauncher.startLinkOptimization(inputParameters);
-
             return 200;
+        });
+
+        post("/output", (request, response) -> {
+            output += "\n" + request.body();
+            return 201;
+        });
+
+        get("/output", (request, response) -> {
+
+            String rOutput = output;
+            output = "";
+            return rOutput;
         });
     }
 }
