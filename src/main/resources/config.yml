@@ -13,13 +13,13 @@ services:
     functions:
     - id: 0
       replicable: false
-      load: 0.2
+      load: 1.0
     - id: 1
       replicable: true
       load: 1.0
     - id: 2
       replicable: false
-      load: 0.2
+      load: 1.0
 
 trafficFlows:
   - src: "A"
@@ -27,5 +27,5 @@ trafficFlows:
     serviceId: 0
 minDemands: 3
 maxDemands: 3
-minBw: 200
-maxBw: 200
+minBw: 300
+maxBw: 300

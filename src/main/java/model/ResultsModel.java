@@ -4,23 +4,25 @@ import gurobi.GRB;
 import gurobi.GRBException;
 import network.Server;
 import org.graphstream.graph.Edge;
+import results.Auxiliary;
+import results.Results;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ModelResults {
+public class ResultsModel {
 
-    private ModelParameters mp;
+    private ParametersModel mp;
     private int numOfMigrations;
     private int numOfReplicas;
 
-    public ModelResults(ModelParameters mp) {
+    public ResultsModel(ParametersModel mp) {
         this.mp = mp;
     }
 
-    public void calculateNumberOfMigrations(ModelResults initialPlacement) throws GRBException {
+    public void calculateNumberOfMigrations(ResultsModel initialPlacement) throws GRBException {
         numOfMigrations = 0;
         for (int x = 0; x < mp.ip.getServers().size(); x++)
             for (int s = 0; s < mp.ip.getServices().size(); s++)
@@ -41,18 +43,9 @@ public class ModelResults {
             }
     }
 
-    public void printResults(double cost) throws GRBException {
-
-        Map<Edge, Double> linksMap = linksMap();
-        Map<Server, Double> serverMap = serversMap();
-        List<Double> linksUtilization = new ArrayList<>(linksMap.values());
-        List<Double> serversUtilization = new ArrayList<>(serverMap.values());
-
-//        ResultsFiles.printGeneralResults(linksUtilization, serversUtilization, mp.ip.getAuxTotalTraffic(), trafficOnLinks()
-//                , avgPathLength(), cost, -1, functionsPerServer(), numOfMigrations, numOfReplicas);
-
-//        ClientResults.updateResultsToWebApp(serverMap, linksMap, functionsMap(), ResultsFiles.getGeneralResults());
-
+    public Results generate(double cost) throws GRBException {
+        return new Results(linksMap(), serversMap(), functionsMap(), mp.ip.getAuxTotalTraffic()
+                , trafficOnLinks(), avgPathLength(), Auxiliary.roundDouble(cost), numOfMigrations, numOfReplicas);
     }
 
     private Map<Edge, Double> linksMap() throws GRBException {

@@ -12,7 +12,6 @@ function startLinkOpt() {
         });
         if (message != null) {
             setInterval(updateOutput, 3000);
-            setInterval(updateScroll, 3000);
         }
         return message;
     }
@@ -22,34 +21,54 @@ function startLinkOpt() {
 }
 
 function updateOutput() {
-    var output = getOutput();
-    for (var s = 0; s < output.length; s++) {
-        document.getElementById("output").innerText += output[s];
+    var results = getResults();
+    if (results != null) {
+        document.getElementById("lu").innerText = results['avgLu'] + ' - ' + results['minLu'] + ' - ' + results['maxLu'] + ' - ' + results['vrcLu'];
+        document.getElementById("xu").innerText = results['avgXu'] + ' - ' + results['minXu'] + ' - ' + results['maxXu'] + ' - ' + results['vrcXu'];
+        document.getElementById("path").innerText = results['avgPathLength'];
+        document.getElementById("cost").innerText = results['cost'];
+    } else {
+        document.getElementById("lu").innerText = "0.0 - 0.0 - 0.0 - 0.0 ";
+        document.getElementById("xu").innerText = "0.0 - 0.0 - 0.0 - 0.0 ";
+        document.getElementById("path").innerText = "0.0";
+        document.getElementById("cost").innerText = "0.0";
     }
+    updateMessage();
 }
 
-var scrolled = false;
-function updateScroll() {
-    if (!scrolled) {
-        var element = document.getElementById("outputDiv");
-        element.scrollTop = element.scrollHeight;
-    }
+function updateMessage() {
+    var message = getMessage();
+    if (message != null)
+        document.getElementById("message").innerText = message;
+    else
+        document.getElementById("message").innerText = "";
 }
 
-$("#outputDiv").on('scroll', function () {
-    scrolled = true;
-});
-
-$("#run-button").click(function () {
-    scrolled = false;
-});
-
-function getOutput() {
+function getResults() {
     try {
         var message = null;
         $.ajax
         ({
-            url: "output",
+            url: "results",
+            type: "GET",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+        return message;
+    }
+    catch (e) {
+        return 0;
+    }
+}
+
+function getMessage() {
+    try {
+        var message = null;
+        $.ajax
+        ({
+            url: "message",
             type: "GET",
             async: false,
             success: function (ans) {

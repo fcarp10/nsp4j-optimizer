@@ -2,6 +2,7 @@ package results;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import gui.JsonLink;
 import gui.JsonServer;
@@ -12,6 +13,7 @@ import network.Server;
 import org.graphstream.graph.Edge;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.ProxySelector;
 import java.net.URI;
@@ -24,16 +26,23 @@ import java.util.Map;
 
 public class ClientResults {
 
-    public static void updateResultsToWebApp(Map<Server, Double> nodes, Map<Edge, Double> links, Map<Server, String> functions, String output) {
-
-        List<JsonServer> jsonServers = getNodeStringsWithResults(nodes, functions);
-        List<JsonLink> jsonLinks = getLinkStringsWithResults(links);
-
+    public static void updateResultsToWebApp(Results results) {
+        if(results!= null) {
+            List<JsonServer> jsonServers = getNodeStringsWithResults(results.getServersMap(), results.getFunctionsMap());
+            List<JsonLink> jsonLinks = getLinkStringsWithResults(results.getLinksMap());
+            try {
+                postMessage("Solution found");
+                postJsonNodes(jsonServers);
+                postJsonLinks(jsonLinks);
+            } catch (URISyntaxException | InterruptedException | IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            postMessage("Model is not feasible");
+        }
         try {
-            postJsonNodes(jsonServers);
-            postJsonLinks(jsonLinks);
-            postOutput(output);
-        } catch (URISyntaxException | InterruptedException | IOException e) {
+            postResults(results);
+        } catch (URISyntaxException | IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -70,12 +79,28 @@ public class ClientResults {
         sendRequest(request);
     }
 
-    private static void postOutput(String generalResults) throws URISyntaxException, IOException, InterruptedException {
+    private static void postResults(Results results) throws URISyntaxException, IOException, InterruptedException {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = gsonBuilder.excludeFieldsWithModifiers(Modifier.TRANSIENT).create();
+        String stringResults = gson.toJson(results);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/output"))
-                .POST(HttpRequest.BodyPublisher.fromString(generalResults))
+                .uri(new URI("http://localhost:8080/results"))
+                .POST(HttpRequest.BodyPublisher.fromString(stringResults))
                 .build();
         sendRequest(request);
+    }
+
+    private static void postMessage(String message)  {
+        HttpRequest request = null;
+        try {
+            request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/message"))
+                    .POST(HttpRequest.BodyPublisher.fromString(message))
+                    .build();
+            sendRequest(request);
+        } catch (URISyntaxException | InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static List<JsonServer> getNodeStringsWithResults(Map<Server, Double> servers, Map<Server, String> functions) {

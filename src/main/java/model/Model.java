@@ -3,110 +3,47 @@ package model;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
-import gurobi.GRBVar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import results.ResultsFiles;
 
 public class Model {
 
     private static final Logger log = LoggerFactory.getLogger(Model.class);
-    private ModelParameters mp;
+    private ParametersModel pm;
 
-    public Model(ModelParameters modelParameters) {
-        this.mp = modelParameters;
+    public Model(ParametersModel parametersModel) {
+        this.pm = parametersModel;
     }
 
     public void setObjectiveFunction(GRBLinExpr expr) throws GRBException {
-        mp.grbModel.setObjective(expr, GRB.MINIMIZE);
+        pm.grbModel.setObjective(expr, GRB.MINIMIZE);
     }
 
-    public GRBLinExpr getExprLinkCosts() throws GRBException {
-
+    public GRBLinExpr exprLinkCosts(double weight) throws GRBException {
         GRBLinExpr expr = new GRBLinExpr();
-        for (int l = 0; l < mp.ip.getLinks().size(); l++)
-            expr.addTerm((1 - mp.ip.getBeta()) / mp.ip.getLinks().size(), mp.lk[l]);
-        setLinkUtilizationCosts();
+        for (int l = 0; l < pm.ip.getLinks().size(); l++)
+            expr.addTerm(weight / pm.ip.getLinks().size(), pm.lk[l]);
         return expr;
     }
 
-    private void setLinkUtilizationCosts() throws GRBException {
-
-        for (int l = 0; l < mp.ip.getLinks().size(); l++) {
-            GRBLinExpr expr = new GRBLinExpr();
-            for (int s = 0; s < mp.ip.getServices().size(); s++)
-                for (int p = 0; p < mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
-                    if (!mp.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).contains(mp.ip.getLinks().get(l)))
-                        continue;
-                    for (int d = 0; d < mp.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        expr.addTerm(mp.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) / (double) mp.ip.getLinks().get(l).getAttribute("capacity"), mp.rSPD[s][p][d]);
-                }
-            mp.grbModel.addConstr(expr, GRB.EQUAL, mp.lu[l], "Link Utilization [" + l + "]");
-            setLinearCostFunctions(expr, mp.lk[l]);
-        }
-
-    }
-
-    public GRBLinExpr getExprServerCosts() throws GRBException {
-
+    public GRBLinExpr exprServerCosts(double weight) throws GRBException {
         GRBLinExpr expr = new GRBLinExpr();
-        for (int x = 0; x < mp.ip.getServers().size(); x++)
-            expr.addTerm(mp.ip.getBeta() / mp.ip.getServers().size(), mp.xk[x]);
-        setServerUtilizationCosts();
+        for (int x = 0; x < pm.ip.getServers().size(); x++)
+            expr.addTerm(weight / pm.ip.getServers().size(), pm.xk[x]);
         return expr;
     }
 
-    private void setServerUtilizationCosts() throws GRBException {
-        for (int x = 0; x < mp.ip.getServers().size(); x++) {
-            GRBLinExpr expr = new GRBLinExpr();
-            for (int s = 0; s < mp.ip.getServices().size(); s++)
-                for (int v = 0; v < mp.ip.getServices().get(s).getFunctions().size(); v++) {
-                    for (int d = 0; d < mp.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-                        expr.addTerm((mp.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-                                        * mp.ip.getServices().get(s).getFunctions().get(v).getLoad()) / mp.ip.getServers().get(x).getCapacity()
-                                , mp.fXSVD[x][s][v][d]);
-                    }
-                }
-            mp.grbModel.addConstr(expr, GRB.EQUAL, mp.xu[x], "Server Utilization [" + x + "]");
-            setLinearCostFunctions(expr, mp.xk[x]);
-        }
-    }
-
-    private void setLinearCostFunctions(GRBLinExpr expr, GRBVar grbVar) throws GRBException {
-
-        for (int l = 0; l < mp.linearCostFunctions.getValues().size(); l++) {
-            GRBLinExpr expr2 = new GRBLinExpr();
-            expr2.multAdd(mp.linearCostFunctions.getValues().get(l)[0], expr);
-            expr2.addConstant(mp.linearCostFunctions.getValues().get(l)[1]);
-            mp.grbModel.addConstr(expr2, GRB.LESS_EQUAL, grbVar, "Linear Cost function");
-        }
-    }
-
-    public void run() throws GRBException {
-
-        mp.grbModel.optimize();
-        if (mp.grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
-            mp.grbModel.computeIIS();
+    public double run() throws GRBException {
+        pm.grbModel.optimize();
+        if (pm.grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
+            pm.grbModel.computeIIS();
             log.error("Model is not feasible");
-            ///System.exit(0);
-        }
-    }
-
-    public ModelResults generateResults(ModelResults initialResults) throws GRBException {
-        ModelResults modelResults = new ModelResults(mp);
-
-        if (initialResults != null) {
-            modelResults.calculateNumberOfMigrations(initialResults);
-            modelResults.calculateNumberOfReplications();
-        }
-        new ResultsFiles(mp.ip.getNetworkFile(), mp.ip.getAlpha() + "-" + mp.ip.getBeta());
-        modelResults.printResults(mp.grbModel.get(GRB.DoubleAttr.ObjVal));
-
-        return modelResults;
+            return -1;
+        } else return pm.grbModel.get(GRB.DoubleAttr.ObjVal);
     }
 
     public void finishModel() throws GRBException {
-        mp.grbModel.dispose();
-        mp.grbEnv.dispose();
+        pm.grbModel.dispose();
+        pm.grbEnv.dispose();
     }
 }

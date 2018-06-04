@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ModelParameters {
+public class ParametersModel {
 
-    private static final Logger log = LoggerFactory.getLogger(ModelParameters.class);
+    private static final Logger log = LoggerFactory.getLogger(ParametersModel.class);
 
     InputParameters ip;
     GRBModel grbModel;
@@ -31,7 +31,7 @@ public class ModelParameters {
     GRBVar[][] mkVS;
     GRBVar[][] rkVS;
 
-    public ModelParameters(InputParameters inputParameters) {
+    public ParametersModel(InputParameters inputParameters) {
         this.ip = inputParameters;
         this.readInputParameters();
     }

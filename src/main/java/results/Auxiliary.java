@@ -1,15 +1,19 @@
 package results;
 
 
+import org.decimal4j.util.DoubleRounder;
+
 import java.util.List;
 
 public class Auxiliary {
+
+    public static final int DECIMALS = 2;
 
     public static double avg(List<Double> utilizationResults) {
         double tmpU = 0;
         for (Double utilizationResult : utilizationResults) tmpU += utilizationResult;
         tmpU = tmpU / utilizationResults.size();
-        return tmpU;
+        return roundDouble(tmpU);
     }
 
     public static double vrc(List<Double> utilizationResults, double avg) {
@@ -17,7 +21,7 @@ public class Auxiliary {
         for (Double utilizationResult : utilizationResults)
             variance += Math.pow(utilizationResult - avg, 2);
         variance = variance / utilizationResults.size();
-        return variance;
+        return roundDouble(variance);
     }
 
     public static double max(List<Double> utilizationResults) {
@@ -25,7 +29,7 @@ public class Auxiliary {
         for (Double utilizationResult : utilizationResults)
             if (utilizationResult > max)
                 max = utilizationResult;
-        return max;
+        return roundDouble(max);
     }
 
     public static double min(List<Double> utilizationResults) {
@@ -33,6 +37,10 @@ public class Auxiliary {
         for (Double utilizationResult : utilizationResults)
             if (utilizationResult < min)
                 min = utilizationResult;
-        return min;
+        return roundDouble(min);
+    }
+
+    public static double roundDouble(double value){
+        return DoubleRounder.round(value, DECIMALS);
     }
 }
