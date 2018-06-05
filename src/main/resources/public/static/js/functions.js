@@ -1,10 +1,12 @@
-function startLinkOpt() {
+function startOpt() {
+    var model = document.getElementById("opt").value;
     try {
         var message = null;
         $.ajax
         ({
-            url: "link-opt",
-            type: "GET",
+            data: model,
+            url: "opt",
+            type: "POST",
             async: false,
             success: function (ans) {
                 message = ans;

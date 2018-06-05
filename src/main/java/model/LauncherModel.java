@@ -6,8 +6,6 @@ import gui.WebApp;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import launcher.Launcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import results.ClientResults;
 import results.Results;
 import results.ResultsFiles;
@@ -15,40 +13,51 @@ import results.ResultsFiles;
 
 public class LauncherModel {
 
-    private static final Logger log = LoggerFactory.getLogger(LauncherModel.class);
+    private static ParametersModel pm;
+    private static Model model;
+    private static ResultsModel resultsModel;
 
-    public static void startLinkOptimization() throws GRBException {
-
-        InputParameters ip = ConfigFiles.readInputParameters("/../" + Launcher.configFile);
-        ip.initializeParameters("/../");
-        new WebApp().initializeResults();
-
-        ParametersModel pm = new ParametersModel(ip);
-        pm.initializeVariables();
-        Model model = new Model(pm);
+    public static void startOptimization(boolean areReplicas, boolean isInitialPlacement) throws GRBException {
+        initializeModel();
         GRBLinExpr expr = new GRBLinExpr();
-        // add link costs expressions to the model
+        expr.add(model.exprServerCosts(pm.ip.getAlpha()));
         expr.add(model.exprLinkCosts(pm.ip.getBeta()));
-        // set objective function
         model.setObjectiveFunction(expr);
-        // initialize general constraints
         ConstraintsModel constraintsModel = new ConstraintsModel(pm);
-        // set link utilization constraints with costs functions (true)
-        constraintsModel.setLinkUtilizationExpr(true);
-        // set server utilization constraints without costs functions (false)
-        constraintsModel.setServerUtilizationExpr(false);
-        double objVal = model.run();
-        generateResults(pm, objVal);
+        constraintsModel.setLinkUtilizationExpr();
+        constraintsModel.setServerUtilizationExpr();
+        double objVal = -1;
+        boolean isRunnable = false;
+        if (!areReplicas)
+            constraintsModel.noParallelPaths();
+        if (isInitialPlacement)
+            isRunnable = true;
+        else if (constraintsModel.variablesFromInitialPlacement(resultsModel))
+            isRunnable = true;
+        if (isRunnable)
+            objVal = model.run();
+        resultsModel = generateResults(pm, objVal);
         model.finishModel();
     }
 
-    private static void generateResults(ParametersModel pm, double objVal) throws GRBException {
+    private static void initializeModel() {
+        InputParameters ip = ConfigFiles.readInputParameters("/../" + Launcher.configFile);
+        ip.initializeParameters("/../");
+        new WebApp().initializeResults();
+        pm = new ParametersModel(ip);
+        pm.initializeVariables();
+        model = new Model(pm);
+    }
+
+    private static ResultsModel generateResults(ParametersModel pm, double objVal) throws GRBException {
+        ResultsModel resultsModel = null;
         Results results = null;
-        if(objVal!= -1) {
-            ResultsModel resultsModel = new ResultsModel(pm);
+        if (objVal != -1) {
+            resultsModel = new ResultsModel(pm);
             new ResultsFiles(pm.ip.getNetworkFile(), pm.ip.getAlpha() + "-" + pm.ip.getBeta());
             results = resultsModel.generate(objVal);
         }
         ClientResults.updateResultsToWebApp(results);
+        return resultsModel;
     }
 }

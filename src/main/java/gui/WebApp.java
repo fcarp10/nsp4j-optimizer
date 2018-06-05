@@ -77,6 +77,28 @@ public class WebApp {
             return 201;
         });
 
+        post("/opt", (request, response) -> {
+            String model = request.body();
+            boolean areReplicas = false;
+            boolean isInitialPlacement = false;
+            switch (model){
+                case "init":
+                    isInitialPlacement = true;
+                    break;
+                case "mgr":
+                    areReplicas = false;
+                    break;
+                case "rep":
+                    areReplicas = true;
+                    break;
+                case "both":
+                    areReplicas = true;
+                    break;
+            }
+            LauncherModel.startOptimization(areReplicas, isInitialPlacement);
+            return 200;
+        });
+
         get("/node", (request, response) -> {
             response.type("application/json");
             return new Gson().toJson(jsonNodes.values());
@@ -93,10 +115,5 @@ public class WebApp {
         });
 
         get("/message", (request, response) -> message);
-
-        get("/link-opt", (request, response) -> {
-            LauncherModel.startLinkOptimization();
-            return 200;
-        });
     }
 }

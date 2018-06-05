@@ -36,9 +36,9 @@ public class ParametersModel {
         this.readInputParameters();
     }
 
-    public void initializeVariables() throws GRBException {
-
-            grbEnv = new GRBEnv("mip.log");
+    public void initializeVariables() {
+        try {
+            grbEnv = new GRBEnv();
             grbEnv.set(GRB.IntParam.LogToConsole, 0);
             grbModel = new GRBModel(grbEnv);
             grbModel.getEnv().set(GRB.DoubleParam.MIPGap, ip.getGap());
@@ -94,6 +94,8 @@ public class ParametersModel {
                     rkVS[s][v] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "rkVS[" + s + "][" + v + "]");
 
             grbModel.update();
+        } catch (Exception e) {
+        }
     }
 
     private void readInputParameters() {
