@@ -27,8 +27,8 @@ import java.util.Map;
 public class ClientResults {
 
     public static void updateResultsToWebApp(Results results) {
-        if(results!= null) {
-            List<JsonServer> jsonServers = getNodeStringsWithResults(results.getServersMap(), results.getFunctionsMap());
+        if (results != null) {
+            List<JsonServer> jsonServers = getNodeStringsWithResults(results.getServersMap(), results.getFunctionsStringMap());
             List<JsonLink> jsonLinks = getLinkStringsWithResults(results.getLinksMap());
             try {
                 postMessage("Solution found");
@@ -90,7 +90,7 @@ public class ClientResults {
         sendRequest(request);
     }
 
-    private static void postMessage(String message)  {
+    private static void postMessage(String message) {
         HttpRequest request = null;
         try {
             request = HttpRequest.newBuilder()
@@ -106,21 +106,20 @@ public class ClientResults {
     private static List<JsonServer> getNodeStringsWithResults(Map<Server, Double> servers, Map<Server, String> functions) {
         List<JsonServer> jsonServers = new ArrayList<>();
         Iterator entries = servers.entrySet().iterator();
-        String label;
+        StringBuilder functionsString;
         DecimalFormat df = new DecimalFormat("#.##");
         while (entries.hasNext()) {
             Map.Entry thisEntry = (Map.Entry) entries.next();
             Double value = (Double) thisEntry.getValue();
             Server server = (Server) thisEntry.getKey();
-            label = "";
+            functionsString = new StringBuilder();
             if (value != 0 && functions.get(server).length() < 40)
-                label = String.valueOf(df.format(value)) + "\n" + functions.get(server);
-            else if (value != 0 && functions.get(server).length() >= 40) {
-                label = String.valueOf(df.format(value));
-            }
+                functionsString.append(String.valueOf(df.format(value))).append("\n").append(functions.get(server));
+            else if (value != 0 && functions.get(server).length() >= 40)
+                functionsString.append(String.valueOf(df.format(value)));
             jsonServers.add(new JsonServer(server.getId(), server.getNodeParent().getAttribute("x")
                     , server.getNodeParent().getAttribute("y")
-                    , "#" + getColor(value), label, true));
+                    , "#" + getColor(value), functionsString.toString(), true));
         }
         return jsonServers;
     }

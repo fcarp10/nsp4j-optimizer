@@ -44,7 +44,7 @@ public class ResultsModel {
     }
 
     public Results generate(double cost) throws GRBException {
-        return new Results(linksMap(), serversMap(), functionsMap(), pm.ip.getAuxTotalTraffic()
+        return new Results(linksMap(), serversMap(), functionsMap(), functionsStringMap(), pm.ip.getAuxTotalTraffic()
                 , trafficOnLinks(), avgPathLength(), Auxiliary.roundDouble(cost), numOfMigrations, numOfReplicas);
     }
 
@@ -62,17 +62,30 @@ public class ResultsModel {
         return serverMapResults;
     }
 
-    public Map<Server, String> functionsMap() throws GRBException {
-        Map<Server, String> functions = new HashMap<>();
+    public Map<Server, List<Integer>> functionsMap() throws GRBException {
+        Map<Server, List<Integer>> functionsMap = new HashMap<>();
+        for (int x = 0; x < pm.ip.getServers().size(); x++) {
+            List<Integer> functions = new ArrayList<>();
+            for (int s = 0; s < pm.ip.getServices().size(); s++)
+                for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++)
+                    if (pm.fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+                        functions.add(pm.ip.getServices().get(s).getFunctions().get(v).getId());
+            functionsMap.put(pm.ip.getServers().get(x), functions);
+        }
+        return functionsMap;
+    }
+
+    public Map<Server, String> functionsStringMap() throws GRBException {
+        Map<Server, String> functionsStringMap = new HashMap<>();
         for (int x = 0; x < pm.ip.getServers().size(); x++) {
             StringBuilder stringVnf = new StringBuilder();
             for (int s = 0; s < pm.ip.getServices().size(); s++)
                 for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++)
                     if (pm.fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
                         stringVnf.append("s").append(String.valueOf(s)).append("v").append(String.valueOf(v)).append("\n");
-            functions.put(pm.ip.getServers().get(x), stringVnf.toString());
+            functionsStringMap.put(pm.ip.getServers().get(x), stringVnf.toString());
         }
-        return functions;
+        return functionsStringMap;
     }
 
     private List<String> usedPaths() throws GRBException {

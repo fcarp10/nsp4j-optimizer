@@ -78,24 +78,8 @@ public class WebApp {
         });
 
         post("/opt", (request, response) -> {
-            String model = request.body();
-            boolean areReplicas = false;
-            boolean isInitialPlacement = false;
-            switch (model){
-                case "init":
-                    isInitialPlacement = true;
-                    break;
-                case "mgr":
-                    areReplicas = false;
-                    break;
-                case "rep":
-                    areReplicas = true;
-                    break;
-                case "both":
-                    areReplicas = true;
-                    break;
-            }
-            LauncherModel.startOptimization(areReplicas, isInitialPlacement);
+            String useCase = request.body();
+            LauncherModel.startOptimization(useCase);
             return 200;
         });
 

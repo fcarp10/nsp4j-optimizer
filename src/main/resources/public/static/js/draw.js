@@ -38,7 +38,7 @@ function initializeGraph() {
                 'font-size': 5,
                 'edge-text-rotation': 'autorotate',
                 'text-background-opacity': 1,
-                'text-background-color': '#fff',
+                'text-background-color': '#f2f2f2',
                 'text-background-shape': 'roundrectangle',
                 'width': 1,
                 'line-color': 'data(faveColor)',

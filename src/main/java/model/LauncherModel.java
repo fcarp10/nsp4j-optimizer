@@ -15,9 +15,9 @@ public class LauncherModel {
 
     private static ParametersModel pm;
     private static Model model;
-    private static ResultsModel resultsModel;
+    private static ResultsModel resultsInitialModel;
 
-    public static void startOptimization(boolean areReplicas, boolean isInitialPlacement) throws GRBException {
+    public static void startOptimization(String useCase) throws GRBException {
         initializeModel();
         GRBLinExpr expr = new GRBLinExpr();
         expr.add(model.exprServerCosts(pm.ip.getAlpha()));
@@ -26,18 +26,50 @@ public class LauncherModel {
         ConstraintsModel constraintsModel = new ConstraintsModel(pm);
         constraintsModel.setLinkUtilizationExpr();
         constraintsModel.setServerUtilizationExpr();
-        double objVal = -1;
-        boolean isRunnable = false;
-        if (!areReplicas)
-            constraintsModel.noParallelPaths();
-        if (isInitialPlacement)
-            isRunnable = true;
-        else if (constraintsModel.variablesFromInitialPlacement(resultsModel))
-            isRunnable = true;
-        if (isRunnable)
-            objVal = model.run();
-        resultsModel = generateResults(pm, objVal);
-        model.finishModel();
+        double objVal;
+        ResultsModel resultsModel;
+        switch (useCase) {
+            case "init":
+                constraintsModel.noParallelPaths();
+                objVal = model.run();
+                resultsModel = generateResultModel(pm, objVal);
+                submitResultsToGUI(resultsModel, objVal);
+                if (resultsModel == null)
+                    model.finishModel();
+                else
+                    resultsInitialModel = resultsModel;
+                break;
+            case "mgr":
+                constraintsModel.noParallelPaths();
+                constraintsModel.setVariablesFromInitialPlacementAsConstraints(resultsInitialModel);
+                objVal = model.run();
+                resultsModel = generateResultModel(pm, objVal);
+                if (resultsModel != null)
+                    resultsModel.calculateNumberOfMigrations(resultsInitialModel);
+                submitResultsToGUI(resultsModel, objVal);
+                model.finishModel();
+                break;
+            case "rep":
+                constraintsModel.setVariablesFromInitialPlacementAsConstraints(resultsInitialModel);
+                objVal = model.run();
+                resultsModel = generateResultModel(pm, objVal);
+                if (resultsModel != null)
+                    resultsModel.calculateNumberOfReplications();
+                submitResultsToGUI(resultsModel, objVal);
+                model.finishModel();
+                break;
+            case "both":
+                constraintsModel.setVariablesFromInitialPlacementAsConstraints(resultsInitialModel);
+                objVal = model.run();
+                resultsModel = generateResultModel(pm, objVal);
+                if (resultsModel != null) {
+                    resultsModel.calculateNumberOfMigrations(resultsInitialModel);
+                    resultsModel.calculateNumberOfReplications();
+                }
+                submitResultsToGUI(resultsModel, objVal);
+                model.finishModel();
+                break;
+        }
     }
 
     private static void initializeModel() {
@@ -49,15 +81,19 @@ public class LauncherModel {
         model = new Model(pm);
     }
 
-    private static ResultsModel generateResults(ParametersModel pm, double objVal) throws GRBException {
+    private static ResultsModel generateResultModel(ParametersModel pm, double objVal) throws GRBException {
         ResultsModel resultsModel = null;
-        Results results = null;
-        if (objVal != -1) {
+        if (objVal > 0) {
             resultsModel = new ResultsModel(pm);
             new ResultsFiles(pm.ip.getNetworkFile(), pm.ip.getAlpha() + "-" + pm.ip.getBeta());
-            results = resultsModel.generate(objVal);
         }
-        ClientResults.updateResultsToWebApp(results);
         return resultsModel;
+    }
+
+    private static void submitResultsToGUI(ResultsModel resultsModel, double objVal) throws GRBException {
+        Results results = null;
+        if (objVal > 0)
+            results = resultsModel.generate(objVal);
+        ClientResults.updateResultsToWebApp(results);
     }
 }

@@ -63,16 +63,12 @@ public class ConstraintsModel {
         }
     }
 
-    public boolean variablesFromInitialPlacement(ResultsModel rm) throws GRBException {
-        if (rm != null) {
-            for (int x = 0; x < rm.getPm().fXSV.length; x++)
-                for (int s = 0; s < rm.getPm().fXSV[x].length; s++)
-                    for (int v = 0; v < rm.getPm().fXSV[x][s].length; v++)
-                        if (rm.getPm().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1)
-                            pm.grbModel.addConstr(pm.fXSV[x][s][v], GRB.EQUAL, 1, "initial placement");
-            return true;
-        } else return false;
-
+    public void setVariablesFromInitialPlacementAsConstraints(ResultsModel rm) throws GRBException {
+        for (int x = 0; x < rm.getPm().fXSV.length; x++)
+            for (int s = 0; s < rm.getPm().fXSV[x].length; s++)
+                for (int v = 0; v < rm.getPm().fXSV[x][s].length; v++)
+                    if (rm.getPm().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1)
+                        pm.grbModel.addConstr(pm.fXSV[x][s][v], GRB.EQUAL, 1, "initial placement");
     }
 
     public void noParallelPaths() throws GRBException {

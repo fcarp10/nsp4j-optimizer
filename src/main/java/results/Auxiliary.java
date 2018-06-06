@@ -3,6 +3,7 @@ package results;
 
 import org.decimal4j.util.DoubleRounder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Auxiliary {
@@ -40,7 +41,45 @@ public class Auxiliary {
         return roundDouble(min);
     }
 
-    public static double roundDouble(double value){
+    public static List<Integer> listsSizes(List<List<Integer>> list) {
+        List<Integer> listsSizes = new ArrayList<>();
+        for (List<Integer> aList : list)
+            listsSizes.add(aList.size());
+        return listsSizes;
+    }
+
+    public static double avgF(List<Integer> results) {
+        double tmp = 0;
+        for (Integer i : results) tmp += i;
+        tmp = tmp / results.size();
+        return roundDouble(tmp);
+    }
+
+    public static double vrcF(List<Integer> results, double avg) {
+        double variance = 0;
+        for (Integer i : results)
+            variance += Math.pow(i - avg, 2);
+        variance = variance / results.size();
+        return roundDouble(variance);
+    }
+
+    public static int maxF(List<Integer> results) {
+        int max = 0;
+        for (Integer i : results)
+            if (i > max)
+                max = i;
+        return max;
+    }
+
+    public static int minF(List<Integer> results) {
+        int min = Integer.MAX_VALUE;
+        for (Integer i : results)
+            if (i < min)
+                min = i;
+        return min;
+    }
+
+    public static double roundDouble(double value) {
         return DoubleRounder.round(value, DECIMALS);
     }
 }
