@@ -18,4 +18,3 @@ public class Launcher {
         new WebApp();
     }
 }
-

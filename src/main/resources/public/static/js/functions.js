@@ -1,12 +1,12 @@
 function startOpt() {
     document.getElementById("message").innerText = "";
-    var model = document.getElementById("opt").value;
+    var runMessage = document.getElementById("opt").value + "-" + document.getElementById("obj").value;
     try {
         var message = null;
         $.ajax
         ({
-            data: model,
-            url: "opt",
+            data: runMessage,
+            url: "run",
             type: "POST",
             async: false,
             success: function (ans) {

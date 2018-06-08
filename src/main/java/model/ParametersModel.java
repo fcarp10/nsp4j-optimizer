@@ -24,10 +24,10 @@ public class ParametersModel {
     GRBVar[][][] rSPD;
     GRBVar[][][] fXSV;
     GRBVar[][][][] fXSVD;
-    GRBVar[] lk;
-    GRBVar[] xk;
-    GRBVar[] lu;
-    GRBVar[] xu;
+    GRBVar[] ukL;
+    GRBVar[] ukX;
+    GRBVar[] uL;
+    GRBVar[] uX;
     GRBVar[][] mkVS;
     GRBVar[][] rkVS;
 
@@ -67,21 +67,21 @@ public class ParametersModel {
                         for (int d = 0; d < ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                             fXSVD[x][s][v][d] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "fXSVD[" + x + "][" + s + "][" + v + "][" + d + "]");
 
-            lu = new GRBVar[ip.getLinks().size()];
+            uL = new GRBVar[ip.getLinks().size()];
             for (int l = 0; l < ip.getLinks().size(); l++)
-                lu[l] = grbModel.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, "lu[" + l + "]");
+                uL[l] = grbModel.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, "uL[" + l + "]");
 
-            xu = new GRBVar[ip.getServers().size()];
+            uX = new GRBVar[ip.getServers().size()];
             for (int x = 0; x < ip.getServers().size(); x++)
-                xu[x] = grbModel.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, "xu[" + x + "]");
+                uX[x] = grbModel.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, "uX[" + x + "]");
 
-            lk = new GRBVar[ip.getLinks().size()];
+            ukL = new GRBVar[ip.getLinks().size()];
             for (int l = 0; l < ip.getLinks().size(); l++)
-                lk[l] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "lk[" + l + "]");
+                ukL[l] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "ukL[" + l + "]");
 
-            xk = new GRBVar[ip.getServers().size()];
+            ukX = new GRBVar[ip.getServers().size()];
             for (int x = 0; x < ip.getServers().size(); x++)
-                xk[x] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "xk[" + x + "]");
+                ukX[x] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "ukX[" + x + "]");
 
             mkVS = new GRBVar[ip.getServices().size()][ip.getAuxServiceLength()];
             for (int s = 0; s < ip.getServices().size(); s++)

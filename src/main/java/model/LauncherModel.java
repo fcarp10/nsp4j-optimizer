@@ -17,7 +17,7 @@ public class LauncherModel {
     private static Model model;
     private static ResultsModel resultsInitialModel;
 
-    public static void startOptimization(String useCase) throws GRBException {
+    public static void startOptimization(String useCase, String objective) throws GRBException {
         initializeModel();
         GRBLinExpr expr = new GRBLinExpr();
         expr.add(model.exprServerCosts(pm.ip.getAlpha()));
@@ -41,7 +41,7 @@ public class LauncherModel {
                 break;
             case "mgr":
                 constraintsModel.noParallelPaths();
-                constraintsModel.setVariablesFromInitialPlacementAsConstraints(resultsInitialModel);
+                constraintsModel.setMigrationCosts(resultsInitialModel);
                 objVal = model.run();
                 resultsModel = generateResultModel(pm, objVal);
                 if (resultsModel != null)
@@ -59,7 +59,7 @@ public class LauncherModel {
                 model.finishModel();
                 break;
             case "both":
-                constraintsModel.setVariablesFromInitialPlacementAsConstraints(resultsInitialModel);
+                constraintsModel.setMigrationCosts(resultsInitialModel);
                 objVal = model.run();
                 resultsModel = generateResultModel(pm, objVal);
                 if (resultsModel != null) {

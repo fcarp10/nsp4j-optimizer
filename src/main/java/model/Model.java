@@ -22,14 +22,22 @@ public class Model {
     public GRBLinExpr exprLinkCosts(double weight) throws GRBException {
         GRBLinExpr expr = new GRBLinExpr();
         for (int l = 0; l < pm.ip.getLinks().size(); l++)
-            expr.addTerm(weight / pm.ip.getLinks().size(), pm.lk[l]);
+            expr.addTerm(weight / pm.ip.getLinks().size(), pm.ukL[l]);
         return expr;
     }
 
     public GRBLinExpr exprServerCosts(double weight) throws GRBException {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < pm.ip.getServers().size(); x++)
-            expr.addTerm(weight / pm.ip.getServers().size(), pm.xk[x]);
+            expr.addTerm(weight / pm.ip.getServers().size(), pm.ukX[x]);
+        return expr;
+    }
+
+    public GRBLinExpr exprMigrationCosts(double weight) throws GRBException {
+        GRBLinExpr expr = new GRBLinExpr();
+        for (int s = 0; s < pm.ip.getServices().size(); s++)
+            for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++)
+                expr.addTerm(weight / pm.ip.getAuxTotalNumberOfFunctions(), pm.mkVS[s][v]);
         return expr;
     }
 

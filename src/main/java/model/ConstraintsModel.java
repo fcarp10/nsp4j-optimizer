@@ -32,8 +32,8 @@ public class ConstraintsModel {
                         expr.addTerm(pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
                                 / (double) pm.ip.getLinks().get(l).getAttribute("capacity"), pm.rSPD[s][p][d]);
                 }
-            pm.grbModel.addConstr(expr, GRB.EQUAL, pm.lu[l], "Link Utilization [" + l + "]");
-            setLinearCostFunctions(expr, pm.lk[l]);
+            pm.grbModel.addConstr(expr, GRB.EQUAL, pm.uL[l], "Link Utilization [" + l + "]");
+            setLinearCostFunctions(expr, pm.ukL[l]);
         }
     }
 
@@ -49,9 +49,25 @@ public class ConstraintsModel {
                                 , pm.fXSVD[x][s][v][d]);
                     }
                 }
-            pm.grbModel.addConstr(expr, GRB.EQUAL, pm.xu[x], "Server Utilization [" + x + "]");
-            setLinearCostFunctions(expr, pm.xk[x]);
+            pm.grbModel.addConstr(expr, GRB.EQUAL, pm.uX[x], "Server Utilization [" + x + "]");
+            setLinearCostFunctions(expr, pm.ukX[x]);
         }
+    }
+
+    public void setMigrationCosts(ResultsModel initialResultsModel) throws GRBException {
+
+        double[][][] utilizationPerFunction = initialResultsModel.getUtilizationPerFunction();
+        for (int x = 0; x < pm.ip.getServers().size(); x++)
+            for (int s = 0; s < pm.ip.getServices().size(); s++)
+                for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++) {
+                    if (initialResultsModel.getPm().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 0) continue;
+                    GRBLinExpr expr = new GRBLinExpr();
+                    expr.addConstant(pm.ip.getAux());
+                    expr.addTerm(-pm.ip.getAux(), pm.fXSV[x][s][v]);
+                    GRBLinExpr expr2 = new GRBLinExpr();
+                    expr2.multAdd(utilizationPerFunction[x][s][v] / pm.ip.getServers().get(x).getCapacity(), expr);
+                    setLinearCostFunctions(expr2, pm.mkVS[s][v]);
+                }
     }
 
     private void setLinearCostFunctions(GRBLinExpr expr, GRBVar grbVar) throws GRBException {
@@ -63,11 +79,11 @@ public class ConstraintsModel {
         }
     }
 
-    public void setVariablesFromInitialPlacementAsConstraints(ResultsModel rm) throws GRBException {
-        for (int x = 0; x < rm.getPm().fXSV.length; x++)
-            for (int s = 0; s < rm.getPm().fXSV[x].length; s++)
-                for (int v = 0; v < rm.getPm().fXSV[x][s].length; v++)
-                    if (rm.getPm().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1)
+    public void setVariablesFromInitialPlacementAsConstraints(ResultsModel initialResultsModel) throws GRBException {
+        for (int x = 0; x < initialResultsModel.getPm().fXSV.length; x++)
+            for (int s = 0; s < initialResultsModel.getPm().fXSV[x].length; s++)
+                for (int v = 0; v < initialResultsModel.getPm().fXSV[x][s].length; v++)
+                    if (initialResultsModel.getPm().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1)
                         pm.grbModel.addConstr(pm.fXSV[x][s][v], GRB.EQUAL, 1, "initial placement");
     }
 

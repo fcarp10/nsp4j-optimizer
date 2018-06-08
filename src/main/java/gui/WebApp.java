@@ -77,9 +77,10 @@ public class WebApp {
             return 201;
         });
 
-        post("/opt", (request, response) -> {
-            String useCase = request.body();
-            LauncherModel.startOptimization(useCase);
+        post("/run", (request, response) -> {
+            String runMessage = request.body();
+            String[] message = runMessage.split("-");
+            LauncherModel.startOptimization(message[0], message[1]);
             return 200;
         });
 

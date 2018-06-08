@@ -43,6 +43,21 @@ public class ResultsModel {
             }
     }
 
+    public double[][][] getUtilizationPerFunction() throws GRBException {
+        double[][][] utilizationPerFunction = new double[pm.ip.getServers().size()][pm.ip.getServices().size()][pm.ip.getAuxServiceLength()];
+        for (int x = 0; x < pm.ip.getServers().size(); x++)
+            for (int s = 0; s < pm.ip.getServices().size(); s++)
+                for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++) {
+                    double functionUtilization = 0;
+                    for (int r = 0; r < pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); r++)
+                        if (pm.fXSVD[x][s][v][r].get(GRB.DoubleAttr.X) == 1)
+                            functionUtilization += (pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().get(r)
+                                    * pm.ip.getServices().get(s).getFunctions().get(v).getLoad());
+                    utilizationPerFunction[x][s][v] = functionUtilization;
+                }
+        return utilizationPerFunction;
+    }
+
     public Results generate(double cost) throws GRBException {
         return new Results(linksMap(), serversMap(), functionsMap(), functionsStringMap(), pm.ip.getAuxTotalTraffic()
                 , trafficOnLinks(), avgPathLength(), Auxiliary.roundDouble(cost), numOfMigrations, numOfReplicas);
@@ -51,14 +66,14 @@ public class ResultsModel {
     private Map<Edge, Double> linksMap() throws GRBException {
         Map<Edge, Double> linkMapResults = new HashMap<>();
         for (int l = 0; l < pm.ip.getLinks().size(); l++)
-            linkMapResults.put(pm.ip.getLinks().get(l), Math.round(pm.lu[l].get(GRB.DoubleAttr.X) * 10000.0) / 10000.0);
+            linkMapResults.put(pm.ip.getLinks().get(l), Math.round(pm.uL[l].get(GRB.DoubleAttr.X) * 10000.0) / 10000.0);
         return linkMapResults;
     }
 
     private Map<Server, Double> serversMap() throws GRBException {
         Map<Server, Double> serverMapResults = new HashMap<>();
         for (int x = 0; x < pm.ip.getServers().size(); x++)
-            serverMapResults.put(pm.ip.getServers().get(x), Math.round(pm.xu[x].get(GRB.DoubleAttr.X) * 10000.0) / 10000.0);
+            serverMapResults.put(pm.ip.getServers().get(x), Math.round(pm.uX[x].get(GRB.DoubleAttr.X) * 10000.0) / 10000.0);
         return serverMapResults;
     }
 
@@ -158,7 +173,7 @@ public class ResultsModel {
     private double trafficOnLinks() throws GRBException {
         double trafficOnLinks = 0;
         for (int l = 0; l < pm.ip.getLinks().size(); l++)
-            trafficOnLinks += pm.lu[l].get(GRB.DoubleAttr.X) * (double) pm.ip.getLinks().get(l).getAttribute("capacity");
+            trafficOnLinks += pm.uL[l].get(GRB.DoubleAttr.X) * (double) pm.ip.getLinks().get(l).getAttribute("capacity");
         return trafficOnLinks;
     }
 
