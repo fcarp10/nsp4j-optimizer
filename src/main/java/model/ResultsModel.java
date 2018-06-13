@@ -60,7 +60,7 @@ public class ResultsModel {
 
     public Results generate(double cost) throws GRBException {
         return new Results(linksMap(), serversMap(), functionsMap(), functionsStringMap(), pm.ip.getAuxTotalTraffic()
-                , trafficOnLinks(), avgPathLength(), Auxiliary.roundDouble(cost), numOfMigrations, numOfReplicas);
+                , trafficOnLinks(), avgPathLength(), Auxiliary.roundDouble(cost), numOfMigrations, numOfReplicas, usedPathsPerDemand());
     }
 
     private Map<Edge, Double> linksMap() throws GRBException {
@@ -118,7 +118,7 @@ public class ResultsModel {
             for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                     if (pm.rSPD[s][p][d].get(GRB.DoubleAttr.X) == 1)
-                        usedPathsPerDemand.add("s" + s + "-r" + d + " --> " + pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
+                        usedPathsPerDemand.add("s" + s + "-d" + d + " --> " + pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
         return usedPathsPerDemand;
     }
 

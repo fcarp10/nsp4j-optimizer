@@ -32,11 +32,12 @@ public class Results {
     private double cost;
     private int numOfMigrations;
     private int numOfReplicas;
+    private List<String> paths;
 
     public Results(Map<Edge, Double> linksMap, Map<Server, Double> serversMap
             , Map<Server, List<Integer>> functionsMap, Map<Server, String> functionsStringMap, double totalTraffic
             , double trafficLinks, double avgPathLength, double cost
-            , int numOfMigrations, int numOfReplicas) {
+            , int numOfMigrations, int numOfReplicas, List<String> paths) {
         this.linksMap = linksMap;
         this.serversMap = serversMap;
         this.functionsMap = functionsMap;
@@ -63,6 +64,7 @@ public class Results {
         this.cost = cost;
         this.numOfMigrations = numOfMigrations;
         this.numOfReplicas = numOfReplicas;
+        this.paths = paths;
     }
 
     public Map<Edge, Double> getLinksMap() {
@@ -151,5 +153,9 @@ public class Results {
 
     public int getNumOfReplicas() {
         return numOfReplicas;
+    }
+
+    public List<String> getPaths() {
+        return paths;
     }
 }

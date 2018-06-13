@@ -83,8 +83,8 @@ public class LauncherModel {
     }
 
     private static void initializeModel() {
-        InputParameters ip = ConfigFiles.readInputParameters("/../" + Launcher.configFile);
-        ip.initializeParameters("/../");
+        InputParameters ip = ConfigFiles.readInputParameters(Launcher.configFile);
+        ip.initializeParameters("");
         new WebApp().initializeResults();
         pm = new ParametersModel(ip);
         pm.initializeVariables();

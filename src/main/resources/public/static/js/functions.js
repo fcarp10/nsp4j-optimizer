@@ -1,6 +1,5 @@
 var refreshIntervalId;
 function startOpt() {
-    document.getElementById("message").innerText = "";
     var runMessage = document.getElementById("opt").value + "-" + document.getElementById("obj").value;
     try {
         var message = null;
@@ -45,6 +44,11 @@ function getResults() {
             document.getElementById("path").innerText = results['avgPathLength'];
             document.getElementById("mgr-rep").innerText = results['numOfMigrations'] + ' - ' + results['numOfReplicas'];
             document.getElementById("cost").innerText = results['cost'];
+            var paths = "";
+            for (var i = 0; i < results['paths'].length; i++) {
+                paths += results['paths'][i] + "\n";
+            }
+            document.getElementById("paths").innerText = paths;
         } else {
             document.getElementById("lu").innerText = "0.0 - 0.0 - 0.0 - 0.0";
             document.getElementById("xu").innerText = "0.0 - 0.0 - 0.0 - 0.0";
@@ -52,6 +56,7 @@ function getResults() {
             document.getElementById("path").innerText = "0.0";
             document.getElementById("mgr-rep").innerText = "0 - 0";
             document.getElementById("cost").innerText = "0.0";
+            document.getElementById("paths").innerText = "";
         }
     }
     catch (e) {
@@ -74,7 +79,7 @@ function getMessage() {
         if (message != null) {
             document.getElementById("message").innerText = message;
         } else {
-            document.getElementById("message").innerText = "";
+            document.getElementById("message").innerText = "The server is not running";
             clearInterval(refreshIntervalId);
         }
     }

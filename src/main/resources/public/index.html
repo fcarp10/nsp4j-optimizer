@@ -62,9 +62,11 @@
                 <option type="text" value="utilization">utilization</option>
                 <option type="text" value="servers">number of used servers</option>
             </select>
-            <br>
+            <br><br>
             <button class="button button-submit" id="run-button" onClick="startOpt()">Run</button>
             <br><br>
+            <div class="div div-output-emphasis" id="message">Model is ready</div>
+            <br>
             <h5>Results</h5>
             Link Utilization (avg - min - max - std):
             <div class="div div-output" id="lu">0.0 - 0.0 - 0.0 - 0.0</div>
@@ -78,7 +80,8 @@
             <div class="div div-output" id="mgr-rep">0 - 0</div>
             Cost:
             <div class="div div-output" id="cost">0.0</div>
-            <div class="div div-output div-output-emphasis" id="message"></div>
+            Paths:
+            <div class="div div-output" id="paths"></div>
         </div>
     </div>
     <div class="row align-items-end">
