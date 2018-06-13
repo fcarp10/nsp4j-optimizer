@@ -1,3 +1,4 @@
+var refreshIntervalId;
 function startOpt() {
     document.getElementById("message").innerText = "";
     var runMessage = document.getElementById("opt").value + "-" + document.getElementById("obj").value;
@@ -14,7 +15,9 @@ function startOpt() {
             }
         });
         if (message != null) {
-            setInterval(updateOutput, 3000);
+            document.getElementById("message").innerText = message;
+            setInterval(getResults, 1000);
+            refreshIntervalId = setInterval(getMessage, 1000);
         }
         return message;
     }
@@ -23,47 +26,33 @@ function startOpt() {
     }
 }
 
-function updateOutput() {
-    var results = getResults();
-    if (results != null) {
-        document.getElementById("lu").innerText = results['avgLu'] + ' - ' + results['minLu'] + ' - ' + results['maxLu'] + ' - ' + results['vrcLu'];
-        document.getElementById("xu").innerText = results['avgXu'] + ' - ' + results['minXu'] + ' - ' + results['maxXu'] + ' - ' + results['vrcXu'];
-        document.getElementById("fp").innerText = results['avgFu'] + ' - ' + results['minFu'] + ' - ' + results['maxFu'] + ' - ' + results['vrcFu'];
-        document.getElementById("path").innerText = results['avgPathLength'];
-        document.getElementById("mgr-rep").innerText = results['numOfMigrations'] + ' - ' + results['numOfReplicas'];
-        document.getElementById("cost").innerText = results['cost'];
-    } else {
-        document.getElementById("lu").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-        document.getElementById("xu").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-        document.getElementById("fp").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-        document.getElementById("path").innerText = "0.0";
-        document.getElementById("mgr-rep").innerText = "0 - 0"
-        document.getElementById("cost").innerText = "0.0";
-    }
-    updateMessage();
-}
-
-function updateMessage() {
-    var message = getMessage();
-    if (message != null)
-        document.getElementById("message").innerText = message;
-    else
-        document.getElementById("message").innerText = "";
-}
-
 function getResults() {
     try {
-        var message = null;
+        var results = null;
         $.ajax
         ({
             url: "results",
             type: "GET",
             async: false,
             success: function (ans) {
-                message = ans;
+                results = ans;
             }
         });
-        return message;
+        if (results != null) {
+            document.getElementById("lu").innerText = results['avgLu'] + ' - ' + results['minLu'] + ' - ' + results['maxLu'] + ' - ' + results['vrcLu'];
+            document.getElementById("xu").innerText = results['avgXu'] + ' - ' + results['minXu'] + ' - ' + results['maxXu'] + ' - ' + results['vrcXu'];
+            document.getElementById("fp").innerText = results['avgFu'] + ' - ' + results['minFu'] + ' - ' + results['maxFu'] + ' - ' + results['vrcFu'];
+            document.getElementById("path").innerText = results['avgPathLength'];
+            document.getElementById("mgr-rep").innerText = results['numOfMigrations'] + ' - ' + results['numOfReplicas'];
+            document.getElementById("cost").innerText = results['cost'];
+        } else {
+            document.getElementById("lu").innerText = "0.0 - 0.0 - 0.0 - 0.0";
+            document.getElementById("xu").innerText = "0.0 - 0.0 - 0.0 - 0.0";
+            document.getElementById("fp").innerText = "0.0 - 0.0 - 0.0 - 0.0";
+            document.getElementById("path").innerText = "0.0";
+            document.getElementById("mgr-rep").innerText = "0 - 0";
+            document.getElementById("cost").innerText = "0.0";
+        }
     }
     catch (e) {
         return 0;
@@ -82,7 +71,12 @@ function getMessage() {
                 message = ans;
             }
         });
-        return message;
+        if (message != null) {
+            document.getElementById("message").innerText = message;
+        } else {
+            document.getElementById("message").innerText = "";
+            clearInterval(refreshIntervalId);
+        }
     }
     catch (e) {
         return 0;

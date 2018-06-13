@@ -20,8 +20,18 @@ public class LauncherModel {
     public static void startOptimization(String useCase, String objective) throws GRBException {
         initializeModel();
         GRBLinExpr expr = new GRBLinExpr();
-        expr.add(model.exprServerCosts(pm.ip.getAlpha()));
-        expr.add(model.exprLinkCosts(pm.ip.getBeta()));
+        switch (objective) {
+            case "costs":
+                expr.add(model.exprServerUtilizationCosts(pm.ip.getAlpha()));
+                expr.add(model.exprLinkUtilizationCosts(pm.ip.getBeta()));
+                break;
+            case "utilization":
+                expr.add(model.exprServerUtilization(pm.ip.getAlpha()));
+                expr.add(model.exprLinkUtilization(pm.ip.getBeta()));
+                break;
+            case "servers":
+                break;
+        }
         model.setObjectiveFunction(expr);
         ConstraintsModel constraintsModel = new ConstraintsModel(pm);
         constraintsModel.setLinkUtilizationExpr();

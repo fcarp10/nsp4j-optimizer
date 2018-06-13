@@ -1,0 +1,12 @@
+DGS004
+test 0 0
+
+an A x:100 y:150 capacity:1000.0
+an B x:200 y:200 capacity:10.0
+an C x:200 y:100 capacity:10.0
+an D x:300 y:150 capacity:1000.0
+
+ae AB A > B capacity:1000.0
+ae AC A > C capacity:1000.0
+ae BD B > D capacity:1000.0
+ae CD C > D capacity:1000.0

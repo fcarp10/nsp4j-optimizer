@@ -1,0 +1,29 @@
+networkFile: network
+gap: 0
+alpha: 1
+beta: 0
+serverCapacity: 1000
+serversPerNode: 2
+linkCapacity: 1000
+
+services:
+  - id: 0
+    functions:
+    - id: 0
+      replicable: false
+      load: 1.0
+    - id: 1
+      replicable: true
+      load: 1.0
+    - id: 2
+      replicable: false
+      load: 1.0
+
+trafficFlows:
+  - src: "n1"
+    dst: "n9"
+    serviceId: 0
+minDemands: 3
+maxDemands: 3
+minBw: 100
+maxBw: 100

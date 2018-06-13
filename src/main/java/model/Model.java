@@ -19,21 +19,35 @@ public class Model {
         pm.grbModel.setObjective(expr, GRB.MINIMIZE);
     }
 
-    public GRBLinExpr exprLinkCosts(double weight) throws GRBException {
+    public GRBLinExpr exprLinkUtilizationCosts(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int l = 0; l < pm.ip.getLinks().size(); l++)
             expr.addTerm(weight / pm.ip.getLinks().size(), pm.ukL[l]);
         return expr;
     }
 
-    public GRBLinExpr exprServerCosts(double weight) throws GRBException {
+    public GRBLinExpr exprServerUtilizationCosts(double weight){
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < pm.ip.getServers().size(); x++)
             expr.addTerm(weight / pm.ip.getServers().size(), pm.ukX[x]);
         return expr;
     }
 
-    public GRBLinExpr exprMigrationCosts(double weight) throws GRBException {
+    public GRBLinExpr exprLinkUtilization(double weight){
+        GRBLinExpr expr = new GRBLinExpr();
+        for (int l = 0; l < pm.ip.getLinks().size(); l++)
+            expr.addTerm(weight / pm.ip.getLinks().size(), pm.uL[l]);
+        return expr;
+    }
+
+    public GRBLinExpr exprServerUtilization(double weight) {
+        GRBLinExpr expr = new GRBLinExpr();
+        for (int x = 0; x < pm.ip.getServers().size(); x++)
+            expr.addTerm(weight / pm.ip.getServers().size(), pm.uX[x]);
+        return expr;
+    }
+
+    public GRBLinExpr exprMigrationCosts(double weight){
         GRBLinExpr expr = new GRBLinExpr();
         for (int s = 0; s < pm.ip.getServices().size(); s++)
             for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++)

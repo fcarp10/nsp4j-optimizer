@@ -81,7 +81,7 @@ public class WebApp {
             String runMessage = request.body();
             String[] message = runMessage.split("-");
             LauncherModel.startOptimization(message[0], message[1]);
-            return 200;
+            return "Running...";
         });
 
         get("/node", (request, response) -> {
