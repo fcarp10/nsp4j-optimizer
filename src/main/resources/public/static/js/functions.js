@@ -15,8 +15,8 @@ function startOpt() {
         });
         if (message != null) {
             document.getElementById("message").innerText = message;
-            setInterval(getResults, 1000);
-            refreshIntervalId = setInterval(getMessage, 1000);
+            setInterval(getResults, 2000);
+            refreshIntervalId = setInterval(getMessage, 2000);
         }
         return message;
     }

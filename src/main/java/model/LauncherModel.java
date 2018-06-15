@@ -36,8 +36,8 @@ public class LauncherModel {
         ConstraintsModel constraintsModel = new ConstraintsModel(pm);
         constraintsModel.setLinkUtilizationExpr();
         constraintsModel.setServerUtilizationExpr();
-        double objVal;
-        ResultsModel resultsModel;
+        double objVal = -1;
+        ResultsModel resultsModel = null;
         switch (useCase) {
             case "init":
                 constraintsModel.noParallelPaths();
@@ -50,31 +50,37 @@ public class LauncherModel {
                     resultsInitialModel = resultsModel;
                 break;
             case "mgr":
-                constraintsModel.noParallelPaths();
-                constraintsModel.setMigrationCosts(resultsInitialModel);
-                objVal = model.run();
-                resultsModel = generateResultModel(pm, objVal);
-                if (resultsModel != null)
-                    resultsModel.calculateNumberOfMigrations(resultsInitialModel);
+                if (resultsInitialModel != null) {
+                    constraintsModel.noParallelPaths();
+                    constraintsModel.setMigrationCosts(resultsInitialModel);
+                    objVal = model.run();
+                    resultsModel = generateResultModel(pm, objVal);
+                    if (resultsModel != null)
+                        resultsModel.calculateNumberOfMigrations(resultsInitialModel);
+                }
                 submitResultsToGUI(resultsModel, objVal);
                 model.finishModel();
                 break;
             case "rep":
-                constraintsModel.setVariablesFromInitialPlacementAsConstraints(resultsInitialModel);
-                objVal = model.run();
-                resultsModel = generateResultModel(pm, objVal);
-                if (resultsModel != null)
-                    resultsModel.calculateNumberOfReplications();
+                if (resultsInitialModel != null) {
+                    constraintsModel.setVariablesFromInitialPlacementAsConstraints(resultsInitialModel);
+                    objVal = model.run();
+                    resultsModel = generateResultModel(pm, objVal);
+                    if (resultsModel != null)
+                        resultsModel.calculateNumberOfReplications();
+                }
                 submitResultsToGUI(resultsModel, objVal);
                 model.finishModel();
                 break;
             case "both":
-                constraintsModel.setMigrationCosts(resultsInitialModel);
-                objVal = model.run();
-                resultsModel = generateResultModel(pm, objVal);
-                if (resultsModel != null) {
-                    resultsModel.calculateNumberOfMigrations(resultsInitialModel);
-                    resultsModel.calculateNumberOfReplications();
+                if (resultsInitialModel != null) {
+                    constraintsModel.setMigrationCosts(resultsInitialModel);
+                    objVal = model.run();
+                    resultsModel = generateResultModel(pm, objVal);
+                    if (resultsModel != null) {
+                        resultsModel.calculateNumberOfMigrations(resultsInitialModel);
+                        resultsModel.calculateNumberOfReplications();
+                    }
                 }
                 submitResultsToGUI(resultsModel, objVal);
                 model.finishModel();
@@ -91,9 +97,9 @@ public class LauncherModel {
         model = new Model(pm);
     }
 
-    private static ResultsModel generateResultModel(ParametersModel pm, double objVal) throws GRBException {
+    private static ResultsModel generateResultModel(ParametersModel pm, double objVal) {
         ResultsModel resultsModel = null;
-        if (objVal > 0) {
+        if (objVal >= 0) {
             resultsModel = new ResultsModel(pm);
             new ResultsFiles(pm.ip.getNetworkFile(), pm.ip.getAlpha() + "-" + pm.ip.getBeta());
         }
@@ -101,9 +107,14 @@ public class LauncherModel {
     }
 
     private static void submitResultsToGUI(ResultsModel resultsModel, double objVal) throws GRBException {
-        Results results = null;
-        if (objVal > 0)
+        Results results;
+        if (objVal >= 0 ) {
             results = resultsModel.generate(objVal);
-        ClientResults.updateResultsToWebApp(results);
+            ClientResults.updateResultsToWebApp(results);
+            ClientResults.postMessage("Solution found");
+        } else if (resultsModel == null){
+            ClientResults.postMessage("Please, run initial placement first");
+        } else
+            ClientResults.postMessage("Model is not feasible");
     }
 }

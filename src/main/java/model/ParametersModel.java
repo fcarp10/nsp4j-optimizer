@@ -20,8 +20,8 @@ public class ParametersModel {
     GRBModel grbModel;
     GRBEnv grbEnv;
     LinearCostFunctions linearCostFunctions;
-    GRBVar[][] rSP;
-    GRBVar[][][] rSPD;
+    GRBVar[][] tSP;
+    GRBVar[][][] tSPD;
     GRBVar[][][] fXSV;
     GRBVar[][][][] fXSVD;
     GRBVar[] ukL;
@@ -43,16 +43,16 @@ public class ParametersModel {
             grbModel = new GRBModel(grbEnv);
             grbModel.getEnv().set(GRB.DoubleParam.MIPGap, ip.getGap());
 
-            rSP = new GRBVar[ip.getServices().size()][ip.getAuxPathsPerTrafficFlow()];
+            tSP = new GRBVar[ip.getServices().size()][ip.getAuxPathsPerTrafficFlow()];
             for (int s = 0; s < ip.getServices().size(); s++)
                 for (int p = 0; p < ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                    rSP[s][p] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "rSP[" + s + "][" + p + "]");
+                    tSP[s][p] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "tSP[" + s + "][" + p + "]");
 
-            rSPD = new GRBVar[ip.getServices().size()][ip.getAuxPathsPerTrafficFlow()][ip.getAuxDemandsPerTrafficFlow()];
+            tSPD = new GRBVar[ip.getServices().size()][ip.getAuxPathsPerTrafficFlow()][ip.getAuxDemandsPerTrafficFlow()];
             for (int s = 0; s < ip.getServices().size(); s++)
                 for (int p = 0; p < ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                     for (int d = 0; d < ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        rSPD[s][p][d] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "rSPD[" + s + "][" + p + "][" + d + "]");
+                        tSPD[s][p][d] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "tSPD[" + s + "][" + p + "][" + d + "]");
 
             fXSV = new GRBVar[ip.getServers().size()][ip.getServices().size()][ip.getAuxServiceLength()];
             for (int x = 0; x < ip.getServers().size(); x++)

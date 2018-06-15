@@ -31,19 +31,12 @@ public class ClientResults {
             List<JsonServer> jsonServers = getNodeStringsWithResults(results.getServersMap(), results.getFunctionsStringMap());
             List<JsonLink> jsonLinks = getLinkStringsWithResults(results.getLinksMap());
             try {
-                postMessage("Solution found");
                 postJsonNodes(jsonServers);
                 postJsonLinks(jsonLinks);
+                postResults(results);
             } catch (URISyntaxException | InterruptedException | IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            postMessage("Model is not feasible");
-        }
-        try {
-            postResults(results);
-        } catch (URISyntaxException | IOException | InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
@@ -90,7 +83,7 @@ public class ClientResults {
         sendRequest(request);
     }
 
-    private static void postMessage(String message) {
+    public static void postMessage(String message) {
         HttpRequest request = null;
         try {
             request = HttpRequest.newBuilder()

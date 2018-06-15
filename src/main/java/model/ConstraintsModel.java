@@ -30,7 +30,7 @@ public class ConstraintsModel {
                         continue;
                     for (int d = 0; d < pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                         expr.addTerm(pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-                                / (double) pm.ip.getLinks().get(l).getAttribute("capacity"), pm.rSPD[s][p][d]);
+                                / (double) pm.ip.getLinks().get(l).getAttribute("capacity"), pm.tSPD[s][p][d]);
                 }
             pm.grbModel.addConstr(expr, GRB.EQUAL, pm.uL[l], "Link Utilization [" + l + "]");
             setLinearCostFunctions(expr, pm.ukL[l]);
@@ -91,7 +91,7 @@ public class ConstraintsModel {
         for (int s = 0; s < pm.ip.getServices().size(); s++) {
             GRBLinExpr expr = new GRBLinExpr();
             for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                expr.addTerm(1.0, pm.rSP[s][p]);
+                expr.addTerm(1.0, pm.tSP[s][p]);
             pm.grbModel.addConstr(expr, GRB.EQUAL, 1, "No parallel paths");
         }
     }
@@ -101,7 +101,7 @@ public class ConstraintsModel {
             for (int d = 0; d < pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
                 GRBLinExpr expr = new GRBLinExpr();
                 for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                    expr.addTerm(1.0, pm.rSPD[s][p][d]);
+                    expr.addTerm(1.0, pm.tSPD[s][p][d]);
                 pm.grbModel.addConstr(expr, GRB.EQUAL, 1.0, "One path per traffic demand");
             }
     }
@@ -110,14 +110,14 @@ public class ConstraintsModel {
         for (int s = 0; s < pm.ip.getServices().size(); s++)
             for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    pm.grbModel.addConstr(pm.rSPD[s][p][d], GRB.LESS_EQUAL, pm.rSP[s][p], "Activate path for service chain");
+                    pm.grbModel.addConstr(pm.tSPD[s][p][d], GRB.LESS_EQUAL, pm.tSP[s][p], "Activate path for service chain");
 
         for (int s = 0; s < pm.ip.getServices().size(); s++)
             for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
                 GRBLinExpr expr = new GRBLinExpr();
                 for (int d = 0; d < pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    expr.addTerm(1.0, pm.rSPD[s][p][d]);
-                pm.grbModel.addConstr(expr, GRB.GREATER_EQUAL, pm.rSP[s][p], "Activate path for service chain");
+                    expr.addTerm(1.0, pm.tSPD[s][p][d]);
+                pm.grbModel.addConstr(expr, GRB.GREATER_EQUAL, pm.tSP[s][p], "Activate path for service chain");
             }
     }
 
@@ -130,7 +130,7 @@ public class ConstraintsModel {
                 if (pm.ip.getServices().get(s).getFunctions().get(v).isReplicable()) {
                     GRBLinExpr expr2 = new GRBLinExpr();
                     for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                        expr2.addTerm(1.0, pm.rSP[s][p]);
+                        expr2.addTerm(1.0, pm.tSP[s][p]);
                     pm.grbModel.addConstr(expr, GRB.EQUAL, expr2, "Paths constrained by functions");
                 } else
                     pm.grbModel.addConstr(expr, GRB.EQUAL, 1.0, "Paths constrained by functions");
@@ -147,7 +147,7 @@ public class ConstraintsModel {
                             for (int x = 0; x < pm.ip.getServers().size(); x++)
                                 if (pm.ip.getServers().get(x).getNodeParent().equals(pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
                                     expr.addTerm(1.0, pm.fXSVD[x][s][v][d]);
-                        pm.grbModel.addConstr(pm.rSPD[s][p][d], GRB.LESS_EQUAL, expr, "Function placement");
+                        pm.grbModel.addConstr(pm.tSPD[s][p][d], GRB.LESS_EQUAL, expr, "Function placement");
                     }
     }
 
@@ -158,7 +158,7 @@ public class ConstraintsModel {
                     GRBLinExpr expr = new GRBLinExpr();
                     for (int x = 0; x < pm.ip.getServers().size(); x++)
                         expr.addTerm(1.0, pm.fXSVD[x][s][v][d]);
-                    pm.grbModel.addConstr(expr, GRB.EQUAL, 1.0, "One function per trafiic demand");
+                    pm.grbModel.addConstr(expr, GRB.EQUAL, 1.0, "One function per traffic demand");
                 }
     }
 
@@ -200,13 +200,11 @@ public class ConstraintsModel {
                                     expr.addTerm(-1.0, pm.fXSVD[x][s][v][d]);
 
                             expr2.addConstant(-1);
-                            expr2.addTerm(1.0, pm.rSPD[s][p][d]);
+                            expr2.addTerm(1.0, pm.tSPD[s][p][d]);
                             pm.grbModel.addConstr(expr, GRB.GREATER_EQUAL, expr2, "Function sequence order");
 
                         }
                     }
             }
     }
-
-
 }

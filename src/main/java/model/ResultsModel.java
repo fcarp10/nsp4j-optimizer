@@ -107,7 +107,7 @@ public class ResultsModel {
         List<String> usedPaths = new ArrayList<>();
         for (int s = 0; s < pm.ip.getServices().size(); s++)
             for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                if (pm.rSP[s][p].get(GRB.DoubleAttr.X) == 1)
+                if (pm.tSP[s][p].get(GRB.DoubleAttr.X) == 1)
                     usedPaths.add("s" + s + " --> " + pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
         return usedPaths;
     }
@@ -117,7 +117,7 @@ public class ResultsModel {
         for (int s = 0; s < pm.ip.getServices().size(); s++)
             for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    if (pm.rSPD[s][p][d].get(GRB.DoubleAttr.X) == 1)
+                    if (pm.tSPD[s][p][d].get(GRB.DoubleAttr.X) == 1)
                         usedPathsPerDemand.add("s" + s + "-d" + d + " --> " + pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
         return usedPathsPerDemand;
     }
@@ -148,7 +148,7 @@ public class ResultsModel {
         int usedPaths = 0;
         for (int s = 0; s < pm.ip.getServices().size(); s++)
             for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                if (pm.rSP[s][p].get(GRB.DoubleAttr.X) == 1.0) {
+                if (pm.tSP[s][p].get(GRB.DoubleAttr.X) == 1.0) {
                     avgPathLength += pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getEdgePath().size();
                     usedPaths++;
                 }

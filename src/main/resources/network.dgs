@@ -11,14 +11,25 @@ an n7 x:350 y:100 capacity:1000.0
 an n8 x:350 y:200 capacity:1000.0
 an n9 x:400 y:150 capacity:1000.0
 
-ae n1n2 n1 n2 capacity:1000.0
-ae n2n3 n2 n3 capacity:1000.0
-ae n1n4 n1 n4 capacity:1000.0
-ae n3n5 n3 n5 capacity:1000.0
-ae n3n7 n3 n7 capacity:1000.0
-ae n4n5 n4 n5 capacity:1000.0
-ae n5n6 n5 n6 capacity:1000.0
-ae n6n7 n6 n7 capacity:1000.0
-ae n6n8 n6 n8 capacity:1000.0
-ae n7n9 n7 n9 capacity:1000.0
-ae n8n9 n8 n9 capacity:1000.0
+ae n1n2 n1 > n2 capacity:1000.0
+ae n1n4 n1 > n4 capacity:1000.0
+ae n2n1 n2 > n1 capacity:1000.0
+ae n2n3 n2 > n3 capacity:1000.0
+ae n3n2 n3 > n2 capacity:1000.0
+ae n3n5 n3 > n5 capacity:1000.0
+ae n3n7 n3 > n7 capacity:1000.0
+ae n4n1 n4 > n1 capacity:1000.0
+ae n4n5 n4 > n5 capacity:1000.0
+ae n5n3 n5 > n3 capacity:1000.0
+ae n5n4 n5 > n4 capacity:1000.0
+ae n5n6 n5 > n6 capacity:1000.0
+ae n6n5 n6 > n5 capacity:1000.0
+ae n6n7 n6 > n7 capacity:1000.0
+ae n6n8 n6 > n8 capacity:1000.0
+ae n7n3 n7 > n3 capacity:1000.0
+ae n7n6 n7 > n6 capacity:1000.0
+ae n7n9 n7 > n9 capacity:1000.0
+ae n8n6 n8 > n6 capacity:1000.0
+ae n8n9 n8 > n9 capacity:1000.0
+ae n9n7 n9 > n7 capacity:1000.0
+ae n9n8 n9 > n8 capacity:1000.0
