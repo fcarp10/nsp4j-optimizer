@@ -6,12 +6,19 @@
 
     <groupId>de.tubs</groupId>
     <artifactId>nfv-optimization</artifactId>
-    <version>0.1.3</version>
+    <version>0.2</version>
 
     <properties>
         <java.version>9</java.version>
         <maven.test.skip>true</maven.test.skip>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>nfv-framework</id>
+            <url>https://github.com/FranCarpio/nfv-framework/tree/master/repository/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -22,7 +29,7 @@
         <dependency>
             <groupId>de.tubs</groupId>
             <artifactId>nfv-framework</artifactId>
-            <version>0.1.2</version>
+            <version>0.1.3</version>
         </dependency>
         <dependency>
             <groupId>com.gurobi</groupId>
