@@ -19,39 +19,46 @@ public class Model {
         pm.grbModel.setObjective(expr, GRB.MINIMIZE);
     }
 
-    public GRBLinExpr exprLinkUtilizationCosts(double weight) {
+    public GRBLinExpr linkUtilizationCostsExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int l = 0; l < pm.ip.getLinks().size(); l++)
             expr.addTerm(weight / pm.ip.getLinks().size(), pm.ukL[l]);
         return expr;
     }
 
-    public GRBLinExpr exprServerUtilizationCosts(double weight){
+    public GRBLinExpr serverUtilizationCostsExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < pm.ip.getServers().size(); x++)
             expr.addTerm(weight / pm.ip.getServers().size(), pm.ukX[x]);
         return expr;
     }
 
-    public GRBLinExpr exprLinkUtilization(double weight){
+    public GRBLinExpr linkUtilizationExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int l = 0; l < pm.ip.getLinks().size(); l++)
             expr.addTerm(weight / pm.ip.getLinks().size(), pm.uL[l]);
         return expr;
     }
 
-    public GRBLinExpr exprServerUtilization(double weight) {
+    public GRBLinExpr serverUtilizationExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < pm.ip.getServers().size(); x++)
             expr.addTerm(weight / pm.ip.getServers().size(), pm.uX[x]);
         return expr;
     }
 
-    public GRBLinExpr exprMigrationCosts(double weight){
+    public GRBLinExpr migrationCostsExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int s = 0; s < pm.ip.getServices().size(); s++)
             for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++)
-                expr.addTerm(weight / pm.ip.getAuxTotalNumberOfFunctions(), pm.mkVS[s][v]);
+                expr.addTerm(weight / pm.ip.getAuxTotalNumberOfFunctions(), pm.mV[s][v]);
+        return expr;
+    }
+
+    public GRBLinExpr usedServersExpr(double weight) {
+        GRBLinExpr expr = new GRBLinExpr();
+        for (int x = 0; x < pm.ip.getServers().size(); x++)
+            expr.addTerm(weight / pm.ip.getServers().size(), pm.fX[x]);
         return expr;
     }
 

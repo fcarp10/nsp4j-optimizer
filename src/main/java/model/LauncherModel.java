@@ -22,14 +22,15 @@ public class LauncherModel {
         GRBLinExpr expr = new GRBLinExpr();
         switch (objective) {
             case "costs":
-                expr.add(model.exprServerUtilizationCosts(pm.ip.getAlpha()));
-                expr.add(model.exprLinkUtilizationCosts(pm.ip.getBeta()));
+                expr.add(model.serverUtilizationCostsExpr(pm.ip.getWeights()[0]));
+                expr.add(model.linkUtilizationCostsExpr(pm.ip.getWeights()[1]));
                 break;
             case "utilization":
-                expr.add(model.exprServerUtilization(pm.ip.getAlpha()));
-                expr.add(model.exprLinkUtilization(pm.ip.getBeta()));
+                expr.add(model.serverUtilizationExpr(pm.ip.getWeights()[0]));
+                expr.add(model.linkUtilizationExpr(pm.ip.getWeights()[1]));
                 break;
             case "servers":
+                expr.add(model.usedServersExpr(pm.ip.getWeights()[2]));
                 break;
         }
         model.setObjectiveFunction(expr);
@@ -99,20 +100,24 @@ public class LauncherModel {
 
     private static ResultsModel generateResultModel(ParametersModel pm, double objVal) {
         ResultsModel resultsModel = null;
+        StringBuilder title = new StringBuilder();
+        for (Double d : pm.ip.getWeights())
+            title.append("-").append(d);
+
         if (objVal >= 0) {
             resultsModel = new ResultsModel(pm);
-            new ResultsFiles(pm.ip.getNetworkFile(), pm.ip.getAlpha() + "-" + pm.ip.getBeta());
+            new ResultsFiles(pm.ip.getNetworkFile(), title.toString());
         }
         return resultsModel;
     }
 
     private static void submitResultsToGUI(ResultsModel resultsModel, double objVal) throws GRBException {
         Results results;
-        if (objVal >= 0 ) {
+        if (objVal >= 0) {
             results = resultsModel.generate(objVal);
             ClientResults.updateResultsToWebApp(results);
             ClientResults.postMessage("Solution found");
-        } else if (resultsModel == null){
+        } else if (resultsModel == null) {
             ClientResults.postMessage("Please, run initial placement first");
         } else
             ClientResults.postMessage("Model is not feasible");

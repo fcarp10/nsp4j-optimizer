@@ -6,7 +6,7 @@
 
     <groupId>de.tubs</groupId>
     <artifactId>nfv-optimization</artifactId>
-    <version>0.2</version>
+    <version>0.2.1</version>
 
     <properties>
         <java.version>9</java.version>
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>de.tubs</groupId>
             <artifactId>nfv-framework</artifactId>
-            <version>0.1.3</version>
+            <version>0.1.4</version>
         </dependency>
         <dependency>
             <groupId>com.gurobi</groupId>

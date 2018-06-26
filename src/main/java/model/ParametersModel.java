@@ -22,14 +22,15 @@ public class ParametersModel {
     LinearCostFunctions linearCostFunctions;
     GRBVar[][] tSP;
     GRBVar[][][] tSPD;
+    GRBVar[] fX;
     GRBVar[][][] fXSV;
     GRBVar[][][][] fXSVD;
     GRBVar[] ukL;
     GRBVar[] ukX;
     GRBVar[] uL;
     GRBVar[] uX;
-    GRBVar[][] mkVS;
-    GRBVar[][] rkVS;
+    GRBVar[][] mV;
+    GRBVar[][] rV;
 
     public ParametersModel(InputParameters inputParameters) {
         this.ip = inputParameters;
@@ -53,6 +54,10 @@ public class ParametersModel {
                 for (int p = 0; p < ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                     for (int d = 0; d < ip.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                         tSPD[s][p][d] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "tSPD[" + s + "][" + p + "][" + d + "]");
+
+            fX = new GRBVar[ip.getServers().size()];
+            for (int x = 0; x < ip.getServers().size(); x++)
+                fX[x] = grbModel.addVar(0.0, Integer.MAX_VALUE, 0.0, GRB.INTEGER, "fX[" + x + "]");
 
             fXSV = new GRBVar[ip.getServers().size()][ip.getServices().size()][ip.getAuxServiceLength()];
             for (int x = 0; x < ip.getServers().size(); x++)
@@ -83,15 +88,15 @@ public class ParametersModel {
             for (int x = 0; x < ip.getServers().size(); x++)
                 ukX[x] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "ukX[" + x + "]");
 
-            mkVS = new GRBVar[ip.getServices().size()][ip.getAuxServiceLength()];
+            mV = new GRBVar[ip.getServices().size()][ip.getAuxServiceLength()];
             for (int s = 0; s < ip.getServices().size(); s++)
                 for (int v = 0; v < ip.getServices().get(s).getFunctions().size(); v++)
-                    mkVS[s][v] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "mkVS[" + s + "][" + v + "]");
+                    mV[s][v] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "mV[" + s + "][" + v + "]");
 
-            rkVS = new GRBVar[ip.getServices().size()][ip.getAuxServiceLength()];
+            rV = new GRBVar[ip.getServices().size()][ip.getAuxServiceLength()];
             for (int s = 0; s < ip.getServices().size(); s++)
                 for (int v = 0; v < ip.getServices().get(s).getFunctions().size(); v++)
-                    rkVS[s][v] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "rkVS[" + s + "][" + v + "]");
+                    rV[s][v] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "rV[" + s + "][" + v + "]");
 
             grbModel.update();
         } catch (Exception e) {

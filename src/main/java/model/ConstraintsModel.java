@@ -12,6 +12,7 @@ public class ConstraintsModel {
 
     public ConstraintsModel(ParametersModel parametersModel) throws GRBException {
         this.pm = parametersModel;
+        this.countNumberOfUsedServers();
         this.onePathPerDemand();
         this.activatePathForService();
         this.pathsConstrainedByFunctions();
@@ -66,7 +67,7 @@ public class ConstraintsModel {
                     expr.addTerm(-pm.ip.getAux(), pm.fXSV[x][s][v]);
                     GRBLinExpr expr2 = new GRBLinExpr();
                     expr2.multAdd(utilizationPerFunction[x][s][v] / pm.ip.getServers().get(x).getCapacity(), expr);
-                    setLinearCostFunctions(expr2, pm.mkVS[s][v]);
+                    setLinearCostFunctions(expr2, pm.mV[s][v]);
                 }
     }
 
@@ -93,6 +94,16 @@ public class ConstraintsModel {
             for (int p = 0; p < pm.ip.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 expr.addTerm(1.0, pm.tSP[s][p]);
             pm.grbModel.addConstr(expr, GRB.EQUAL, 1, "No parallel paths");
+        }
+    }
+
+    private void countNumberOfUsedServers() throws GRBException {
+        GRBLinExpr expr = new GRBLinExpr();
+        for (int x = 0; x < pm.ip.getServers().size(); x++) {
+            for (int s = 0; s < pm.ip.getServices().size(); s++)
+                for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++)
+                    expr.addTerm(1.0, pm.fXSV[x][s][v]);
+            pm.grbModel.addConstr(expr, GRB.EQUAL, pm.fX[x], "countNumberOfUsedServers");
         }
     }
 

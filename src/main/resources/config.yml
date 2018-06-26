@@ -1,8 +1,7 @@
 networkFile: network
 pathsFile: paths
 gap: 0
-alpha: 1
-beta: 0
+weights: [1, 0, 1]
 serverCapacity: 1000
 serversPerNode: 1
 linkCapacity: 1000
@@ -24,6 +23,7 @@ trafficFlows:
   - src: "n1"
     dst: "n9"
     serviceId: 0
+
 minDemands: 3
 maxDemands: 3
 minBw: 100

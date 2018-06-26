@@ -8,7 +8,7 @@ public class ResultsFiles {
 
     public ResultsFiles(String fileName, String factors) {
         try {
-            generalFile = new WriteFile("1-general-" + fileName, factors);
+            generalFile = new WriteFile("1-general" + fileName, factors);
              } catch (Exception e) {
         }
     }
