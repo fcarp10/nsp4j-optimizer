@@ -35,11 +35,11 @@ public class ResultsModel {
         numOfReplicas = 0;
         for (int s = 0; s < pm.ip.getServices().size(); s++)
             for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++) {
-                int numberOfReplicas = 0;
+                int numOfReplicasPerFunction = 0;
                 for (int x = 0; x < pm.ip.getServers().size(); x++)
                     if (pm.fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1)
-                        numberOfReplicas++;
-                numOfReplicas += numberOfReplicas - 1;
+                        numOfReplicasPerFunction++;
+                numOfReplicas += numOfReplicasPerFunction - 1;
             }
     }
 

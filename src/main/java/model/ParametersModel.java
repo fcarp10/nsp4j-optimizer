@@ -29,8 +29,6 @@ public class ParametersModel {
     GRBVar[] ukX;
     GRBVar[] uL;
     GRBVar[] uX;
-    GRBVar[][] mV;
-    GRBVar[][] rV;
 
     public ParametersModel(InputParameters inputParameters) {
         this.ip = inputParameters;
@@ -57,7 +55,7 @@ public class ParametersModel {
 
             fX = new GRBVar[ip.getServers().size()];
             for (int x = 0; x < ip.getServers().size(); x++)
-                fX[x] = grbModel.addVar(0.0, Integer.MAX_VALUE, 0.0, GRB.INTEGER, "fX[" + x + "]");
+                fX[x] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "fX[" + x + "]");
 
             fXSV = new GRBVar[ip.getServers().size()][ip.getServices().size()][ip.getAuxServiceLength()];
             for (int x = 0; x < ip.getServers().size(); x++)
@@ -88,15 +86,6 @@ public class ParametersModel {
             for (int x = 0; x < ip.getServers().size(); x++)
                 ukX[x] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "ukX[" + x + "]");
 
-            mV = new GRBVar[ip.getServices().size()][ip.getAuxServiceLength()];
-            for (int s = 0; s < ip.getServices().size(); s++)
-                for (int v = 0; v < ip.getServices().get(s).getFunctions().size(); v++)
-                    mV[s][v] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "mV[" + s + "][" + v + "]");
-
-            rV = new GRBVar[ip.getServices().size()][ip.getAuxServiceLength()];
-            for (int s = 0; s < ip.getServices().size(); s++)
-                for (int v = 0; v < ip.getServices().get(s).getFunctions().size(); v++)
-                    rV[s][v] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "rV[" + s + "][" + v + "]");
 
             grbModel.update();
         } catch (Exception e) {
@@ -105,7 +94,7 @@ public class ParametersModel {
 
     private void readInputParameters() {
 
-        TypeReference<LinearCostFunctions> typeReference = new TypeReference<LinearCostFunctions>() {
+        TypeReference<LinearCostFunctions> typeReference = new TypeReference<>() {
         };
         InputStream inputStream = TypeReference.class.getResourceAsStream("/linear-cost-functions.yml");
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());

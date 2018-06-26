@@ -18,30 +18,33 @@ public class LauncherModel {
     private static ResultsModel resultsInitialModel;
 
     public static void startOptimization(String useCase, String objective) throws GRBException {
+        double objVal = -1;
+        ResultsModel resultsModel = null;
         initializeModel();
-        GRBLinExpr expr = new GRBLinExpr();
-        switch (objective) {
-            case "costs":
-                expr.add(model.serverUtilizationCostsExpr(pm.ip.getWeights()[0]));
-                expr.add(model.linkUtilizationCostsExpr(pm.ip.getWeights()[1]));
-                break;
-            case "utilization":
-                expr.add(model.serverUtilizationExpr(pm.ip.getWeights()[0]));
-                expr.add(model.linkUtilizationExpr(pm.ip.getWeights()[1]));
-                break;
-            case "servers":
-                expr.add(model.usedServersExpr(pm.ip.getWeights()[2]));
-                break;
-        }
-        model.setObjectiveFunction(expr);
+
         ConstraintsModel constraintsModel = new ConstraintsModel(pm);
         constraintsModel.setLinkUtilizationExpr();
         constraintsModel.setServerUtilizationExpr();
-        double objVal = -1;
-        ResultsModel resultsModel = null;
+
+        GRBLinExpr expr = new GRBLinExpr();
+        switch (objective) {
+            case "servers":
+                expr.add(model.usedServersExpr());
+                break;
+            case "costs":
+                expr.add(model.linkUtilizationCostsExpr(pm.ip.getWeights()[0]));
+                expr.add(model.serverUtilizationCostsExpr(pm.ip.getWeights()[1]));
+                break;
+            case "utilization":
+                expr.add(model.linkUtilizationExpr(pm.ip.getWeights()[0]));
+                expr.add(model.serverUtilizationExpr(pm.ip.getWeights()[1]));
+                break;
+        }
+
         switch (useCase) {
             case "init":
                 constraintsModel.noParallelPaths();
+                model.setObjectiveFunction(expr);
                 objVal = model.run();
                 resultsModel = generateResultModel(pm, objVal);
                 submitResultsToGUI(resultsModel, objVal);
@@ -53,7 +56,8 @@ public class LauncherModel {
             case "mgr":
                 if (resultsInitialModel != null) {
                     constraintsModel.noParallelPaths();
-                    constraintsModel.setMigrationCosts(resultsInitialModel);
+                    expr.add(model.migrations(resultsInitialModel, pm.ip.getWeights()[2]));
+                    model.setObjectiveFunction(expr);
                     objVal = model.run();
                     resultsModel = generateResultModel(pm, objVal);
                     if (resultsModel != null)
@@ -65,6 +69,8 @@ public class LauncherModel {
             case "rep":
                 if (resultsInitialModel != null) {
                     constraintsModel.setVariablesFromInitialPlacementAsConstraints(resultsInitialModel);
+                    expr.add(model.replications(pm.ip.getWeights()[3]));
+                    model.setObjectiveFunction(expr);
                     objVal = model.run();
                     resultsModel = generateResultModel(pm, objVal);
                     if (resultsModel != null)
@@ -75,7 +81,9 @@ public class LauncherModel {
                 break;
             case "both":
                 if (resultsInitialModel != null) {
-                    constraintsModel.setMigrationCosts(resultsInitialModel);
+                    expr.add(model.migrations(resultsInitialModel, pm.ip.getWeights()[2]));
+                    expr.add(model.replications(pm.ip.getWeights()[3]));
+                    model.setObjectiveFunction(expr);
                     objVal = model.run();
                     resultsModel = generateResultModel(pm, objVal);
                     if (resultsModel != null) {

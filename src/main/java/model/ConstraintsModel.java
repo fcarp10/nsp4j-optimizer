@@ -55,22 +55,6 @@ public class ConstraintsModel {
         }
     }
 
-    public void setMigrationCosts(ResultsModel initialResultsModel) throws GRBException {
-
-        double[][][] utilizationPerFunction = initialResultsModel.getUtilizationPerFunction();
-        for (int x = 0; x < pm.ip.getServers().size(); x++)
-            for (int s = 0; s < pm.ip.getServices().size(); s++)
-                for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++) {
-                    if (initialResultsModel.getPm().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 0) continue;
-                    GRBLinExpr expr = new GRBLinExpr();
-                    expr.addConstant(pm.ip.getAux());
-                    expr.addTerm(-pm.ip.getAux(), pm.fXSV[x][s][v]);
-                    GRBLinExpr expr2 = new GRBLinExpr();
-                    expr2.multAdd(utilizationPerFunction[x][s][v] / pm.ip.getServers().get(x).getCapacity(), expr);
-                    setLinearCostFunctions(expr2, pm.mV[s][v]);
-                }
-    }
-
     private void setLinearCostFunctions(GRBLinExpr expr, GRBVar grbVar) throws GRBException {
         for (int l = 0; l < pm.linearCostFunctions.getValues().size(); l++) {
             GRBLinExpr expr2 = new GRBLinExpr();
@@ -98,12 +82,13 @@ public class ConstraintsModel {
     }
 
     private void countNumberOfUsedServers() throws GRBException {
-        GRBLinExpr expr = new GRBLinExpr();
+
         for (int x = 0; x < pm.ip.getServers().size(); x++) {
+            GRBLinExpr expr = new GRBLinExpr();
             for (int s = 0; s < pm.ip.getServices().size(); s++)
                 for (int v = 0; v < pm.ip.getServices().get(s).getFunctions().size(); v++)
-                    expr.addTerm(1.0, pm.fXSV[x][s][v]);
-            pm.grbModel.addConstr(expr, GRB.EQUAL, pm.fX[x], "countNumberOfUsedServers");
+                    expr.addTerm(1 / pm.ip.getAuxTotalNumberOfFunctions(), pm.fXSV[x][s][v]);
+            pm.grbModel.addConstr(pm.fX[x], GRB.GREATER_EQUAL, expr, "countNumberOfUsedServers");
         }
     }
 
