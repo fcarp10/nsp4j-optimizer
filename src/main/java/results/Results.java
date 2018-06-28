@@ -3,6 +3,7 @@ package results;
 
 import network.Server;
 import org.graphstream.graph.Edge;
+import utils.Auxiliary;
 
 import java.util.ArrayList;
 import java.util.List;

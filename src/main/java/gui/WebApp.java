@@ -4,7 +4,7 @@ package gui;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import filemanager.GraphManager;
-import model.LauncherModel;
+import model.Launcher;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import results.Results;
@@ -25,7 +25,7 @@ public class WebApp {
     private static Results results;
     private static String message;
 
-    public WebApp(){
+    public WebApp() {
         jsonNodes = new HashMap<>();
         jsonLinks = new HashMap<>();
         interfaces();
@@ -80,7 +80,8 @@ public class WebApp {
         post("/run", (request, response) -> {
             String runMessage = request.body();
             String[] message = runMessage.split("-");
-            LauncherModel.startOptimization(message[0], message[1]);
+            new Launcher();
+            Launcher.startOptimization(message[0], message[1]);
             return "Running...";
         });
 

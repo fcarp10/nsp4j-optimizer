@@ -4,7 +4,7 @@ import gui.WebApp;
 
 import static spark.Spark.*;
 
-public class Launcher {
+public class App {
 
     public static String configFile;
 

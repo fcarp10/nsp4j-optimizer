@@ -1,4 +1,4 @@
-package results;
+package utils;
 
 
 import org.decimal4j.util.DoubleRounder;
@@ -8,13 +8,11 @@ import java.util.List;
 
 public class Auxiliary {
 
-    public static final int DECIMALS = 2;
-
     public static double avg(List<Double> utilizationResults) {
         double tmpU = 0;
         for (Double utilizationResult : utilizationResults) tmpU += utilizationResult;
         tmpU = tmpU / utilizationResults.size();
-        return roundDouble(tmpU);
+        return roundDouble(tmpU, 2);
     }
 
     public static double vrc(List<Double> utilizationResults, double avg) {
@@ -22,7 +20,7 @@ public class Auxiliary {
         for (Double utilizationResult : utilizationResults)
             variance += Math.pow(utilizationResult - avg, 2);
         variance = variance / utilizationResults.size();
-        return roundDouble(variance);
+        return roundDouble(variance, 2);
     }
 
     public static double max(List<Double> utilizationResults) {
@@ -30,7 +28,7 @@ public class Auxiliary {
         for (Double utilizationResult : utilizationResults)
             if (utilizationResult > max)
                 max = utilizationResult;
-        return roundDouble(max);
+        return roundDouble(max, 2);
     }
 
     public static double min(List<Double> utilizationResults) {
@@ -38,7 +36,7 @@ public class Auxiliary {
         for (Double utilizationResult : utilizationResults)
             if (utilizationResult < min)
                 min = utilizationResult;
-        return roundDouble(min);
+        return roundDouble(min, 2);
     }
 
     public static List<Integer> listsSizes(List<List<Integer>> list) {
@@ -52,7 +50,7 @@ public class Auxiliary {
         double tmp = 0;
         for (Integer i : results) tmp += i;
         tmp = tmp / results.size();
-        return roundDouble(tmp);
+        return roundDouble(tmp, 2);
     }
 
     public static double vrcF(List<Integer> results, double avg) {
@@ -60,7 +58,7 @@ public class Auxiliary {
         for (Integer i : results)
             variance += Math.pow(i - avg, 2);
         variance = variance / results.size();
-        return roundDouble(variance);
+        return roundDouble(variance, 2);
     }
 
     public static int maxF(List<Integer> results) {
@@ -79,7 +77,16 @@ public class Auxiliary {
         return min;
     }
 
-    public static double roundDouble(double value) {
-        return DoubleRounder.round(value, DECIMALS);
+    public static double roundDouble(double value, int decimals) {
+        return DoubleRounder.round(value, decimals);
     }
+
+    public static double findMax(int[] values) {
+        int max = 0;
+        for (int d : values)
+            if (d > max)
+                max = d;
+        return max;
+    }
+
 }
