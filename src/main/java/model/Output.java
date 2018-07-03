@@ -61,7 +61,7 @@ public class Output {
         return utilizationPerFunction;
     }
 
-    public Results generate(double cost) throws GRBException {
+    public Results generateResults(double cost) throws GRBException {
         return new Results(linksMap(), serversMap(), functionsMap(), functionsStringMap(), parameters.getTotalTrafficAux()
                 , trafficOnLinks(), avgPathLength(), Auxiliary.roundDouble(cost, 4), numOfMigrations, numOfReplicas, usedPathsPerDemand());
     }

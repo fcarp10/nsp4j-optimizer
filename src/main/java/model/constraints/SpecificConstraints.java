@@ -38,20 +38,20 @@ public class SpecificConstraints {
                         model.getGrbModel().addConstr(variables.fXSV[x][s][v], GRB.EQUAL, 1, "setVariablesFromInitialPlacementAsConstraints");
     }
 
-    public void reRoutingFromPreviousPlacement(Output initialOutput) throws GRBException {
-        for (int s = 0; s < parameters.getServices().size(); s++)
-            for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-                        GRBLinExpr expr = new GRBLinExpr();
-                        for (int n = 0; n < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
-                            for (int x = 0; x < parameters.getServers().size(); x++)
-                                if (parameters.getServers().get(x).getNodeParent().equals(parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
-                                    if (initialOutput.getVariables().fXSVD[x][s][v][d].get(GRB.DoubleAttr.X) == 1) {
-                                        expr.addConstant(1.0);
-                                        expr.addTerm(-1.0, variables.fXSVD[x][s][v][d]);
-                                    }
-                        model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, expr, "reRoutingFromPreviousPlacement");
-                    }
-    }
+//    public void reRoutingFromPreviousPlacement(Output initialOutput) throws GRBException {
+//        for (int s = 0; s < parameters.getServices().size(); s++)
+//            for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+//                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+//                    for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
+//                        GRBLinExpr expr = new GRBLinExpr();
+//                        for (int n = 0; n < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
+//                            for (int x = 0; x < parameters.getServers().size(); x++)
+//                                if (parameters.getServers().get(x).getNodeParent().equals(parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
+//                                    if (initialOutput.getVariables().fXSVD[x][s][v][d].get(GRB.DoubleAttr.X) == 1) {
+//                                        expr.addConstant(1.0);
+//                                        expr.addTerm(-1.0, variables.fXSVD[x][s][v][d]);
+//                                    }
+//                        model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, expr, "reRoutingFromPreviousPlacement");
+//                    }
+//    }
 }

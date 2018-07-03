@@ -80,13 +80,4 @@ public class Auxiliary {
     public static double roundDouble(double value, int decimals) {
         return DoubleRounder.round(value, decimals);
     }
-
-    public static double findMax(int[] values) {
-        int max = 0;
-        for (int d : values)
-            if (d > max)
-                max = d;
-        return max;
-    }
-
 }

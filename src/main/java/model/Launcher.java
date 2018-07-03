@@ -8,9 +8,9 @@ import gurobi.GRBLinExpr;
 import launcher.App;
 import model.constraints.GeneralConstraints;
 import model.constraints.SpecificConstraints;
-import results.ClientResults;
+import results.Client;
 import results.Results;
-import results.ResultsFiles;
+import results.ResultFiles;
 
 
 public class Launcher {
@@ -19,7 +19,7 @@ public class Launcher {
     private static Output initialOutput;
 
     public Launcher() {
-        Parameters parameters = ConfigFiles.readInputParameters(App.configFile);
+        Parameters parameters = ConfigFiles.readParameters(App.configFile);
         parameters.initialize();
         new WebApp().initializeResults();
         model = new Model(parameters);
@@ -29,8 +29,8 @@ public class Launcher {
     }
 
     public static void startOptimization(String useCase, String objective) throws GRBException {
-        double objVal = -1;
-        Output output = null;
+        double objVal;
+        Output output;
 
         double linksWeights = model.getParameters().getWeights()[0] / model.getParameters().getLinks().size();
         double serversWeights = model.getParameters().getWeights()[1] / model.getParameters().getServers().size();
@@ -58,8 +58,7 @@ public class Launcher {
                 specificConstraints.noParallelPaths();
                 model.setObjectiveFunction(expr);
                 objVal = model.run();
-                output = generateResultModel(objVal);
-                submitResultsToGUI(output, objVal);
+                output = generateResults(objVal);
                 if (output == null)
                     model.finishModel();
                 else
@@ -68,14 +67,12 @@ public class Launcher {
             case "mgr":
                 if (initialOutput != null) {
                     specificConstraints.noParallelPaths();
-                    specificConstraints.reRoutingFromPreviousPlacement(initialOutput);
                     model.setObjectiveFunction(expr);
                     objVal = model.run();
-                    output = generateResultModel(objVal);
+                    output = generateResults(objVal);
                     if (output != null)
                         output.calculateNumberOfMigrations(initialOutput);
                 }
-                submitResultsToGUI(output, objVal);
                 model.finishModel();
                 break;
             case "rep":
@@ -83,52 +80,47 @@ public class Launcher {
                     specificConstraints.setVariablesFromInitialPlacementAsConstraints(initialOutput);
                     model.setObjectiveFunction(expr);
                     objVal = model.run();
-                    output = generateResultModel(objVal);
+                    output = generateResults(objVal);
                     if (output != null)
                         output.calculateNumberOfReplications();
                 }
-                submitResultsToGUI(output, objVal);
                 model.finishModel();
                 break;
             case "both":
                 if (initialOutput != null) {
-                    specificConstraints.reRoutingFromPreviousPlacement(initialOutput);
                     model.setObjectiveFunction(expr);
                     objVal = model.run();
-                    output = generateResultModel(objVal);
+                    output = generateResults(objVal);
                     if (output != null) {
                         output.calculateNumberOfMigrations(initialOutput);
                         output.calculateNumberOfReplications();
                     }
                 }
-                submitResultsToGUI(output, objVal);
                 model.finishModel();
                 break;
         }
     }
 
-    private static Output generateResultModel(double objVal) {
+    private static Output generateResults(double objVal) throws GRBException {
         Output output = null;
+        Results results = null;
         StringBuilder title = new StringBuilder();
         for (Double d : model.getParameters().getWeights())
             title.append("-").append(d);
-
         if (objVal >= 0) {
             output = new Output(model);
-            new ResultsFiles(model.getParameters().getNetworkFile(), title.toString());
+            results = output.generateResults(objVal);
+            ResultFiles resultFiles = new ResultFiles(model.getParameters().getNetworkFile(), title.toString());
+            resultFiles.printSummary(results);
+            resultFiles.print(results);
         }
-        return output;
-    }
-
-    private static void submitResultsToGUI(Output output, double objVal) throws GRBException {
-        Results results;
         if (objVal >= 0) {
-            results = output.generate(objVal);
-            ClientResults.updateResultsToWebApp(results);
-            ClientResults.postMessage("Solution found");
-        } else if (output == null) {
-            ClientResults.postMessage("Please, run initial placement first");
-        } else
-            ClientResults.postMessage("Model is not feasible");
+            Client.updateResultsToWebApp(results);
+            Client.postMessage("Solution found");
+        } else if (output == null)
+            Client.postMessage("Please, run initial placement first");
+        else
+            Client.postMessage("Model is not feasible");
+        return output;
     }
 }

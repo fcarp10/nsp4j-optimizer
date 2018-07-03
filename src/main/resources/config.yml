@@ -1,7 +1,7 @@
 networkFile: network
 pathsFile: paths
 gap: 0
-weights: [1.0, 1.0, 1.0, 1.0]
+weights: [0.0, 1.0]
 serverCapacity: 1000
 serversPerNode: 1
 linkCapacity: 1000
