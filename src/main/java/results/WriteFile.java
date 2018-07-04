@@ -1,6 +1,8 @@
 package results;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -13,11 +15,11 @@ import java.util.Locale;
 
 public class WriteFile {
 
-    private File file;
-    private ObjectMapper mapper;
+    private File textPlainFile;
     private FileWriter filewriter;
+    private String folder;
 
-    public WriteFile(String fileName, String factors) {
+    public WriteFile(String folderName) {
         SimpleDateFormat MY_FORMAT = new SimpleDateFormat(
                 "dd-MM-yy--HH-mm", Locale.getDefault());
         Date date = new Date();
@@ -26,34 +28,36 @@ public class WriteFile {
         File parentDirectory = new File(path + "/../results");
         if (!parentDirectory.exists())
             parentDirectory.mkdir();
-        String folder = path + "/../results/" + MY_FORMAT.format(date) + "-" + factors;
+        folder = path + "/../results/" + MY_FORMAT.format(date) + "-" + folderName;
         new File(folder).mkdir();
-        file = new File(folder + "/" + fileName);
-
     }
 
-    public void initializeJsonFile() {
-        mapper = new ObjectMapper(new JsonFactory());
+    public void initializeTextPlainFile(String fileName) throws IOException {
+        textPlainFile = new File(folder + "/" + fileName + ".txt");
+        filewriter = new FileWriter(textPlainFile, false);
     }
 
-    public void initializeTextPlainFile() throws IOException {
-        filewriter = new FileWriter(file, false);
-    }
-
-    public void writeJson(String content) {
+    public void writeTextPlain(String content) {
         try {
-            mapper.writeValue(file, content);
+            filewriter = new FileWriter(textPlainFile, true);
+            PrintWriter printer = new PrintWriter(filewriter);
+            printer.write(content);
+            printer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void writeTextPlain(String content) {
+    public void createJsonForResults(String fileName, Object object) {
+        File jsonFile = new File(folder + "/" + fileName + ".json");
+        ObjectMapper mapper = new ObjectMapper(new JsonFactory());
+        DefaultPrettyPrinter.Indenter indenter =
+                new DefaultIndenter("    ", DefaultIndenter.SYS_LF);
+        DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
+        printer.indentObjectsWith(indenter);
+        printer.indentArraysWith(indenter);
         try {
-            filewriter = new FileWriter(file, true);
-            PrintWriter printer = new PrintWriter(filewriter);
-            printer.write(content);
-            printer.close();
+            mapper.writer(printer).writeValue(jsonFile, object);
         } catch (IOException e) {
             e.printStackTrace();
         }

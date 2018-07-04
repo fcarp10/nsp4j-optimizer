@@ -6,9 +6,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import gui.JsonLink;
 import gui.JsonServer;
+import gurobi.GRBException;
 import jdk.incubator.http.HttpClient;
 import jdk.incubator.http.HttpRequest;
 import jdk.incubator.http.HttpResponse;
+import model.Output;
 import network.Server;
 import org.graphstream.graph.Edge;
 
@@ -26,10 +28,10 @@ import java.util.Map;
 
 public class Client {
 
-    public static void updateResultsToWebApp(Results results) {
+    public static void updateResultsToWebApp(Output output, Results results) throws GRBException {
         if (results != null) {
-            List<JsonServer> jsonServers = getNodeStringsWithResults(results.getServersMap(), results.getFunctionsStringMap());
-            List<JsonLink> jsonLinks = getLinkStringsWithResults(results.getLinksMap());
+            List<JsonServer> jsonServers = getNodeStringsWithResults(output.serversMap(), output.functionsStringMap());
+            List<JsonLink> jsonLinks = getLinkStringsWithResults(output.linksMap());
             try {
                 postJsonNodes(jsonServers);
                 postJsonLinks(jsonLinks);
@@ -41,7 +43,7 @@ public class Client {
     }
 
     private static void sendRequest(HttpRequest request) throws IOException, InterruptedException {
-        HttpResponse<String> response = HttpClient
+        HttpClient
                 .newBuilder()
                 .proxy(ProxySelector.getDefault())
                 .build()
@@ -84,7 +86,7 @@ public class Client {
     }
 
     public static void postMessage(String message) {
-        HttpRequest request = null;
+        HttpRequest request;
         try {
             request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/message"))

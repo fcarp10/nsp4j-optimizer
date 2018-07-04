@@ -6,7 +6,7 @@
 
     <groupId>de.tubs</groupId>
     <artifactId>nfv-optimization</artifactId>
-    <version>0.5</version>
+    <version>0.6</version>
 
     <properties>
         <java.version>9</java.version>

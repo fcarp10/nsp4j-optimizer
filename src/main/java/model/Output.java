@@ -62,25 +62,32 @@ public class Output {
     }
 
     public Results generateResults(double cost) throws GRBException {
-        return new Results(linksMap(), serversMap(), functionsMap(), functionsStringMap(), parameters.getTotalTrafficAux()
-                , trafficOnLinks(), avgPathLength(), Auxiliary.roundDouble(cost, 4), numOfMigrations, numOfReplicas, usedPathsPerDemand());
+
+        List<Double> lu = new ArrayList<>(linksMap().values());
+        List<Double> xu = new ArrayList<>(serversMap().values());
+        List<Integer> numOfFunctionsPerServer = Auxiliary.listsSizes(new ArrayList<>(functionsMap().values()));
+
+        return new Results(lu, xu, numOfFunctionsPerServer, parameters.getTotalTrafficAux()
+                , Auxiliary.roundDouble(trafficOnLinks(), 2), avgPathLength()
+                , Auxiliary.roundDouble(cost, 4), numOfMigrations, numOfReplicas
+                , functions(), functionsPerDemand(), paths(), pathsPerDemand());
     }
 
-    private Map<Edge, Double> linksMap() throws GRBException {
+    public Map<Edge, Double> linksMap() throws GRBException {
         Map<Edge, Double> linkMapResults = new HashMap<>();
         for (int l = 0; l < parameters.getLinks().size(); l++)
             linkMapResults.put(parameters.getLinks().get(l), Math.round(variables.uL[l].get(GRB.DoubleAttr.X) * 10000.0) / 10000.0);
         return linkMapResults;
     }
 
-    private Map<Server, Double> serversMap() throws GRBException {
+    public Map<Server, Double> serversMap() throws GRBException {
         Map<Server, Double> serverMapResults = new HashMap<>();
         for (int x = 0; x < parameters.getServers().size(); x++)
             serverMapResults.put(parameters.getServers().get(x), Math.round(variables.uX[x].get(GRB.DoubleAttr.X) * 10000.0) / 10000.0);
         return serverMapResults;
     }
 
-    public Map<Server, List<Integer>> functionsMap() throws GRBException {
+    private Map<Server, List<Integer>> functionsMap() throws GRBException {
         Map<Server, List<Integer>> functionsMap = new HashMap<>();
         for (int x = 0; x < parameters.getServers().size(); x++) {
             List<Integer> functions = new ArrayList<>();
@@ -106,44 +113,44 @@ public class Output {
         return functionsStringMap;
     }
 
-    private List<String> usedPaths() throws GRBException {
-        List<String> usedPaths = new ArrayList<>();
-        for (int s = 0; s < parameters.getServices().size(); s++)
-            for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                if (variables.tSP[s][p].get(GRB.DoubleAttr.X) == 1)
-                    usedPaths.add("s" + s + " --> " + parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
-        return usedPaths;
-    }
-
-    private List<String> usedPathsPerDemand() throws GRBException {
-        List<String> usedPathsPerDemand = new ArrayList<>();
-        for (int s = 0; s < parameters.getServices().size(); s++)
-            for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    if (variables.tSPD[s][p][d].get(GRB.DoubleAttr.X) == 1)
-                        usedPathsPerDemand.add("s" + s + "-d" + d + " --> " + parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
-        return usedPathsPerDemand;
-    }
-
-    private List<String> usedServers() throws GRBException {
+    private List<String> functions() throws GRBException {
         List<String> usedServers = new ArrayList<>();
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
                 for (int x = 0; x < parameters.getServers().size(); x++)
                     if (variables.fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1)
-                        usedServers.add("s" + s + "-v" + v + " --> " + parameters.getServers().get(x).getId());
+                        usedServers.add("s[" + s + "]-v[" + v + "]: " + parameters.getServers().get(x).getId());
         return usedServers;
     }
 
-    private List<String> usedServersPerDemand() throws GRBException {
+    private List<String> functionsPerDemand() throws GRBException {
         List<String> usedServersPerDemand = new ArrayList<>();
         for (int x = 0; x < parameters.getServers().size(); x++)
             for (int s = 0; s < parameters.getServices().size(); s++)
                 for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
                     for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                         if (variables.fXSVD[x][s][v][d].get(GRB.DoubleAttr.X) == 1)
-                            usedServersPerDemand.add("s" + s + "-v" + v + "-r" + d + " --> " + parameters.getServers().get(x).getId());
+                            usedServersPerDemand.add("s[" + s + "]-v[" + v + "]-d[" + d + "]: " + parameters.getServers().get(x).getId());
         return usedServersPerDemand;
+    }
+
+    private List<String> paths() throws GRBException {
+        List<String> usedPaths = new ArrayList<>();
+        for (int s = 0; s < parameters.getServices().size(); s++)
+            for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+                if (variables.tSP[s][p].get(GRB.DoubleAttr.X) == 1)
+                    usedPaths.add("s[" + s + "]: " + parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
+        return usedPaths;
+    }
+
+    private List<String> pathsPerDemand() throws GRBException {
+        List<String> usedPathsPerDemand = new ArrayList<>();
+        for (int s = 0; s < parameters.getServices().size(); s++)
+            for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                    if (variables.tSPD[s][p][d].get(GRB.DoubleAttr.X) == 1)
+                        usedPathsPerDemand.add("s[" + s + "]-d[" + d + "]: " + parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
+        return usedPathsPerDemand;
     }
 
     private double avgPathLength() throws GRBException {
@@ -157,20 +164,6 @@ public class Output {
                 }
         avgPathLength = avgPathLength / usedPaths;
         return avgPathLength;
-    }
-
-    private List<Integer> functionsPerServer() throws GRBException {
-        List<Integer> fnv = new ArrayList<>();
-        int counter;
-        for (int x = 0; x < parameters.getServers().size(); x++) {
-            counter = 0;
-            for (int s = 0; s < parameters.getServices().size(); s++)
-                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
-                    if (variables.fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
-                        counter++;
-            fnv.add(counter);
-        }
-        return fnv;
     }
 
     private double trafficOnLinks() throws GRBException {

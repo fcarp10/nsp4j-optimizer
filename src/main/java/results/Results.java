@@ -1,20 +1,16 @@
 package results;
 
 
-import network.Server;
-import org.graphstream.graph.Edge;
 import utils.Auxiliary;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Results {
 
-    private transient Map<Edge, Double> linksMap;
-    private transient Map<Server, Double> serversMap;
-    private transient Map<Server, List<Integer>> functionsMap;
-    private transient Map<Server, String> functionsStringMap;
+    private transient List<String> functions;
+    private transient List<String> functionsPerDemand;
+    private transient List<String> paths;
+    private transient List<String> pathsPerDemands;
     private double avgLu;
     private double minLu;
     private double maxLu;
@@ -33,20 +29,12 @@ public class Results {
     private double cost;
     private int numOfMigrations;
     private int numOfReplicas;
-    private List<String> paths;
 
-    public Results(Map<Edge, Double> linksMap, Map<Server, Double> serversMap
-            , Map<Server, List<Integer>> functionsMap, Map<Server, String> functionsStringMap, double totalTraffic
-            , double trafficLinks, double avgPathLength, double cost
-            , int numOfMigrations, int numOfReplicas, List<String> paths) {
-        this.linksMap = linksMap;
-        this.serversMap = serversMap;
-        this.functionsMap = functionsMap;
-        this.functionsStringMap = functionsStringMap;
-        List<Double> lu = new ArrayList<>(linksMap.values());
-        List<Double> xu = new ArrayList<>(serversMap.values());
-        List<List<Integer>> functionsPerServer = new ArrayList<>(functionsMap.values());
-        List<Integer> numOfFunctionsPerServer = Auxiliary.listsSizes(functionsPerServer);
+    public Results(List<Double> lu, List<Double> xu, List<Integer> numOfFunctionsPerServer,
+                   double totalTraffic, double trafficLinks, double avgPathLength, double cost
+            , int numOfMigrations, int numOfReplicas, List<String> functions, List<String> functionsPerDemand
+            , List<String> paths, List<String> pathsPerDemands) {
+
         this.avgLu = Auxiliary.avg(lu);
         this.minLu = Auxiliary.min(lu);
         this.maxLu = Auxiliary.max(lu);
@@ -65,23 +53,10 @@ public class Results {
         this.cost = cost;
         this.numOfMigrations = numOfMigrations;
         this.numOfReplicas = numOfReplicas;
+        this.functions = functions;
+        this.functionsPerDemand = functionsPerDemand;
         this.paths = paths;
-    }
-
-    public Map<Edge, Double> getLinksMap() {
-        return linksMap;
-    }
-
-    public Map<Server, Double> getServersMap() {
-        return serversMap;
-    }
-
-    public Map<Server, List<Integer>> getFunctionsMap() {
-        return functionsMap;
-    }
-
-    public Map<Server, String> getFunctionsStringMap() {
-        return functionsStringMap;
+        this.pathsPerDemands = pathsPerDemands;
     }
 
     public double getAvgLu() {
@@ -156,7 +131,19 @@ public class Results {
         return numOfReplicas;
     }
 
+    public List<String> getFunctions() {
+        return functions;
+    }
+
+    public List<String> getFunctionsPerDemand() {
+        return functionsPerDemand;
+    }
+
     public List<String> getPaths() {
         return paths;
+    }
+
+    public List<String> getPathsPerDemands() {
+        return pathsPerDemands;
     }
 }
