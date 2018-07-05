@@ -9,7 +9,7 @@ public class ResultFiles {
         this.fileName = fileName;
         try {
             writeFile = new WriteFile(factors);
-            writeFile.initializeTextPlainFile("summary_" + fileName);
+            writeFile.initializeTextPlainFile("_summary_" + fileName);
             writeFile.writeTextPlain(String.format("%-7s %-7s %-7s %-7s %-7s %-7s %-7s %-7s " +
                             "%-7s %-7s %-7s %-7s %-7s %-7s %-7s %-7s"
                     , "avg-lu", "max-lu", "min-lu", "std-lu", "avg-su", "max-su", "min-su", "std-su"

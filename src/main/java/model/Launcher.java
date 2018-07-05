@@ -28,14 +28,13 @@ public class Launcher {
     public static void startOptimization(String useCase, String objective) throws GRBException {
         ResultFiles resultFiles = initializeResultFiles();
 
-        if (!useCase.equals("all"))
-            runOptimization(objective, useCase, resultFiles);
-        else {
-            runOptimization(objective, "init", resultFiles);
+        if (useCase.equals("all")) {
+            runOptimization("servers", "init", resultFiles);
             runOptimization(objective, "mgr", resultFiles);
             runOptimization(objective, "rep", resultFiles);
-            runOptimization(objective, "both", resultFiles);
-        }
+            runOptimization(objective, "rep_mgr", resultFiles);
+        } else
+            runOptimization(objective, useCase, resultFiles);
     }
 
     private static GRBLinExpr generateExprForObjectiveFunction(String objective) throws GRBException {
@@ -71,48 +70,33 @@ public class Launcher {
         switch (useCase) {
             case "init":
                 specificConstraints.noParallelPaths();
-                model.setObjectiveFunction(expr);
-                objVal = model.run();
-                output = generateResults(useCase, objVal, resultFiles);
-                if (output == null)
-                    model.finishModel();
-                else
-                    initialOutput = output;
                 break;
             case "mgr":
                 if (initialOutput != null) {
                     specificConstraints.noParallelPaths();
-                    model.setObjectiveFunction(expr);
-                    objVal = model.run();
-                    output = generateResults(useCase, objVal, resultFiles);
-                    if (output != null)
-                        output.calculateNumberOfMigrations(initialOutput);
+                    specificConstraints.reRoutingMigration(initialOutput);
                 }
-                model.finishModel();
                 break;
             case "rep":
-                if (initialOutput != null) {
+                if (initialOutput != null)
                     specificConstraints.setVariablesFromInitialPlacementAsConstraints(initialOutput);
-                    model.setObjectiveFunction(expr);
-                    objVal = model.run();
-                    output = generateResults(useCase, objVal, resultFiles);
-                    if (output != null)
-                        output.calculateNumberOfReplications();
-                }
-                model.finishModel();
                 break;
-            case "both":
-                if (initialOutput != null) {
-                    model.setObjectiveFunction(expr);
-                    objVal = model.run();
-                    output = generateResults(useCase, objVal, resultFiles);
-                    if (output != null) {
-                        output.calculateNumberOfMigrations(initialOutput);
-                        output.calculateNumberOfReplications();
-                    }
-                }
+        }
+        if (useCase.equals("init")) {
+            model.setObjectiveFunction(expr);
+            objVal = model.run();
+            output = generateResults(useCase, objVal, resultFiles);
+            if (output == null)
                 model.finishModel();
-                break;
+            else
+                initialOutput = output;
+        } else {
+            if (initialOutput != null) {
+                model.setObjectiveFunction(expr);
+                objVal = model.run();
+                generateResults(useCase, objVal, resultFiles);
+            }
+            model.finishModel();
         }
     }
 
@@ -128,6 +112,10 @@ public class Launcher {
         Results results = null;
         if (objVal >= 0) {
             output = new Output(model);
+            if (initialOutput != null) {
+                output.calculateNumberOfMigrations(initialOutput);
+                output.calculateNumberOfReplications();
+            }
             results = output.generateResults(objVal);
             resultFiles.printSummary(results);
             resultFiles.print(results, useCase);

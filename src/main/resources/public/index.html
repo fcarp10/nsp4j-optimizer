@@ -50,7 +50,7 @@
             <hr>
             <h5>Objective Function (min.)</h5>
             <select type="text" id="obj">
-                <option type="text" value="servers"># of used servers</option>
+                <option type="text" value="servers">number of used servers</option>
                 <option type="text" value="costs">utilization costs</option>
                 <option type="text" value="utilization">utilization</option>
             </select>
@@ -58,10 +58,10 @@
             <h5>Model</h5>
             <select type="text" id="opt">
                 <option type="text" value="init">initial placement</option>
-                <option type="text" value="mgr">only migration</option>
-                <option type="text" value="rep">only replication</option>
-                <option type="text" value="both">migr. & rep.</option>
-                <option type="text" value="all">all</option>
+                <option type="text" value="mgr">migration</option>
+                <option type="text" value="rep">replication</option>
+                <option type="text" value="rep_mgr">replication & migration</option>
+                <option type="text" value="all">all (single execution)</option>
             </select>
             <br><br>
             <button class="button button-submit" id="run-button" onClick="startOpt()">Run</button>

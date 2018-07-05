@@ -68,7 +68,7 @@ public class Output {
         List<Integer> numOfFunctionsPerServer = Auxiliary.listsSizes(new ArrayList<>(functionsMap().values()));
 
         return new Results(lu, xu, numOfFunctionsPerServer, parameters.getTotalTrafficAux()
-                , Auxiliary.roundDouble(trafficOnLinks(), 2), avgPathLength()
+                , Auxiliary.roundDouble(trafficOnLinks(), 2), Auxiliary.roundDouble(avgPathLength(), 2)
                 , Auxiliary.roundDouble(cost, 4), numOfMigrations, numOfReplicas
                 , functions(), functionsPerDemand(), paths(), pathsPerDemand());
     }

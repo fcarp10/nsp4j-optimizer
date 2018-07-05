@@ -176,15 +176,15 @@ public class GeneralConstraints {
                         for (int n = 0; n < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++) {
                             GRBLinExpr expr = new GRBLinExpr();
                             GRBLinExpr expr2 = new GRBLinExpr();
-                            Node currentNode = parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n);
-                            for (int pointer = -1; pointer < n; pointer++) {
-                                Node pastNode = parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(pointer + 1);
+                            Node nodeN = parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n);
+                            for (int m = 0; m <= n; m++) {
+                                Node nodeM = parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(m);
                                 for (int x = 0; x < parameters.getServers().size(); x++)
-                                    if (parameters.getServers().get(x).getNodeParent().equals(pastNode))
+                                    if (parameters.getServers().get(x).getNodeParent().equals(nodeM))
                                         expr.addTerm(1.0, variables.fXSVD[x][s][v - 1][d]);
                             }
                             for (int x = 0; x < parameters.getServers().size(); x++)
-                                if (parameters.getServers().get(x).getNodeParent().equals(currentNode))
+                                if (parameters.getServers().get(x).getNodeParent().equals(nodeN))
                                     expr.addTerm(-1.0, variables.fXSVD[x][s][v][d]);
 
                             expr2.addConstant(-1);

@@ -21,14 +21,14 @@ public class WriteFile {
 
     public WriteFile(String folderName) {
         SimpleDateFormat MY_FORMAT = new SimpleDateFormat(
-                "dd-MM-yy--HH-mm", Locale.getDefault());
+                "dd-MM-yy_HH-mm_", Locale.getDefault());
         Date date = new Date();
         String path = WriteFile.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         path = path.replaceAll("%20", " ");
         File parentDirectory = new File(path + "/../results");
         if (!parentDirectory.exists())
             parentDirectory.mkdir();
-        folder = path + "/../results/" + MY_FORMAT.format(date) + "-" + folderName;
+        folder = path + "/../results/" + MY_FORMAT.format(date) + "W" + folderName;
         new File(folder).mkdir();
     }
 
