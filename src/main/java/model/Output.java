@@ -70,7 +70,8 @@ public class Output {
         return new Results(lu, xu, numOfFunctionsPerServer, parameters.getTotalTrafficAux()
                 , Auxiliary.roundDouble(trafficOnLinks(), 2), Auxiliary.roundDouble(avgPathLength(), 2)
                 , Auxiliary.roundDouble(cost, 4), numOfMigrations, numOfReplicas
-                , functions(), functionsPerDemand(), paths(), pathsPerDemand());
+                , functions(), functionsPerDemand(), paths(), pathsPerDemand()
+                , reRoutedTraffic());
     }
 
     public Map<Edge, Double> linksMap() throws GRBException {
@@ -94,7 +95,7 @@ public class Output {
             for (int s = 0; s < parameters.getServices().size(); s++)
                 for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
                     if (variables.fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
-                        functions.add(parameters.getServices().get(s).getFunctions().get(v).getId());
+                        functions.add(parameters.getServices().get(s).getFunctions().get(v).getType());
             functionsMap.put(parameters.getServers().get(x), functions);
         }
         return functionsMap;
@@ -171,6 +172,17 @@ public class Output {
         for (int l = 0; l < parameters.getLinks().size(); l++)
             trafficOnLinks += variables.uL[l].get(GRB.DoubleAttr.X) * (double) parameters.getLinks().get(l).getAttribute("capacity");
         return trafficOnLinks;
+    }
+
+    public List<String> reRoutedTraffic() throws GRBException {
+        List<String> reroutedTraffic = new ArrayList<>();
+
+        for (int s = 0; s < parameters.getServices().size(); s++)
+            for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+                for (int p = 0; p < parameters.getPaths().size(); p++)
+                    if (variables.mPSV[p][s][v].get(GRB.DoubleAttr.X) > 0.0)
+                        reroutedTraffic.add("s[" + s + "]-v[" + v + "]-p[" + parameters.getPaths().get(p).getNodePath() + "]: " + variables.mPSV[p][s][v].get(GRB.DoubleAttr.X));
+        return reroutedTraffic;
     }
 
     public Variables getVariables() {

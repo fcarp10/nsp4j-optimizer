@@ -41,15 +41,37 @@ public class SpecificConstraints {
     public void reRoutingMigration(Output initialOutput) throws GRBException {
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
-                for (int x = 0; x < parameters.getServers().size(); x++)
-                    if (initialOutput.getVariables().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1)
-                        for (int y = 0; y < parameters.getServers().size(); y++)
-                            if (x != y) {
-                                GRBLinExpr expr = new GRBLinExpr();
-                                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                                    expr.addTerm(parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-                                            * parameters.getServices().get(s).getFunctions().get(v).getLoad(), variables.fXSV[y][s][v]);
-                                model.getGrbModel().addConstr(variables.mXYSV[x][y][s][v], GRB.EQUAL, expr, "reRoutingMigration");
-                            }
+                for (int p = 0; p < parameters.getPaths().size(); p++)
+                    for (int x = 0; x < parameters.getServers().size(); x++)
+                        for (int y = 0; y < parameters.getServers().size(); y++) {
+                            if (x == y)
+                                continue;
+                            if (!parameters.getPaths().get(p).getNodePath().get(0).equals(parameters.getServers().get(x).getNodeParent())
+                                    | !parameters.getPaths().get(p).getNodePath().get(parameters.getPaths().get(p).getNodePath().size() - 1).equals(parameters.getServers().get(y).getNodeParent()))
+                                continue;
+                            GRBLinExpr expr = new GRBLinExpr();
+                            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                                expr.addTerm(parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
+                                        * parameters.getServices().get(s).getFunctions().get(v).getLoad()
+                                        * initialOutput.getVariables().fXSV[x][s][v].get(GRB.DoubleAttr.X), variables.fXSV[y][s][v]);
+                            model.getGrbModel().addConstr(variables.mPSV[p][s][v], GRB.LESS_EQUAL, expr, "reRoutingMigration");
+                        }
+
+        for (int s = 0; s < parameters.getServices().size(); s++)
+            for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+                for (int x = 0; x < parameters.getServers().size(); x++) {
+                    double trafficToMigrate = 0;
+                    for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                        trafficToMigrate += parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
+                                * parameters.getServices().get(s).getFunctions().get(v).getLoad()
+                                * initialOutput.getVariables().fXSV[x][s][v].get(GRB.DoubleAttr.X);
+                    GRBLinExpr expr = new GRBLinExpr();
+                    for (int p = 0; p < parameters.getPaths().size(); p++)
+                        expr.addTerm(1.0, variables.mPSV[p][s][v]);
+                    GRBLinExpr expr2 = new GRBLinExpr();
+                    expr2.addConstant(trafficToMigrate);
+                    expr2.addTerm(-trafficToMigrate, variables.fXSV[x][s][v]);
+                    model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "reRoutingMigration");
+                }
     }
 }

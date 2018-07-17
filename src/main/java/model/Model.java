@@ -26,8 +26,11 @@ public class Model {
         }
     }
 
-    public void setObjectiveFunction(GRBLinExpr expr) throws GRBException {
-        grbModel.setObjective(expr, GRB.MINIMIZE);
+    public void setObjectiveFunction(GRBLinExpr expr, boolean isMaximization) throws GRBException {
+        if (!isMaximization)
+            grbModel.setObjective(expr, GRB.MINIMIZE);
+        else
+            grbModel.setObjective(expr, GRB.MAXIMIZE);
     }
 
     public GRBLinExpr usedServersExpr() {

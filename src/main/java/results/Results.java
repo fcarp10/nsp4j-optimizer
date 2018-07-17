@@ -29,11 +29,13 @@ public class Results {
     private double cost;
     private int numOfMigrations;
     private int numOfReplicas;
+    private transient List<String> reRoutedTraffic;
 
     public Results(List<Double> lu, List<Double> xu, List<Integer> numOfFunctionsPerServer,
                    double totalTraffic, double trafficLinks, double avgPathLength, double cost
             , int numOfMigrations, int numOfReplicas, List<String> functions, List<String> functionsPerDemand
-            , List<String> paths, List<String> pathsPerDemands) {
+            , List<String> paths, List<String> pathsPerDemands
+            , List<String> reRoutedTraffic) {
 
         this.avgLu = Auxiliary.avg(lu);
         this.minLu = Auxiliary.min(lu);
@@ -57,6 +59,7 @@ public class Results {
         this.functionsPerDemand = functionsPerDemand;
         this.paths = paths;
         this.pathsPerDemands = pathsPerDemands;
+        this.reRoutedTraffic = reRoutedTraffic;
     }
 
     public double getAvgLu() {
@@ -145,5 +148,9 @@ public class Results {
 
     public List<String> getPathsPerDemands() {
         return pathsPerDemands;
+    }
+
+    public List<String> getReRoutedTraffic() {
+        return reRoutedTraffic;
     }
 }

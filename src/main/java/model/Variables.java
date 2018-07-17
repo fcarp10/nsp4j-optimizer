@@ -24,7 +24,7 @@ public class Variables {
     public GRBVar[] ukX;
     public GRBVar[] uL;
     public GRBVar[] uX;
-    public GRBVar[][][][] mXYSV;
+    public GRBVar[][][] mPSV;
 
     public Variables() {
         this.readLinearCostFunctions();
@@ -76,12 +76,11 @@ public class Variables {
             for (int x = 0; x < param.getServers().size(); x++)
                 ukX[x] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "ukX[" + x + "]");
 
-            mXYSV = new GRBVar[param.getServers().size()][param.getServers().size()][param.getServices().size()][param.getServiceLengthAux()];
+            mPSV = new GRBVar[param.getPaths().size()][param.getServices().size()][param.getServiceLengthAux()];
             for (int s = 0; s < param.getServices().size(); s++)
                 for (int v = 0; v < param.getServices().get(s).getFunctions().size(); v++)
-                    for (int x = 0; x < param.getServers().size(); x++)
-                        for (int y = 0; y < param.getServers().size(); y++)
-                            mXYSV[x][y][s][v] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "mXYSV[" + x + "][" + y + "][" + s + "][" + v + "]");
+                    for (int p = 0; p < param.getPaths().size(); p++)
+                        mPSV[p][s][v] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "mPSV[" + p + "][" + s + "][" + v + "]");
 
             grbModel.update();
         } catch (Exception e) {

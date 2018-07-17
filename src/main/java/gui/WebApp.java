@@ -81,7 +81,7 @@ public class WebApp {
             String runMessage = request.body();
             String[] message = runMessage.split("-");
             new Launcher();
-            Launcher.startOptimization(message[0], message[1]);
+            Launcher.startOptimization(message[0], message[2], message[1]);
             return "Running...";
         });
 
