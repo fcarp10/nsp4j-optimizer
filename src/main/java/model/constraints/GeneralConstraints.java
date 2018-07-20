@@ -29,7 +29,7 @@ public class GeneralConstraints {
                     if (!parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).contains(parameters.getLinks().get(l)))
                         continue;
                     for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        expr.addTerm(parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
+                        expr.addTerm((double) parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
                                 / (double) parameters.getLinks().get(l).getAttribute("capacity"), variables.tSPD[s][p][d]);
                 }
             if (isMigration)
