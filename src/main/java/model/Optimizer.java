@@ -21,8 +21,9 @@ public class Optimizer {
     private static Output initialOutput;
 
     public Optimizer() {
-
-        String path  = FilenameUtils.getPath(getClass().getClassLoader().getResource(Launcher.configFile).getFile());
+        String path = FilenameUtils.getPath(getClass().getClassLoader().getResource(Launcher.configFile).getFile());
+        if (System.getProperty("os.name").equals("Mac OS X"))
+            path = "/" + path;
         parameters = ConfigFiles.readParameters(path, Launcher.configFile);
         parameters.initialize(path);
         new WebServer().initializeResults();
