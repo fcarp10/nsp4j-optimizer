@@ -3,7 +3,7 @@ package model;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import elements.LinearCostFunctions;
+import utils.LinearCostFunctions;
 import filemanager.Parameters;
 import gurobi.GRB;
 import gurobi.GRBModel;

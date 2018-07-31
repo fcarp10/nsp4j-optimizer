@@ -1,10 +1,10 @@
-package launcher;
+package app;
 
-import gui.WebApp;
+import gui.WebServer;
 
 import static spark.Spark.*;
 
-public class App {
+public class Launcher {
 
     public static String configFile;
 
@@ -15,6 +15,6 @@ public class App {
         port(8080);
         staticFiles.location("/public");
         init();
-        new WebApp();
+        new WebServer();
     }
 }

@@ -170,7 +170,7 @@ public class Output {
     private double trafficOnLinks() throws GRBException {
         double trafficOnLinks = 0;
         for (int l = 0; l < parameters.getLinks().size(); l++)
-            trafficOnLinks += variables.uL[l].get(GRB.DoubleAttr.X) * (double) parameters.getLinks().get(l).getAttribute("capacity");
+            trafficOnLinks += variables.uL[l].get(GRB.DoubleAttr.X) * (int) parameters.getLinks().get(l).getAttribute("capacity");
         return trafficOnLinks;
     }
 

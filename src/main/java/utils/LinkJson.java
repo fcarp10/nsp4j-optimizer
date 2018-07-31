@@ -1,10 +1,10 @@
-package gui;
+package utils;
 
-public class JsonLink {
+public class LinkJson {
 
     private Data data;
 
-    public JsonLink(String id, String source, String target, String label, String favecolor) {
+    public LinkJson(String id, String source, String target, String label, String favecolor) {
         this.data = new Data(id, source, target, label, favecolor);
     }
 

@@ -1,16 +1,16 @@
 package results;
 
-public class ResultFiles {
+public class Files {
 
-    public WriteFile writeFile;
+    public Writer writer;
     private String fileName;
 
-    public ResultFiles(String fileName, String factors) {
+    public Files(String fileName, String factors) {
         this.fileName = fileName;
         try {
-            writeFile = new WriteFile(factors);
-            writeFile.initializeTextPlainFile("_summary_" + fileName);
-            writeFile.writeTextPlain(String.format("%-7s %-7s %-7s %-7s %-7s %-7s %-7s %-7s " +
+            writer = new Writer(factors);
+            writer.initializeTextPlainFile("_summary_" + fileName);
+            writer.writeTextPlain(String.format("%-7s %-7s %-7s %-7s %-7s %-7s %-7s %-7s " +
                             "%-7s %-7s %-7s %-7s %-7s %-7s %-7s %-7s"
                     , "avg-lu", "max-lu", "min-lu", "std-lu", "avg-su", "max-su", "min-su", "std-su"
                     , "avg-f", "max-f", "min-f", "std-f", "avg-p", "mgr", "rep", "cost"));
@@ -19,7 +19,7 @@ public class ResultFiles {
     }
 
     public void printSummary(Results r) {
-        writeFile.writeTextPlain(String.format("\n%-7s %-7s %-7s %-7s %-7s %-7s %-7s %-7s " +
+        writer.writeTextPlain(String.format("\n%-7s %-7s %-7s %-7s %-7s %-7s %-7s %-7s " +
                         "%-7s %-7s %-7s %-7s %-7s %-7s %-7s %-7s",
                 r.getAvgLu(), r.getMinLu(), r.getMaxLu(), r.getVrcLu(),
                 r.getAvgXu(), r.getMinXu(), r.getMaxXu(), r.getVrcXu(),
@@ -28,6 +28,6 @@ public class ResultFiles {
     }
 
     public void print(Results results, String useCase) {
-        writeFile.createJsonForResults(fileName + "_" + useCase, results);
+        writer.createJsonForResults(fileName + "_" + useCase, results);
     }
 }

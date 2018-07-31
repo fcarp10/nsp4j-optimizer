@@ -1,46 +1,49 @@
 package model;
 
+import app.Launcher;
 import filemanager.ConfigFiles;
 import filemanager.Parameters;
-import gui.WebApp;
+import gui.WebClient;
+import gui.WebServer;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
-import launcher.App;
 import model.constraints.GeneralConstraints;
 import model.constraints.SpecificConstraints;
-import results.Client;
-import results.ResultFiles;
+import org.apache.commons.io.FilenameUtils;
+import results.Files;
 import results.Results;
 
 
-public class Launcher {
+public class Optimizer {
 
     private static Parameters parameters;
     private static Model model;
     private static Output initialOutput;
 
-    public Launcher() {
-        parameters = ConfigFiles.readParameters(App.configFile);
-        parameters.initialize();
-        new WebApp().initializeResults();
+    public Optimizer() {
+
+        String path  = FilenameUtils.getPath(getClass().getClassLoader().getResource(Launcher.configFile).getFile());
+        parameters = ConfigFiles.readParameters(path, Launcher.configFile);
+        parameters.initialize(path);
+        new WebServer().initializeResults();
     }
 
-    public static void startOptimization(String useCase, String objectiveFunction, String objective) throws GRBException {
-        ResultFiles resultFiles = initializeResultFiles();
+    public static void start(String useCase, String objectiveFunction, String objective) throws GRBException {
+        Files files = initializeResultFiles();
         boolean isMaximization = false;
         if (objective.equals("max"))
             isMaximization = true;
 
         if (useCase.equals("all")) {
-            runOptimization("servers", "init", isMaximization, resultFiles);
-            runOptimization("mgr", objectiveFunction, isMaximization, resultFiles);
-            runOptimization("rep", objectiveFunction, isMaximization, resultFiles);
-            runOptimization("rep_mgr", objectiveFunction, isMaximization, resultFiles);
+            run("servers", "init", isMaximization, files);
+            run("mgr", objectiveFunction, isMaximization, files);
+            run("rep", objectiveFunction, isMaximization, files);
+            run("rep_mgr", objectiveFunction, isMaximization, files);
         } else
-            runOptimization(useCase, objectiveFunction, isMaximization, resultFiles);
+            run(useCase, objectiveFunction, isMaximization, files);
     }
 
-    private static void runOptimization(String useCase, String objectiveFunction, boolean isMaximization, ResultFiles resultFiles) throws GRBException {
+    private static void run(String useCase, String objectiveFunction, boolean isMaximization, Files files) throws GRBException {
         double objVal;
         Output output;
         model = new Model(parameters);
@@ -76,7 +79,7 @@ public class Launcher {
         if (useCase.equals("init")) {
             model.setObjectiveFunction(expr, isMaximization);
             objVal = model.run();
-            output = generateResults(useCase, objVal, resultFiles);
+            output = generateResults(useCase, objVal, files);
             if (output == null)
                 model.finishModel();
             else
@@ -85,7 +88,7 @@ public class Launcher {
             if (initialOutput != null) {
                 model.setObjectiveFunction(expr, isMaximization);
                 objVal = model.run();
-                generateResults(useCase, objVal, resultFiles);
+                generateResults(useCase, objVal, files);
             }
             model.finishModel();
         }
@@ -124,14 +127,14 @@ public class Launcher {
         generalConstraints.functionSequenceOrder();
     }
 
-    private static ResultFiles initializeResultFiles() {
+    private static Files initializeResultFiles() {
         StringBuilder title = new StringBuilder();
         for (Double d : parameters.getWeights())
             title.append("-").append(d);
-        return new ResultFiles(parameters.getNetworkFile(), title.toString());
+        return new Files(parameters.getNetworkFile(), title.toString());
     }
 
-    private static Output generateResults(String useCase, double objVal, ResultFiles resultFiles) throws GRBException {
+    private static Output generateResults(String useCase, double objVal, Files files) throws GRBException {
         Output output = null;
         Results results = null;
         if (objVal >= 0) {
@@ -141,16 +144,16 @@ public class Launcher {
                 output.calculateNumberOfReplications();
             }
             results = output.generateResults(objVal);
-            resultFiles.printSummary(results);
-            resultFiles.print(results, useCase);
+            files.printSummary(results);
+            files.print(results, useCase);
         }
         if (objVal >= 0) {
-            Client.updateResultsToWebApp(output, results);
-            Client.postMessage("Solution found");
+            WebClient.updateResultsToWebApp(output, results);
+            WebClient.postMessage("Solution found");
         } else if (output == null)
-            Client.postMessage("Please, run initial placement first");
+            WebClient.postMessage("Please, run initial placement first");
         else
-            Client.postMessage("Model is not feasible");
+            WebClient.postMessage("Model is not feasible");
         return output;
     }
 }

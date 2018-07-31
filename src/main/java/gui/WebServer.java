@@ -3,8 +3,10 @@ package gui;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import utils.LinkJson;
+import utils.ServerJson;
 import filemanager.GraphManager;
-import model.Launcher;
+import model.Optimizer;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import results.Results;
@@ -18,14 +20,14 @@ import java.util.Map;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
-public class WebApp {
+public class WebServer {
 
-    private static Map<String, JsonServer> jsonNodes;
-    private static Map<String, JsonLink> jsonLinks;
+    private static Map<String, ServerJson> jsonNodes;
+    private static Map<String, LinkJson> jsonLinks;
     private static Results results;
     private static String message;
 
-    public WebApp() {
+    public WebServer() {
         jsonNodes = new HashMap<>();
         jsonLinks = new HashMap<>();
         interfaces();
@@ -36,32 +38,32 @@ public class WebApp {
         jsonLinks = new HashMap<>();
         List<Node> nodes = new ArrayList<>(GraphManager.getGraph().getNodeSet());
         for (Node node : nodes)
-            jsonNodes.put(node.getId(), new JsonServer(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#BDBDBD", node.getId()));
+            jsonNodes.put(node.getId(), new ServerJson(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#BDBDBD", node.getId()));
 
         List<Edge> edges = new ArrayList<>(GraphManager.getGraph().getEdgeSet());
         for (Edge edge : edges)
-            jsonLinks.put(edge.getId(), new JsonLink(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));
+            jsonLinks.put(edge.getId(), new LinkJson(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));
     }
 
     private static void interfaces() {
         post("/node", (request, response) -> {
             response.type("application/json");
-            Type listType = new TypeToken<ArrayList<JsonServer>>() {
+            Type listType = new TypeToken<ArrayList<ServerJson>>() {
             }.getType();
-            List<JsonServer> rJsonServers = new Gson().fromJson(request.body(), listType);
-            for (JsonServer jsonServer : rJsonServers)
-                jsonNodes.put(jsonServer.getData().getId(), jsonServer);
+            List<ServerJson> rServerJsons = new Gson().fromJson(request.body(), listType);
+            for (ServerJson serverJson : rServerJsons)
+                jsonNodes.put(serverJson.getData().getId(), serverJson);
             response.status(201);
             return 201;
         });
 
         post("/link", (request, response) -> {
             response.type("application/json");
-            Type listType = new TypeToken<ArrayList<JsonLink>>() {
+            Type listType = new TypeToken<ArrayList<LinkJson>>() {
             }.getType();
-            List<JsonLink> rJsonLinks = new Gson().fromJson(request.body(), listType);
-            for (JsonLink jsonLink : rJsonLinks)
-                jsonLinks.replace(jsonLink.getData().getId(), jsonLink);
+            List<LinkJson> rLinkJsons = new Gson().fromJson(request.body(), listType);
+            for (LinkJson linkJson : rLinkJsons)
+                jsonLinks.replace(linkJson.getData().getId(), linkJson);
             response.status(201);
             return 201;
         });
@@ -80,8 +82,8 @@ public class WebApp {
         post("/run", (request, response) -> {
             String runMessage = request.body();
             String[] message = runMessage.split("-");
-            new Launcher();
-            Launcher.startOptimization(message[0], message[2], message[1]);
+            new Optimizer();
+            Optimizer.start(message[0], message[2], message[1]);
             return "Running...";
         });
 

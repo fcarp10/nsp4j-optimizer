@@ -6,24 +6,23 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class WriteFile {
+public class Writer {
 
     private File textPlainFile;
-    private FileWriter filewriter;
+    private java.io.FileWriter filewriter;
     private String folder;
 
-    public WriteFile(String folderName) {
+    public Writer(String folderName) {
         SimpleDateFormat MY_FORMAT = new SimpleDateFormat(
                 "dd-MM-yy_HH-mm_", Locale.getDefault());
         Date date = new Date();
-        String path = WriteFile.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String path = Writer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         path = path.replaceAll("%20", " ");
         File parentDirectory = new File(path + "/../results");
         if (!parentDirectory.exists())
@@ -34,12 +33,12 @@ public class WriteFile {
 
     public void initializeTextPlainFile(String fileName) throws IOException {
         textPlainFile = new File(folder + "/" + fileName + ".txt");
-        filewriter = new FileWriter(textPlainFile, false);
+        filewriter = new java.io.FileWriter(textPlainFile, false);
     }
 
     public void writeTextPlain(String content) {
         try {
-            filewriter = new FileWriter(textPlainFile, true);
+            filewriter = new java.io.FileWriter(textPlainFile, true);
             PrintWriter printer = new PrintWriter(filewriter);
             printer.write(content);
             printer.close();

@@ -1,17 +1,17 @@
-package gui;
+package utils;
 
 
-public class JsonServer {
+public class ServerJson {
 
     private Position position;
     private Data data;
 
-    public JsonServer(String id, int x, int y, String favecolor, String label) {
+    public ServerJson(String id, int x, int y, String favecolor, String label) {
         position = new Position(x, y);
         data = new Data(id, favecolor, label);
     }
 
-    public JsonServer(String id, int x, int y, String favecolor, String label, boolean isServer) {
+    public ServerJson(String id, int x, int y, String favecolor, String label, boolean isServer) {
         int xS, yS;
         if (Integer.valueOf(id.split("-")[1]) % 2 == 0) {
             xS = x - 10;

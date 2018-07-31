@@ -1,11 +1,11 @@
-package results;
+package gui;
 
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import gui.JsonLink;
-import gui.JsonServer;
+import utils.LinkJson;
+import utils.ServerJson;
 import gurobi.GRBException;
 import jdk.incubator.http.HttpClient;
 import jdk.incubator.http.HttpRequest;
@@ -13,6 +13,7 @@ import jdk.incubator.http.HttpResponse;
 import model.Output;
 import network.Server;
 import org.graphstream.graph.Edge;
+import results.Results;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -26,15 +27,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Client {
+public class WebClient {
 
     public static void updateResultsToWebApp(Output output, Results results) throws GRBException {
         if (results != null) {
-            List<JsonServer> jsonServers = getNodeStringsWithResults(output.serversMap(), output.functionsStringMap());
-            List<JsonLink> jsonLinks = getLinkStringsWithResults(output.linksMap());
+            List<ServerJson> serverJsons = getNodeStringsWithResults(output.serversMap(), output.functionsStringMap());
+            List<LinkJson> linkJsons = getLinkStringsWithResults(output.linksMap());
             try {
-                postJsonNodes(jsonServers);
-                postJsonLinks(jsonLinks);
+                postJsonNodes(serverJsons);
+                postJsonLinks(linkJsons);
                 postResults(results);
             } catch (URISyntaxException | InterruptedException | IOException e) {
                 e.printStackTrace();
@@ -50,26 +51,26 @@ public class Client {
                 .send(request, HttpResponse.BodyHandler.asString());
     }
 
-    private static void postJsonNodes(List<JsonServer> jsonServers) throws URISyntaxException, IOException, InterruptedException {
-        Type listType = new TypeToken<ArrayList<JsonServer>>() {
+    private static void postJsonNodes(List<ServerJson> serverJsons) throws URISyntaxException, IOException, InterruptedException {
+        Type listType = new TypeToken<ArrayList<ServerJson>>() {
         }.getType();
-        String stringJsonNodes = new Gson().toJson(jsonServers, listType);
+        String stringJsonNodes = new Gson().toJson(serverJsons, listType);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/node"))
                 .headers("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublisher.fromString(stringJsonNodes))
+                .POST(HttpRequest.BodyProcessor.fromString(stringJsonNodes))
                 .build();
         sendRequest(request);
     }
 
-    private static void postJsonLinks(List<JsonLink> jsonLinks) throws URISyntaxException, IOException, InterruptedException {
-        Type listType = new TypeToken<ArrayList<JsonLink>>() {
+    private static void postJsonLinks(List<LinkJson> linkJsons) throws URISyntaxException, IOException, InterruptedException {
+        Type listType = new TypeToken<ArrayList<LinkJson>>() {
         }.getType();
-        String stringJsonLinks = new Gson().toJson(jsonLinks, listType);
+        String stringJsonLinks = new Gson().toJson(linkJsons, listType);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/link"))
                 .headers("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublisher.fromString(stringJsonLinks))
+                .POST(HttpRequest.BodyProcessor.fromString(stringJsonLinks))
                 .build();
         sendRequest(request);
     }
@@ -80,7 +81,7 @@ public class Client {
         String stringResults = gson.toJson(results);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/results"))
-                .POST(HttpRequest.BodyPublisher.fromString(stringResults))
+                .POST(HttpRequest.BodyProcessor.fromString(stringResults))
                 .build();
         sendRequest(request);
     }
@@ -90,7 +91,7 @@ public class Client {
         try {
             request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/message"))
-                    .POST(HttpRequest.BodyPublisher.fromString(message))
+                    .POST(HttpRequest.BodyProcessor.fromString(message))
                     .build();
             sendRequest(request);
         } catch (URISyntaxException | InterruptedException | IOException e) {
@@ -98,8 +99,8 @@ public class Client {
         }
     }
 
-    private static List<JsonServer> getNodeStringsWithResults(Map<Server, Double> servers, Map<Server, String> functions) {
-        List<JsonServer> jsonServers = new ArrayList<>();
+    private static List<ServerJson> getNodeStringsWithResults(Map<Server, Double> servers, Map<Server, String> functions) {
+        List<ServerJson> serverJsons = new ArrayList<>();
         Iterator entries = servers.entrySet().iterator();
         StringBuilder functionsString;
         DecimalFormat df = new DecimalFormat("#.##");
@@ -112,15 +113,15 @@ public class Client {
                 functionsString.append(String.valueOf(df.format(value))).append("\n").append(functions.get(server));
             else if (value != 0 && functions.get(server).length() >= 40)
                 functionsString.append(String.valueOf(df.format(value)));
-            jsonServers.add(new JsonServer(server.getId(), server.getNodeParent().getAttribute("x")
+            serverJsons.add(new ServerJson(server.getId(), server.getNodeParent().getAttribute("x")
                     , server.getNodeParent().getAttribute("y")
                     , "#" + getColor(value), functionsString.toString(), true));
         }
-        return jsonServers;
+        return serverJsons;
     }
 
-    private static List<JsonLink> getLinkStringsWithResults(Map<Edge, Double> links) {
-        List<JsonLink> jsonLinks = new ArrayList<>();
+    private static List<LinkJson> getLinkStringsWithResults(Map<Edge, Double> links) {
+        List<LinkJson> linkJsons = new ArrayList<>();
         Iterator entries = links.entrySet().iterator();
         DecimalFormat df = new DecimalFormat("#.##");
 
@@ -131,11 +132,11 @@ public class Client {
             String label = "";
             if (value != 0)
                 label = df.format(value);
-            jsonLinks.add(new JsonLink(edge.getId(), edge.getSourceNode().getId()
+            linkJsons.add(new LinkJson(edge.getId(), edge.getSourceNode().getId()
                     , edge.getTargetNode().getId(), label, "#" + getColor(value)));
         }
 
-        return jsonLinks;
+        return linkJsons;
     }
 
     private static String getColor(Double utilization) {
