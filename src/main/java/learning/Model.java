@@ -13,27 +13,17 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionAllocator {
+public class Model {
 
     private Agent agent;
-    private List<Integer> serversCapacity;
-    private List<Integer> functionsDemands;
     private final double THRESHOLD = 0.9;
     private INDArray lastIndArray;
     private boolean[] lastOutput;
 
-    public FunctionAllocator(List<Integer> functionsDemands, List<Integer> serversCapacity) {
-
-        this.functionsDemands = functionsDemands;
-        this.serversCapacity = serversCapacity;
-        int inputLength = 2 + functionsDemands.size() + serversCapacity.size();
-        int outputLength = serversCapacity.size() * functionsDemands.size();
-        lastIndArray = null;
-        lastOutput = null;
-
+    public Model(int inputLength) {
+        int outputLength = 1;
         int hiddenLayerOut = 150;
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(123)
@@ -58,15 +48,14 @@ public class FunctionAllocator {
                 .backprop(true)
                 .build();
 
-        agent = new Agent(conf, 100000, .99f, 1024, 500, 1024, inputLength, outputLength);
+        agent = new Agent(conf, 100000, .99f, 1024, 500, 1024, inputLength);
 
     }
 
-    public boolean learn(List<Integer> input) {
+    public boolean learn(int[] input, int[] environment, double maxReward) {
 
-        INDArray inputIndArray = createINDArray(input);
-        double maxReward = calculateMaxReward();
-        boolean[] output = agent.getOutput(inputIndArray, 1, functionsDemands.size());
+        INDArray inputIndArray = Nd4j.create(input);
+        boolean[] output = agent.getAction(inputIndArray, 1);
         double reward = calculateReward(output);
         boolean optimalSolution = false;
 //        if (reward >= maxReward * THRESHOLD) {
@@ -79,55 +68,29 @@ public class FunctionAllocator {
         return optimalSolution;
     }
 
-    public boolean[] reason(List<Integer> input, double epsilon) {
-        boolean[] output = agent.getOutput(createINDArray(input), epsilon, functionsDemands.size());
+    public boolean[] reason(int[] input, double epsilon) {
+        boolean[] output = agent.getAction(Nd4j.create(input), epsilon);
 
         return output;
     }
 
-    private INDArray createINDArray(List<Integer> input) {
-        float convertedInput[] = new float[input.size()];
-        for (int i = 0; i < input.size(); i++)
-            convertedInput[i] = input.get(i);
-        return Nd4j.create(convertedInput);
-    }
-
     private double calculateReward(boolean[] output) {
         double reward = 0;
-        List<Double> tmpUtilization = new ArrayList<>();
-        for (Integer ignored : serversCapacity)
-            tmpUtilization.add(0.0);
-
-        for (int x = 0; x < serversCapacity.size(); x++)
-            for (int v = 0; v < functionsDemands.size(); v++)
-                if (output[(x * functionsDemands.size()) + v])
-                    tmpUtilization.set(x, tmpUtilization.get(x) + (double) functionsDemands.get(v) / (double) serversCapacity.get(x));
-
-        for (Double aTmpUtilization : tmpUtilization)
-            reward += Math.pow(aTmpUtilization, 2);
-
-        reward = serversCapacity.size() - reward;
+//        List<Double> tmpUtilization = new ArrayList<>();
+//        for (Integer ignored : serversCapacity)
+//            tmpUtilization.add(0.0);
+//
+//        for (int x = 0; x < serversCapacity.size(); x++)
+//            for (int v = 0; v < functionsDemands.size(); v++)
+//                if (output[(x * functionsDemands.size()) + v])
+//                    tmpUtilization.set(x, tmpUtilization.get(x) + (double) functionsDemands.get(v) / (double) serversCapacity.get(x));
+//
+//        for (Double aTmpUtilization : tmpUtilization)
+//            reward += Math.pow(aTmpUtilization, 2);
+//
+//        reward = serversCapacity.size() - reward;
 
         return reward;
-    }
-
-    private double calculateMaxReward() {
-        double maxReward = 0;
-        List<Double> tmpUtilization = new ArrayList<>();
-        for (Integer ignored : serversCapacity)
-            tmpUtilization.add(0.0);
-
-        for (Integer functionDemand : functionsDemands) {
-            int x = findIndexMinValue(tmpUtilization);
-            tmpUtilization.set(x, tmpUtilization.get(x) + (double) functionDemand / (double) serversCapacity.get(x));
-        }
-
-        for (Double aTmpUtilization : tmpUtilization)
-            maxReward += Math.pow(aTmpUtilization, 2);
-
-        maxReward = serversCapacity.size() - maxReward;
-
-        return maxReward;
     }
 
     private int findIndexMinValue(List<Double> list) {

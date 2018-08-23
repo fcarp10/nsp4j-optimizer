@@ -21,7 +21,7 @@ public class Agent {
     private float discount;
     private Random rnd;
 
-    public Agent(MultiLayerConfiguration conf, int memoryCapacity, float discount, int batchSize, int freq, int startSize, int inputLength, int outputLength) {
+    public Agent(MultiLayerConfiguration conf, int memoryCapacity, float discount, int batchSize, int freq, int startSize, int inputLength) {
 
         this.multiLayerNetwork = new MultiLayerNetwork(conf);
         this.multiLayerNetwork.init();
@@ -36,23 +36,22 @@ public class Agent {
         this.counter = 0;
         this.startSize = startSize;
         this.inputLength = inputLength;
-        this.outputLength = outputLength;
         this.rnd = new Random();
     }
 
-    public boolean[] getOutput(INDArray input, double epsilon, int numOfActivations) {
+    public boolean[] getAction(INDArray input, double epsilon) {
 
         boolean[] output = new boolean[outputLength];
         INDArray indArrayOutput = multiLayerNetwork.output(input);
         log.debug("DeepQ output: " + indArrayOutput);
         if (epsilon > rnd.nextDouble()) {
             int outputSize = indArrayOutput.size(1);
-            for (int i = 0; i < numOfActivations; i++) {
-                int activation = rnd.nextInt(outputSize);
-                while (output[activation])
-                    activation = rnd.nextInt(outputSize);
-                output[activation] = true;
-            }
+//            for (int i = 0; i < numOfActivations; i++) {
+//                int activation = rnd.nextInt(outputSize);
+//                while (output[activation])
+//                    activation = rnd.nextInt(outputSize);
+//                output[activation] = true;
+//            }
         } else
             output = findActionMax(indArrayOutput);
 
