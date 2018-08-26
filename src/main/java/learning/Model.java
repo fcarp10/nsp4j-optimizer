@@ -13,6 +13,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Model {
@@ -56,12 +57,13 @@ public class Model {
 
         INDArray inputIndArray = Nd4j.create(input);
         boolean[] output = agent.getAction(inputIndArray, 1);
-        double reward = calculateReward(output);
+        double reward = calculateReward(environment);
         boolean optimalSolution = false;
-//        if (reward >= maxReward * THRESHOLD) {
+        if (reward >= maxReward * THRESHOLD) {
 //            agent.observeReward(lastIndArray, lastOutput, null, null, reward);
 //            optimalSolution = true;
-//        } else
+        }
+//        else
 //            agent.observeReward(lastIndArray, lastOutput, inputIndArray, output, reward);
         this.lastIndArray = inputIndArray;
         this.lastOutput = output;
@@ -74,10 +76,11 @@ public class Model {
         return output;
     }
 
-    private double calculateReward(boolean[] output) {
+    private double calculateReward(int[] environment) {
         double reward = 0;
-//        List<Double> tmpUtilization = new ArrayList<>();
-//        for (Integer ignored : serversCapacity)
+
+        List<Double> tmpUtilization = new ArrayList<>();
+//        for (Integer ignored : numOfServers)
 //            tmpUtilization.add(0.0);
 //
 //        for (int x = 0; x < serversCapacity.size(); x++)
@@ -92,6 +95,7 @@ public class Model {
 
         return reward;
     }
+
 
     private int findIndexMinValue(List<Double> list) {
         double minValue = Integer.MAX_VALUE;
