@@ -132,7 +132,7 @@ public class Optimizer {
         StringBuilder title = new StringBuilder();
         for (Double d : parameters.getWeights())
             title.append("-").append(d);
-        return new Files(parameters.getNetworkFile(), title.toString());
+        return new Files(parameters.getScenario(), title.toString());
     }
 
     private static Output generateResults(String useCase, double objVal, Files files) throws GRBException {

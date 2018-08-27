@@ -91,7 +91,7 @@ public class Variables {
 
         TypeReference<LinearCostFunctions> typeReference = new TypeReference<>() {
         };
-        InputStream inputStream = TypeReference.class.getResourceAsStream("/linear-cost-functions.yml");
+        InputStream inputStream = TypeReference.class.getResourceAsStream("/aux_files/linear-cost-functions.yml");
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         try {
             linearCostFunctions = mapper.readValue(inputStream, typeReference);

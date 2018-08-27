@@ -1,0 +1,52 @@
+# Optimization parameters
+gap: 0
+weights: [0.5, 0.5]
+
+# Network default parameters
+serverCapacityDefault: 1000
+serversNodeDefault: 1
+linkCapacityDefault: 1000
+minPathsDefault: 3
+maxPathsDefault: 3
+minDemandsDefault: 3
+maxDemandsDefault: 3
+minBwDefault: 100
+maxBwDefault: 100
+
+# NFV parameters
+serviceChains:
+  - id: 0
+    chain: [0, 1, 2]
+    minPaths: 3
+    maxPaths: 3
+functions:
+  - type: 0
+    replicable: false
+    load: 1.0
+    maxShareable: 5
+  - type: 1
+    replicable: true
+    load: 1.0
+    maxShareable: 5
+  - type: 2
+    replicable: false
+    load: 1.0
+    maxShareable: 5
+trafficFlows:
+  - src: "n1"
+    dst: "n9"
+    serviceId: 0
+    minDemands: 3
+    maxDemands: 3
+    minBw: 100
+    maxBw: 100
+  - src: "n2"
+    dst: "n9"
+    serviceId: 0
+    minDemands: 3
+    maxDemands: 3
+    minBw: 100
+    maxBw: 100
+
+# Auxiliary values
+aux: [1000, 10]

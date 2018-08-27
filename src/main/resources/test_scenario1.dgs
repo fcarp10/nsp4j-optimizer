@@ -1,15 +1,15 @@
 DGS004
 test 0 0
 
-an n1 x:100 y:150 capacity:1000
-an n2 x:150 y:100 capacity:1000
-an n3 x:200 y:100 capacity:1000
-an n4 x:175 y:200 capacity:1000
-an n5 x:250 y:150 capacity:1000
-an n6 x:300 y:150 capacity:1000
-an n7 x:350 y:100 capacity:1000
-an n8 x:350 y:200 capacity:1000
-an n9 x:400 y:150 capacity:1000
+an n1 x:100 y:150 capacity:1000 serversNode: 1 type: 0
+an n2 x:150 y:100 capacity:1000 serversNode: 1 type: 0
+an n3 x:200 y:100 capacity:1000 serversNode: 1 type: 0
+an n4 x:175 y:200 capacity:1000 serversNode: 1 type: 0
+an n5 x:250 y:150 capacity:1000 serversNode: 1 type: 0
+an n6 x:300 y:150 capacity:1000 serversNode: 1 type: 0
+an n7 x:350 y:100 capacity:1000 serversNode: 1 type: 0
+an n8 x:350 y:200 capacity:1000 serversNode: 1 type: 0
+an n9 x:400 y:150 capacity:1000 serversNode: 1 type: 0
 
 ae n1n2 n1 > n2 capacity:1000
 ae n1n4 n1 > n4 capacity:1000

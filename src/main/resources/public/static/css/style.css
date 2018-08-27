@@ -7,7 +7,7 @@
 }
 
 .div-output {
-    margin:5px 0 20px 0;
+    margin:1px 0 7px 0;
 }
 
 .div-output-emphasis {
@@ -18,8 +18,8 @@
 .jumbotron {
 
     background-size: cover;
-    padding: 10px 0 10px 0;
-    margin-bottom: 20px;
+    padding: 5px 0 5px 0;
+    margin-bottom: 10px;
     background-color: #f2f2f2;
 
 }
@@ -30,10 +30,11 @@
 }
 
 .button {
+    margin: 10px 0 10px 0;
     border: none;
     color: white;
-    width: 150px;
-    padding: 10px;
+    width: 100px;
+    padding: 5px;
     text-align: center;
     text-decoration: none;
     /*display: inline;*/
@@ -46,7 +47,7 @@
 .button-submit{
     background-color: green;
     /*margin-top: 20px;*/
-    border-radius: 4px;
+    border-radius: 20px;
 }
 
 .button:active {
@@ -89,4 +90,9 @@
     background-color: rgba(255, 255, 255, .5);
 }
 
-.footer
+.select-style, option {
+    margin-bottom: 15px;
+    width: 120px ;
+}
+
+

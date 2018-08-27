@@ -32,7 +32,7 @@
 </nav>
 
 <div class="jumbotron">
-    <div class="col-sm-8 mx-auto">
+    <div class="col-md-9 mx-auto">
         <h1 class="display-4">NFV Optimizer</h1>
         <p class="lead">VNF placement, replication and migration optimization models</p>
     </div>
@@ -40,36 +40,53 @@
 
 <div class="container">
     <div id="topologyDiv" class="row">
-        <div class="col-md-9">
-            <h2>Topology</h2>
+        <div class="col-md-8">
+            <h3>Topology</h3>
             <hr>
             <p id="cy"></p>
         </div>
-        <div class="col-md-3">
-            <h2>Parameters</h2>
+        <div class="col-md-2">
+            <h3>Parameters</h3>
             <hr>
-            <h5>Objective Function</h5>
-            <select type="text" id="obj">
-                <option type="text" value="min-servers">min. number of used servers</option>
-                <option type="text" value="max-servers">max. number of used servers</option>
-                <option type="text" value="min-costs">min. utilization costs</option>
-                <option type="text" value="min-utilization">min. utilization</option>
-            </select>
-            <br><br>
-            <h5>Model</h5>
-            <select type="text" id="opt">
-                <option type="text" value="init">initial placement</option>
-                <option type="text" value="mgr">migration</option>
-                <option type="text" value="rep">replication</option>
-                <option type="text" value="rep_mgr">replication & migration</option>
-                <option type="text" value="all">all (single execution)</option>
-            </select>
-            <br><br>
+            <h6>Objective Function</h6>
+            <div class="select-style">
+                <select id="obj">
+                    <option value="min-servers">min. servers</option>
+                    <option value="max-servers">max. servers</option>
+                    <option value="min-costs">min. costs</option>
+                    <option value="min-utilization">min. utilization</option>
+                </select>
+            </div>
+            <h6>Model</h6>
+            <div class="select-style">
+                <select id="opt">
+                    <option value="init">initial placement</option>
+                    <option value="mgr">migration</option>
+                    <option value="rep">replication</option>
+                    <option value="rep_mgr">rep. & mgr.</option>
+                    <option value="all">all</option>
+                    <option value="exp">exp</option>
+                </select>
+            </div>
+            <h6>Constraints</h6>
+            <form id="constraints">
+                <input type="checkbox" value="onePathPerDemand" checked> One path per demand<br>
+                <input type="checkbox" value="activatePathForService" checked> Activate path for service<br>
+                <input type="checkbox" value="pathsConstrainedByFunctions" checked> Paths constrained by functions<br>
+                <input type="checkbox" value="functionPlacement" checked> Function placement<br>
+                <input type="checkbox" value="oneFunctionPerDemand" checked> One function per demand<br>
+                <input type="checkbox" value="mappingFunctionsWithDemands" checked> Mapping functions with demands<br>
+                <input type="checkbox" value="functionSequenceOrder" checked> Functions sequence order<br>
+                <input type="checkbox" value="reroutingMigration"> Rerouting migration<br>
+            </form>
             <button class="button button-submit" id="run-button" onClick="startOpt()">Run</button>
-            <br><br>
             <div class="div div-output-emphasis" id="message">Model is ready</div>
             <br>
-            <h5>Results</h5>
+
+        </div>
+        <div class="col-md-2">
+            <h3>Results</h3>
+            <hr>
             Link Utilization (avg - min - max - std):
             <div class="div div-output" id="lu">0.0 - 0.0 - 0.0 - 0.0</div>
             Server Utilization (avg - min - max - std):

@@ -18,7 +18,7 @@ public class Placement {
     public Placement(Parameters pm, Output initialOutput, double maxReward) {
         this.pm = pm;
         this.initialOutput = initialOutput;
-        this.trainingIterations = pm.getAuxValues()[0];
+        this.trainingIterations = pm.getAux()[0];
         this.model = new Model(pm.getServers().size() * pm.getServices().size() * pm.getServiceLengthAux());
         this.maxReward = maxReward;
     }
