@@ -30,7 +30,7 @@
 }
 
 .button {
-    margin: 10px 0 10px 0;
+    margin: 20px 0 10px 0;
     border: none;
     color: white;
     width: 100px;
@@ -91,8 +91,19 @@
 }
 
 .select-style, option {
-    margin-bottom: 15px;
     width: 120px ;
+}
+
+.radio-margin {
+    margin: 5px 0 0px 0;
+}
+
+.title-margin {
+    margin: 15px 0 5px 0;
+}
+
+.input-style {
+    width: 140px ;
 }
 
 

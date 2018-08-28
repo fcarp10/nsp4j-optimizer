@@ -4,9 +4,10 @@ package gui;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import utils.LinkJson;
+import utils.Scenario;
 import utils.ServerJson;
 import filemanager.GraphManager;
-import model.Optimizer;
+import app.App;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import results.Results;
@@ -80,10 +81,8 @@ public class WebServer {
         });
 
         post("/run", (request, response) -> {
-            String runMessage = request.body();
-            String[] message = runMessage.split("-");
-            new Optimizer();
-            Optimizer.start(message[0], message[2], message[1]);
+            Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
+            App.start(scenario);
             return "Running...";
         });
 

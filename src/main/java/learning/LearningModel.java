@@ -3,29 +3,29 @@ package learning;
 import filemanager.Parameters;
 import gurobi.GRB;
 import gurobi.GRBException;
-import model.Output;
+import lp.Output;
 
 import java.util.Random;
 
-public class Placement {
+public class LearningModel {
 
     private Parameters pm;
     private Output initialOutput;
     private int trainingIterations;
-    private Model model;
+    private DeepQ deepQ;
     private double maxReward;
 
-    public Placement(Parameters pm, Output initialOutput, double maxReward) {
+    public LearningModel(Parameters pm, Output initialOutput, double maxReward) {
         this.pm = pm;
         this.initialOutput = initialOutput;
         this.trainingIterations = pm.getAux()[0];
-        this.model = new Model(pm.getServers().size() * pm.getServices().size() * pm.getServiceLengthAux());
+        this.deepQ = new DeepQ(pm.getServers().size() * pm.getServices().size() * pm.getServiceLengthAux());
         this.maxReward = maxReward;
     }
 
     public void run() throws GRBException {
         for (int i = 0; i < trainingIterations; i++)
-            model.learn(generateInput(), generateEnvironment(), maxReward);
+            deepQ.learn(generateInput(), generateEnvironment(), maxReward);
     }
 
     private int[] generateEnvironment() throws GRBException {

@@ -1,4 +1,4 @@
-package model;
+package lp;
 
 import filemanager.Parameters;
 import gurobi.GRB;
@@ -20,9 +20,9 @@ public class Output {
     private int numOfMigrations;
     private int numOfReplicas;
 
-    public Output(Model model) {
-        this.parameters = model.getParameters();
-        this.variables = model.getVariables();
+    public Output(OptimizationModel optimizationModel) {
+        this.parameters = optimizationModel.getParameters();
+        this.variables = optimizationModel.getVariables();
     }
 
     public void calculateNumberOfMigrations(Output initialPlacement) throws GRBException {

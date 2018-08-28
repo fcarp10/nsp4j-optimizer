@@ -1,20 +1,20 @@
-package model;
+package lp;
 
 import filemanager.Parameters;
 import gurobi.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Model {
+public class OptimizationModel {
 
-    private static final Logger log = LoggerFactory.getLogger(Model.class);
+    private static final Logger log = LoggerFactory.getLogger(OptimizationModel.class);
 
     private GRBModel grbModel;
     private GRBEnv grbEnv;
     private Variables variables;
     private Parameters parameters;
 
-    public Model(Parameters parameters) {
+    public OptimizationModel(Parameters parameters) {
         this.parameters = parameters;
         try {
             grbEnv = new GRBEnv();
@@ -95,11 +95,16 @@ public class Model {
 
     public double run() throws GRBException {
         grbModel.optimize();
-        if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
+        if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL)
+            return grbModel.get(GRB.DoubleAttr.ObjVal);
+        else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
             grbModel.computeIIS();
             log.error("Model is not feasible");
-            return -1;
-        } else return grbModel.get(GRB.DoubleAttr.ObjVal);
+        } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INF_OR_UNBD)
+            log.error("Solution is infinite or unbounded");
+        else
+            log.error("No solution, status: " + grbModel.get(GRB.IntAttr.Status));
+        return -1;
     }
 
     public void finishModel() throws GRBException {

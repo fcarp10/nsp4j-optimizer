@@ -16,14 +16,14 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Model {
+public class DeepQ {
 
     private Agent agent;
     private final double THRESHOLD = 0.9;
     private INDArray lastIndArray;
     private boolean[] lastOutput;
 
-    public Model(int inputLength) {
+    public DeepQ(int inputLength) {
         int outputLength = 1;
         int hiddenLayerOut = 150;
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()

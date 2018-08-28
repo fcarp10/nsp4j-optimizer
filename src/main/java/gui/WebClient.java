@@ -10,7 +10,7 @@ import gurobi.GRBException;
 import jdk.incubator.http.HttpClient;
 import jdk.incubator.http.HttpRequest;
 import jdk.incubator.http.HttpResponse;
-import model.Output;
+import lp.Output;
 import network.Server;
 import org.graphstream.graph.Edge;
 import results.Results;

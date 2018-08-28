@@ -1,27 +1,51 @@
-package model.constraints;
+package lp.constraints;
 
 import filemanager.Parameters;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBVar;
-import model.Model;
-import model.Variables;
+import lp.OptimizationModel;
+import lp.Variables;
 import org.graphstream.graph.Node;
+import utils.Scenario;
 
-public class GeneralConstraints {
+public class CommonConstraints {
 
-    private Model model;
+    private OptimizationModel optimizationModel;
     private Variables variables;
     private Parameters parameters;
 
-    public GeneralConstraints(Model model) throws GRBException {
-        this.model = model;
-        this.parameters = model.getParameters();
-        this.variables = model.getVariables();
+    public CommonConstraints(OptimizationModel optimizationModel, Scenario scenario) throws GRBException {
+        this.optimizationModel = optimizationModel;
+        this.parameters = optimizationModel.getParameters();
+        this.variables = optimizationModel.getVariables();
+        if (scenario.getConstraints().get("setLinkUtilizationExpr")) {
+            if (scenario.getUseCase().equals("mgr") || scenario.getUseCase().equals("rep_mgr"))
+                setLinkUtilizationExpr(true);
+            else setLinkUtilizationExpr(false);
+        }
+        if (scenario.getConstraints().get("setServerUtilizationExpr"))
+            setServerUtilizationExpr();
+        if (scenario.getConstraints().get("countNumberOfUsedServers"))
+            countNumberOfUsedServers();
+        if (scenario.getConstraints().get("onePathPerDemand"))
+            onePathPerDemand();
+        if (scenario.getConstraints().get("activatePathForService"))
+            activatePathForService();
+        if (scenario.getConstraints().get("pathsConstrainedByFunctions"))
+            pathsConstrainedByFunctions();
+        if (scenario.getConstraints().get("functionPlacement"))
+            functionPlacement();
+        if (scenario.getConstraints().get("oneFunctionPerDemand"))
+            oneFunctionPerDemand();
+        if (scenario.getConstraints().get("mappingFunctionsWithDemands"))
+            mappingFunctionsWithDemands();
+        if (scenario.getConstraints().get("functionSequenceOrder"))
+            functionSequenceOrder();
     }
 
-    public void setLinkUtilizationExpr(boolean isMigration) throws GRBException {
+    private void setLinkUtilizationExpr(boolean isMigration) throws GRBException {
         for (int l = 0; l < parameters.getLinks().size(); l++) {
             GRBLinExpr expr = new GRBLinExpr();
             for (int s = 0; s < parameters.getServices().size(); s++)
@@ -38,15 +62,15 @@ public class GeneralConstraints {
                         for (int p = 0; p < parameters.getPaths().size(); p++) {
                             if (!parameters.getPaths().get(p).contains(parameters.getLinks().get(l)))
                                 continue;
-                            expr.addTerm(1.0 / (double) parameters.getLinks().get(l).getAttribute("capacity"), variables.mPSV[p][s][v]);
+                            expr.addTerm(1.0 / (int) parameters.getLinks().get(l).getAttribute("capacity"), variables.mPSV[p][s][v]);
                         }
 
-            model.getGrbModel().addConstr(expr, GRB.EQUAL, variables.uL[l], "setLinkUtilizationExpr");
+            optimizationModel.getGrbModel().addConstr(expr, GRB.EQUAL, variables.uL[l], "setLinkUtilizationExpr");
             setLinearCostFunctions(expr, variables.ukL[l]);
         }
     }
 
-    public void setServerUtilizationExpr() throws GRBException {
+    private void setServerUtilizationExpr() throws GRBException {
         for (int x = 0; x < parameters.getServers().size(); x++) {
             GRBLinExpr expr = new GRBLinExpr();
             for (int s = 0; s < parameters.getServices().size(); s++)
@@ -58,21 +82,21 @@ public class GeneralConstraints {
                                 , variables.fXSVD[x][s][v][d]);
                     }
                 }
-            model.getGrbModel().addConstr(expr, GRB.EQUAL, variables.uX[x], "setServerUtilizationExpr");
+            optimizationModel.getGrbModel().addConstr(expr, GRB.EQUAL, variables.uX[x], "setServerUtilizationExpr");
             setLinearCostFunctions(expr, variables.ukX[x]);
         }
     }
 
-    public void setLinearCostFunctions(GRBLinExpr expr, GRBVar grbVar) throws GRBException {
+    private void setLinearCostFunctions(GRBLinExpr expr, GRBVar grbVar) throws GRBException {
         for (int l = 0; l < variables.linearCostFunctions.getValues().size(); l++) {
             GRBLinExpr expr2 = new GRBLinExpr();
             expr2.multAdd(variables.linearCostFunctions.getValues().get(l)[0], expr);
             expr2.addConstant(variables.linearCostFunctions.getValues().get(l)[1]);
-            model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar, "setLinearCostFunctions");
+            optimizationModel.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar, "setLinearCostFunctions");
         }
     }
 
-    public void countNumberOfUsedServers() throws GRBException {
+    private void countNumberOfUsedServers() throws GRBException {
 
         for (int x = 0; x < parameters.getServers().size(); x++) {
             GRBLinExpr expr = new GRBLinExpr();
@@ -82,37 +106,37 @@ public class GeneralConstraints {
                     expr.addTerm(1.0 / parameters.getTotalNumberOfFunctionsAux(), variables.fXSV[x][s][v]);
                     expr2.addTerm(1.0, variables.fXSV[x][s][v]);
                 }
-            model.getGrbModel().addConstr(variables.fX[x], GRB.GREATER_EQUAL, expr, "countNumberOfUsedServers");
-            model.getGrbModel().addConstr(variables.fX[x], GRB.LESS_EQUAL, expr2, "countNumberOfUsedServers");
+            optimizationModel.getGrbModel().addConstr(variables.fX[x], GRB.GREATER_EQUAL, expr, "countNumberOfUsedServers");
+            optimizationModel.getGrbModel().addConstr(variables.fX[x], GRB.LESS_EQUAL, expr2, "countNumberOfUsedServers");
         }
     }
 
-    public void onePathPerDemand() throws GRBException {
+    private void onePathPerDemand() throws GRBException {
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
                 GRBLinExpr expr = new GRBLinExpr();
                 for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                     expr.addTerm(1.0, variables.tSPD[s][p][d]);
-                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
+                optimizationModel.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
             }
     }
 
-    public void activatePathForService() throws GRBException {
+    private void activatePathForService() throws GRBException {
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, variables.tSP[s][p], "activatePathForService");
+                    optimizationModel.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, variables.tSP[s][p], "activatePathForService");
 
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
                 GRBLinExpr expr = new GRBLinExpr();
                 for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                     expr.addTerm(1.0, variables.tSPD[s][p][d]);
-                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.tSP[s][p], "activatePathForService");
+                optimizationModel.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.tSP[s][p], "activatePathForService");
             }
     }
 
-    public void pathsConstrainedByFunctions() throws GRBException {
+    private void pathsConstrainedByFunctions() throws GRBException {
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
                 GRBLinExpr expr = new GRBLinExpr();
@@ -122,13 +146,13 @@ public class GeneralConstraints {
                     GRBLinExpr expr2 = new GRBLinExpr();
                     for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                         expr2.addTerm(1.0, variables.tSP[s][p]);
-                    model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
+                    optimizationModel.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
                 } else
-                    model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
+                    optimizationModel.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
             }
     }
 
-    public void functionPlacement() throws GRBException {
+    private void functionPlacement() throws GRBException {
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
@@ -138,28 +162,28 @@ public class GeneralConstraints {
                             for (int x = 0; x < parameters.getServers().size(); x++)
                                 if (parameters.getServers().get(x).getNodeParent().equals(parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
                                     expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-                        model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
+                        optimizationModel.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
                     }
     }
 
-    public void oneFunctionPerDemand() throws GRBException {
+    private void oneFunctionPerDemand() throws GRBException {
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
                 for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
                     GRBLinExpr expr = new GRBLinExpr();
                     for (int x = 0; x < parameters.getServers().size(); x++)
                         expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-                    model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "oneFunctionPerDemand");
+                    optimizationModel.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "oneFunctionPerDemand");
                 }
     }
 
-    public void mappingFunctionsWithDemands() throws GRBException {
+    private void mappingFunctionsWithDemands() throws GRBException {
 
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
                 for (int x = 0; x < parameters.getServers().size(); x++)
                     for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        model.getGrbModel().addConstr(variables.fXSVD[x][s][v][d], GRB.LESS_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
+                        optimizationModel.getGrbModel().addConstr(variables.fXSVD[x][s][v][d], GRB.LESS_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
 
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
@@ -167,11 +191,11 @@ public class GeneralConstraints {
                     GRBLinExpr expr = new GRBLinExpr();
                     for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                         expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-                    model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
+                    optimizationModel.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
                 }
     }
 
-    public void functionSequenceOrder() throws GRBException {
+    private void functionSequenceOrder() throws GRBException {
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
                 for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
@@ -192,7 +216,7 @@ public class GeneralConstraints {
 
                             expr2.addConstant(-1);
                             expr2.addTerm(1.0, variables.tSPD[s][p][d]);
-                            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "functionSequenceOrder");
+                            optimizationModel.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "functionSequenceOrder");
                         }
                     }
             }

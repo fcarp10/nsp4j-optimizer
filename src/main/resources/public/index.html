@@ -48,18 +48,29 @@
         <div class="col-md-2">
             <h3>Parameters</h3>
             <hr>
-            <h6>Objective Function</h6>
+            <h6>Input files name</h6>
+            <input type="text" class="input-style" id="inputFilesName" value="test_scenario1">
+            <div class="title-margin">
+                <h6>Objective Function</h6>
+            </div>
             <div class="select-style">
-                <select id="obj">
-                    <option value="min-servers">min. servers</option>
-                    <option value="max-servers">max. servers</option>
-                    <option value="min-costs">min. costs</option>
-                    <option value="min-utilization">min. utilization</option>
+                <select id="objective">
+                    <option value="servers">num of servers</option>
+                    <option value="costs">utilization costs</option>
+                    <option value="utilization">utilization</option>
                 </select>
             </div>
-            <h6>Model</h6>
+            <div class="radio-margin">
+                <form>
+                    <input type="radio" name="min-max" id="min" checked> Min
+                    <input type="radio" name="min-max" id="max"> Max
+                </form>
+            </div>
+            <div class="title-margin">
+                <h6>Use Case</h6>
+            </div>
             <div class="select-style">
-                <select id="opt">
+                <select id="useCase" onChange="check(this);">
                     <option value="init">initial placement</option>
                     <option value="mgr">migration</option>
                     <option value="rep">replication</option>
@@ -68,37 +79,48 @@
                     <option value="exp">exp</option>
                 </select>
             </div>
-            <h6>Constraints</h6>
-            <form id="constraints">
-                <input type="checkbox" value="onePathPerDemand" checked> One path per demand<br>
-                <input type="checkbox" value="activatePathForService" checked> Activate path for service<br>
-                <input type="checkbox" value="pathsConstrainedByFunctions" checked> Paths constrained by functions<br>
-                <input type="checkbox" value="functionPlacement" checked> Function placement<br>
-                <input type="checkbox" value="oneFunctionPerDemand" checked> One function per demand<br>
-                <input type="checkbox" value="mappingFunctionsWithDemands" checked> Mapping functions with demands<br>
-                <input type="checkbox" value="functionSequenceOrder" checked> Functions sequence order<br>
-                <input type="checkbox" value="reroutingMigration"> Rerouting migration<br>
+            <div class="title-margin">
+                <h6>Common Constraints</h6>
+            </div>
+            <form id="common-constraints">
+                <input type="checkbox" id="setLinkUtilizationExpr" checked> Link Utilization Expr<br>
+                <input type="checkbox" id="setServerUtilizationExpr" checked> Server Utilization Expr<br>
+                <input type="checkbox" id="countNumberOfUsedServers" checked> Count number of used servers<br>
+                <input type="checkbox" id="onePathPerDemand" checked> One path per demand<br>
+                <input type="checkbox" id="activatePathForService" checked> Activate path for service<br>
+                <input type="checkbox" id="pathsConstrainedByFunctions" checked> Paths constrained by functions<br>
+                <input type="checkbox" id="functionPlacement" checked> Function placement<br>
+                <input type="checkbox" id="oneFunctionPerDemand" checked> One function per demand<br>
+                <input type="checkbox" id="mappingFunctionsWithDemands" checked> Mapping functions with demands<br>
+                <input type="checkbox" id="functionSequenceOrder" checked> Functions sequence order<br>
             </form>
-            <button class="button button-submit" id="run-button" onClick="startOpt()">Run</button>
-            <div class="div div-output-emphasis" id="message">Model is ready</div>
-            <br>
-
+            <div class="title-margin">
+                <h6>Use Case Constraints</h6>
+            </div>
+            <form id="use-case-constraints">
+                <input type="checkbox" id="noParallelPaths" checked> No parallel paths<br>
+                <input type="checkbox" id="initialPlacementAsConstraints"> Initial placement as constraints<br>
+                <input type="checkbox" id="reroutingMigration"> Rerouting migration<br>
+            </form>
         </div>
+
         <div class="col-md-2">
-            <h3>Results</h3>
+            <h3>Summary results</h3>
             <hr>
-            Link Utilization (avg - min - max - std):
+            Link Utilization (avg-min-max-std):
             <div class="div div-output" id="lu">0.0 - 0.0 - 0.0 - 0.0</div>
-            Server Utilization (avg - min - max - std):
+            Server Utilization (avg-min-max-std):
             <div class="div div-output" id="xu">0.0 - 0.0 - 0.0 - 0.0</div>
-            Functions (avg - min - max - std):
+            Functions (avg-min-max-std):
             <div class="div div-output" id="fp">0.0 - 0.0 - 0.0 - 0.0</div>
             Average path length:
             <div class="div div-output" id="path">0.0</div>
-            Number of migrations - replicas:
+            Number of migrations/replicas:
             <div class="div div-output" id="mgr-rep">0 - 0</div>
-            Cost:
+            Optimum value:
             <div class="div div-output" id="cost">0.0</div>
+            <button class="button button-submit" id="run-button" onClick="startOpt()">Run</button>
+            <div class="div div-output-emphasis" id="message">Model is ready</div>
         </div>
     </div>
     <div class="row align-items-end">
