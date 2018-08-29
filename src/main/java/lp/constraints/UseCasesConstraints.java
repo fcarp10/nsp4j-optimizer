@@ -39,10 +39,10 @@ public class UseCasesConstraints {
 
     private void initialPlacementAsConstraints(Output initialOutput) throws GRBException {
         if (initialOutput != null)
-            for (int x = 0; x < initialOutput.getVariables().fXSV.length; x++)
-                for (int s = 0; s < initialOutput.getVariables().fXSV[x].length; s++)
-                    for (int v = 0; v < initialOutput.getVariables().fXSV[x][s].length; v++)
-                        if (initialOutput.getVariables().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1)
+            for (int x = 0; x < initialOutput.getfXSV().length; x++)
+                for (int s = 0; s < initialOutput.getfXSV()[x].length; s++)
+                    for (int v = 0; v < initialOutput.getfXSV()[x][s].length; v++)
+                        if (initialOutput.getfXSV()[x][s][v])
                             optimizationModel.getGrbModel().addConstr(variables.fXSV[x][s][v], GRB.EQUAL, 1, "initialPlacementAsConstraints");
     }
 
@@ -59,10 +59,11 @@ public class UseCasesConstraints {
                                         | !parameters.getPaths().get(p).getNodePath().get(parameters.getPaths().get(p).getNodePath().size() - 1).equals(parameters.getServers().get(y).getNodeParent()))
                                     continue;
                                 GRBLinExpr expr = new GRBLinExpr();
+                                double fXSV = initialOutput.getfXSV()[x][s][v] ? 1.0 : 0.0;
                                 for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                                     expr.addTerm(parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
                                             * parameters.getServices().get(s).getFunctions().get(v).getLoad()
-                                            * initialOutput.getVariables().fXSV[x][s][v].get(GRB.DoubleAttr.X), variables.fXSV[y][s][v]);
+                                            * fXSV, variables.fXSV[y][s][v]);
                                 optimizationModel.getGrbModel().addConstr(variables.mPSV[p][s][v], GRB.LESS_EQUAL, expr, "reroutingMigration");
                             }
 
@@ -70,10 +71,10 @@ public class UseCasesConstraints {
                 for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
                     for (int x = 0; x < parameters.getServers().size(); x++) {
                         double trafficToMigrate = 0;
+                        double fXSV = initialOutput.getfXSV()[x][s][v] ? 1.0 : 0.0;
                         for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                             trafficToMigrate += parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-                                    * parameters.getServices().get(s).getFunctions().get(v).getLoad()
-                                    * initialOutput.getVariables().fXSV[x][s][v].get(GRB.DoubleAttr.X);
+                                    * parameters.getServices().get(s).getFunctions().get(v).getLoad() * fXSV;
                         GRBLinExpr expr = new GRBLinExpr();
                         for (int p = 0; p < parameters.getPaths().size(); p++)
                             expr.addTerm(1.0, variables.mPSV[p][s][v]);

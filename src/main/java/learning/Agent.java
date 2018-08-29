@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -17,11 +16,11 @@ public class Agent {
     private static final Logger log = LoggerFactory.getLogger(Agent.class);
     private MultiLayerNetwork multiLayerNetwork, targetMultiLayerNetwork;
     private List<Experience> memoryAction;
-    private int startSize, batchSize, freq, counter, inputLength, memoryCapacity, outputLength;
+    private int startSize, batchSize, freq, counter, inputLength, memoryCapacity, outputLength, lastAction;
     private float discount;
     private Random rnd;
 
-    public Agent(MultiLayerConfiguration conf, int memoryCapacity, float discount, int batchSize, int freq, int startSize, int inputLength) {
+    Agent(MultiLayerConfiguration conf, int memoryCapacity, float discount, int batchSize, int freq, int startSize, int inputLength) {
 
         this.multiLayerNetwork = new MultiLayerNetwork(conf);
         this.multiLayerNetwork.init();
@@ -37,39 +36,41 @@ public class Agent {
         this.startSize = startSize;
         this.inputLength = inputLength;
         this.rnd = new Random();
+        this.lastAction = -1;
     }
 
-    public boolean[] getAction(INDArray input, double epsilon) {
-
-        boolean[] output = new boolean[outputLength];
+    int getAction(INDArray input, double epsilon) {
+        boolean isValid = false;
+        int lastAction = -1;
         INDArray indArrayOutput = multiLayerNetwork.output(input);
         log.debug("DeepQ output: " + indArrayOutput);
         if (epsilon > rnd.nextDouble()) {
-            int outputSize = indArrayOutput.size(1);
-//            for (int i = 0; i < numOfActivations; i++) {
-//                int activation = rnd.nextInt(outputSize);
-//                while (output[activation])
-//                    activation = rnd.nextInt(outputSize);
-//                output[activation] = true;
-//            }
+            while (!isValid){
+                lastAction = rnd.nextInt(indArrayOutput.size(1));
+                isValid = actionMask(lastAction);
+            }
+            this.lastAction = lastAction;
         } else
-            output = findActionMax(indArrayOutput);
-
-        log.debug("DeepQ action: " + Arrays.toString(output));
-        return output;
+            lastAction = findActionMax(indArrayOutput);
+        log.debug("Agent action: " + lastAction);
+        return lastAction;
     }
 
-    private boolean[] findActionMax(INDArray outputs) {
-        boolean[] optimalOutput = null;
-        return optimalOutput;
+    private boolean actionMask(int action) {
+        return action != this.lastAction && action != inputLength - 1;
     }
 
-    public void observeReward(INDArray inputIndArray, INDArray nextInputIndArray, boolean[] environment, int action, double reward) {
+    private int findActionMax(INDArray outputs) {
+        int actionMax = -1;
+        return actionMax;
+    }
+
+    public void observeReward(INDArray inputIndArray, int action, double reward) {
 
         // TO BE CHANGED, SHOULD REMOVE THE ONE WITH LOWEST REWARD
         if (memoryAction.size() >= memoryCapacity)
             memoryAction.remove(rnd.nextInt(memoryAction.size()));
-        memoryAction.add(new Experience(inputIndArray, nextInputIndArray, environment, action, (float) reward));
+//        memoryAction.add(new Experience(inputIndArray, nextInputIndArray, environment, action, (float) reward));
         if (startSize < memoryAction.size())
             trainNetwork();
         counter++;

@@ -68,12 +68,12 @@ public class OptimizationModel {
         return expr;
     }
 
-    public GRBLinExpr migrations(Output initialOutput, double weight) throws GRBException {
+    public GRBLinExpr migrations(Output initialOutput, double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < parameters.getServers().size(); x++)
             for (int s = 0; s < parameters.getServices().size(); s++)
                 for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-                    if (initialOutput.getVariables().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 0) continue;
+                    if (!initialOutput.getfXSV()[x][s][v]) continue;
                     expr.addConstant(weight);
                     expr.addTerm(-weight, this.variables.fXSV[x][s][v]);
                 }

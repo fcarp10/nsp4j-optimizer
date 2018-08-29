@@ -30,56 +30,56 @@ public class Variables {
         this.readLinearCostFunctions();
     }
 
-    public void initializeVariables(Parameters param, GRBModel grbModel) {
+    public void initializeVariables(Parameters pm, GRBModel grbModel) {
         try {
-            tSP = new GRBVar[param.getServices().size()][param.getPathsPerTrafficFlowAux()];
-            for (int s = 0; s < param.getServices().size(); s++)
-                for (int p = 0; p < param.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+            tSP = new GRBVar[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                     tSP[s][p] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "tSP[" + s + "][" + p + "]");
 
-            tSPD = new GRBVar[param.getServices().size()][param.getPathsPerTrafficFlowAux()][param.getDemandsPerTrafficFlowAux()];
-            for (int s = 0; s < param.getServices().size(); s++)
-                for (int p = 0; p < param.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                    for (int d = 0; d < param.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+            tSPD = new GRBVar[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()][pm.getDemandsPerTrafficFlowAux()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                         tSPD[s][p][d] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "tSPD[" + s + "][" + p + "][" + d + "]");
 
-            fX = new GRBVar[param.getServers().size()];
-            for (int x = 0; x < param.getServers().size(); x++)
+            fX = new GRBVar[pm.getServers().size()];
+            for (int x = 0; x < pm.getServers().size(); x++)
                 fX[x] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "fX[" + x + "]");
 
-            fXSV = new GRBVar[param.getServers().size()][param.getServices().size()][param.getServiceLengthAux()];
-            for (int x = 0; x < param.getServers().size(); x++)
-                for (int s = 0; s < param.getServices().size(); s++)
-                    for (int v = 0; v < param.getServices().get(s).getFunctions().size(); v++)
+            fXSV = new GRBVar[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()];
+            for (int x = 0; x < pm.getServers().size(); x++)
+                for (int s = 0; s < pm.getServices().size(); s++)
+                    for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                         fXSV[x][s][v] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "fXSV[" + x + "][" + s + "][" + v + "]");
 
-            fXSVD = new GRBVar[param.getServers().size()][param.getServices().size()][param.getServiceLengthAux()][param.getDemandsPerTrafficFlowAux()];
-            for (int x = 0; x < param.getServers().size(); x++)
-                for (int s = 0; s < param.getServices().size(); s++)
-                    for (int v = 0; v < param.getServices().get(s).getFunctions().size(); v++)
-                        for (int d = 0; d < param.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+            fXSVD = new GRBVar[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()][pm.getDemandsPerTrafficFlowAux()];
+            for (int x = 0; x < pm.getServers().size(); x++)
+                for (int s = 0; s < pm.getServices().size(); s++)
+                    for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                             fXSVD[x][s][v][d] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "fXSVD[" + x + "][" + s + "][" + v + "][" + d + "]");
 
-            uL = new GRBVar[param.getLinks().size()];
-            for (int l = 0; l < param.getLinks().size(); l++)
+            uL = new GRBVar[pm.getLinks().size()];
+            for (int l = 0; l < pm.getLinks().size(); l++)
                 uL[l] = grbModel.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, "uL[" + l + "]");
 
-            uX = new GRBVar[param.getServers().size()];
-            for (int x = 0; x < param.getServers().size(); x++)
+            uX = new GRBVar[pm.getServers().size()];
+            for (int x = 0; x < pm.getServers().size(); x++)
                 uX[x] = grbModel.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, "uX[" + x + "]");
 
-            ukL = new GRBVar[param.getLinks().size()];
-            for (int l = 0; l < param.getLinks().size(); l++)
+            ukL = new GRBVar[pm.getLinks().size()];
+            for (int l = 0; l < pm.getLinks().size(); l++)
                 ukL[l] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "ukL[" + l + "]");
 
-            ukX = new GRBVar[param.getServers().size()];
-            for (int x = 0; x < param.getServers().size(); x++)
+            ukX = new GRBVar[pm.getServers().size()];
+            for (int x = 0; x < pm.getServers().size(); x++)
                 ukX[x] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "ukX[" + x + "]");
 
-            mPSV = new GRBVar[param.getPaths().size()][param.getServices().size()][param.getServiceLengthAux()];
-            for (int s = 0; s < param.getServices().size(); s++)
-                for (int v = 0; v < param.getServices().get(s).getFunctions().size(); v++)
-                    for (int p = 0; p < param.getPaths().size(); p++)
+            mPSV = new GRBVar[pm.getPaths().size()][pm.getServices().size()][pm.getServiceLengthAux()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                    for (int p = 0; p < pm.getPaths().size(); p++)
                         mPSV[p][s][v] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "mPSV[" + p + "][" + s + "][" + v + "]");
 
             grbModel.update();

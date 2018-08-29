@@ -82,8 +82,8 @@ public class App {
     }
 
     private static void runRL(double maxReward) throws GRBException {
-        LearningModel learningModel = new LearningModel(parameters, initialOutput, maxReward);
-        learningModel.run();
+        LearningModel learningModel = new LearningModel(parameters, maxReward);
+        learningModel.run(initialOutput);
     }
 
     private static GRBLinExpr generateExprForObjectiveFunction(String objective) throws GRBException {

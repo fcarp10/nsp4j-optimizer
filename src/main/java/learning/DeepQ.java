@@ -20,7 +20,7 @@ public class DeepQ {
 
     private Agent agent;
     private final double THRESHOLD = 0.9;
-    private INDArray lastIndArray;
+    private INDArray lastInputIndArray;
     private boolean[] lastOutput;
 
     public DeepQ(int inputLength) {
@@ -53,27 +53,35 @@ public class DeepQ {
 
     }
 
-    public boolean learn(int[] input, int[] environment, double maxReward) {
+    void learn(float[] input, int[] environment, double maxReward) {
 
+        int[] localEnvironment = environment.clone();
         INDArray inputIndArray = Nd4j.create(input);
-        boolean[] output = agent.getAction(inputIndArray, 1);
-        double reward = calculateReward(environment);
-        boolean optimalSolution = false;
-        if (reward >= maxReward * THRESHOLD) {
-//            agent.observeReward(lastIndArray, lastOutput, null, null, reward);
-//            optimalSolution = true;
+        boolean optimal = false;
+        while (!optimal) {
+            int action = agent.getAction(inputIndArray, 1);
+            localEnvironment = modifyEnvironment(localEnvironment, action);
+            double reward = calculateReward(localEnvironment);
+            if (reward >= maxReward * THRESHOLD) {
+//            agent.observeReward(lastInputIndArray, lastOutput, null, null, reward);
+                optimal = true;
+            } else
+                agent.observeReward(inputIndArray, action, reward);
+
+            this.lastInputIndArray = inputIndArray;
+//        this.lastOutput = output;
         }
-//        else
-//            agent.observeReward(lastIndArray, lastOutput, inputIndArray, output, reward);
-        this.lastIndArray = inputIndArray;
-        this.lastOutput = output;
-        return optimalSolution;
     }
 
-    public boolean[] reason(int[] input, double epsilon) {
-        boolean[] output = agent.getAction(Nd4j.create(input), epsilon);
+    private int[] modifyEnvironment(int[] environment, int action) {
+        if (environment[action] == 1)
+            environment[action] = 0;
+        else environment[action] = 1;
+        return environment;
+    }
 
-        return output;
+    public void reason(int[] input, double epsilon) {
+        int output = agent.getAction(Nd4j.create(input), epsilon);
     }
 
     private double calculateReward(int[] environment) {

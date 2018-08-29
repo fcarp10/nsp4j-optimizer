@@ -8,10 +8,10 @@ serversNodeDefault: 1
 linkCapacityDefault: 1000
 minPathsDefault: 3
 maxPathsDefault: 3
-minDemandsDefault: 3
-maxDemandsDefault: 3
-minBwDefault: 100
-maxBwDefault: 100
+minDemandsDefault: 1
+maxDemandsDefault: 1
+minBwDefault: 300
+maxBwDefault: 300
 
 # NFV parameters
 serviceChains:
