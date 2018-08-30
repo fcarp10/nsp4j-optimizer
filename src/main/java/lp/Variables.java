@@ -1,20 +1,12 @@
 package lp;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import utils.LinearCostFunctions;
 import filemanager.Parameters;
 import gurobi.GRB;
 import gurobi.GRBModel;
 import gurobi.GRBVar;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 public class Variables {
 
-    public LinearCostFunctions linearCostFunctions;
     public GRBVar[][] tSP;
     public GRBVar[][][] tSPD;
     public GRBVar[] fX;
@@ -26,11 +18,7 @@ public class Variables {
     public GRBVar[] uX;
     public GRBVar[][][] mPSV;
 
-    public Variables() {
-        this.readLinearCostFunctions();
-    }
-
-    public void initializeVariables(Parameters pm, GRBModel grbModel) {
+    public Variables(Parameters pm, GRBModel grbModel) {
         try {
             tSP = new GRBVar[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
             for (int s = 0; s < pm.getServices().size(); s++)
@@ -83,20 +71,7 @@ public class Variables {
                         mPSV[p][s][v] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "mPSV[" + p + "][" + s + "][" + v + "]");
 
             grbModel.update();
-        } catch (Exception e) {
-        }
-    }
-
-    private void readLinearCostFunctions() {
-
-        TypeReference<LinearCostFunctions> typeReference = new TypeReference<>() {
-        };
-        InputStream inputStream = TypeReference.class.getResourceAsStream("/aux_files/linear-cost-functions.yml");
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        try {
-            linearCostFunctions = mapper.readValue(inputStream, typeReference);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
     }
 }

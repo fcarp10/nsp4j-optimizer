@@ -5,7 +5,6 @@ import lp.Output;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class LearningModel {
 
@@ -21,9 +20,9 @@ public class LearningModel {
         this.maxReward = maxReward;
     }
 
-    public void run(Output initialOutput) {
+    public void run(Output initialPlacement) {
         for (int i = 0; i < trainingIterations; i++)
-            deepQ.learn(generateInput(), generateEnvironment(initialOutput), maxReward);
+            deepQ.learn(generateInput(initialPlacement), generateEnvironment(initialPlacement), maxReward, pm);
     }
 
     private int[] generateEnvironment(Output initialOutput) {
@@ -40,24 +39,23 @@ public class LearningModel {
         return environment;
     }
 
-    private float[] generateInput() {
-        Random random = new Random();
+    private float[] generateInput(Output initialOutput) {
         List<float[]> inputList = new ArrayList<>();
-        for (int t = 0; t < pm.getTrafficFlows().size(); t++) {
-            for (int d = 0; d < pm.getTrafficFlows().get(t).getTrafficDemands().size(); d++) {
-                float[] individualInput = new float[4];
-                for (int n = 0; n < pm.getNodes().size(); n++) {
-                    if (pm.getNodes().get(n).getId().equals(pm.getTrafficFlows().get(t).getSrc()))
-                        individualInput[0] = n;
-                    if (pm.getNodes().get(n).getId().equals(pm.getTrafficFlows().get(t).getDst()))
-                        individualInput[1] = n;
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
+                    if (initialOutput.gettSPD()[s][p][d]) {
+                        float[] individualInput = new float[2 + pm.getServiceLengthAux()];
+                        individualInput[0] = pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d);
+                        individualInput[1] = p;
+                        for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                            for (int x = 0; x < pm.getServers().size(); x++)
+                                if (initialOutput.getfXSVD()[x][s][v][d])
+                                    individualInput[2 + v] = x;
+                        inputList.add(individualInput);
+                    }
                 }
-                individualInput[2] = pm.getTrafficFlows().get(t).getTrafficDemands().get(t);
-                individualInput[3] = random.nextInt(pm.getTrafficFlows().get(t).getAdmissiblePaths().size());
-                inputList.add(individualInput);
-            }
-        }
-        float[] inputArray = new float[inputList.size() * 4];
+        float[] inputArray = new float[inputList.size() * (2 + pm.getServiceLengthAux())];
         for (int i = 0; i < inputList.size(); i++)
             if (inputList.get(i).length >= 0)
                 System.arraycopy(inputList.get(i), 0, inputArray, i * 4, inputList.get(i).length);

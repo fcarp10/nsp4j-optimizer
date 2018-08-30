@@ -1,12 +1,31 @@
 package utils;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.decimal4j.util.DoubleRounder;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Auxiliary {
+
+    public static LinearCostFunctions linearCostFunctions;
+
+    public Auxiliary() {
+        TypeReference<LinearCostFunctions> typeReference = new TypeReference<>() {
+        };
+        InputStream inputStream = TypeReference.class.getResourceAsStream("/aux_files/linear-cost-functions.yml");
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        try {
+            linearCostFunctions = mapper.readValue(inputStream, typeReference);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static double avg(List<Double> utilizationResults) {
         double tmpU = 0;

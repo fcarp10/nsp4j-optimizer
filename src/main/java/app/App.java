@@ -62,8 +62,7 @@ public class App {
     private static double runLP(String useCase, Scenario scenario, Files files) throws GRBException {
         GRBLinExpr expr;
         optimizationModel = new OptimizationModel(parameters);
-        Variables variables = new Variables();
-        variables.initializeVariables(parameters, optimizationModel.getGrbModel());
+        Variables variables = new Variables(parameters, optimizationModel.getGrbModel());
         optimizationModel.setVariables(variables);
         new CommonConstraints(optimizationModel, scenario);
         new UseCasesConstraints(optimizationModel, scenario, initialOutput);

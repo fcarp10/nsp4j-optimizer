@@ -8,6 +8,7 @@ import gurobi.GRBVar;
 import lp.OptimizationModel;
 import lp.Variables;
 import org.graphstream.graph.Node;
+import utils.Auxiliary;
 import utils.Scenario;
 
 public class CommonConstraints {
@@ -88,10 +89,10 @@ public class CommonConstraints {
     }
 
     private void setLinearCostFunctions(GRBLinExpr expr, GRBVar grbVar) throws GRBException {
-        for (int l = 0; l < variables.linearCostFunctions.getValues().size(); l++) {
+        for (int l = 0; l < Auxiliary.linearCostFunctions.getValues().size(); l++) {
             GRBLinExpr expr2 = new GRBLinExpr();
-            expr2.multAdd(variables.linearCostFunctions.getValues().get(l)[0], expr);
-            expr2.addConstant(variables.linearCostFunctions.getValues().get(l)[1]);
+            expr2.multAdd(Auxiliary.linearCostFunctions.getValues().get(l)[0], expr);
+            expr2.addConstant(Auxiliary.linearCostFunctions.getValues().get(l)[1]);
             optimizationModel.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar, "setLinearCostFunctions");
         }
     }
