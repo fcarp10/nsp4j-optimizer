@@ -1,6 +1,6 @@
 # Optimization parameters
 gap: 0
-weights: [0.5, 0.5]
+weights: [0, 1.0]
 
 # Network default parameters
 serverCapacityDefault: 1000
@@ -37,5 +37,5 @@ trafficFlows:
     minBw: 100
     maxBw: 100
 
-# Auxiliary values
-aux: [1000, 10]
+# Auxiliary values (overhead, training iterations)
+aux: [100, 1000]

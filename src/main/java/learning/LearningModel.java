@@ -15,14 +15,14 @@ public class LearningModel {
 
     public LearningModel(Parameters pm, double maxReward) {
         this.pm = pm;
-        this.trainingIterations = pm.getAux()[0];
-        this.deepQ = new DeepQ(pm.getServers().size() * pm.getServices().size() * pm.getServiceLengthAux());
+        this.trainingIterations = pm.getAux()[1];
+        this.deepQ = new DeepQ(pm);
         this.maxReward = maxReward;
     }
 
     public void run(Output initialPlacement) {
         for (int i = 0; i < trainingIterations; i++)
-            deepQ.learn(generateInput(initialPlacement), generateEnvironment(initialPlacement), maxReward, pm);
+            deepQ.learn(generateInput(initialPlacement), generateEnvironment(initialPlacement), maxReward);
     }
 
     private int[] generateEnvironment(Output initialOutput) {

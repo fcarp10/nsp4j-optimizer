@@ -82,6 +82,8 @@ public class CommonConstraints {
                                         / parameters.getServers().get(x).getCapacity()
                                 , variables.fXSVD[x][s][v][d]);
                     }
+                    expr.addTerm(parameters.getServices().get(s).getFunctions().get(v).getLoad() * parameters.getAux()[0] / parameters.getServers().get(x).getCapacity()
+                            , variables.fXSV[x][s][v]);
                 }
             optimizationModel.getGrbModel().addConstr(expr, GRB.EQUAL, variables.uX[x], "setServerUtilizationExpr");
             setLinearCostFunctions(expr, variables.ukX[x]);

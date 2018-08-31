@@ -120,11 +120,10 @@ public class Output {
         List<Double> xu = new ArrayList<>(serversMap().values());
         List<Integer> numOfFunctionsPerServer = Auxiliary.listsSizes(new ArrayList<>(functionsMap().values()));
 
-        return new Results(lu, xu, numOfFunctionsPerServer, pm.getTotalTrafficAux()
+        return new Results(pm, lu, xu, numOfFunctionsPerServer, pm.getTotalTrafficAux()
                 , Auxiliary.roundDouble(trafficOnLinks(), 2), Auxiliary.roundDouble(avgPathLength(), 2)
                 , Auxiliary.roundDouble(cost, 4), numOfMigrations, numOfReplicas
-                , functions(), functionsPerDemand(), paths(), pathsPerDemand()
-                , reRoutedTraffic());
+                , fXSV, fXSVD, tSP, tSPD, mPSV);
     }
 
     public Map<Edge, Double> linksMap() {
@@ -167,46 +166,6 @@ public class Output {
         return functionsStringMap;
     }
 
-    private List<String> functions() {
-        List<String> usedServers = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                for (int x = 0; x < pm.getServers().size(); x++)
-                    if (fXSV[x][s][v])
-                        usedServers.add("s[" + s + "]-v[" + v + "]: " + pm.getServers().get(x).getId());
-        return usedServers;
-    }
-
-    private List<String> functionsPerDemand() {
-        List<String> usedServersPerDemand = new ArrayList<>();
-        for (int x = 0; x < pm.getServers().size(); x++)
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        if (fXSVD[x][s][v][d])
-                            usedServersPerDemand.add("s[" + s + "]-v[" + v + "]-d[" + d + "]: " + pm.getServers().get(x).getId());
-        return usedServersPerDemand;
-    }
-
-    private List<String> paths() {
-        List<String> usedPaths = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                if (tSP[s][p])
-                    usedPaths.add("s[" + s + "]: " + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
-        return usedPaths;
-    }
-
-    private List<String> pathsPerDemand() {
-        List<String> usedPathsPerDemand = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    if (tSPD[s][p][d])
-                        usedPathsPerDemand.add("s[" + s + "]-d[" + d + "]: " + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
-        return usedPathsPerDemand;
-    }
-
     private double avgPathLength() {
         double avgPathLength = 0;
         int usedPaths = 0;
@@ -225,17 +184,6 @@ public class Output {
         for (int l = 0; l < pm.getLinks().size(); l++)
             trafficOnLinks += uL[l] * (int) pm.getLinks().get(l).getAttribute("capacity");
         return trafficOnLinks;
-    }
-
-    public List<String> reRoutedTraffic() {
-        List<String> reroutedTraffic = new ArrayList<>();
-
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                for (int p = 0; p < pm.getPaths().size(); p++)
-                    if (mPSV[p][s][v] > 0.0)
-                        reroutedTraffic.add("s[" + s + "]-v[" + v + "]-p[" + pm.getPaths().get(p).getNodePath() + "]: " + mPSV[p][s][v]);
-        return reroutedTraffic;
     }
 
     public boolean[][] gettSP() {

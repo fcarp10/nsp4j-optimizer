@@ -48,5 +48,5 @@ trafficFlows:
     minBw: 100
     maxBw: 100
 
-# Auxiliary values
-aux: [1000, 10]
+# Auxiliary values (overhead, training iterations)
+aux: [100, 1000]

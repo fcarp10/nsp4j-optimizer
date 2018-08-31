@@ -1,6 +1,7 @@
 package app;
 
 import gui.WebServer;
+import utils.Auxiliary;
 
 import static spark.Spark.*;
 
@@ -10,6 +11,7 @@ public class Launcher {
         port(8080);
         staticFiles.location("/public");
         init();
+        new Auxiliary();
         new WebServer();
     }
 }
