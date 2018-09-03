@@ -5,11 +5,11 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 public class Experience {
 
     private INDArray inputIndArray, nextInputIndArray;
-    private boolean[] environment;
+    private int[] environment;
     private int action;
     private float reward;
 
-    public Experience(INDArray inputIndArray, INDArray nextInputIndArray, boolean[] environment, int action, float reward) {
+    Experience(INDArray inputIndArray, INDArray nextInputIndArray, int[] environment, int action, float reward) {
         this.inputIndArray = inputIndArray;
         this.nextInputIndArray = nextInputIndArray;
         this.environment = environment;
@@ -17,15 +17,15 @@ public class Experience {
         this.reward = reward;
     }
 
-    public INDArray getInputIndArray() {
+    INDArray getInputIndArray() {
         return inputIndArray;
     }
 
-    public INDArray getNextInputIndArray() {
+    INDArray getNextInputIndArray() {
         return nextInputIndArray;
     }
 
-    public boolean[] getEnvironment() {
+    public int[] getEnvironment() {
         return environment;
     }
 
@@ -33,7 +33,7 @@ public class Experience {
         return action;
     }
 
-    public float getReward() {
+    float getReward() {
         return reward;
     }
 }

@@ -16,7 +16,7 @@ public class Agent {
     private static final Logger log = LoggerFactory.getLogger(Agent.class);
     private MultiLayerNetwork multiLayerNetwork, targetMultiLayerNetwork;
     private List<Experience> memoryAction;
-    private int startSize, batchSize, freq, counter, inputLength, memoryCapacity, outputLength, lastAction;
+    private int startSize, batchSize, freq, counter, inputLength, memoryCapacity, lastAction;
     private float discount;
     private Random rnd;
 
@@ -45,13 +45,13 @@ public class Agent {
         INDArray indArrayOutput = multiLayerNetwork.output(input);
         log.debug("DeepQ output: " + indArrayOutput);
         if (epsilon > rnd.nextDouble()) {
-            while (!isValid){
+            while (!isValid) {
                 lastAction = rnd.nextInt(indArrayOutput.size(1));
                 isValid = actionMask(lastAction);
             }
             this.lastAction = lastAction;
         } else
-            lastAction = findActionMax(indArrayOutput);
+            lastAction = findMaxAction(indArrayOutput);
         log.debug("Agent action: " + lastAction);
         return lastAction;
     }
@@ -60,17 +60,34 @@ public class Agent {
         return action != this.lastAction && action != inputLength - 1;
     }
 
-    private int findActionMax(INDArray outputs) {
-        int actionMax = -1;
+    private int findMaxAction(INDArray outputs) {
+        int actionMax = 0;
+        float maxValue = outputs.getFloat(0);
+        for (int i = 1; i < outputs.size(1); i++) {
+            float value = outputs.getFloat(i);
+            if (value > maxValue) {
+                maxValue = value;
+                actionMax = i;
+            }
+        }
         return actionMax;
     }
 
-    public void observeReward(INDArray inputIndArray, int action, double reward) {
+    private float findMaxValue(INDArray outputs) {
+        float maxValue = 0;
+        for (int i = 1; i < outputs.size(1); i++) {
+            float value = outputs.getFloat(i);
+            if (value > maxValue)
+                maxValue = value;
+        }
+        return maxValue;
+    }
 
+    void observeReward(INDArray inputIndArray, INDArray nextInputIndArray, int[] environment, double reward) {
         // TO BE CHANGED, SHOULD REMOVE THE ONE WITH LOWEST REWARD
         if (memoryAction.size() >= memoryCapacity)
             memoryAction.remove(rnd.nextInt(memoryAction.size()));
-//        memoryAction.add(new Experience(inputIndArray, nextInputIndArray, environment, action, (float) reward));
+        memoryAction.add(new Experience(inputIndArray, nextInputIndArray, environment, lastAction, (float) reward));
         if (startSize < memoryAction.size())
             trainNetwork();
         counter++;
@@ -87,17 +104,14 @@ public class Agent {
         INDArray currentOutput = multiLayerNetwork.output(combinedLastInputs);
         INDArray targetOutput = targetMultiLayerNetwork.output(combinedNextInputs);
 
-//        for (int i = 0; i < actionArray.length; i++) {
-//            float futureReward = 0;
-//            if (actionArray[i].getNextInputIndArray() != null)
-//                futureReward = findMaxValue(targetOutput.getRow(i));
-//            float targetReward = actionArray[i].getReward() + discount * futureReward;
-//            int[] action = new int[actionArray[i].getLastOutput().length + 1];
-//            action[0] = i;
-//            for (int j = 0; j < actionArray[i].getLastOutput().length; j++)
-//                action[j] = convertBooleanArrayToIntegerArray(actionArray[i].getLastOutput())[j];
-//            currentOutput.putScalar(action, targetReward);
-//        }
+        for (int i = 0; i < actionArray.length; i++) {
+            float futureReward = 0;
+            if (actionArray[i].getNextInputIndArray() != null)
+                futureReward = findMaxValue(targetOutput.getRow(i));
+            float targetReward = actionArray[i].getReward() + discount * futureReward;
+            int actionScalar[] = {i, actionArray[i].getAction()};
+            currentOutput.putScalar(actionScalar, targetReward);
+        }
         multiLayerNetwork.fit(combinedLastInputs, currentOutput);
     }
 
@@ -122,24 +136,5 @@ public class Agent {
             if (actionArray[i].getNextInputIndArray() != null)
                 combinedNextInputs.putRow(i, actionArray[i].getNextInputIndArray());
         return combinedNextInputs;
-    }
-
-    private float findMaxValue(INDArray outputs) {
-        float maxValue = outputs.getFloat(0);
-        for (int i = 1; i < outputs.size(1); i++)
-            if (outputs.getFloat(i) > maxValue)
-                maxValue = outputs.getFloat(i);
-        return maxValue;
-    }
-
-    private int[] convertBooleanArrayToIntegerArray(boolean[] booleans) {
-        int[] conversion = new int[booleans.length];
-        for (int b = 0; b < booleans.length; b++) {
-            if (booleans[b])
-                conversion[b] = 1;
-            else
-                conversion[b] = 0;
-        }
-        return conversion;
     }
 }

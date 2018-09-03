@@ -2,27 +2,40 @@ package learning;
 
 import filemanager.Parameters;
 import lp.Output;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class LearningModel {
 
+    private static final Logger log = LoggerFactory.getLogger(LearningModel.class);
     private Parameters pm;
     private int trainingIterations;
     private DeepQ deepQ;
-    private double maxReward;
+    private double minCost;
 
-    public LearningModel(Parameters pm, double maxReward) {
+    public LearningModel(Parameters pm, double minCost) {
         this.pm = pm;
         this.trainingIterations = pm.getAux()[1];
         this.deepQ = new DeepQ(pm);
-        this.maxReward = maxReward;
+        this.minCost = minCost;
     }
 
     public void run(Output initialPlacement) {
-        for (int i = 0; i < trainingIterations; i++)
-            deepQ.learn(generateInput(initialPlacement), generateEnvironment(initialPlacement), maxReward);
+
+        float[] input = generateInput(initialPlacement);
+        int[] environment = generateEnvironment(initialPlacement);
+        int steps;
+        for (int i = 0; i < trainingIterations; i++) {
+            steps = deepQ.learn(input, environment, minCost);
+            log.info("iteration " + i + " -> " + steps + " steps");
+        }
+        for (int i = 0; i < 10; i++) {
+            steps = deepQ.reason(input, environment, minCost, 0);
+            log.info("Reasoning in " + steps + " steps");
+        }
     }
 
     private int[] generateEnvironment(Output initialOutput) {
