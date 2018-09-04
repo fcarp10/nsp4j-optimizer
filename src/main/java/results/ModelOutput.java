@@ -1,11 +1,11 @@
-package lp;
+package results;
 
 import filemanager.Parameters;
 import gurobi.GRB;
-import gurobi.GRBException;
+import learning.LearningModel;
+import lp.OptimizationModel;
 import network.Server;
 import org.graphstream.graph.Edge;
-import results.Results;
 import utils.Auxiliary;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Output {
+public class ModelOutput {
 
     private Parameters pm;
     private boolean[][] tSP;
@@ -29,56 +29,70 @@ public class Output {
     private int numOfMigrations;
     private int numOfReplicas;
 
-    public Output(OptimizationModel optimizationModel) throws GRBException {
-        pm = optimizationModel.getParameters();
-        tSP = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                if (optimizationModel.getVariables().tSP[s][p].get(GRB.DoubleAttr.X) == 1.0)
-                    tSP[s][p] = true;
-        tSPD = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()][pm.getDemandsPerTrafficFlowAux()];
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    if (optimizationModel.getVariables().tSPD[s][p][d].get(GRB.DoubleAttr.X) == 1.0)
-                        tSPD[s][p][d] = true;
-        fX = new boolean[pm.getServers().size()];
-        for (int x = 0; x < pm.getServers().size(); x++)
-            if (optimizationModel.getVariables().fX[x].get(GRB.DoubleAttr.X) == 1.0)
-                fX[x] = true;
-        fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()];
-        for (int x = 0; x < pm.getServers().size(); x++)
+    public ModelOutput(Parameters pm, OptimizationModel optimizationModel) {
+        this.pm = pm;
+        try {
+            tSP = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
             for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                    if (optimizationModel.getVariables().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
-                        fXSV[x][s][v] = true;
-        fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()][pm.getDemandsPerTrafficFlowAux()];
-        for (int x = 0; x < pm.getServers().size(); x++)
+                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+                    if (optimizationModel.getVariables().tSP[s][p].get(GRB.DoubleAttr.X) == 1.0)
+                        tSP[s][p] = true;
+            tSPD = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()][pm.getDemandsPerTrafficFlowAux()];
             for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        if (optimizationModel.getVariables().fXSVD[x][s][v][d].get(GRB.DoubleAttr.X) == 1.0)
-                            fXSVD[x][s][v][d] = true;
-        uL = new double[pm.getLinks().size()];
-        for (int l = 0; l < pm.getLinks().size(); l++)
-            uL[l] = optimizationModel.getVariables().uL[l].get(GRB.DoubleAttr.X);
-        uX = new double[pm.getServers().size()];
-        for (int x = 0; x < pm.getServers().size(); x++)
-            uX[x] = optimizationModel.getVariables().uX[x].get(GRB.DoubleAttr.X);
-        ukL = new double[pm.getLinks().size()];
-        for (int l = 0; l < pm.getLinks().size(); l++)
-            ukL[l] = optimizationModel.getVariables().ukL[l].get(GRB.DoubleAttr.X);
-        ukX = new double[pm.getServers().size()];
-        for (int x = 0; x < pm.getServers().size(); x++)
-            ukX[x] = optimizationModel.getVariables().ukX[x].get(GRB.DoubleAttr.X);
-        mPSV = new double[pm.getPaths().size()][pm.getServices().size()][pm.getServiceLengthAux()];
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                for (int p = 0; p < pm.getPaths().size(); p++)
-                    mPSV[p][s][v] = optimizationModel.getVariables().mPSV[p][s][v].get(GRB.DoubleAttr.X);
+                        if (optimizationModel.getVariables().tSPD[s][p][d].get(GRB.DoubleAttr.X) == 1.0)
+                            tSPD[s][p][d] = true;
+            fX = new boolean[pm.getServers().size()];
+            for (int x = 0; x < pm.getServers().size(); x++)
+                if (optimizationModel.getVariables().fX[x].get(GRB.DoubleAttr.X) == 1.0)
+                    fX[x] = true;
+            fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()];
+            for (int x = 0; x < pm.getServers().size(); x++)
+                for (int s = 0; s < pm.getServices().size(); s++)
+                    for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                        if (optimizationModel.getVariables().fXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+                            fXSV[x][s][v] = true;
+            fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()][pm.getDemandsPerTrafficFlowAux()];
+            for (int x = 0; x < pm.getServers().size(); x++)
+                for (int s = 0; s < pm.getServices().size(); s++)
+                    for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                            if (optimizationModel.getVariables().fXSVD[x][s][v][d].get(GRB.DoubleAttr.X) == 1.0)
+                                fXSVD[x][s][v][d] = true;
+            uL = new double[pm.getLinks().size()];
+            for (int l = 0; l < pm.getLinks().size(); l++)
+                uL[l] = optimizationModel.getVariables().uL[l].get(GRB.DoubleAttr.X);
+            uX = new double[pm.getServers().size()];
+            for (int x = 0; x < pm.getServers().size(); x++)
+                uX[x] = optimizationModel.getVariables().uX[x].get(GRB.DoubleAttr.X);
+            ukL = new double[pm.getLinks().size()];
+            for (int l = 0; l < pm.getLinks().size(); l++)
+                ukL[l] = optimizationModel.getVariables().ukL[l].get(GRB.DoubleAttr.X);
+            ukX = new double[pm.getServers().size()];
+            for (int x = 0; x < pm.getServers().size(); x++)
+                ukX[x] = optimizationModel.getVariables().ukX[x].get(GRB.DoubleAttr.X);
+            mPSV = new double[pm.getPaths().size()][pm.getServices().size()][pm.getServiceLengthAux()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                    for (int p = 0; p < pm.getPaths().size(); p++)
+                        mPSV[p][s][v] = optimizationModel.getVariables().mPSV[p][s][v].get(GRB.DoubleAttr.X);
+        } catch (Exception ignored) {
+        }
     }
 
-    public void calculateNumberOfMigrations(Output initialPlacement) {
+    public ModelOutput(Parameters pm, LearningModel learningModel) {
+        this.pm = pm;
+        this.tSP = learningModel.getDeepQ().gettSP();
+        this.tSPD = learningModel.getDeepQ().gettSPD();
+        this.fXSV = learningModel.getDeepQ().getfXSV();
+        this.fXSVD = learningModel.getDeepQ().getfXSVD();
+        this.uX = learningModel.getDeepQ().getuX();
+        this.uL = learningModel.getDeepQ().getuL();
+        this.mPSV = learningModel.getDeepQ().getmPSV();
+    }
+
+    public void calculateNumberOfMigrations(ModelOutput initialPlacement) {
         numOfMigrations = 0;
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
@@ -114,7 +128,7 @@ public class Output {
         return utilizationPerFunction;
     }
 
-    public Results generateResults(double cost) throws GRBException {
+    public Results generateResults(double cost) {
 
         List<Double> lu = new ArrayList<>(linksMap().values());
         List<Double> xu = new ArrayList<>(serversMap().values());
@@ -175,7 +189,8 @@ public class Output {
                     avgPathLength += pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getEdgePath().size();
                     usedPaths++;
                 }
-        avgPathLength = avgPathLength / usedPaths;
+        if (usedPaths != 0)
+            avgPathLength = avgPathLength / usedPaths;
         return avgPathLength;
     }
 

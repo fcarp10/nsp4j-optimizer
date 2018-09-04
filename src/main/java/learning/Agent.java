@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Agent {
+class Agent {
 
     private static final Logger log = LoggerFactory.getLogger(Agent.class);
     private MultiLayerNetwork multiLayerNetwork, targetMultiLayerNetwork;
@@ -57,7 +57,7 @@ public class Agent {
     }
 
     private boolean actionMask(int action) {
-        return action != this.lastAction && action != inputLength - 1;
+        return action != this.lastAction;
     }
 
     private int findMaxAction(INDArray outputs) {
@@ -83,11 +83,11 @@ public class Agent {
         return maxValue;
     }
 
-    void observeReward(INDArray inputIndArray, INDArray nextInputIndArray, int[] environment, double reward) {
+    void observeReward(INDArray inputIndArray, INDArray nextInputIndArray, double reward) {
         // TO BE CHANGED, SHOULD REMOVE THE ONE WITH LOWEST REWARD
         if (memoryAction.size() >= memoryCapacity)
             memoryAction.remove(rnd.nextInt(memoryAction.size()));
-        memoryAction.add(new Experience(inputIndArray, nextInputIndArray, environment, lastAction, (float) reward));
+        memoryAction.add(new Experience(inputIndArray, nextInputIndArray, lastAction, (float) reward));
         if (startSize < memoryAction.size())
             trainNetwork();
         counter++;

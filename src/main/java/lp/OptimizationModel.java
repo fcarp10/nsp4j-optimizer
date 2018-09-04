@@ -4,6 +4,7 @@ import filemanager.Parameters;
 import gurobi.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import results.ModelOutput;
 
 public class OptimizationModel {
 
@@ -68,12 +69,12 @@ public class OptimizationModel {
         return expr;
     }
 
-    public GRBLinExpr migrations(Output initialOutput, double weight) {
+    public GRBLinExpr migrations(ModelOutput initialModelOutput, double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < parameters.getServers().size(); x++)
             for (int s = 0; s < parameters.getServices().size(); s++)
                 for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-                    if (!initialOutput.getfXSV()[x][s][v]) continue;
+                    if (!initialModelOutput.getfXSV()[x][s][v]) continue;
                     expr.addConstant(weight);
                     expr.addTerm(-weight, this.variables.fXSV[x][s][v]);
                 }
@@ -126,9 +127,5 @@ public class OptimizationModel {
 
     public void setVariables(Variables variables) {
         this.variables = variables;
-    }
-
-    public Parameters getParameters() {
-        return parameters;
     }
 }

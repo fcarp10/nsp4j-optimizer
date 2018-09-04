@@ -4,16 +4,15 @@ package gui;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import utils.LinkJson;
-import utils.ServerJson;
-import gurobi.GRBException;
 import jdk.incubator.http.HttpClient;
 import jdk.incubator.http.HttpRequest;
 import jdk.incubator.http.HttpResponse;
-import lp.Output;
 import network.Server;
 import org.graphstream.graph.Edge;
+import results.ModelOutput;
 import results.Results;
+import utils.LinkJson;
+import utils.ServerJson;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -29,10 +28,10 @@ import java.util.Map;
 
 public class WebClient {
 
-    public static void updateResultsToWebApp(Output output, Results results) throws GRBException {
+    public static void updateResultsToWebApp(ModelOutput modelOutput, Results results) {
         if (results != null) {
-            List<ServerJson> serverJsons = getNodeStringsWithResults(output.serversMap(), output.functionsStringMap());
-            List<LinkJson> linkJsons = getLinkStringsWithResults(output.linksMap());
+            List<ServerJson> serverJsons = getNodeStringsWithResults(modelOutput.serversMap(), modelOutput.functionsStringMap());
+            List<LinkJson> linkJsons = getLinkStringsWithResults(modelOutput.linksMap());
             try {
                 postJsonNodes(serverJsons);
                 postJsonLinks(linkJsons);

@@ -36,7 +36,7 @@ public class Results {
     private int numOfMigrations;
     private int numOfReplicas;
 
-    public Results(Parameters pm, List<Double> lu, List<Double> xu, List<Integer> numOfFunctionsPerServer
+    Results(Parameters pm, List<Double> lu, List<Double> xu, List<Integer> numOfFunctionsPerServer
             , double totalTraffic, double trafficLinks, double avgPathLength, double cost, int numOfMigrations, int numOfReplicas
             , boolean fXSV[][][], boolean fXSVD[][][][], boolean tSP[][], boolean tSPD[][][], double mPSV[][][]) {
         this.pm = pm;
@@ -135,6 +135,34 @@ public class Results {
         return reroutedTraffic;
     }
 
+    public List<String> getFunctionsServers() {
+        return functionsServers;
+    }
+
+    public List<String> getFunctionsDemandsServers() {
+        return functionsDemandsServers;
+    }
+
+    public List<String> getServicesPaths() {
+        return servicesPaths;
+    }
+
+    public List<String> getServicesDemandsPaths() {
+        return servicesDemandsPaths;
+    }
+
+    public List<String> getServerUtilization() {
+        return serverUtilization;
+    }
+
+    public List<String> getLinkUtilization() {
+        return linkUtilization;
+    }
+
+    public List<String> getReroutedTraffic() {
+        return reroutedTraffic;
+    }
+
     public double getAvgLu() {
         return avgLu;
     }
@@ -205,33 +233,5 @@ public class Results {
 
     public int getNumOfReplicas() {
         return numOfReplicas;
-    }
-
-    public List<String> getFunctionsServers() {
-        return functionsServers;
-    }
-
-    public List<String> getFunctionsDemandsServers() {
-        return functionsDemandsServers;
-    }
-
-    public List<String> getServicesPaths() {
-        return servicesPaths;
-    }
-
-    public List<String> getServicesDemandsPaths() {
-        return servicesDemandsPaths;
-    }
-
-    public List<String> getServerUtilization() {
-        return serverUtilization;
-    }
-
-    public List<String> getLinkUtilization() {
-        return linkUtilization;
-    }
-
-    public List<String> getReroutedTraffic() {
-        return reroutedTraffic;
     }
 }

@@ -12,17 +12,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class Writer {
+class FileWriter {
 
     private File textPlainFile;
-    private java.io.FileWriter filewriter;
+    private java.io.FileWriter fileWriter;
     private String folder;
 
-    public Writer(String folderName) {
+    FileWriter(String folderName) {
         SimpleDateFormat MY_FORMAT = new SimpleDateFormat(
                 "dd-MM-yy_HH-mm_", Locale.getDefault());
         Date date = new Date();
-        String path = Writer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String path = FileWriter.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         path = path.replaceAll("%20", " ");
         File parentDirectory = new File(path + "/../results");
         if (!parentDirectory.exists())
@@ -31,15 +31,15 @@ public class Writer {
         new File(folder).mkdir();
     }
 
-    public void initializeTextPlainFile(String fileName) throws IOException {
+    void initializeTextPlainFile(String fileName) throws IOException {
         textPlainFile = new File(folder + "/" + fileName + ".txt");
-        filewriter = new java.io.FileWriter(textPlainFile, false);
+        fileWriter = new java.io.FileWriter(textPlainFile, false);
     }
 
-    public void writeTextPlain(String content) {
+    void writeTextPlain(String content) {
         try {
-            filewriter = new java.io.FileWriter(textPlainFile, true);
-            PrintWriter printer = new PrintWriter(filewriter);
+            fileWriter = new java.io.FileWriter(textPlainFile, true);
+            PrintWriter printer = new PrintWriter(fileWriter);
             printer.write(content);
             printer.close();
         } catch (IOException e) {
@@ -47,7 +47,7 @@ public class Writer {
         }
     }
 
-    public void createJsonForResults(String fileName, Object object) {
+    void createJsonForResults(String fileName, Object object) {
         File jsonFile = new File(folder + "/" + fileName + ".json");
         ObjectMapper mapper = new ObjectMapper(new JsonFactory());
         DefaultPrettyPrinter.Indenter indenter =

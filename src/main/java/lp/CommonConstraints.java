@@ -1,12 +1,10 @@
-package lp.constraints;
+package lp;
 
 import filemanager.Parameters;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBVar;
-import lp.OptimizationModel;
-import lp.Variables;
 import org.graphstream.graph.Node;
 import utils.Auxiliary;
 import utils.Scenario;
@@ -17,9 +15,9 @@ public class CommonConstraints {
     private Variables variables;
     private Parameters pm;
 
-    public CommonConstraints(OptimizationModel optimizationModel, Scenario scenario) throws GRBException {
+    public CommonConstraints(Parameters pm, OptimizationModel optimizationModel, Scenario scenario) throws GRBException {
+        this.pm = pm;
         this.optimizationModel = optimizationModel;
-        this.pm = optimizationModel.getParameters();
         this.variables = optimizationModel.getVariables();
         if (scenario.getConstraints().get("setLinkUtilizationExpr")) {
             if (scenario.getUseCase().equals("mgr") || scenario.getUseCase().equals("rep_mgr"))
