@@ -71,16 +71,17 @@ public class DeepQ {
         boolean optimal = false;
         int timeStep = 0;
         while (!optimal) {
-            int action = agent.getAction(inputIndArray, 1);
+            int[] actionMask = generateActionMask(localEnvironment);
+            int action = agent.getAction(inputIndArray, actionMask, 1);
             modifyEnvironment(false, localEnvironment, action);
             double reward = computeReward();
             timeStep++;
             input[input.length - 1] = timeStep;
             if (reward >= (1 - minCost) * THRESHOLD) {
-                agent.observeReward(inputIndArray, null, reward);
+                agent.observeReward(inputIndArray, null, reward, actionMask);
                 optimal = true;
             } else
-                agent.observeReward(inputIndArray, Nd4j.create(input), reward);
+                agent.observeReward(inputIndArray, Nd4j.create(input), reward, actionMask);
         }
         log.info("iteration " + iteration + " -> " + timeStep + " steps");
     }
@@ -92,14 +93,15 @@ public class DeepQ {
         int timeStep = 0;
         double reward = 0;
         while (!optimal) {
-            int action = agent.getAction(inputIndArray, epsilon);
+            int[] actionMask = generateActionMask(localEnvironment);
+            int action = agent.getAction(inputIndArray, actionMask, epsilon);
             modifyEnvironment(true, localEnvironment, action);
             reward = computeReward();
             timeStep++;
             if (reward >= (1 - minCost) * THRESHOLD)
                 optimal = true;
             else {
-                agent.observeReward(inputIndArray, Nd4j.create(input), reward);
+                agent.observeReward(inputIndArray, Nd4j.create(input), reward, actionMask);
                 if (timeStep > 15)
                     break;
             }
@@ -107,6 +109,24 @@ public class DeepQ {
         computeFunctionsServers();
         log.info("reasoning in -> " + timeStep + " steps");
         return 1 - reward;
+    }
+
+    private int[] generateActionMask(int[] environment) {
+        int[] actionMask = new int[environment.length - 1];
+        for (int v = 0; v < pm.getServiceLengthAux(); v++) {
+            int activations = 0;
+            for (int x = 0; x < pm.getServers().size(); x++)
+                if (environment[x * pm.getServiceLengthAux() + v] == 1)
+                    activations++;
+            for (int x = 0; x < pm.getServers().size(); x++) {
+                if (activations == pm.getServices().size())
+                    if (environment[x * pm.getServiceLengthAux() + v] == 0)
+                        actionMask[x * pm.getServiceLengthAux() + v] = 1;
+                if (activations > pm.getServices().size())
+                    actionMask[x * pm.getServiceLengthAux() + v] = 1;
+            }
+        }
+        return actionMask;
     }
 
     private void modifyEnvironment(boolean isReasoning, int[] environment, int action) {
@@ -132,28 +152,31 @@ public class DeepQ {
 
     private List<Path> computeAdmissiblePaths(int s, int[] environment) {
         List<Path> admissiblePaths = new ArrayList<>();
-        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
+        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
+                boolean allFunctionsExist = true;
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                     boolean activatedInPath = false;
                     outerLoop:
                     for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++) {
                         Node node = pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n);
                         for (int x = 0; x < pm.getServers().size(); x++) {
-                            if (pm.getServers().get(x).getNodeParent().equals(node)) {
+                            if (pm.getServers().get(x).getNodeParent().equals(node))
                                 if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
                                     activatedInPath = true;
                                     break outerLoop;
                                 }
-                            }
                         }
                     }
-                    if (!activatedInPath)
+                    if (!activatedInPath) {
+                        allFunctionsExist = false;
                         break;
+                    }
                 }
-                admissiblePaths.add(pm.getPaths().get(p));
+                if (allFunctionsExist)
+                    admissiblePaths.add(pm.getPaths().get(p));
             }
-        }
+
         return admissiblePaths;
     }
 

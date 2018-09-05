@@ -7,12 +7,14 @@ public class Experience {
     private INDArray inputIndArray, nextInputIndArray;
     private int action;
     private float reward;
+    private int[] actionMask;
 
-    Experience(INDArray inputIndArray, INDArray nextInputIndArray, int action, float reward) {
+    Experience(INDArray inputIndArray, INDArray nextInputIndArray, int action, float reward, int[] actionMask) {
         this.inputIndArray = inputIndArray;
         this.nextInputIndArray = nextInputIndArray;
         this.action = action;
         this.reward = reward;
+        this.actionMask = actionMask;
     }
 
     INDArray getInputIndArray() {
@@ -29,5 +31,9 @@ public class Experience {
 
     float getReward() {
         return reward;
+    }
+
+    public int[] getActionMask() {
+        return actionMask;
     }
 }

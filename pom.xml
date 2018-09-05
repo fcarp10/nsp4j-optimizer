@@ -23,7 +23,7 @@
         <dependency>
             <groupId>de.tubs</groupId>
             <artifactId>nfv-framework</artifactId>
-            <version>0.1.8</version>
+            <version>0.2</version>
         </dependency>
         <dependency>
             <groupId>com.gurobi</groupId>
