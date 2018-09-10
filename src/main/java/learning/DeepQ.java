@@ -1,289 +1,135 @@
-
 package learning;
 
-import filemanager.Parameters;
-import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
-import org.deeplearning4j.nn.weights.WeightInit;
-import org.graphstream.graph.Node;
-import org.graphstream.graph.Path;
-import org.nd4j.linalg.activations.Activation;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import utils.Auxiliary;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-public class DeepQ {
+class DeepQ {
 
     private static final Logger log = LoggerFactory.getLogger(DeepQ.class);
-    private Agent agent;
-    private final double THRESHOLD = 1.0;
-    private Parameters pm;
-    private double uX[];
-    private double uL[];
-    private boolean fXSVD[][][][];
-    private boolean fXSV[][][];
-    private boolean tSP[][];
-    private boolean tSPD[][][];
-    private double mPSV[][][];
+    private MultiLayerNetwork multiLayerNetwork, targetMultiLayerNetwork;
+    private List<Experience> experiences;
+    private int startSize, batchSize, freq, counter, inputLength, memoryCapacity, lastAction;
+    private float discount;
+    private Random rnd;
 
-    DeepQ(Parameters pm) {
-        this.pm = pm;
-        int inputLength = pm.getServers().size() * pm.getServices().size() * pm.getServiceLengthAux();
-        int outputLength = pm.getServers().size() * pm.getServices().size() * pm.getServiceLengthAux();
-        int hiddenLayerOut = 150;
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .seed(123)
-                .iterations(1)
-                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-                .learningRate(0.0025)
-                .updater(Updater.NESTEROVS)
-                .list()
-                .layer(0, new DenseLayer.Builder()
-                        .nIn(inputLength)
-                        .nOut(hiddenLayerOut)
-                        .weightInit(WeightInit.XAVIER)
-                        .activation(Activation.RELU)
-                        .build())
-                .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
-                        .nIn(hiddenLayerOut)
-                        .nOut(outputLength)
-                        .weightInit(WeightInit.XAVIER)
-                        .activation(Activation.IDENTITY)
-                        .build())
-                .pretrain(false)
-                .backprop(true)
-                .build();
-        agent = new Agent(conf, 100000, .99f, 1024, 100, 1024, inputLength);
+    DeepQ(MultiLayerConfiguration conf, int memoryCapacity, float discount, int batchSize, int freq, int startSize, int inputLength) {
+        this.multiLayerNetwork = new MultiLayerNetwork(conf);
+        this.multiLayerNetwork.init();
+        this.targetMultiLayerNetwork = new MultiLayerNetwork(conf);
+        this.targetMultiLayerNetwork.init();
+        this.targetMultiLayerNetwork.setParams(multiLayerNetwork.params());
+        this.experiences = new ArrayList<>();
+        this.memoryCapacity = memoryCapacity;
+        this.discount = discount;
+        this.batchSize = batchSize;
+        this.freq = freq;
+        this.counter = 0;
+        this.startSize = startSize;
+        this.inputLength = inputLength;
+        this.rnd = new Random();
+        this.lastAction = -1;
     }
 
-    void learn(float[] input, int[] environment, double minCost, int iteration) {
-        int[] localEnvironment = environment.clone();
-        INDArray inputIndArray = Nd4j.create(input);
-        boolean optimal = false;
-        int timeStep = 0;
-        while (!optimal) {
-            int[] actionMask = generateActionMask(localEnvironment);
-            int action = agent.getAction(inputIndArray, actionMask, 1);
-            modifyEnvironment(false, localEnvironment, action);
-            double reward = computeReward();
-            timeStep++;
-            input[input.length - 1] = timeStep;
-            if (reward >= (1 - minCost) * THRESHOLD) {
-                agent.observeReward(inputIndArray, null, reward, actionMask);
-                optimal = true;
-            } else
-                agent.observeReward(inputIndArray, Nd4j.create(input), reward, actionMask);
-        }
-        log.info("iteration " + iteration + " -> " + timeStep + " steps");
+    int getAction(INDArray input, int[] actionMask, double epsilon) {
+        boolean isValid = false;
+        INDArray indArrayOutput = multiLayerNetwork.output(input);
+        log.debug("DeepQ output: " + indArrayOutput);
+        if (epsilon > rnd.nextDouble()) {
+            int action = -1;
+            while (!isValid) {
+                action = rnd.nextInt(indArrayOutput.size(1));
+                if (actionMask[action] == 1 && action != this.lastAction)
+                    isValid = true;
+            }
+            this.lastAction = action;
+        } else
+            this.lastAction = findMaxAction(indArrayOutput, actionMask);
+        log.debug("Agent action: " + this.lastAction);
+        return this.lastAction;
     }
 
-    double reason(float[] input, int[] environment, double minCost, double epsilon) {
-        int[] localEnvironment = environment.clone();
-        INDArray inputIndArray = Nd4j.create(input);
-        boolean optimal = false;
-        int timeStep = 0;
-        double reward = 0;
-        while (!optimal) {
-            int[] actionMask = generateActionMask(localEnvironment);
-            int action = agent.getAction(inputIndArray, actionMask, epsilon);
-            modifyEnvironment(true, localEnvironment, action);
-            reward = computeReward();
-            timeStep++;
-            if (reward >= (1 - minCost) * THRESHOLD)
-                optimal = true;
-            else {
-                agent.observeReward(inputIndArray, Nd4j.create(input), reward, actionMask);
-                if (timeStep > 15)
-                    break;
+    private int findMaxAction(INDArray outputs, int actionMask[]) {
+        float maxValue = Float.NEGATIVE_INFINITY;
+        int actionMax = -1;
+        for (int i = 0; i < outputs.size(1); i++) {
+            if (actionMask[i] != 1) continue;
+            if (outputs.getFloat(i) > maxValue) {
+                maxValue = outputs.getFloat(i);
+                actionMax = i;
             }
         }
-        computeFunctionsServers();
-        log.info("reasoning in -> " + timeStep + " steps");
-        return 1 - reward;
+        return actionMax;
     }
 
-    private int[] generateActionMask(int[] environment) {
-        int[] actionMask = new int[environment.length - 1];
-        for (int v = 0; v < pm.getServiceLengthAux(); v++) {
-            int activations = 0;
-            for (int x = 0; x < pm.getServers().size(); x++)
-                if (environment[x * pm.getServiceLengthAux() + v] == 1)
-                    activations++;
-            for (int x = 0; x < pm.getServers().size(); x++) {
-                if (activations == pm.getServices().size())
-                    if (environment[x * pm.getServiceLengthAux() + v] == 0)
-                        actionMask[x * pm.getServiceLengthAux() + v] = 1;
-                if (activations > pm.getServices().size())
-                    actionMask[x * pm.getServiceLengthAux() + v] = 1;
-            }
+    private float findMaxValue(INDArray outputs, int actionMask[]) {
+        float maxValue = Float.NEGATIVE_INFINITY;
+        for (int i = 0; i < outputs.size(1); i++) {
+            if (actionMask[i] != 1) continue;
+            if (outputs.getFloat(i) > maxValue)
+                maxValue = outputs.getFloat(i);
         }
-        return actionMask;
+        return maxValue;
     }
 
-    private void modifyEnvironment(boolean isReasoning, int[] environment, int action) {
-        if (environment[action] == 1)
-            environment[action] = 0;
-        else environment[action] = 1;
-        Map<Integer, List<Path>> servicesAdmissiblePaths = getServicesAdmissiblePaths(environment);
-        chooseServersPerDemand(servicesAdmissiblePaths, environment);
-        calculateServerUtilization(environment);
-        calculateLinkUtilization(environment);
-        if (isReasoning) {
-            computePaths();
-            calculateReroutingTraffic();
+    void observeReward(INDArray inputIndArray, INDArray nextInputIndArray, double reward, int[] actionMask) {
+        // TO BE CHANGED, SHOULD REMOVE THE ONE WITH LOWEST REWARD
+        if (experiences.size() >= memoryCapacity)
+            experiences.remove(rnd.nextInt(experiences.size()));
+        experiences.add(new Experience(inputIndArray, nextInputIndArray, lastAction, (float) reward, actionMask));
+        if (startSize < experiences.size())
+            trainNetwork();
+        counter++;
+        if (counter == freq) {
+            counter = 0;
+            targetMultiLayerNetwork.setParams(multiLayerNetwork.params());
         }
     }
 
-    private Map<Integer, List<Path>> getServicesAdmissiblePaths(int[] environment) {
-        Map<Integer, List<Path>> servicesAdmissiblePaths = new HashMap<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            servicesAdmissiblePaths.put(s, computeAdmissiblePaths(s, environment));
-        return servicesAdmissiblePaths;
-    }
-
-    private List<Path> computeAdmissiblePaths(int s, int[] environment) {
-        List<Path> admissiblePaths = new ArrayList<>();
-        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
-                boolean allFunctionsExist = true;
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                    boolean activatedInPath = false;
-                    outerLoop:
-                    for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++) {
-                        Node node = pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n);
-                        for (int x = 0; x < pm.getServers().size(); x++) {
-                            if (pm.getServers().get(x).getNodeParent().equals(node))
-                                if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
-                                    activatedInPath = true;
-                                    break outerLoop;
-                                }
-                        }
-                    }
-                    if (!activatedInPath) {
-                        allFunctionsExist = false;
-                        break;
-                    }
-                }
-                if (allFunctionsExist)
-                    admissiblePaths.add(pm.getPaths().get(p));
-            }
-
-        return admissiblePaths;
-    }
-
-    private void chooseServersPerDemand(Map<Integer, List<Path>> tSP, int[] environment) {
-        Random rnd = new Random();
-        fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()][pm.getDemandsPerTrafficFlowAux()];
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-                Path path = tSP.get(s).get(rnd.nextInt(tSP.get(s).size()));
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                    outerLoop:
-                    for (int n = 0; n < path.getNodePath().size(); n++)
-                        for (int x = 0; x < pm.getServers().size(); x++)
-                            if (pm.getServers().get(x).getNodeParent().equals(path.getNodePath().get(n)))
-                                if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
-                                    fXSVD[x][s][v][d] = true;
-                                    break outerLoop;
-                                }
-                }
-            }
-    }
-
-    private void calculateServerUtilization(int[] environment) {
-        uX = new double[pm.getServers().size()];
-        for (int x = 0; x < pm.getServers().size(); x++) {
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                    double demands = 0;
-                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-                        if (fXSVD[x][s][v][d]) {
-                            demands += pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d);
-                        }
-                    }
-                    if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1)
-                        uX[x] += ((demands * pm.getServices().get(s).getFunctions().get(v).getLoad())
-                                + (pm.getServices().get(s).getFunctions().get(v).getLoad() * pm.getAux()[0]))
-                                / pm.getServers().get(x).getCapacity();
-                }
+    private void trainNetwork() {
+        Experience experiences[] = getBatch();
+        INDArray combinedLastInputs = combineInputs(experiences);
+        INDArray combinedNextInputs = combineNextInputs(experiences);
+        INDArray currentOutput = multiLayerNetwork.output(combinedLastInputs);
+        INDArray targetOutput = targetMultiLayerNetwork.output(combinedNextInputs);
+        for (int i = 0; i < experiences.length; i++) {
+            float futureReward = 0;
+            if (experiences[i].getNextInputIndArray() != null)
+                futureReward = findMaxValue(targetOutput.getRow(i), experiences[i].getActionMask());
+            float targetReward = experiences[i].getReward() + discount * futureReward;
+            int actionScalar[] = {i, experiences[i].getAction()};
+            currentOutput.putScalar(actionScalar, targetReward);
         }
+        multiLayerNetwork.fit(combinedLastInputs, currentOutput);
     }
 
-    private void calculateLinkUtilization(int[] environment) {
-        uL = new double[pm.getLinks().size()];
-        // TODO
+    private Experience[] getBatch() {
+        int size = experiences.size() < batchSize ? experiences.size() : batchSize;
+        Experience[] batch = new Experience[size];
+        for (int i = 0; i < size; i++)
+            batch[i] = experiences.get(this.rnd.nextInt(experiences.size()));
+        return batch;
     }
 
-    private double computeReward() {
-        double cost, totalCost = 0;
-        for (Double serverUtilization : uX) {
-            cost = 0;
-            for (int f = 0; f < Auxiliary.linearCostFunctions.getValues().size(); f++) {
-                double value = Auxiliary.linearCostFunctions.getValues().get(f)[0] * serverUtilization
-                        + Auxiliary.linearCostFunctions.getValues().get(f)[1];
-                if (value > cost)
-                    cost = value;
-            }
-            totalCost += cost;
-        }
-        return 1 - (totalCost / pm.getServers().size());
+    private INDArray combineInputs(Experience actionArray[]) {
+        INDArray combinedLastInputs = Nd4j.create(actionArray.length, inputLength);
+        for (int i = 0; i < actionArray.length; i++)
+            combinedLastInputs.putRow(i, actionArray[i].getInputIndArray());
+        return combinedLastInputs;
     }
 
-    private void computeFunctionsServers() {
-        fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()];
-        for (int x = 0; x < pm.getServers().size(); x++)
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        if (fXSVD[x][s][v][d])
-                            fXSV[x][s][v] = true;
-    }
-
-    private void computePaths() {
-        tSP = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
-        tSPD = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()][pm.getDemandsPerTrafficFlowAux()];
-        // TODO
-    }
-
-    private void calculateReroutingTraffic() {
-        mPSV = new double[pm.getPaths().size()][pm.getServices().size()][pm.getServiceLengthAux()];
-        // TODO
-    }
-
-    public double[] getuX() {
-        return uX;
-    }
-
-    public double[] getuL() {
-        return uL;
-    }
-
-    public boolean[][][][] getfXSVD() {
-        return fXSVD;
-    }
-
-    public boolean[][][] getfXSV() {
-        return fXSV;
-    }
-
-    public boolean[][] gettSP() {
-        return tSP;
-    }
-
-    public boolean[][][] gettSPD() {
-        return tSPD;
-    }
-
-    public double[][][] getmPSV() {
-        return mPSV;
+    private INDArray combineNextInputs(Experience actionArray[]) {
+        INDArray combinedNextInputs = Nd4j.create(actionArray.length, inputLength);
+        for (int i = 0; i < actionArray.length; i++)
+            if (actionArray[i].getNextInputIndArray() != null)
+                combinedNextInputs.putRow(i, actionArray[i].getNextInputIndArray());
+        return combinedNextInputs;
     }
 }

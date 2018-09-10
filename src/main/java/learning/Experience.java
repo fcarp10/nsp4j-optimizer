@@ -33,7 +33,7 @@ public class Experience {
         return reward;
     }
 
-    public int[] getActionMask() {
+    int[] getActionMask() {
         return actionMask;
     }
 }

@@ -83,13 +83,13 @@ public class ModelOutput {
 
     public ModelOutput(Parameters pm, LearningModel learningModel) {
         this.pm = pm;
-        this.tSP = learningModel.getDeepQ().gettSP();
-        this.tSPD = learningModel.getDeepQ().gettSPD();
-        this.fXSV = learningModel.getDeepQ().getfXSV();
-        this.fXSVD = learningModel.getDeepQ().getfXSVD();
-        this.uX = learningModel.getDeepQ().getuX();
-        this.uL = learningModel.getDeepQ().getuL();
-        this.mPSV = learningModel.getDeepQ().getmPSV();
+        this.tSP = learningModel.gettSP();
+        this.tSPD = learningModel.gettSPD();
+        this.fXSV = learningModel.getfXSV();
+        this.fXSVD = learningModel.getfXSVD();
+        this.uX = learningModel.getuX();
+        this.uL = learningModel.getuL();
+        this.mPSV = learningModel.getmPSV();
     }
 
     public void calculateNumberOfMigrations(ModelOutput initialPlacement) {
