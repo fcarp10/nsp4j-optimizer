@@ -79,11 +79,11 @@ class DeepQ {
         return maxValue;
     }
 
-    void observeReward(INDArray inputIndArray, INDArray nextInputIndArray, double reward, int[] actionMask) {
+    void observeReward(INDArray inputIndArray, INDArray nextInputIndArray, double reward, int[] nextActionMask) {
         // TO BE CHANGED, SHOULD REMOVE THE ONE WITH LOWEST REWARD
         if (experiences.size() >= memoryCapacity)
             experiences.remove(rnd.nextInt(experiences.size()));
-        experiences.add(new Experience(inputIndArray, nextInputIndArray, lastAction, (float) reward, actionMask));
+        experiences.add(new Experience(inputIndArray, nextInputIndArray, lastAction, (float) reward, nextActionMask));
         if (startSize < experiences.size())
             trainNetwork();
         counter++;
@@ -102,7 +102,7 @@ class DeepQ {
         for (int i = 0; i < experiences.length; i++) {
             float futureReward = 0;
             if (experiences[i].getNextInputIndArray() != null)
-                futureReward = findMaxValue(targetOutput.getRow(i), experiences[i].getActionMask());
+                futureReward = findMaxValue(targetOutput.getRow(i), experiences[i].getNextActionMask());
             float targetReward = experiences[i].getReward() + discount * futureReward;
             int actionScalar[] = {i, experiences[i].getAction()};
             currentOutput.putScalar(actionScalar, targetReward);

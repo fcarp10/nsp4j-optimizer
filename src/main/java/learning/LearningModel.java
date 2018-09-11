@@ -37,7 +37,7 @@ public class LearningModel {
 
     public LearningModel(Parameters pm) {
         this.pm = pm;
-        int inputLength = pm.getServers().size() * pm.getServices().size() * pm.getServiceLengthAux();
+        int inputLength = pm.getServers().size() * pm.getServices().size() * pm.getServiceLengthAux() + 1;
         int outputLength = pm.getServers().size() * pm.getServices().size() * pm.getServiceLengthAux();
         int hiddenLayerOut = 150;
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
@@ -89,7 +89,7 @@ public class LearningModel {
                         inputList.add(individualInput);
                     }
                 }
-        float[] inputArray = new float[inputList.size() * (2 + pm.getServiceLengthAux())];
+        float[] inputArray = new float[inputList.size() * (2 + pm.getServiceLengthAux()) + 1];
         for (int i = 0; i < inputList.size(); i++)
             if (inputList.get(i).length >= 0)
                 System.arraycopy(inputList.get(i), 0, inputArray, i * 4, inputList.get(i).length);
@@ -97,7 +97,7 @@ public class LearningModel {
     }
 
     private int[] generateEnvironment(ModelOutput initialModelOutput) {
-        int[] environment = new int[pm.getServers().size() * pm.getTotalNumberOfFunctionsAux() + 1];
+        int[] environment = new int[pm.getServers().size() * pm.getTotalNumberOfFunctionsAux()];
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
@@ -112,41 +112,44 @@ public class LearningModel {
 
     private void learn(float[] input, int[] environment, double minCost, int iteration) {
         int[] localEnvironment = environment.clone();
-        INDArray inputIndArray = Nd4j.create(input);
-        boolean optimal = false;
         int timeStep = 0;
-        while (!optimal) {
-            int[] actionMask = generateActionMask(localEnvironment);
-            int action = deepQ.getAction(inputIndArray, actionMask, 1);
+        int action = -1;
+        while (true) {
+            INDArray inputIndArray = Nd4j.create(input);
+            int[] actionMask = generateActionMask(localEnvironment, action);
+            action = deepQ.getAction(inputIndArray, actionMask, 1);
             modifyEnvironment(false, localEnvironment, action);
+            int[] nextActionMask = generateActionMask(localEnvironment, action);
             double reward = computeReward();
             timeStep++;
             input[input.length - 1] = timeStep;
             if (reward >= (1 - minCost) * THRESHOLD) {
-                deepQ.observeReward(inputIndArray, null, reward, actionMask);
-                optimal = true;
+                deepQ.observeReward(inputIndArray, null, reward, nextActionMask);
+                break;
             } else
-                deepQ.observeReward(inputIndArray, Nd4j.create(input), reward, actionMask);
+                deepQ.observeReward(inputIndArray, Nd4j.create(input), reward, nextActionMask);
         }
         log.info("iteration " + iteration + " -> " + timeStep + " steps");
     }
 
     private double reason(float[] input, int[] environment, double minCost, double epsilon) {
         int[] localEnvironment = environment.clone();
-        INDArray inputIndArray = Nd4j.create(input);
-        boolean optimal = false;
         int timeStep = 0;
-        double reward = 0;
-        while (!optimal) {
-            int[] actionMask = generateActionMask(localEnvironment);
-            int action = deepQ.getAction(inputIndArray, actionMask, epsilon);
+        double reward;
+        int action = -1;
+        while (true) {
+            INDArray inputIndArray = Nd4j.create(input);
+            int[] actionMask = generateActionMask(localEnvironment, action);
+            action = deepQ.getAction(inputIndArray, actionMask, epsilon);
             modifyEnvironment(true, localEnvironment, action);
+            int[] nextActionMask = generateActionMask(localEnvironment, action);
             reward = computeReward();
             timeStep++;
+            input[input.length - 1] = timeStep;
             if (reward >= (1 - minCost) * THRESHOLD)
-                optimal = true;
+                break;
             else {
-                deepQ.observeReward(inputIndArray, Nd4j.create(input), reward, actionMask);
+                deepQ.observeReward(inputIndArray, Nd4j.create(input), reward, nextActionMask);
                 if (timeStep > 15)
                     break;
             }
@@ -156,8 +159,8 @@ public class LearningModel {
         return 1 - reward;
     }
 
-    private int[] generateActionMask(int[] environment) {
-        int[] actionMask = new int[environment.length - 1];
+    private int[] generateActionMask(int[] environment, int pastAction) {
+        int[] actionMask = new int[environment.length];
         for (int v = 0; v < pm.getServiceLengthAux(); v++) {
             int activations = 0;
             for (int x = 0; x < pm.getServers().size(); x++)
@@ -171,6 +174,8 @@ public class LearningModel {
                     actionMask[x * pm.getServiceLengthAux() + v] = 1;
             }
         }
+        if (pastAction != -1)
+            actionMask[pastAction] = 0;
         return actionMask;
     }
 
