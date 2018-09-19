@@ -2,29 +2,26 @@ package app;
 
 import filemanager.ConfigFiles;
 import filemanager.Parameters;
-import gui.WebClient;
-import gui.WebServer;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import learning.LearningModel;
 import lp.OptimizationModel;
-import results.ModelOutput;
+import results.Output;
 import lp.Variables;
-import lp.CommonConstraints;
-import lp.SpecialConstraints;
+import lp.Constraints;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import results.OutputFiles;
+import elements.OutputFiles;
 import results.Results;
-import utils.Scenario;
+import elements.Scenario;
 
 
 public class App {
 
     private static final Logger log = LoggerFactory.getLogger(App.class);
     private static Parameters parameters;
-    private static ModelOutput initialModelOutput;
+    private static Output initialOutput;
 
     public static void start(Scenario scenario) {
         try {
@@ -63,18 +60,17 @@ public class App {
         OptimizationModel optimizationModel = new OptimizationModel(parameters);
         Variables variables = new Variables(parameters, optimizationModel.getGrbModel());
         optimizationModel.setVariables(variables);
-        new CommonConstraints(parameters, optimizationModel, scenario);
-        new SpecialConstraints(parameters, optimizationModel, scenario, initialModelOutput);
+        new Constraints(parameters, optimizationModel, scenario, initialOutput);
         if (scenario.getUseCase().equals("all") || scenario.getUseCase().equals("exp") && useCase.equals("init"))
             expr = generateExprForObjectiveFunction(optimizationModel, "servers");
         else
             expr = generateExprForObjectiveFunction(optimizationModel, scenario.getObjective());
         optimizationModel.setObjectiveFunction(expr, scenario.isMaximization());
         double objVal = optimizationModel.run();
-        ModelOutput modelOutput = generateModelOutput(optimizationModel);
-        generateResults(modelOutput, useCase, objVal, outputFiles);
+        Output output = generateModelOutput(optimizationModel);
+        submitResults(output, useCase, objVal, outputFiles);
         if (useCase.equals("init"))
-            initialModelOutput = modelOutput;
+            initialOutput = output;
         else
             optimizationModel.finishModel();
         return objVal;
@@ -82,9 +78,9 @@ public class App {
 
     private static void runRL(String useCase, double objValue, OutputFiles outputFiles) {
         LearningModel learningModel = new LearningModel(parameters);
-        double objVal = learningModel.run(initialModelOutput, objValue);
-        ModelOutput modelOutput = generateModelOutput(learningModel);
-        generateResults(modelOutput, useCase, objVal, outputFiles);
+        double objVal = learningModel.run(initialOutput, objValue);
+        Output output = generateModelOutput(learningModel);
+        submitResults(output, useCase, objVal, outputFiles);
     }
 
     private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel optimizationModel, String objective) throws GRBException {
@@ -114,24 +110,20 @@ public class App {
         return new OutputFiles(parameters.getScenario(), title.toString());
     }
 
-    private static ModelOutput generateModelOutput(OptimizationModel optimizationModel) {
-        return new ModelOutput(parameters, optimizationModel);
+    private static Output generateModelOutput(OptimizationModel optimizationModel) {
+        return new Output(parameters, optimizationModel);
     }
 
-    private static ModelOutput generateModelOutput(LearningModel learningModel) {
-        return new ModelOutput(parameters, learningModel);
+    private static Output generateModelOutput(LearningModel learningModel) {
+        return new Output(parameters, learningModel);
     }
 
-    private static void generateResults(ModelOutput modelOutput, String useCase, double objVal, OutputFiles outputFiles) {
+    private static void submitResults(Output output, String useCase, double objVal, OutputFiles outputFiles) {
         if (objVal >= 0) {
-            if (initialModelOutput != null && !useCase.equals("init")) {
-                modelOutput.calculateNumberOfMigrations(initialModelOutput);
-                modelOutput.calculateNumberOfReplications();
-            }
-            Results results = modelOutput.generateResults(objVal);
+            Results results = output.generateResults(objVal, initialOutput);
             outputFiles.printSummary(results);
             outputFiles.print(results, useCase);
-            WebClient.updateResultsToWebApp(modelOutput, results);
+            WebClient.updateResultsToWebApp(output, results);
             WebClient.postMessage("Solution found");
         } else
             WebClient.postMessage("No solution");

@@ -1,4 +1,6 @@
-package results;
+package elements;
+
+import results.Results;
 
 public class OutputFiles {
 

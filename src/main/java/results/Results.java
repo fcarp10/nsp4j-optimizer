@@ -2,7 +2,6 @@ package results;
 
 
 import filemanager.Parameters;
-import utils.Auxiliary;
 
 import java.util.ArrayList;
 import java.util.List;

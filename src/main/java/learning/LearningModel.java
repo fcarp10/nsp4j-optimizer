@@ -14,10 +14,10 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-import results.ModelOutput;
+import results.Output;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import utils.Auxiliary;
+import results.Auxiliary;
 
 import java.util.*;
 
@@ -65,7 +65,7 @@ public class LearningModel {
         deepQ = new DeepQ(conf, 100000, .99f, 1024, 100, 1024, inputLength);
     }
 
-    public double run(ModelOutput initialPlacement, double minCost) {
+    public double run(Output initialPlacement, double minCost) {
         float[] input = generateInput(initialPlacement);
         int[] environment = generateEnvironment(initialPlacement);
         for (int i = 0; i < pm.getAux()[1]; i++)
@@ -73,18 +73,18 @@ public class LearningModel {
         return reason(input, environment, minCost, 0);
     }
 
-    private float[] generateInput(ModelOutput initialModelOutput) {
+    private float[] generateInput(Output initialOutput) {
         List<float[]> inputList = new ArrayList<>();
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-                    if (initialModelOutput.gettSPD()[s][p][d]) {
+                    if (initialOutput.getSpd()[s][p][d]) {
                         float[] individualInput = new float[2 + pm.getServiceLengthAux()];
                         individualInput[0] = pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d);
                         individualInput[1] = p;
                         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                             for (int x = 0; x < pm.getServers().size(); x++)
-                                if (initialModelOutput.getfXSVD()[x][s][v][d])
+                                if (initialOutput.getXsvd()[x][s][v][d])
                                     individualInput[2 + v] = x;
                         inputList.add(individualInput);
                     }
@@ -96,13 +96,13 @@ public class LearningModel {
         return inputArray;
     }
 
-    private int[] generateEnvironment(ModelOutput initialModelOutput) {
+    private int[] generateEnvironment(Output initialOutput) {
         int[] environment = new int[pm.getServers().size() * pm.getTotalNumberOfFunctionsAux()];
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                     int pointer = x * pm.getTotalNumberOfFunctionsAux() + s * pm.getServices().get(s).getFunctions().size() + v;
-                    if (initialModelOutput.getfXSV()[x][s][v])
+                    if (initialOutput.getXsv()[x][s][v])
                         environment[pointer] = 1;
                     else
                         environment[pointer] = 0;

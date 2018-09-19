@@ -4,7 +4,6 @@ import filemanager.Parameters;
 import gurobi.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import results.ModelOutput;
 
 public class OptimizationModel {
 
@@ -37,60 +36,35 @@ public class OptimizationModel {
     public GRBLinExpr usedServersExpr() {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < parameters.getServers().size(); x++)
-            expr.addTerm(1.0, variables.fX[x]);
+            expr.addTerm(1.0, variables.x[x]);
         return expr;
     }
 
     public GRBLinExpr linkUtilizationCostsExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int l = 0; l < parameters.getLinks().size(); l++)
-            expr.addTerm(weight, variables.ukL[l]);
+            expr.addTerm(weight, variables.kl[l]);
         return expr;
     }
 
     public GRBLinExpr serverUtilizationCostsExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < parameters.getServers().size(); x++)
-            expr.addTerm(weight, variables.ukX[x]);
+            expr.addTerm(weight, variables.kx[x]);
         return expr;
     }
 
     public GRBLinExpr linkUtilizationExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int l = 0; l < parameters.getLinks().size(); l++)
-            expr.addTerm(weight, variables.uL[l]);
+            expr.addTerm(weight, variables.ul[l]);
         return expr;
     }
 
     public GRBLinExpr serverUtilizationExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < parameters.getServers().size(); x++)
-            expr.addTerm(weight, variables.uX[x]);
-        return expr;
-    }
-
-    public GRBLinExpr migrations(ModelOutput initialModelOutput, double weight) {
-        GRBLinExpr expr = new GRBLinExpr();
-        for (int x = 0; x < parameters.getServers().size(); x++)
-            for (int s = 0; s < parameters.getServices().size(); s++)
-                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-                    if (!initialModelOutput.getfXSV()[x][s][v]) continue;
-                    expr.addConstant(weight);
-                    expr.addTerm(-weight, this.variables.fXSV[x][s][v]);
-                }
-        return expr;
-    }
-
-    public GRBLinExpr replications(double weight) throws GRBException {
-        GRBLinExpr expr = new GRBLinExpr();
-        for (int s = 0; s < parameters.getServices().size(); s++)
-            for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-                GRBLinExpr expr2 = new GRBLinExpr();
-                for (int x = 0; x < parameters.getServers().size(); x++)
-                    expr2.addTerm(weight, variables.fXSV[x][s][v]);
-                expr.add(expr2);
-                expr.addConstant(-weight);
-            }
+            expr.addTerm(weight, variables.ux[x]);
         return expr;
     }
 
@@ -115,10 +89,6 @@ public class OptimizationModel {
 
     public GRBModel getGrbModel() {
         return grbModel;
-    }
-
-    public GRBEnv getGrbEnv() {
-        return grbEnv;
     }
 
     public Variables getVariables() {

@@ -1,13 +1,12 @@
-package gui;
+package app;
 
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import utils.LinkJson;
-import utils.Scenario;
-import utils.ServerJson;
+import elements.LinkJson;
+import elements.Scenario;
+import elements.ServerJson;
 import filemanager.GraphManager;
-import app.App;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import results.Results;

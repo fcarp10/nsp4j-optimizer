@@ -1,7 +1,6 @@
 package app;
 
-import gui.WebServer;
-import utils.Auxiliary;
+import results.Auxiliary;
 
 import static spark.Spark.*;
 

@@ -1,4 +1,4 @@
-package gui;
+package app;
 
 
 import com.google.gson.Gson;
@@ -9,10 +9,11 @@ import jdk.incubator.http.HttpRequest;
 import jdk.incubator.http.HttpResponse;
 import network.Server;
 import org.graphstream.graph.Edge;
-import results.ModelOutput;
+import results.Output;
 import results.Results;
-import utils.LinkJson;
-import utils.ServerJson;
+import elements.LinkJson;
+import elements.ServerJson;
+import services.Function;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -21,20 +22,18 @@ import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WebClient {
 
-    public static void updateResultsToWebApp(ModelOutput modelOutput, Results results) {
+    public static void updateResultsToWebApp(Output output, Results results) {
         if (results != null) {
-            List<ServerJson> serverJsons = getNodeStringsWithResults(modelOutput.serversMap(), modelOutput.functionsStringMap());
-            List<LinkJson> linkJsons = getLinkStringsWithResults(modelOutput.linksMap());
+            List<ServerJson> serverJsonList = getServerUtilizationStrings(output.serverUtilizationMap()
+                    , getFunctionsPerServerStringMap(output.functionsPerServerMap()));
+            List<LinkJson> linkJsonList = getLinkUtilizationStrings(output.linkUtilizationMap());
             try {
-                postJsonNodes(serverJsons);
-                postJsonLinks(linkJsons);
+                postJsonNodes(serverJsonList);
+                postJsonLinks(linkJsonList);
                 postResults(results);
             } catch (URISyntaxException | InterruptedException | IOException e) {
                 e.printStackTrace();
@@ -85,7 +84,7 @@ public class WebClient {
         sendRequest(request);
     }
 
-    public static void postMessage(String message) {
+    static void postMessage(String message) {
         HttpRequest request;
         try {
             request = HttpRequest.newBuilder()
@@ -98,7 +97,7 @@ public class WebClient {
         }
     }
 
-    private static List<ServerJson> getNodeStringsWithResults(Map<Server, Double> servers, Map<Server, String> functions) {
+    private static List<ServerJson> getServerUtilizationStrings(Map<Server, Double> servers, Map<Server, String> functions) {
         List<ServerJson> serverJsons = new ArrayList<>();
         Iterator entries = servers.entrySet().iterator();
         StringBuilder functionsString;
@@ -119,7 +118,7 @@ public class WebClient {
         return serverJsons;
     }
 
-    private static List<LinkJson> getLinkStringsWithResults(Map<Edge, Double> links) {
+    private static List<LinkJson> getLinkUtilizationStrings(Map<Edge, Double> links) {
         List<LinkJson> linkJsons = new ArrayList<>();
         Iterator entries = links.entrySet().iterator();
         DecimalFormat df = new DecimalFormat("#.##");
@@ -136,6 +135,18 @@ public class WebClient {
         }
 
         return linkJsons;
+    }
+
+    private static Map<Server, String> getFunctionsPerServerStringMap(Map<Server, List<Function>> functionsPerServerMap) {
+        Map<Server, String> functionsStringMap = new HashMap<>();
+        for (Map.Entry<Server, List<Function>> entry : functionsPerServerMap.entrySet()) {
+            StringBuilder stringVnf = new StringBuilder();
+            for (int i = 0; i < entry.getValue().size(); i++) {
+                stringVnf.append(entry.getKey().getId()).append(entry.getValue().get(i).getType()).append("\n");
+                functionsStringMap.put(entry.getKey(), stringVnf.toString());
+            }
+        }
+        return functionsStringMap;
     }
 
     private static String getColor(Double utilization) {

@@ -1,14 +1,14 @@
-package utils;
+package results;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import elements.LinearCostFunctions;
 import org.decimal4j.util.DoubleRounder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Auxiliary {
@@ -56,13 +56,6 @@ public class Auxiliary {
             if (utilizationResult < min)
                 min = utilizationResult;
         return roundDouble(min, 2);
-    }
-
-    public static List<Integer> listsSizes(List<List<Integer>> list) {
-        List<Integer> listsSizes = new ArrayList<>();
-        for (List<Integer> aList : list)
-            listsSizes.add(aList.size());
-        return listsSizes;
     }
 
     public static double avgF(List<Integer> results) {
