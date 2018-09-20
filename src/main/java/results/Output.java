@@ -6,7 +6,6 @@ import learning.LearningModel;
 import lp.OptimizationModel;
 import network.Server;
 import org.graphstream.graph.Edge;
-import services.Function;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,19 +143,6 @@ public class Output {
         return serverMapResults;
     }
 
-    public Map<Server, List<Function>> functionsPerServerMap() {
-        Map<Server, List<Function>> functionsMap = new HashMap<>();
-        for (int x = 0; x < pm.getServers().size(); x++) {
-            List<Function> functions = new ArrayList<>();
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                    if (xsv[x][s][v])
-                        functions.add(pm.getServices().get(s).getFunctions().get(v));
-            functionsMap.put(pm.getServers().get(x), functions);
-        }
-        return functionsMap;
-    }
-
     private List<Integer> numOfFunctionsPerServer() {
         List<Integer> numOfFunctionsPerServer = new ArrayList<>();
         for (int x = 0; x < pm.getServers().size(); x++) {
@@ -189,6 +175,10 @@ public class Output {
         for (int l = 0; l < pm.getLinks().size(); l++)
             trafficOnLinks += ul[l] * (int) pm.getLinks().get(l).getAttribute("capacity");
         return trafficOnLinks;
+    }
+
+    public Parameters getPm() {
+        return pm;
     }
 
     public boolean[][] getSp() {

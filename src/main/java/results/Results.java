@@ -9,13 +9,12 @@ import java.util.List;
 public class Results {
 
     private transient Parameters pm;
-    private transient List<String> functionsServers;
-    private transient List<String> functionsDemandsServers;
-    private transient List<String> servicesPaths;
-    private transient List<String> servicesDemandsPaths;
-    private transient List<String> serverUtilization;
-    private transient List<String> linkUtilization;
-    private transient List<String> reroutedTraffic;
+    private transient List<String> sp;
+    private transient List<String> spd;
+    private transient List<String> xsv;
+    private transient List<String> xsvd;
+    private transient List<String> ux;
+    private transient List<String> ul;
     private double avgLu;
     private double minLu;
     private double maxLu;
@@ -37,7 +36,7 @@ public class Results {
 
     Results(Parameters pm, List<Double> lu, List<Double> xu, List<Integer> numOfFunctionsPerServer
             , double totalTraffic, double trafficLinks, double avgPathLength, double cost, int numOfMigrations, int numOfReplicas
-            , boolean fXSV[][][], boolean fXSVD[][][][], boolean tSP[][], boolean tSPD[][][], double mPSV[][][]) {
+            , boolean fXSV[][][], boolean fXSVD[][][][], boolean tSP[][], boolean tSPD[][][], double svp[][][]) {
         this.pm = pm;
         this.avgLu = Auxiliary.avg(lu);
         this.minLu = Auxiliary.min(lu);
@@ -57,109 +56,106 @@ public class Results {
         this.cost = cost;
         this.numOfMigrations = numOfMigrations;
         this.numOfReplicas = numOfReplicas;
-        this.functionsServers = createFunctionsServersResults(fXSV);
-        this.functionsDemandsServers = createFunctionsDemandsServersResults(fXSVD);
-        this.servicesPaths = createServicesPathsResults(tSP);
-        this.servicesDemandsPaths = createServicesDemandsPathsResults(tSPD);
-        this.serverUtilization = createServerUtilizationResults(xu);
-        this.linkUtilization = createLinkUtilizationResults(lu);
-        this.reroutedTraffic = createReroutedTrafficResults(mPSV);
+        this.sp = generateSPResults(tSP);
+        this.spd = generateSPDResults(tSPD);
+        this.xsv = generateXSVResults(fXSV);
+        this.xsvd = generateXSVDResults(fXSVD);
+        this.ux = generateUXResults(xu);
+        this.ul = generateULResults(lu);
     }
 
-    private List<String> createFunctionsServersResults(boolean fXSV[][][]) {
-        List<String> usedServers = new ArrayList<>();
+    private List<String> generateSPResults(boolean tSP[][]) {
+        List<String> spStrings = new ArrayList<>();
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+                if (tSP[s][p])
+                    spStrings.add("(" + s + "," + p + "): ["
+                            + pm.getServices().get(s).getId() + "]"
+                            + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
+        return spStrings;
+    }
+
+    private List<String> generateSPDResults(boolean tSPD[][][]) {
+        List<String> spdStrings = new ArrayList<>();
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                    if (tSPD[s][p][d])
+                        spdStrings.add("(" + s + "," + p + "," + d + "): ["
+                                + pm.getServices().get(s).getId() + "]"
+                                + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath() + "["
+                                + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "]");
+        return spdStrings;
+    }
+
+    private List<String> generateXSVResults(boolean fXSV[][][]) {
+        List<String> xsvStrings = new ArrayList<>();
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int x = 0; x < pm.getServers().size(); x++)
                     if (fXSV[x][s][v])
-                        usedServers.add("s[" + s + "]-v[" + v + "]: " + pm.getServers().get(x).getId());
-        return usedServers;
+                        xsvStrings.add("(" + x + "," + s + "," + v + "): ["
+                                + pm.getServers().get(x).getId() + "]["
+                                + pm.getServices().get(s).getId() + "]["
+                                + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
+        return xsvStrings;
     }
 
-    private List<String> createFunctionsDemandsServersResults(boolean fXSVD[][][][]) {
-        List<String> usedServersPerDemand = new ArrayList<>();
+    private List<String> generateXSVDResults(boolean fXSVD[][][][]) {
+        List<String> xsvdStrings = new ArrayList<>();
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                         if (fXSVD[x][s][v][d])
-                            usedServersPerDemand.add("s[" + s + "]-v[" + v + "]-d[" + d + "]("
-                                    + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "): "
-                                    + pm.getServers().get(x).getId());
-        return usedServersPerDemand;
+                            xsvdStrings.add("(" + x + "," + s + "," + v + "," + d + "): ["
+                                    + pm.getServers().get(x).getId() + "]["
+                                    + pm.getServices().get(s).getId() + "]["
+                                    + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
+                                    + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "]");
+        return xsvdStrings;
     }
 
-    private List<String> createServicesPathsResults(boolean tSP[][]) {
-        List<String> usedPaths = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                if (tSP[s][p])
-                    usedPaths.add("s[" + s + "]: " + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
-        return usedPaths;
-    }
-
-    private List<String> createServicesDemandsPathsResults(boolean tSPD[][][]) {
-        List<String> usedPathsPerDemand = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    if (tSPD[s][p][d])
-                        usedPathsPerDemand.add("s[" + s + "]-d[" + d + "]("
-                                + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "): "
-                                + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
-        return usedPathsPerDemand;
-    }
-
-    private List<String> createServerUtilizationResults(List<Double> xu) {
-        List<String> serverUtilization = new ArrayList<>();
+    private List<String> generateUXResults(List<Double> xu) {
+        List<String> uxStrings = new ArrayList<>();
         for (int x = 0; x < pm.getServers().size(); x++)
-            serverUtilization.add("x[" + x + "](" + pm.getServers().get(x).getId() + "): " + xu.get(x));
-        return serverUtilization;
+            uxStrings.add("(" + x + "): ["
+                    + pm.getServers().get(x).getId() + "]["
+                    + xu.get(x) + "]");
+        return uxStrings;
     }
 
-    private List<String> createLinkUtilizationResults(List<Double> lu) {
-        List<String> linkUtilization = new ArrayList<>();
+    private List<String> generateULResults(List<Double> lu) {
+        List<String> ulStrings = new ArrayList<>();
         for (int l = 0; l < pm.getLinks().size(); l++)
-            linkUtilization.add("l[" + l + "](" + pm.getLinks().get(l).getId() + "): " + lu.get(l));
-        return linkUtilization;
+            ulStrings.add("(" + l + "): ["
+                    + pm.getLinks().get(l).getId() + "]["
+                    + lu.get(l) + "]");
+        return ulStrings;
     }
 
-    private List<String> createReroutedTrafficResults(double mPSV[][][]) {
-        List<String> reroutedTraffic = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                for (int p = 0; p < pm.getPaths().size(); p++)
-                    if (mPSV[p][s][v] > 0.0)
-                        reroutedTraffic.add("s[" + s + "]-v[" + v + "]-p[" + pm.getPaths().get(p).getNodePath() + "]: " + mPSV[p][s][v]);
-        return reroutedTraffic;
+    public List<String> getXsv() {
+        return xsv;
     }
 
-    public List<String> getFunctionsServers() {
-        return functionsServers;
+    public List<String> getXsvd() {
+        return xsvd;
     }
 
-    public List<String> getFunctionsDemandsServers() {
-        return functionsDemandsServers;
+    public List<String> getSp() {
+        return sp;
     }
 
-    public List<String> getServicesPaths() {
-        return servicesPaths;
+    public List<String> getSpd() {
+        return spd;
     }
 
-    public List<String> getServicesDemandsPaths() {
-        return servicesDemandsPaths;
+    public List<String> getUx() {
+        return ux;
     }
 
-    public List<String> getServerUtilization() {
-        return serverUtilization;
-    }
-
-    public List<String> getLinkUtilization() {
-        return linkUtilization;
-    }
-
-    public List<String> getReroutedTraffic() {
-        return reroutedTraffic;
+    public List<String> getUl() {
+        return ul;
     }
 
     public double getAvgLu() {

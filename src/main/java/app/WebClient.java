@@ -4,6 +4,8 @@ package app;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import elements.LinkJson;
+import elements.ServerJson;
 import jdk.incubator.http.HttpClient;
 import jdk.incubator.http.HttpRequest;
 import jdk.incubator.http.HttpResponse;
@@ -11,9 +13,6 @@ import network.Server;
 import org.graphstream.graph.Edge;
 import results.Output;
 import results.Results;
-import elements.LinkJson;
-import elements.ServerJson;
-import services.Function;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -24,13 +23,12 @@ import java.net.URISyntaxException;
 import java.text.DecimalFormat;
 import java.util.*;
 
-public class WebClient {
+class WebClient {
 
-    public static void updateResultsToWebApp(Output output, Results results) {
+    static void updateResultsToWebApp(Output output, Results results) {
         if (results != null) {
-            List<ServerJson> serverJsonList = getServerUtilizationStrings(output.serverUtilizationMap()
-                    , getFunctionsPerServerStringMap(output.functionsPerServerMap()));
-            List<LinkJson> linkJsonList = getLinkUtilizationStrings(output.linkUtilizationMap());
+            List<ServerJson> serverJsonList = generateServerUtilizationStrings(output);
+            List<LinkJson> linkJsonList = generateLinkUtilizationStrings(output);
             try {
                 postJsonNodes(serverJsonList);
                 postJsonLinks(linkJsonList);
@@ -97,32 +95,32 @@ public class WebClient {
         }
     }
 
-    private static List<ServerJson> getServerUtilizationStrings(Map<Server, Double> servers, Map<Server, String> functions) {
-        List<ServerJson> serverJsons = new ArrayList<>();
-        Iterator entries = servers.entrySet().iterator();
-        StringBuilder functionsString;
+    private static List<ServerJson> generateServerUtilizationStrings(Output output) {
+        Map<Server, String> functions = generateFunctionsPerServerStringMap(output);
+        List<ServerJson> serverJsonList = new ArrayList<>();
+        Iterator entries = output.serverUtilizationMap().entrySet().iterator();
         DecimalFormat df = new DecimalFormat("#.##");
         while (entries.hasNext()) {
             Map.Entry thisEntry = (Map.Entry) entries.next();
-            Double value = (Double) thisEntry.getValue();
+            Double utilization = (Double) thisEntry.getValue();
             Server server = (Server) thisEntry.getKey();
-            functionsString = new StringBuilder();
-            if (value != 0 && functions.get(server).length() < 40)
-                functionsString.append(String.valueOf(df.format(value))).append("\n").append(functions.get(server));
-            else if (value != 0 && functions.get(server).length() >= 40)
-                functionsString.append(String.valueOf(df.format(value)));
-            serverJsons.add(new ServerJson(server.getId(), server.getNodeParent().getAttribute("x")
+            StringBuilder u = new StringBuilder();
+            if (utilization != 0) {
+                u.append("u(").append(String.valueOf(df.format(utilization))).append(")");
+                if (functions.get(server).length() < 40)
+                    u.append("\n").append(functions.get(server));
+            }
+            serverJsonList.add(new ServerJson(server.getId(), server.getNodeParent().getAttribute("x")
                     , server.getNodeParent().getAttribute("y")
-                    , "#" + getColor(value), functionsString.toString(), true));
+                    , "#" + getColor(utilization), u.toString(), true));
         }
-        return serverJsons;
+        return serverJsonList;
     }
 
-    private static List<LinkJson> getLinkUtilizationStrings(Map<Edge, Double> links) {
-        List<LinkJson> linkJsons = new ArrayList<>();
-        Iterator entries = links.entrySet().iterator();
+    private static List<LinkJson> generateLinkUtilizationStrings(Output output) {
+        List<LinkJson> linkJsonList = new ArrayList<>();
+        Iterator entries = output.linkUtilizationMap().entrySet().iterator();
         DecimalFormat df = new DecimalFormat("#.##");
-
         while (entries.hasNext()) {
             Map.Entry thisEntry = (Map.Entry) entries.next();
             Double value = (Double) thisEntry.getValue();
@@ -130,21 +128,21 @@ public class WebClient {
             String label = "";
             if (value != 0)
                 label = df.format(value);
-            linkJsons.add(new LinkJson(edge.getId(), edge.getSourceNode().getId()
+            linkJsonList.add(new LinkJson(edge.getId(), edge.getSourceNode().getId()
                     , edge.getTargetNode().getId(), label, "#" + getColor(value)));
         }
-
-        return linkJsons;
+        return linkJsonList;
     }
 
-    private static Map<Server, String> getFunctionsPerServerStringMap(Map<Server, List<Function>> functionsPerServerMap) {
+    private static Map<Server, String> generateFunctionsPerServerStringMap(Output output) {
         Map<Server, String> functionsStringMap = new HashMap<>();
-        for (Map.Entry<Server, List<Function>> entry : functionsPerServerMap.entrySet()) {
-            StringBuilder stringVnf = new StringBuilder();
-            for (int i = 0; i < entry.getValue().size(); i++) {
-                stringVnf.append(entry.getKey().getId()).append(entry.getValue().get(i).getType()).append("\n");
-                functionsStringMap.put(entry.getKey(), stringVnf.toString());
-            }
+        for (int x = 0; x < output.getPm().getServers().size(); x++) {
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int s = 0; s < output.getPm().getServices().size(); s++)
+                for (int v = 0; v < output.getPm().getServices().get(s).getFunctions().size(); v++)
+                    if (output.getXsv()[x][s][v])
+                        stringBuilder.append("f(").append(x).append(",").append(s).append(",").append(v).append(")\n");
+            functionsStringMap.put(output.getPm().getServers().get(x), stringBuilder.toString());
         }
         return functionsStringMap;
     }

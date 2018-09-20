@@ -13,7 +13,7 @@ public class ServerJson {
 
     public ServerJson(String id, int x, int y, String favecolor, String label, boolean isServer) {
         int xS, yS;
-        if (Integer.valueOf(id.split("-")[1]) % 2 == 0) {
+        if (Integer.valueOf(id.split("_")[1]) % 2 == 0) {
             xS = x - 10;
             yS = y + 20;
         } else {
