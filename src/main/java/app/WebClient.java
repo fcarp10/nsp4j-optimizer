@@ -11,6 +11,7 @@ import jdk.incubator.http.HttpRequest;
 import jdk.incubator.http.HttpResponse;
 import network.Server;
 import org.graphstream.graph.Edge;
+import results.Auxiliary;
 import results.Output;
 import results.Results;
 
@@ -106,7 +107,7 @@ class WebClient {
             Server server = (Server) thisEntry.getKey();
             StringBuilder u = new StringBuilder();
             if (utilization != 0) {
-                u.append("u(").append(String.valueOf(df.format(utilization))).append(")");
+                u.append(String.valueOf(df.format(utilization)));
                 if (functions.get(server).length() < 40)
                     u.append("\n").append(functions.get(server));
             }
@@ -141,7 +142,7 @@ class WebClient {
             for (int s = 0; s < output.getPm().getServices().size(); s++)
                 for (int v = 0; v < output.getPm().getServices().get(s).getFunctions().size(); v++)
                     if (output.getXsv()[x][s][v])
-                        stringBuilder.append("f(").append(x).append(",").append(s).append(",").append(v).append(")\n");
+                        stringBuilder.append("f(").append(x + Auxiliary.OFFSET).append(",").append(s + Auxiliary.OFFSET).append(",").append(v + Auxiliary.OFFSET).append(")\n");
             functionsStringMap.put(output.getPm().getServers().get(x), stringBuilder.toString());
         }
         return functionsStringMap;

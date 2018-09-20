@@ -20,20 +20,20 @@ import java.util.Map;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
-public class WebServer {
+class WebServer {
 
     private static Map<String, ServerJson> jsonNodes;
     private static Map<String, LinkJson> jsonLinks;
     private static Results results;
     private static String message;
 
-    public WebServer() {
+    WebServer() {
         jsonNodes = new HashMap<>();
         jsonLinks = new HashMap<>();
         interfaces();
     }
 
-    public void initializeResults() {
+    void initializeResults() {
         jsonNodes = new HashMap<>();
         jsonLinks = new HashMap<>();
         List<Node> nodes = new ArrayList<>(GraphManager.getGraph().getNodeSet());

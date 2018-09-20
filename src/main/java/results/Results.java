@@ -69,7 +69,7 @@ public class Results {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 if (tSP[s][p])
-                    spStrings.add("(" + s + "," + p + "): ["
+                    spStrings.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): ["
                             + pm.getServices().get(s).getId() + "]"
                             + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
         return spStrings;
@@ -81,7 +81,7 @@ public class Results {
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                     if (tSPD[s][p][d])
-                        spdStrings.add("(" + s + "," + p + "," + d + "): ["
+                        spdStrings.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "," + (d + Auxiliary.OFFSET) + "): ["
                                 + pm.getServices().get(s).getId() + "]"
                                 + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath() + "["
                                 + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "]");
@@ -94,7 +94,7 @@ public class Results {
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int x = 0; x < pm.getServers().size(); x++)
                     if (fXSV[x][s][v])
-                        xsvStrings.add("(" + x + "," + s + "," + v + "): ["
+                        xsvStrings.add("(" + (x + Auxiliary.OFFSET) + "," + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "): ["
                                 + pm.getServers().get(x).getId() + "]["
                                 + pm.getServices().get(s).getId() + "]["
                                 + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
@@ -108,7 +108,7 @@ public class Results {
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                         if (fXSVD[x][s][v][d])
-                            xsvdStrings.add("(" + x + "," + s + "," + v + "," + d + "): ["
+                            xsvdStrings.add("(" + (x + Auxiliary.OFFSET) + "," + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "," + (d + Auxiliary.OFFSET) + "): ["
                                     + pm.getServers().get(x).getId() + "]["
                                     + pm.getServices().get(s).getId() + "]["
                                     + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
@@ -119,7 +119,7 @@ public class Results {
     private List<String> generateUXResults(List<Double> xu) {
         List<String> uxStrings = new ArrayList<>();
         for (int x = 0; x < pm.getServers().size(); x++)
-            uxStrings.add("(" + x + "): ["
+            uxStrings.add("(" + (x + Auxiliary.OFFSET) + "): ["
                     + pm.getServers().get(x).getId() + "]["
                     + xu.get(x) + "]");
         return uxStrings;
@@ -128,7 +128,7 @@ public class Results {
     private List<String> generateULResults(List<Double> lu) {
         List<String> ulStrings = new ArrayList<>();
         for (int l = 0; l < pm.getLinks().size(); l++)
-            ulStrings.add("(" + l + "): ["
+            ulStrings.add("(" + (l + Auxiliary.OFFSET) + "): ["
                     + pm.getLinks().get(l).getId() + "]["
                     + lu.get(l) + "]");
         return ulStrings;

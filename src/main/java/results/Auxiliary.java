@@ -13,6 +13,7 @@ import java.util.List;
 
 public class Auxiliary {
 
+    public static final int OFFSET = 0;
     public static LinearCostFunctions linearCostFunctions;
 
     public Auxiliary() {
@@ -27,14 +28,14 @@ public class Auxiliary {
         }
     }
 
-    public static double avg(List<Double> utilizationResults) {
+    static double avg(List<Double> utilizationResults) {
         double tmpU = 0;
         for (Double utilizationResult : utilizationResults) tmpU += utilizationResult;
         tmpU = tmpU / utilizationResults.size();
         return roundDouble(tmpU, 2);
     }
 
-    public static double vrc(List<Double> utilizationResults, double avg) {
+    static double vrc(List<Double> utilizationResults, double avg) {
         double variance = 0;
         for (Double utilizationResult : utilizationResults)
             variance += Math.pow(utilizationResult - avg, 2);
@@ -58,14 +59,14 @@ public class Auxiliary {
         return roundDouble(min, 2);
     }
 
-    public static double avgF(List<Integer> results) {
+    static double avgF(List<Integer> results) {
         double tmp = 0;
         for (Integer i : results) tmp += i;
         tmp = tmp / results.size();
         return roundDouble(tmp, 2);
     }
 
-    public static double vrcF(List<Integer> results, double avg) {
+    static double vrcF(List<Integer> results, double avg) {
         double variance = 0;
         for (Integer i : results)
             variance += Math.pow(i - avg, 2);
@@ -73,7 +74,7 @@ public class Auxiliary {
         return roundDouble(variance, 2);
     }
 
-    public static int maxF(List<Integer> results) {
+    static int maxF(List<Integer> results) {
         int max = 0;
         for (Integer i : results)
             if (i > max)
@@ -81,7 +82,7 @@ public class Auxiliary {
         return max;
     }
 
-    public static int minF(List<Integer> results) {
+    static int minF(List<Integer> results) {
         int min = Integer.MAX_VALUE;
         for (Integer i : results)
             if (i < min)
@@ -89,7 +90,7 @@ public class Auxiliary {
         return min;
     }
 
-    public static double roundDouble(double value, int decimals) {
+    static double roundDouble(double value, int decimals) {
         return DoubleRounder.round(value, decimals);
     }
 }
