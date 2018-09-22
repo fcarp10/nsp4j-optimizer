@@ -10,15 +10,22 @@
 
     <properties>
         <java.version>9</java.version>
-        <maven.test.skip>true</maven.test.skip>
         <dl4j.version>0.9.1</dl4j.version>
+        <maven.test.skip>true</maven.test.skip>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>de.tubs</groupId>
-            <artifactId>nfv-framework</artifactId>
-            <version>0.2</version>
+            <groupId>com.github.francarpio</groupId>
+            <artifactId>nsm4j-api</artifactId>
+            <version>0.2.1</version>
         </dependency>
         <dependency>
             <groupId>com.gurobi</groupId>
