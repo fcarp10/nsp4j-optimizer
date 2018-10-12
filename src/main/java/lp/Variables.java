@@ -17,6 +17,7 @@ public class Variables {
     public GRBVar[] ul;
     public GRBVar[] ux;
     public GRBVar[][][] svp;
+    public GRBVar[][][][] svxy;
 
     public Variables(Parameters pm, GRBModel grbModel) {
         try {
@@ -64,11 +65,18 @@ public class Variables {
             for (int x = 0; x < pm.getServers().size(); x++)
                 kx[x] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "kx[" + x + "]");
 
-            svp = new GRBVar[pm.getPaths().size()][pm.getServices().size()][pm.getServiceLengthAux()];
+            svp = new GRBVar[pm.getServices().size()][pm.getServiceLengthAux()][pm.getPaths().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                     for (int p = 0; p < pm.getPaths().size(); p++)
-                        svp[p][s][v] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "svp[" + p + "][" + s + "][" + v + "]");
+                        svp[s][v][p] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "svp[" + s + "][" + v + "][" + p + "]");
+
+            svxy = new GRBVar[pm.getServices().size()][pm.getServiceLengthAux()][pm.getServers().size()][pm.getServers().size()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                    for (int x = 0; x < pm.getServers().size(); x++)
+                        for (int y = 0; y < pm.getServers().size(); y++)
+                            svxy[s][v][x][y] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "svxy[" + s + "][" + v + "][" + x + "][" + y + "]");
 
             grbModel.update();
         } catch (Exception ignored) {

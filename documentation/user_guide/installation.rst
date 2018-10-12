@@ -21,20 +21,20 @@ Installing and running the NFV Optimization tool
 
 	mvn install:install-file -Dfile=$PATH_TO_GUROBI_LIB$/gurobi.jar -DgroupId=com.gurobi -DartifactId=gurobi-solver -Dversion=8.0.0 -Dpackaging=jar
 
-1. Clone git repository:
+2. Clone git repository:
 
 .. code-block:: bash
 
 	git clone https://FranCarpio@bitbucket.org/FranCarpio/nfv-optimization.git
 
-2. Package the sources:
+3. Package the sources:
 
 .. code-block:: bash
 
 	cd /nfv-optimization
 	mvn package
 
-3. Run the created jar:
+4. Run the created jar:
 	
 .. code-block:: bash
 

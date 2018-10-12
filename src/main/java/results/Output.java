@@ -24,7 +24,7 @@ public class Output {
     private double[] kx;
     private double[] ul;
     private double[] ux;
-    private double[][][] svp;
+    private boolean[][][] svp;
 
     public Output(Parameters pm, OptimizationModel optimizationModel) {
         this.pm = pm;
@@ -69,24 +69,25 @@ public class Output {
             kx = new double[pm.getServers().size()];
             for (int x = 0; x < pm.getServers().size(); x++)
                 kx[x] = optimizationModel.getVariables().kx[x].get(GRB.DoubleAttr.X);
-            svp = new double[pm.getPaths().size()][pm.getServices().size()][pm.getServiceLengthAux()];
+            svp = new boolean[pm.getServices().size()][pm.getServiceLengthAux()][pm.getPaths().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                     for (int p = 0; p < pm.getPaths().size(); p++)
-                        svp[p][s][v] = optimizationModel.getVariables().svp[p][s][v].get(GRB.DoubleAttr.X);
+                        if (optimizationModel.getVariables().svp[s][v][p].get(GRB.DoubleAttr.X) == 1.0)
+                            svp[s][v][p] = true;
         } catch (Exception ignored) {
         }
     }
 
     public Output(Parameters pm, LearningModel learningModel) {
         this.pm = pm;
-        this.sp = learningModel.gettSP();
-        this.spd = learningModel.gettSPD();
-        this.xsv = learningModel.getfXSV();
-        this.xsvd = learningModel.getfXSVD();
-        this.ux = learningModel.getuX();
-        this.ul = learningModel.getuL();
-        this.svp = learningModel.getmPSV();
+        this.sp = learningModel.getSp();
+        this.spd = learningModel.getSpd();
+        this.xsv = learningModel.getXsv();
+        this.xsvd = learningModel.getXsvd();
+        this.ux = learningModel.getUx();
+        this.ul = learningModel.getUl();
+        this.svp = learningModel.getSvp();
     }
 
     public Results generateResults(double cost, Output initialOutput) {
@@ -217,7 +218,7 @@ public class Output {
         return ux;
     }
 
-    public double[][][] getSvp() {
+    public boolean[][][] getSvp() {
         return svp;
     }
 }

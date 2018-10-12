@@ -1,6 +1,6 @@
 # Optimization parameters
 gap: 0
-weights: [0.5, 0.5]
+weights: [0, 1.0]
 
 # Network default parameters
 serverCapacityDefault: 1000
@@ -40,13 +40,13 @@ trafficFlows:
     maxDemands: 3
     minBw: 100
     maxBw: 100
-  - src: "n2"
-    dst: "n9"
-    serviceId: 0
-    minDemands: 3
-    maxDemands: 3
-    minBw: 100
-    maxBw: 100
+#  - src: "n2"
+#    dst: "n9"
+#    serviceId: 0
+#    minDemands: 3
+#    maxDemands: 3
+#    minBw: 100
+#    maxBw: 100
 
 # Auxiliary values (overhead, training iterations)
 aux: [100, 1000]

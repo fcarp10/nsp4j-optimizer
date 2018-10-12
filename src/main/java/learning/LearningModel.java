@@ -27,13 +27,13 @@ public class LearningModel {
     private Parameters pm;
     private DeepQ deepQ;
     private final double THRESHOLD = 1.0;
-    private double uX[];
-    private double uL[];
-    private boolean fXSVD[][][][];
-    private boolean fXSV[][][];
-    private boolean tSP[][];
-    private boolean tSPD[][][];
-    private double mPSV[][][];
+    private double ux[];
+    private double ul[];
+    private boolean xsvd[][][][];
+    private boolean xsv[][][];
+    private boolean sp[][];
+    private boolean spd[][][];
+    private boolean svp[][][];
 
     public LearningModel(Parameters pm) {
         this.pm = pm;
@@ -231,7 +231,7 @@ public class LearningModel {
 
     private void chooseServersPerDemand(Map<Integer, List<Path>> tSP, int[] environment) {
         Random rnd = new Random();
-        fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()][pm.getDemandsPerTrafficFlowAux()];
+        xsvd = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()][pm.getDemandsPerTrafficFlowAux()];
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
                 Path path = tSP.get(s).get(rnd.nextInt(tSP.get(s).size()));
@@ -241,7 +241,7 @@ public class LearningModel {
                         for (int x = 0; x < pm.getServers().size(); x++)
                             if (pm.getServers().get(x).getNodeParent().equals(path.getNodePath().get(n)))
                                 if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
-                                    fXSVD[x][s][v][d] = true;
+                                    xsvd[x][s][v][d] = true;
                                     break outerLoop;
                                 }
                 }
@@ -249,18 +249,18 @@ public class LearningModel {
     }
 
     private void calculateServerUtilization(int[] environment) {
-        uX = new double[pm.getServers().size()];
+        ux = new double[pm.getServers().size()];
         for (int x = 0; x < pm.getServers().size(); x++) {
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                     double demands = 0;
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-                        if (fXSVD[x][s][v][d]) {
+                        if (xsvd[x][s][v][d]) {
                             demands += pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d);
                         }
                     }
                     if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1)
-                        uX[x] += ((demands * pm.getServices().get(s).getFunctions().get(v).getLoad())
+                        ux[x] += ((demands * pm.getServices().get(s).getFunctions().get(v).getLoad())
                                 + (pm.getServices().get(s).getFunctions().get(v).getLoad() * pm.getAux()[0]))
                                 / pm.getServers().get(x).getCapacity();
                 }
@@ -268,13 +268,13 @@ public class LearningModel {
     }
 
     private void calculateLinkUtilization(int[] environment) {
-        uL = new double[pm.getLinks().size()];
+        ul = new double[pm.getLinks().size()];
         // TODO
     }
 
     private double computeReward() {
         double cost, totalCost = 0;
-        for (Double serverUtilization : uX) {
+        for (Double serverUtilization : ux) {
             cost = 0;
             for (int f = 0; f < Auxiliary.linearCostFunctions.getValues().size(); f++) {
                 double value = Auxiliary.linearCostFunctions.getValues().get(f)[0] * serverUtilization
@@ -288,52 +288,51 @@ public class LearningModel {
     }
 
     private void computeFunctionsServers() {
-        fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()];
+        xsv = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()];
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        if (fXSVD[x][s][v][d])
-                            fXSV[x][s][v] = true;
+                        if (xsvd[x][s][v][d])
+                            xsv[x][s][v] = true;
     }
 
     private void computePaths() {
-        tSP = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
-        tSPD = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()][pm.getDemandsPerTrafficFlowAux()];
+        sp = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
+        spd = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()][pm.getDemandsPerTrafficFlowAux()];
         // TODO
     }
 
     private void calculateReroutingTraffic() {
-        mPSV = new double[pm.getPaths().size()][pm.getServices().size()][pm.getServiceLengthAux()];
         // TODO
     }
 
-    public double[] getuX() {
-        return uX;
+    public double[] getUx() {
+        return ux;
     }
 
-    public double[] getuL() {
-        return uL;
+    public double[] getUl() {
+        return ul;
     }
 
-    public boolean[][][][] getfXSVD() {
-        return fXSVD;
+    public boolean[][][][] getXsvd() {
+        return xsvd;
     }
 
-    public boolean[][][] getfXSV() {
-        return fXSV;
+    public boolean[][][] getXsv() {
+        return xsv;
     }
 
-    public boolean[][] gettSP() {
-        return tSP;
+    public boolean[][] getSp() {
+        return sp;
     }
 
-    public boolean[][][] gettSPD() {
-        return tSPD;
+    public boolean[][][] getSpd() {
+        return spd;
     }
 
-    public double[][][] getmPSV() {
-        return mPSV;
+    public boolean[][][] getSvp() {
+        return svp;
     }
 
 

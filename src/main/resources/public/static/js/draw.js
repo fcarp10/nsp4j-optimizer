@@ -1,5 +1,4 @@
 var cy;
-
 window.onload = function () {
     initializeGraph();
     updateGraph();
@@ -9,10 +8,8 @@ window.onload = function () {
 function initializeGraph() {
     cy = cytoscape({
         container: document.getElementById('cy'),
-
         boxSelectionEnabled: false,
         autounselectify: true,
-
         style: cytoscape.stylesheet()
             .selector('node')
             .css({
@@ -20,8 +17,9 @@ function initializeGraph() {
                 'background-color': 'data(faveColor)',
                 'border-color': 'data(faveColor)',
                 'border-width': 0.5,
-                'width': 20,
-                'height': 20,
+                'shape': 'data(faveShape)',
+                'width': 'data(width)',
+                'height': 'data(height)',
                 'font-size': 4,
                 'text-valign': 'center',
                 'text-halign': 'center',
@@ -52,18 +50,19 @@ function initializeGraph() {
 }
 
 function updateGraph() {
-
     cy.elements().remove();
-
     var nodes = getNodes();
+    var servers = getServers();
     var links = getLinks();
-
     for (var n = 0; n < nodes.length; n++) {
         cy.add({
                 data: {
                     id: nodes[n]['data']['id'],
-                    faveColor: nodes[n]['data']['favecolor'],
-                    label: nodes[n]['data']['label']
+                    faveColor: nodes[n]['data']['faveColor'],
+                    label: nodes[n]['data']['label'],
+                    faveShape: nodes[n]['data']['faveShape'],
+                    width: nodes[n]['data']['width'],
+                    height: nodes[n]['data']['height']
                 },
                 position: {
                     x: nodes[n]['position']['x'],
@@ -73,7 +72,24 @@ function updateGraph() {
             }
         );
     }
-
+    for (var x = 0; x < servers.length; x++) {
+        cy.add({
+                data: {
+                    id: servers[x]['data']['id'],
+                    faveColor: servers[x]['data']['faveColor'],
+                    label: servers[x]['data']['label'],
+                    faveShape: servers[x]['data']['faveShape'],
+                    width: servers[x]['data']['width'],
+                    height: servers[x]['data']['height']
+                },
+                position: {
+                    x: servers[x]['position']['x'],
+                    y: servers[x]['position']['y']
+                },
+                classes: 'multiline-manual'
+            }
+        );
+    }
     for (var l = 0; l < links.length; l++) {
         cy.add({
                 data: {
@@ -82,12 +98,11 @@ function updateGraph() {
                     source: links[l]['data']['source'],
                     target: links[l]['data']['target'],
                     label: links[l]['data']['label'],
-                    faveColor: links[l]['data']['favecolor']
+                    faveColor: links[l]['data']['faveColor']
                 }
             }
         );
     }
-
     cy.layout({
         name: 'preset'
     }).run();
@@ -99,6 +114,25 @@ function getNodes() {
         $.ajax
         ({
             url: "node",
+            type: "GET",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+        return message;
+    }
+    catch (e) {
+        return 0;
+    }
+}
+
+function getServers() {
+    try {
+        var message = null;
+        $.ajax
+        ({
+            url: "server",
             type: "GET",
             async: false,
             success: function (ans) {

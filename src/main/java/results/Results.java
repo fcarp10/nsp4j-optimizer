@@ -15,6 +15,7 @@ public class Results {
     private transient List<String> xsvd;
     private transient List<String> ux;
     private transient List<String> ul;
+    private transient List<String> svp;
     private double avgLu;
     private double minLu;
     private double maxLu;
@@ -36,7 +37,7 @@ public class Results {
 
     Results(Parameters pm, List<Double> lu, List<Double> xu, List<Integer> numOfFunctionsPerServer
             , double totalTraffic, double trafficLinks, double avgPathLength, double cost, int numOfMigrations, int numOfReplicas
-            , boolean fXSV[][][], boolean fXSVD[][][][], boolean tSP[][], boolean tSPD[][][], double svp[][][]) {
+            , boolean xsv[][][], boolean xsvd[][][][], boolean sp[][], boolean spd[][][], boolean svp[][][]) {
         this.pm = pm;
         this.avgLu = Auxiliary.avg(lu);
         this.minLu = Auxiliary.min(lu);
@@ -56,12 +57,13 @@ public class Results {
         this.cost = cost;
         this.numOfMigrations = numOfMigrations;
         this.numOfReplicas = numOfReplicas;
-        this.sp = generateSPResults(tSP);
-        this.spd = generateSPDResults(tSPD);
-        this.xsv = generateXSVResults(fXSV);
-        this.xsvd = generateXSVDResults(fXSVD);
+        this.sp = generateSPResults(sp);
+        this.spd = generateSPDResults(spd);
+        this.xsv = generateXSVResults(xsv);
+        this.xsvd = generateXSVDResults(xsvd);
         this.ux = generateUXResults(xu);
         this.ul = generateULResults(lu);
+        this.svp = generateSvpResults(svp);
     }
 
     private List<String> generateSPResults(boolean tSP[][]) {
@@ -134,6 +136,17 @@ public class Results {
         return ulStrings;
     }
 
+    private List<String> generateSvpResults(boolean svp[][][]) {
+        List<String> svpStrings = new ArrayList<>();
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                for (int p = 0; p < pm.getPaths().size(); p++)
+                    if (svp[s][v][p])
+                        svpStrings.add("(" + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): "
+                                + pm.getPaths().get(p).getNodePath());
+        return svpStrings;
+    }
+
     public List<String> getXsv() {
         return xsv;
     }
@@ -156,6 +169,10 @@ public class Results {
 
     public List<String> getUl() {
         return ul;
+    }
+
+    public List<String> getSvp() {
+        return svp;
     }
 
     public double getAvgLu() {

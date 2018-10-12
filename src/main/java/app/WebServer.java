@@ -3,10 +3,12 @@ package app;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import elements.LinkJson;
 import elements.Scenario;
-import elements.ServerJson;
+import elements.json.LinkJson;
+import elements.json.NodeJson;
+import elements.json.ServerJson;
 import filemanager.GraphManager;
+import network.Server;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import results.Results;
@@ -22,37 +24,42 @@ import static spark.Spark.post;
 
 class WebServer {
 
-    private static Map<String, ServerJson> jsonNodes;
-    private static Map<String, LinkJson> jsonLinks;
+    private static List<NodeJson> nodeList;
+    private static Map<String, ServerJson> serverJsonMap;
+    private static Map<String, LinkJson> linkJsonMap;
     private static Results results;
     private static String message;
 
     WebServer() {
-        jsonNodes = new HashMap<>();
-        jsonLinks = new HashMap<>();
+        nodeList = new ArrayList<>();
+        serverJsonMap = new HashMap<>();
+        linkJsonMap = new HashMap<>();
         interfaces();
     }
 
-    void initializeResults() {
-        jsonNodes = new HashMap<>();
-        jsonLinks = new HashMap<>();
+    void initialize(List<Server> servers) {
+        nodeList = new ArrayList<>();
+        serverJsonMap = new HashMap<>();
+        linkJsonMap = new HashMap<>();
         List<Node> nodes = new ArrayList<>(GraphManager.getGraph().getNodeSet());
         for (Node node : nodes)
-            jsonNodes.put(node.getId(), new ServerJson(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#BDBDBD", node.getId()));
-
+            nodeList.add(new NodeJson(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#cccccc", node.getId()));
+        for (Server server : servers)
+            serverJsonMap.put(server.getId(), new ServerJson(server.getId(), server.getNodeParent().getAttribute("x"), server.getNodeParent().getAttribute("y"), "#cccccc", server.getId()));
         List<Edge> edges = new ArrayList<>(GraphManager.getGraph().getEdgeSet());
         for (Edge edge : edges)
-            jsonLinks.put(edge.getId(), new LinkJson(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));
+            linkJsonMap.put(edge.getId(), new LinkJson(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));
     }
 
     private static void interfaces() {
-        post("/node", (request, response) -> {
+
+        post("/server", (request, response) -> {
             response.type("application/json");
             Type listType = new TypeToken<ArrayList<ServerJson>>() {
             }.getType();
             List<ServerJson> rServerJsons = new Gson().fromJson(request.body(), listType);
             for (ServerJson serverJson : rServerJsons)
-                jsonNodes.put(serverJson.getData().getId(), serverJson);
+                serverJsonMap.put(serverJson.getData().getId(), serverJson);
             response.status(201);
             return 201;
         });
@@ -63,7 +70,7 @@ class WebServer {
             }.getType();
             List<LinkJson> rLinkJsons = new Gson().fromJson(request.body(), listType);
             for (LinkJson linkJson : rLinkJsons)
-                jsonLinks.replace(linkJson.getData().getId(), linkJson);
+                linkJsonMap.replace(linkJson.getData().getId(), linkJson);
             response.status(201);
             return 201;
         });
@@ -87,12 +94,17 @@ class WebServer {
 
         get("/node", (request, response) -> {
             response.type("application/json");
-            return new Gson().toJson(jsonNodes.values());
+            return new Gson().toJson(nodeList);
+        });
+
+        get("/server", (request, response) -> {
+            response.type("application/json");
+            return new Gson().toJson(serverJsonMap.values());
         });
 
         get("/link", (request, response) -> {
             response.type("application/json");
-            return new Gson().toJson(jsonLinks.values());
+            return new Gson().toJson(linkJsonMap.values());
         });
 
         get("/results", (request, response) -> {

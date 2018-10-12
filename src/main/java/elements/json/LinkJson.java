@@ -1,4 +1,4 @@
-package elements;
+package elements.json;
 
 public class LinkJson {
 
@@ -21,14 +21,14 @@ public class LinkJson {
         private String source;
         private String target;
         private String label;
-        private String favecolor;
+        private String faveColor;
 
-        public Data(String id, String source, String target, String label, String favecolor) {
+        public Data(String id, String source, String target, String label, String faveColor) {
             this.id = id;
             this.source = source;
             this.target = target;
             this.label = label;
-            this.favecolor = favecolor;
+            this.faveColor = faveColor;
         }
 
         public String getId() {
@@ -63,12 +63,12 @@ public class LinkJson {
             this.label = label;
         }
 
-        public String getFavecolor() {
-            return favecolor;
+        public String getFaveColor() {
+            return faveColor;
         }
 
-        public void setFavecolor(String favecolor) {
-            this.favecolor = favecolor;
+        public void setFaveColor(String faveColor) {
+            this.faveColor = faveColor;
         }
     }
 }

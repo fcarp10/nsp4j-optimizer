@@ -30,7 +30,7 @@ public class App {
                 path = "/" + path;
             parameters = ConfigFiles.readParameters(path, scenario.getInputFilesName() + ".yml");
             parameters.initialize(path);
-            new WebServer().initializeResults();
+            new WebServer().initialize(parameters.getServers());
             OutputFiles outputFiles = initializeResultFiles();
             switch (scenario.getUseCase()) {
                 case "all":

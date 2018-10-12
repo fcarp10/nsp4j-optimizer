@@ -4,8 +4,9 @@ package app;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import elements.LinkJson;
-import elements.ServerJson;
+import elements.json.LinkJson;
+import elements.json.NodeJson;
+import elements.json.ServerJson;
 import jdk.incubator.http.HttpClient;
 import jdk.incubator.http.HttpRequest;
 import jdk.incubator.http.HttpResponse;
@@ -28,10 +29,10 @@ class WebClient {
 
     static void updateResultsToWebApp(Output output, Results results) {
         if (results != null) {
-            List<ServerJson> serverJsonList = generateServerUtilizationStrings(output);
-            List<LinkJson> linkJsonList = generateLinkUtilizationStrings(output);
+            List<ServerJson> serverJsonList = generateServerStrings(output);
+            List<LinkJson> linkJsonList = generateLinkStrings(output);
             try {
-                postJsonNodes(serverJsonList);
+                postJsonServers(serverJsonList);
                 postJsonLinks(linkJsonList);
                 postResults(results);
             } catch (URISyntaxException | InterruptedException | IOException e) {
@@ -48,12 +49,24 @@ class WebClient {
                 .send(request, HttpResponse.BodyHandler.asString());
     }
 
-    private static void postJsonNodes(List<ServerJson> serverJsons) throws URISyntaxException, IOException, InterruptedException {
+    private static void postJsonNodes(List<NodeJson> nodeJsons) throws URISyntaxException, IOException, InterruptedException {
+        Type listType = new TypeToken<ArrayList<NodeJson>>() {
+        }.getType();
+        String stringJsonNodes = new Gson().toJson(nodeJsons, listType);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI("http://localhost:8080/node"))
+                .headers("Content-Type", "application/json")
+                .POST(HttpRequest.BodyProcessor.fromString(stringJsonNodes))
+                .build();
+        sendRequest(request);
+    }
+
+    private static void postJsonServers(List<ServerJson> serverJsons) throws URISyntaxException, IOException, InterruptedException {
         Type listType = new TypeToken<ArrayList<ServerJson>>() {
         }.getType();
         String stringJsonNodes = new Gson().toJson(serverJsons, listType);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/node"))
+                .uri(new URI("http://localhost:8080/server"))
                 .headers("Content-Type", "application/json")
                 .POST(HttpRequest.BodyProcessor.fromString(stringJsonNodes))
                 .build();
@@ -96,7 +109,7 @@ class WebClient {
         }
     }
 
-    private static List<ServerJson> generateServerUtilizationStrings(Output output) {
+    private static List<ServerJson> generateServerStrings(Output output) {
         Map<Server, String> functions = generateFunctionsPerServerStringMap(output);
         List<ServerJson> serverJsonList = new ArrayList<>();
         Iterator entries = output.serverUtilizationMap().entrySet().iterator();
@@ -113,12 +126,12 @@ class WebClient {
             }
             serverJsonList.add(new ServerJson(server.getId(), server.getNodeParent().getAttribute("x")
                     , server.getNodeParent().getAttribute("y")
-                    , "#" + getColor(utilization), u.toString(), true));
+                    , "#" + getColor(utilization), u.toString()));
         }
         return serverJsonList;
     }
 
-    private static List<LinkJson> generateLinkUtilizationStrings(Output output) {
+    private static List<LinkJson> generateLinkStrings(Output output) {
         List<LinkJson> linkJsonList = new ArrayList<>();
         Iterator entries = output.linkUtilizationMap().entrySet().iterator();
         DecimalFormat df = new DecimalFormat("#.##");

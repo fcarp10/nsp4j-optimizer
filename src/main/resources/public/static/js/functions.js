@@ -17,7 +17,7 @@ function startOpt() {
     var functionSequenceOrder = $("#functionSequenceOrder").is(":checked");
     var noParallelPaths = $("#noParallelPaths").is(":checked");
     var initialPlacementAsConstraints = $("#initialPlacementAsConstraints").is(":checked");
-    var reroutingMigration = $("#reroutingMigration").is(":checked");
+    var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
 
     var scenario = JSON.stringify({
             inputFilesName: inputFilesName,
@@ -37,7 +37,7 @@ function startOpt() {
                 functionSequenceOrder: functionSequenceOrder,
                 noParallelPaths: noParallelPaths,
                 initialPlacementAsConstraints: initialPlacementAsConstraints,
-                reroutingMigration: reroutingMigration
+                synchronizationTraffic: synchronizationTraffic
             }
         });
 
@@ -136,35 +136,51 @@ function check(elem) {
     document.getElementById("functionSequenceOrder").disabled = false;
     document.getElementById("noParallelPaths").disabled = false;
     document.getElementById("initialPlacementAsConstraints").disabled = false;
-    document.getElementById("reroutingMigration").disabled = false;
+    document.getElementById("synchronizationTraffic").disabled = false;
 
     var useCase = document.getElementById("useCase").value;
     if(useCase === "init"){
         document.getElementById("noParallelPaths").checked = true;
         document.getElementById("initialPlacementAsConstraints").checked = false;
-        document.getElementById("reroutingMigration").checked = false;
+        document.getElementById("synchronizationTraffic").checked = false;
     }
     if(useCase === "mgr"){
             document.getElementById("noParallelPaths").checked = true;
             document.getElementById("initialPlacementAsConstraints").checked = false;
-            document.getElementById("reroutingMigration").checked = true;
+            document.getElementById("synchronizationTraffic").checked = false;
     }
     if(useCase === "rep"){
                 document.getElementById("noParallelPaths").checked = false;
                 document.getElementById("initialPlacementAsConstraints").checked = true;
-                document.getElementById("reroutingMigration").checked = false;
+                document.getElementById("synchronizationTraffic").checked = true;
     }
     if(useCase === "rep_mgr"){
                 document.getElementById("noParallelPaths").checked = false;
                 document.getElementById("initialPlacementAsConstraints").checked = false;
-                document.getElementById("reroutingMigration").checked = true;
+                document.getElementById("synchronizationTraffic").checked = true;
     }
     if(useCase === "all"){
+                document.getElementById("noParallelPaths").checked = false;
+                document.getElementById("initialPlacementAsConstraints").checked = false;
+                document.getElementById("synchronizationTraffic").checked = false;
                 document.getElementById("noParallelPaths").disabled = true;
                 document.getElementById("initialPlacementAsConstraints").disabled = true;
-                document.getElementById("reroutingMigration").disabled = true;
+                document.getElementById("synchronizationTraffic").disabled = true;
     }
     if(useCase === "exp"){
+                document.getElementById("setLinkUtilizationExpr").checked = false;
+                document.getElementById("setServerUtilizationExpr").checked = false;
+                document.getElementById("countNumberOfUsedServers").checked = false;
+                document.getElementById("onePathPerDemand").checked = false;
+                document.getElementById("activatePathForService").checked = false;
+                document.getElementById("pathsConstrainedByFunctions").checked = false;
+                document.getElementById("functionPlacement").checked = false;
+                document.getElementById("oneFunctionPerDemand").checked = false;
+                document.getElementById("mappingFunctionsWithDemands").checked = false;
+                document.getElementById("functionSequenceOrder").checked = false;
+                document.getElementById("noParallelPaths").checked = false;
+                document.getElementById("initialPlacementAsConstraints").checked = false;
+                document.getElementById("synchronizationTraffic").checked = false;
                 document.getElementById("setLinkUtilizationExpr").disabled = true;
                 document.getElementById("setServerUtilizationExpr").disabled = true;
                 document.getElementById("countNumberOfUsedServers").disabled = true;
@@ -177,6 +193,6 @@ function check(elem) {
                 document.getElementById("functionSequenceOrder").disabled = true;
                 document.getElementById("noParallelPaths").disabled = true;
                 document.getElementById("initialPlacementAsConstraints").disabled = true;
-                document.getElementById("reroutingMigration").disabled = true;
+                document.getElementById("synchronizationTraffic").disabled = true;
     }
 }
