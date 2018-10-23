@@ -36,35 +36,43 @@ public class OptimizationModel {
     public GRBLinExpr usedServersExpr() {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < parameters.getServers().size(); x++)
-            expr.addTerm(1.0, variables.x[x]);
+            expr.addTerm(1.0, variables.pX[x]);
         return expr;
     }
 
     public GRBLinExpr linkUtilizationCostsExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int l = 0; l < parameters.getLinks().size(); l++)
-            expr.addTerm(weight, variables.kl[l]);
+            expr.addTerm(weight, variables.kL[l]);
         return expr;
     }
 
     public GRBLinExpr serverUtilizationCostsExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < parameters.getServers().size(); x++)
-            expr.addTerm(weight, variables.kx[x]);
+            expr.addTerm(weight, variables.kX[x]);
         return expr;
     }
 
     public GRBLinExpr linkUtilizationExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int l = 0; l < parameters.getLinks().size(); l++)
-            expr.addTerm(weight, variables.ul[l]);
+            expr.addTerm(weight, variables.uL[l]);
         return expr;
     }
 
     public GRBLinExpr serverUtilizationExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < parameters.getServers().size(); x++)
-            expr.addTerm(weight, variables.ux[x]);
+            expr.addTerm(weight, variables.uX[x]);
+        return expr;
+    }
+
+    public GRBLinExpr serviceDelayExpr(double weight) {
+        GRBLinExpr expr = new GRBLinExpr();
+        for (int s = 0; s < parameters.getServices().size(); s++)
+            for (int p = 0; p < parameters.getPaths().size(); p++)
+                expr.addTerm(weight, variables.dSP[s][p]);
         return expr;
     }
 

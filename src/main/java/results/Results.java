@@ -3,19 +3,23 @@ package results;
 
 import filemanager.Parameters;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Results {
 
     private transient Parameters pm;
-    private transient List<String> sp;
-    private transient List<String> spd;
-    private transient List<String> xsv;
-    private transient List<String> xsvd;
-    private transient List<String> ux;
-    private transient List<String> ul;
-    private transient List<String> svp;
+    // Elementary variables
+    private transient List<String> rSP;
+    private transient List<String> rSPD;
+    private transient List<String> pXSV;
+    private transient List<String> pXSVD;
+    private transient List<String> uX;
+    private transient List<String> uL;
+    // Additional variables
+    private transient List<String> sSVP;
+    private transient List<String> dSP;
+    // Extra
     private double avgLu;
     private double minLu;
     private double maxLu;
@@ -35,18 +39,18 @@ public class Results {
     private int numOfMigrations;
     private int numOfReplicas;
 
-    Results(Parameters pm, List<Double> lu, List<Double> xu, List<Integer> numOfFunctionsPerServer
+    Results(Parameters pm, List<Double> uL, List<Double> uX, List<Integer> numOfFunctionsPerServer
             , double totalTraffic, double trafficLinks, double avgPathLength, double cost, int numOfMigrations, int numOfReplicas
-            , boolean xsv[][][], boolean xsvd[][][][], boolean sp[][], boolean spd[][][], boolean svp[][][]) {
+            , boolean pXSV[][][], boolean pXSVD[][][][], boolean rSP[][], boolean rSPD[][][], boolean sSVP[][][], double dSP[][]) {
         this.pm = pm;
-        this.avgLu = Auxiliary.avg(lu);
-        this.minLu = Auxiliary.min(lu);
-        this.maxLu = Auxiliary.max(lu);
-        this.vrcLu = Auxiliary.vrc(lu, avgLu);
-        this.avgXu = Auxiliary.avg(xu);
-        this.minXu = Auxiliary.min(xu);
-        this.maxXu = Auxiliary.max(xu);
-        this.vrcXu = Auxiliary.vrc(xu, avgXu);
+        this.avgLu = Auxiliary.avg(uL);
+        this.minLu = Auxiliary.min(uL);
+        this.maxLu = Auxiliary.max(uL);
+        this.vrcLu = Auxiliary.vrc(uL, avgLu);
+        this.avgXu = Auxiliary.avg(uX);
+        this.minXu = Auxiliary.min(uX);
+        this.maxXu = Auxiliary.max(uX);
+        this.vrcXu = Auxiliary.vrc(uX, avgXu);
         this.avgFu = Auxiliary.avgF(numOfFunctionsPerServer);
         this.minFu = Auxiliary.minF(numOfFunctionsPerServer);
         this.maxFu = Auxiliary.maxF(numOfFunctionsPerServer);
@@ -57,122 +61,121 @@ public class Results {
         this.cost = cost;
         this.numOfMigrations = numOfMigrations;
         this.numOfReplicas = numOfReplicas;
-        this.sp = generateSPResults(sp);
-        this.spd = generateSPDResults(spd);
-        this.xsv = generateXSVResults(xsv);
-        this.xsvd = generateXSVDResults(xsvd);
-        this.ux = generateUXResults(xu);
-        this.ul = generateULResults(lu);
-        this.svp = generateSvpResults(svp);
+        setrSP(rSP);
+        setrSPD(rSPD);
+        setpXSV(pXSV);
+        setpXSVD(pXSVD);
+        setuX(uX);
+        setuL(uL);
+        setsSVP(sSVP);
+        setdSP(dSP);
     }
 
-    private List<String> generateSPResults(boolean tSP[][]) {
-        List<String> spStrings = new ArrayList<>();
+    private void setrSP(boolean rSPinput[][]) {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                if (tSP[s][p])
-                    spStrings.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): ["
+                if (rSPinput[s][p])
+                    rSP.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): ["
                             + pm.getServices().get(s).getId() + "]"
                             + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
-        return spStrings;
     }
 
-    private List<String> generateSPDResults(boolean tSPD[][][]) {
-        List<String> spdStrings = new ArrayList<>();
+    private void setrSPD(boolean rSPDinput[][][]) {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                    if (tSPD[s][p][d])
-                        spdStrings.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "," + (d + Auxiliary.OFFSET) + "): ["
+                    if (rSPDinput[s][p][d])
+                        rSPD.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "," + (d + Auxiliary.OFFSET) + "): ["
                                 + pm.getServices().get(s).getId() + "]"
                                 + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath() + "["
                                 + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "]");
-        return spdStrings;
     }
 
-    private List<String> generateXSVResults(boolean fXSV[][][]) {
-        List<String> xsvStrings = new ArrayList<>();
+    private void setpXSV(boolean pXSVinput[][][]) {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int x = 0; x < pm.getServers().size(); x++)
-                    if (fXSV[x][s][v])
-                        xsvStrings.add("(" + (x + Auxiliary.OFFSET) + "," + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "): ["
+                    if (pXSVinput[x][s][v])
+                        pXSV.add("(" + (x + Auxiliary.OFFSET) + "," + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "): ["
                                 + pm.getServers().get(x).getId() + "]["
                                 + pm.getServices().get(s).getId() + "]["
                                 + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
-        return xsvStrings;
     }
 
-    private List<String> generateXSVDResults(boolean fXSVD[][][][]) {
-        List<String> xsvdStrings = new ArrayList<>();
+    private void setpXSVD(boolean pXSVDinput[][][][]) {
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                        if (fXSVD[x][s][v][d])
-                            xsvdStrings.add("(" + (x + Auxiliary.OFFSET) + "," + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "," + (d + Auxiliary.OFFSET) + "): ["
+                        if (pXSVDinput[x][s][v][d])
+                            pXSVD.add("(" + (x + Auxiliary.OFFSET) + "," + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "," + (d + Auxiliary.OFFSET) + "): ["
                                     + pm.getServers().get(x).getId() + "]["
                                     + pm.getServices().get(s).getId() + "]["
                                     + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
                                     + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "]");
-        return xsvdStrings;
     }
 
-    private List<String> generateUXResults(List<Double> xu) {
-        List<String> uxStrings = new ArrayList<>();
+    private void setuX(List<Double> uXinput) {
         for (int x = 0; x < pm.getServers().size(); x++)
-            uxStrings.add("(" + (x + Auxiliary.OFFSET) + "): ["
+            uX.add("(" + (x + Auxiliary.OFFSET) + "): ["
                     + pm.getServers().get(x).getId() + "]["
-                    + xu.get(x) + "]");
-        return uxStrings;
+                    + uXinput.get(x) + "]");
     }
 
-    private List<String> generateULResults(List<Double> lu) {
-        List<String> ulStrings = new ArrayList<>();
+    private void setuL(List<Double> uLinput) {
         for (int l = 0; l < pm.getLinks().size(); l++)
-            ulStrings.add("(" + (l + Auxiliary.OFFSET) + "): ["
+            uL.add("(" + (l + Auxiliary.OFFSET) + "): ["
                     + pm.getLinks().get(l).getId() + "]["
-                    + lu.get(l) + "]");
-        return ulStrings;
+                    + uLinput.get(l) + "]");
     }
 
-    private List<String> generateSvpResults(boolean svp[][][]) {
-        List<String> svpStrings = new ArrayList<>();
+    private void setsSVP(boolean sSVPinput[][][]) {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int p = 0; p < pm.getPaths().size(); p++)
-                    if (svp[s][v][p])
-                        svpStrings.add("(" + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): "
+                    if (sSVPinput[s][v][p])
+                        sSVP.add("(" + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): "
                                 + pm.getPaths().get(p).getNodePath());
-        return svpStrings;
     }
 
-    public List<String> getXsv() {
-        return xsv;
+    private void setdSP(double dSPinput[][]) {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getPaths().size(); p++)
+                if (dSPinput[s][p] > 0)
+                    dSP.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): "
+                            + pm.getPaths().get(p).getNodePath() + "[" + Arrays.deepToString(dSPinput) + "]");
     }
 
-    public List<String> getXsvd() {
-        return xsvd;
+    public List<String> getpXSV() {
+        return pXSV;
     }
 
-    public List<String> getSp() {
-        return sp;
+    public List<String> getpXSVD() {
+        return pXSVD;
     }
 
-    public List<String> getSpd() {
-        return spd;
+    public List<String> getrSP() {
+        return rSP;
     }
 
-    public List<String> getUx() {
-        return ux;
+    public List<String> getrSPD() {
+        return rSPD;
     }
 
-    public List<String> getUl() {
-        return ul;
+    public List<String> getuX() {
+        return uX;
     }
 
-    public List<String> getSvp() {
-        return svp;
+    public List<String> getuL() {
+        return uL;
+    }
+
+    public List<String> getsSVP() {
+        return sSVP;
+    }
+
+    public List<String> getdSP() {
+        return dSP;
     }
 
     public double getAvgLu() {

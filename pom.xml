@@ -9,7 +9,7 @@
     <version>0.7.2</version>
 
     <properties>
-        <java.version>9</java.version>
+        <java.version>11</java.version>
         <dl4j.version>0.9.1</dl4j.version>
         <maven.test.skip>true</maven.test.skip>
     </properties>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.gurobi</groupId>
             <artifactId>gurobi-solver</artifactId>
-            <version>8.0.0</version>
+            <version>8</version>
         </dependency>
         <dependency>
             <groupId>com.sparkjava</groupId>
@@ -57,6 +57,12 @@
             <artifactId>deeplearning4j-core</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.2</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <packaging>jar</packaging>
@@ -66,11 +72,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <compilerArgument>--add-modules=jdk.incubator.httpclient</compilerArgument>
                 </configuration>
             </plugin>
             <plugin>

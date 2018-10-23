@@ -26,7 +26,7 @@ public class App {
     public static void start(Scenario scenario) {
         try {
             String path = FilenameUtils.getPath(App.class.getClassLoader().getResource(scenario.getInputFilesName() + ".yml").getFile());
-            if (System.getProperty("os.name").equals("Mac OS X"))
+            if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
                 path = "/" + path;
             parameters = ConfigFiles.readParameters(path, scenario.getInputFilesName() + ".yml");
             parameters.initialize(path);

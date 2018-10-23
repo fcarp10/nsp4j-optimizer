@@ -43,9 +43,9 @@ class WebServer {
         linkJsonMap = new HashMap<>();
         List<Node> nodes = new ArrayList<>(GraphManager.getGraph().getNodeSet());
         for (Node node : nodes)
-            nodeList.add(new NodeJson(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#cccccc", node.getId()));
+            nodeList.add(new NodeJson(node.getId(), node.getAttribute("pX"), node.getAttribute("y"), "#cccccc", node.getId()));
         for (Server server : servers)
-            serverJsonMap.put(server.getId(), new ServerJson(server.getId(), server.getNodeParent().getAttribute("x"), server.getNodeParent().getAttribute("y"), "#cccccc", server.getId()));
+            serverJsonMap.put(server.getId(), new ServerJson(server.getId(), server.getNodeParent().getAttribute("pX"), server.getNodeParent().getAttribute("y"), "#cccccc", server.getId()));
         List<Edge> edges = new ArrayList<>(GraphManager.getGraph().getEdgeSet());
         for (Edge edge : edges)
             linkJsonMap.put(edge.getId(), new LinkJson(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));

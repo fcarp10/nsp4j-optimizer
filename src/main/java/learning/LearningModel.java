@@ -78,13 +78,13 @@ public class LearningModel {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-                    if (initialOutput.getSpd()[s][p][d]) {
+                    if (initialOutput.getrSPD()[s][p][d]) {
                         float[] individualInput = new float[2 + pm.getServiceLengthAux()];
                         individualInput[0] = pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d);
                         individualInput[1] = p;
                         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                             for (int x = 0; x < pm.getServers().size(); x++)
-                                if (initialOutput.getXsvd()[x][s][v][d])
+                                if (initialOutput.getpXSVD()[x][s][v][d])
                                     individualInput[2 + v] = x;
                         inputList.add(individualInput);
                     }
@@ -102,7 +102,7 @@ public class LearningModel {
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                     int pointer = x * pm.getTotalNumberOfFunctionsAux() + s * pm.getServices().get(s).getFunctions().size() + v;
-                    if (initialOutput.getXsv()[x][s][v])
+                    if (initialOutput.getpXSV()[x][s][v])
                         environment[pointer] = 1;
                     else
                         environment[pointer] = 0;

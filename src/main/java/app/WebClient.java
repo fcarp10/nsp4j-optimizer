@@ -7,21 +7,20 @@ import com.google.gson.reflect.TypeToken;
 import elements.json.LinkJson;
 import elements.json.NodeJson;
 import elements.json.ServerJson;
-import jdk.incubator.http.HttpClient;
-import jdk.incubator.http.HttpRequest;
-import jdk.incubator.http.HttpResponse;
 import network.Server;
 import org.graphstream.graph.Edge;
 import results.Auxiliary;
 import results.Output;
 import results.Results;
-
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -46,7 +45,7 @@ class WebClient {
                 .newBuilder()
                 .proxy(ProxySelector.getDefault())
                 .build()
-                .send(request, HttpResponse.BodyHandler.asString());
+                .send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     private static void postJsonNodes(List<NodeJson> nodeJsons) throws URISyntaxException, IOException, InterruptedException {
@@ -56,7 +55,7 @@ class WebClient {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/node"))
                 .headers("Content-Type", "application/json")
-                .POST(HttpRequest.BodyProcessor.fromString(stringJsonNodes))
+                .POST(HttpRequest.BodyPublishers.ofString(stringJsonNodes))
                 .build();
         sendRequest(request);
     }
@@ -68,7 +67,7 @@ class WebClient {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/server"))
                 .headers("Content-Type", "application/json")
-                .POST(HttpRequest.BodyProcessor.fromString(stringJsonNodes))
+                .POST(HttpRequest.BodyPublishers.ofString(stringJsonNodes))
                 .build();
         sendRequest(request);
     }
@@ -80,7 +79,7 @@ class WebClient {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/link"))
                 .headers("Content-Type", "application/json")
-                .POST(HttpRequest.BodyProcessor.fromString(stringJsonLinks))
+                .POST(HttpRequest.BodyPublishers.ofString(stringJsonLinks))
                 .build();
         sendRequest(request);
     }
@@ -91,7 +90,7 @@ class WebClient {
         String stringResults = gson.toJson(results);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/results"))
-                .POST(HttpRequest.BodyProcessor.fromString(stringResults))
+                .POST(HttpRequest.BodyPublishers.ofString(stringResults))
                 .build();
         sendRequest(request);
     }
@@ -101,7 +100,7 @@ class WebClient {
         try {
             request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/message"))
-                    .POST(HttpRequest.BodyProcessor.fromString(message))
+                    .POST(HttpRequest.BodyPublishers.ofString(message))
                     .build();
             sendRequest(request);
         } catch (URISyntaxException | InterruptedException | IOException e) {
@@ -124,7 +123,7 @@ class WebClient {
                 if (functions.get(server).length() < 40)
                     u.append("\n").append(functions.get(server));
             }
-            serverJsonList.add(new ServerJson(server.getId(), server.getNodeParent().getAttribute("x")
+            serverJsonList.add(new ServerJson(server.getId(), server.getNodeParent().getAttribute("pX")
                     , server.getNodeParent().getAttribute("y")
                     , "#" + getColor(utilization), u.toString()));
         }
@@ -154,7 +153,7 @@ class WebClient {
             StringBuilder stringBuilder = new StringBuilder();
             for (int s = 0; s < output.getPm().getServices().size(); s++)
                 for (int v = 0; v < output.getPm().getServices().get(s).getFunctions().size(); v++)
-                    if (output.getXsv()[x][s][v])
+                    if (output.getpXSV()[x][s][v])
                         stringBuilder.append("f(").append(x + Auxiliary.OFFSET).append(",").append(s + Auxiliary.OFFSET).append(",").append(v + Auxiliary.OFFSET).append(")\n");
             functionsStringMap.put(output.getPm().getServers().get(x), stringBuilder.toString());
         }
