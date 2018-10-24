@@ -5,8 +5,6 @@ function startOpt() {
     var objective = document.getElementById("objective").value;
     var useCase = document.getElementById("useCase").value;
     var maximization = $("#max").is(":checked");
-    var setLinkUtilizationExpr = $("#setLinkUtilizationExpr").is(":checked");
-    var setServerUtilizationExpr = $("#setServerUtilizationExpr").is(":checked");
     var countNumberOfUsedServers = $("#countNumberOfUsedServers").is(":checked");
     var onePathPerDemand = $("#onePathPerDemand").is(":checked");
     var activatePathForService = $("#onePathPerDemand").is(":checked");
@@ -25,8 +23,6 @@ function startOpt() {
             useCase: useCase,
             maximization: maximization,
             constraints :{
-                setLinkUtilizationExpr: setLinkUtilizationExpr,
-                setServerUtilizationExpr: setServerUtilizationExpr,
                 countNumberOfUsedServers: countNumberOfUsedServers,
                 onePathPerDemand: onePathPerDemand,
                 activatePathForService: activatePathForService,
@@ -123,9 +119,6 @@ function getMessage() {
 }
 
 function check(elem) {
-
-    document.getElementById("setLinkUtilizationExpr").disabled = false;
-    document.getElementById("setServerUtilizationExpr").disabled = false;
     document.getElementById("countNumberOfUsedServers").disabled = false;
     document.getElementById("onePathPerDemand").disabled = false;
     document.getElementById("activatePathForService").disabled = false;
@@ -168,8 +161,6 @@ function check(elem) {
                 document.getElementById("synchronizationTraffic").disabled = true;
     }
     if(useCase === "exp"){
-                document.getElementById("setLinkUtilizationExpr").checked = false;
-                document.getElementById("setServerUtilizationExpr").checked = false;
                 document.getElementById("countNumberOfUsedServers").checked = false;
                 document.getElementById("onePathPerDemand").checked = false;
                 document.getElementById("activatePathForService").checked = false;

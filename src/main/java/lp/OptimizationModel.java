@@ -40,14 +40,14 @@ public class OptimizationModel {
         return expr;
     }
 
-    public GRBLinExpr linkUtilizationCostsExpr(double weight) {
+    public GRBLinExpr linkCostsExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int l = 0; l < parameters.getLinks().size(); l++)
             expr.addTerm(weight, variables.kL[l]);
         return expr;
     }
 
-    public GRBLinExpr serverUtilizationCostsExpr(double weight) {
+    public GRBLinExpr serverCostsExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int x = 0; x < parameters.getServers().size(); x++)
             expr.addTerm(weight, variables.kX[x]);

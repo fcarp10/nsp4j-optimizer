@@ -1,6 +1,6 @@
 # Optimization parameters
 gap: 0
-weights: [0, 1.0]
+weights: [0, 1.0, 1.0]
 
 # Network default parameters
 serverCapacityDefault: 1000

@@ -85,19 +85,21 @@ public class App {
 
     private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel optimizationModel, String objective) throws GRBException {
         GRBLinExpr expr = new GRBLinExpr();
-        double linksWeights = parameters.getWeights()[0] / parameters.getLinks().size();
-        double serversWeights = parameters.getWeights()[1] / parameters.getServers().size();
+        double weightLinks = parameters.getWeights()[0] / parameters.getLinks().size();
+        double weightServers = parameters.getWeights()[1] / parameters.getServers().size();
+        double weightServiceDelays = parameters.getWeights()[2] / parameters.getPaths().size();
         switch (objective) {
             case "servers":
                 expr.add(optimizationModel.usedServersExpr());
                 break;
             case "costs":
-                expr.add(optimizationModel.linkUtilizationCostsExpr(linksWeights));
-                expr.add(optimizationModel.serverUtilizationCostsExpr(serversWeights));
+                expr.add(optimizationModel.linkCostsExpr(weightLinks));
+                expr.add(optimizationModel.serverCostsExpr(weightServers));
+                expr.add(optimizationModel.serviceDelayExpr(weightServiceDelays));
                 break;
             case "utilization":
-                expr.add(optimizationModel.linkUtilizationExpr(linksWeights));
-                expr.add(optimizationModel.serverUtilizationExpr(serversWeights));
+                expr.add(optimizationModel.linkUtilizationExpr(weightLinks));
+                expr.add(optimizationModel.serverUtilizationExpr(weightServers));
                 break;
         }
         return expr;

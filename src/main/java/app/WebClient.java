@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import elements.json.LinkJson;
-import elements.json.NodeJson;
 import elements.json.ServerJson;
 import network.Server;
 import org.graphstream.graph.Edge;
@@ -46,18 +45,6 @@ class WebClient {
                 .proxy(ProxySelector.getDefault())
                 .build()
                 .send(request, HttpResponse.BodyHandlers.ofString());
-    }
-
-    private static void postJsonNodes(List<NodeJson> nodeJsons) throws URISyntaxException, IOException, InterruptedException {
-        Type listType = new TypeToken<ArrayList<NodeJson>>() {
-        }.getType();
-        String stringJsonNodes = new Gson().toJson(nodeJsons, listType);
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8080/node"))
-                .headers("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(stringJsonNodes))
-                .build();
-        sendRequest(request);
     }
 
     private static void postJsonServers(List<ServerJson> serverJsons) throws URISyntaxException, IOException, InterruptedException {
