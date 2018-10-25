@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'SENDATE'
-copyright = '2018, Technische Universität Braunschweig'
+copyright = '2018, Technische Universitaet Braunschweig'
 author = 'Francisco Carpio'
 
 # The version info for the project you're documenting, acts as replacement for

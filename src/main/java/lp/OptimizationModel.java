@@ -71,7 +71,7 @@ public class OptimizationModel {
     public GRBLinExpr serviceDelayExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int s = 0; s < parameters.getServices().size(); s++)
-            for (int p = 0; p < parameters.getPaths().size(); p++)
+            for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 expr.addTerm(weight, variables.dSP[s][p]);
         return expr;
     }

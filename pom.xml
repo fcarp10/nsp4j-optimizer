@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.gurobi</groupId>
             <artifactId>gurobi-solver</artifactId>
-            <version>8</version>
+            <version>8.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.sparkjava</groupId>

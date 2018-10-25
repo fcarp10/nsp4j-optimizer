@@ -6,6 +6,7 @@ import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBVar;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.Path;
 import results.Output;
 import results.Auxiliary;
 import elements.Scenario;
@@ -94,18 +95,36 @@ public class Constraints {
 
     private void serviceDelay() throws GRBException {
         for (int s = 0; s < pm.getServices().size(); s++) {
-            for (int p = 0; p < pm.getPaths().size(); p++) {
-                GRBLinExpr expr = new GRBLinExpr();
-                for (int l = 0; l < pm.getPaths().get(p).getEdgePath().size(); l++) {
-                    expr.addConstant(pm.getPaths().get(p).getEdgePath().get(l).getAttribute("delay"));
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
+                Path path = pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p);
+                double pathDelay = 0.0;
+                for (int l = 0; l < path.getEdgePath().size(); l++)
+                    pathDelay += (double) path.getEdgePath().get(l).getAttribute("delay");
+                GRBLinExpr linkDelayExpr = new GRBLinExpr();
+                linkDelayExpr.addTerm(pathDelay, variables.rSP[s][p]);
+                GRBLinExpr processingDelayExpr = new GRBLinExpr();
+                for (int x = 0; x < pm.getServers().size(); x++) {
+                    for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                        double traffic = 0.0;
+                        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                            traffic += pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d);
+                        processingDelayExpr.addTerm(traffic * pm.getServices().get(s).getFunctions().get(v).getLoad()
+                                * pm.getServers().get(x).getProcessingDelay() / pm.getServers().get(x).getCapacity()
+                                , variables.pXSV[x][s][v]);
+                    }
                 }
-                optimizationModel.getGrbModel().addConstr(expr, GRB.EQUAL, variables.dSP[s][p], "serviceDelay");
+                GRBLinExpr migrationDelayExpr = new GRBLinExpr();
+
+                GRBLinExpr serviceDelayExpr = new GRBLinExpr();
+                serviceDelayExpr.add(linkDelayExpr);
+                serviceDelayExpr.add(processingDelayExpr);
+                serviceDelayExpr.add(migrationDelayExpr);
+                optimizationModel.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, variables.dSP[s][p], "serviceDelay");
             }
         }
     }
 
     private void countNumberOfUsedServers() throws GRBException {
-
         for (int x = 0; x < pm.getServers().size(); x++) {
             GRBLinExpr expr = new GRBLinExpr();
             GRBLinExpr expr2 = new GRBLinExpr();

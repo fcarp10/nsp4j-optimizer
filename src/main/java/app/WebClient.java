@@ -110,7 +110,7 @@ class WebClient {
                 if (functions.get(server).length() < 40)
                     u.append("\n").append(functions.get(server));
             }
-            serverJsonList.add(new ServerJson(server.getId(), server.getNodeParent().getAttribute("pX")
+            serverJsonList.add(new ServerJson(server.getId(), server.getNodeParent().getAttribute("x")
                     , server.getNodeParent().getAttribute("y")
                     , "#" + getColor(utilization), u.toString()));
         }

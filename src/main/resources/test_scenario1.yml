@@ -1,15 +1,16 @@
 # Optimization parameters
 gap: 0
-weights: [0, 1.0, 1.0]
+weights: [0, 0, 1.0]
 
 # Network default parameters
 serverCapacityDefault: 1000
 serversNodeDefault: 1
+serverDelayDefault: 10
 linkCapacityDefault: 1000
 minPathsDefault: 3
 maxPathsDefault: 3
-minDemandsDefault: 3
-maxDemandsDefault: 3
+minDemandsDefault: 2
+maxDemandsDefault: 2
 minBwDefault: 100
 maxBwDefault: 100
 

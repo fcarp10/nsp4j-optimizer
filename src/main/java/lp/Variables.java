@@ -70,9 +70,9 @@ public class Variables {
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                     for (int p = 0; p < pm.getPaths().size(); p++)
                         sSVP[s][v][p] = grbModel.addVar(0.0, 1.0, 0.0, GRB.BINARY, "sSVP[" + s + "][" + v + "][" + p + "]");
-            dSP = new GRBVar[pm.getServices().size()][pm.getPaths().size()];
+            dSP = new GRBVar[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
             for (int s = 0; s < pm.getServices().size(); s++)
-                for (int p = 0; p < pm.getPaths().size(); p++)
+                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                     dSP[s][p] = grbModel.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, "dSP[" + s + "][" + p + "]");
             grbModel.update();
         } catch (Exception ignored) {

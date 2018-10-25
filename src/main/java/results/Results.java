@@ -3,6 +3,7 @@ package results;
 
 import filemanager.Parameters;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,6 +73,7 @@ public class Results {
     }
 
     private void setrSP(boolean rSPinput[][]) {
+        rSP = new ArrayList<>();
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 if (rSPinput[s][p])
@@ -81,6 +83,7 @@ public class Results {
     }
 
     private void setrSPD(boolean rSPDinput[][][]) {
+        rSPD = new ArrayList<>();
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
@@ -92,6 +95,7 @@ public class Results {
     }
 
     private void setpXSV(boolean pXSVinput[][][]) {
+        pXSV = new ArrayList<>();
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int x = 0; x < pm.getServers().size(); x++)
@@ -103,6 +107,7 @@ public class Results {
     }
 
     private void setpXSVD(boolean pXSVDinput[][][][]) {
+        pXSVD = new ArrayList<>();
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -116,6 +121,7 @@ public class Results {
     }
 
     private void setuX(List<Double> uXinput) {
+        uX = new ArrayList<>();
         for (int x = 0; x < pm.getServers().size(); x++)
             uX.add("(" + (x + Auxiliary.OFFSET) + "): ["
                     + pm.getServers().get(x).getId() + "]["
@@ -123,6 +129,7 @@ public class Results {
     }
 
     private void setuL(List<Double> uLinput) {
+        uL = new ArrayList<>();
         for (int l = 0; l < pm.getLinks().size(); l++)
             uL.add("(" + (l + Auxiliary.OFFSET) + "): ["
                     + pm.getLinks().get(l).getId() + "]["
@@ -130,6 +137,7 @@ public class Results {
     }
 
     private void setsSVP(boolean sSVPinput[][][]) {
+        sSVP = new ArrayList<>();
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int p = 0; p < pm.getPaths().size(); p++)
@@ -139,11 +147,13 @@ public class Results {
     }
 
     private void setdSP(double dSPinput[][]) {
+        dSP = new ArrayList<>();
         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getPaths().size(); p++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 if (dSPinput[s][p] > 0)
                     dSP.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): "
-                            + pm.getPaths().get(p).getNodePath() + "[" + Arrays.deepToString(dSPinput) + "]");
+                            + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath()
+                            + "[" + Auxiliary.roundDouble(dSPinput[s][p], 2) + "]");
     }
 
     public List<String> getpXSV() {

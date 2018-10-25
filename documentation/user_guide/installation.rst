@@ -45,3 +45,7 @@ This will launch the application on your local machine trough the port 8080. Ope
 
 .. image:: /_static/interface.png
     :align: center
+
+*NOTE: in Linux or Mac OS distributions you might need to specify the Java library path ``-Djava.library.path=/opt/gurobi810/linux64/lib/``.
+
+**NOTE: in Ubuntu, add a file named ``randomLibs.conf`` to the directory ``/etc/ld.so.conf.d/``. Add the next line to this file: ``/opt/gurobi810/linux64/lib/`` (according to your Gurobi version). Finally, run the following command in the terminal: ``sudo ldconfig``.

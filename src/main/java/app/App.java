@@ -16,6 +16,9 @@ import elements.OutputFiles;
 import results.Results;
 import elements.Scenario;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 
 public class App {
 
@@ -106,9 +109,12 @@ public class App {
     }
 
     private static OutputFiles initializeResultFiles() {
+        NumberFormat formatter = new DecimalFormat("#.##");
         StringBuilder title = new StringBuilder();
-        for (Double d : parameters.getWeights())
-            title.append("-").append(d);
+        title.append(formatter.format(parameters.getWeights()[0]));
+        if (parameters.getWeights().length > 1)
+            for (int i = 1; i < parameters.getWeights().length; i++)
+                title.append("-").append(formatter.format(parameters.getWeights()[i]));
         return new OutputFiles(parameters.getScenario(), title.toString());
     }
 

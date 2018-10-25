@@ -78,9 +78,9 @@ public class Output {
                     for (int p = 0; p < pm.getPaths().size(); p++)
                         if (optimizationModel.getVariables().sSVP[s][v][p].get(GRB.DoubleAttr.X) == 1.0)
                             sSVP[s][v][p] = true;
-            dSP = new double[pm.getServices().size()][pm.getPaths().size()];
+            dSP = new double[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
             for (int s = 0; s < pm.getServices().size(); s++)
-                for (int p = 0; p < pm.getPaths().size(); p++)
+                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                     dSP[s][p] = optimizationModel.getVariables().dSP[s][p].get(GRB.DoubleAttr.X);
         } catch (Exception ignored) {
         }
