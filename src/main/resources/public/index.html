@@ -49,13 +49,13 @@
             <h3>Parameters</h3>
             <hr>
             <h6>Input files name</h6>
-            <input type="text" class="input-style" id="inputFilesName" value="test_scenario1">
+            <input type="text" class="input-style" id="inputFileName" value="test_scenario1">
             <div class="title-margin">
                 <h6>Objective Function</h6>
             </div>
             <div class="select-style">
-                <select id="objective">
-                    <option value="servers">num of servers</option>
+                <select id="objectiveFunction">
+                    <option value="num_of_servers">num of servers</option>
                     <option value="costs">utilization costs</option>
                     <option value="utilization">utilization</option>
                 </select>
@@ -67,16 +67,16 @@
                 </form>
             </div>
             <div class="title-margin">
-                <h6>Use Case</h6>
+                <h6>Model</h6>
             </div>
             <div class="select-style">
-                <select id="useCase" onChange="check(this);">
-                    <option value="init">initial placement</option>
-                    <option value="mgr">migration</option>
-                    <option value="rep">replication</option>
-                    <option value="rep_mgr">rep. & mgr.</option>
-                    <option value="all">all</option>
-                    <option value="exp">exp</option>
+                <select id="model" onChange="check(this);">
+                    <option value="initial_placement">initial placement</option>
+                    <option value="migration">migration</option>
+                    <option value="replication">replication</option>
+                    <option value="migration_replication">rep. & mgr.</option>
+                    <option value="all_optimization_models">all opt. models</option>
+                    <option value="migration_replication_rl">learning</option>
                 </select>
             </div>
             <div class="title-margin">
@@ -89,7 +89,7 @@
                 <input type="checkbox" id="pathsConstrainedByFunctions" checked> Paths constrained by functions<br>
                 <input type="checkbox" id="functionPlacement" checked> Function placement<br>
                 <input type="checkbox" id="oneFunctionPerDemand" checked> One function per demand<br>
-                <input type="checkbox" id="mappingFunctionsWithDemands" checked> Mapping functions with demands<br>
+                <input type="checkbox" id="mappingFunctionsWithDemands" checked> Mapping func. with demands<br>
                 <input type="checkbox" id="functionSequenceOrder" checked> Functions sequence order<br>
             </form>
             <div class="title-margin">
@@ -105,17 +105,19 @@
         <div class="col-md-2">
             <h3>Summary results</h3>
             <hr>
-            Link Utilization (avg-min-max-std):
-            <div class="div div-output" id="lu">0.0 - 0.0 - 0.0 - 0.0</div>
-            Server Utilization (avg-min-max-std):
-            <div class="div div-output" id="xu">0.0 - 0.0 - 0.0 - 0.0</div>
+            Link util. (avg-min-max-std):
+            <div class="div div-output" id="luSummary">0.0 - 0.0 - 0.0 - 0.0</div>
+            Server util. (avg-min-max-std):
+            <div class="div div-output" id="xuSummary">0.0 - 0.0 - 0.0 - 0.0</div>
             Functions (avg-min-max-std):
-            <div class="div div-output" id="fp">0.0 - 0.0 - 0.0 - 0.0</div>
-            Average path length:
-            <div class="div div-output" id="path">0.0</div>
-            Number of migrations/replicas:
+            <div class="div div-output" id="fuSummary">0.0 - 0.0 - 0.0 - 0.0</div>
+            Service delay (avg-min-max-std):
+            <div class="div div-output" id="sdSummary">0.0 - 0.0 - 0.0 - 0.0</div>
+            avgPathLen. - totalTraff. - traff.Links:
+            <div class="div div-output" id="extra">0.0 - 0.0 - 0.0</div>
+            Migrations - Replications:
             <div class="div div-output" id="mgr-rep">0 - 0</div>
-            Optimum value:
+            Cost value:
             <div class="div div-output" id="cost">0.0</div>
             <button class="button button-submit" id="run-button" onClick="startOpt()">Run</button>
             <div class="div div-output-emphasis" id="message">Model is ready</div>

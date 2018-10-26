@@ -1,15 +1,28 @@
 package results;
 
 
+import elements.Scenario;
 import filemanager.Parameters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Results {
 
+    // Scenario
     private transient Parameters pm;
+    private transient Scenario scenario;
+    // Summary results
+    private double[] luSummary;
+    private double[] xuSummary;
+    private double[] fuSummary;
+    private double[] sdSummary;
+    private double avgPathLength;
+    private double totalTraffic;
+    private double trafficLinks;
+    private int migrationsNum;
+    private int replicationsNum;
+    private double cost;
     // Elementary variables
     private transient List<String> rSP;
     private transient List<String> rSPD;
@@ -20,60 +33,25 @@ public class Results {
     // Additional variables
     private transient List<String> sSVP;
     private transient List<String> dSP;
-    // Extra
-    private double avgLu;
-    private double minLu;
-    private double maxLu;
-    private double vrcLu;
-    private double avgXu;
-    private double minXu;
-    private double maxXu;
-    private double vrcXu;
-    private double avgFu;
-    private double minFu;
-    private double maxFu;
-    private double vrcFu;
-    private double totalTraffic;
-    private double trafficLinks;
-    private double avgPathLength;
-    private double cost;
-    private int numOfMigrations;
-    private int numOfReplicas;
 
-    Results(Parameters pm, List<Double> uL, List<Double> uX, List<Integer> numOfFunctionsPerServer
-            , double totalTraffic, double trafficLinks, double avgPathLength, double cost, int numOfMigrations, int numOfReplicas
-            , boolean pXSV[][][], boolean pXSVD[][][][], boolean rSP[][], boolean rSPD[][][], boolean sSVP[][][], double dSP[][]) {
+    Results(Parameters pm, Scenario scenario) {
         this.pm = pm;
-        this.avgLu = Auxiliary.avg(uL);
-        this.minLu = Auxiliary.min(uL);
-        this.maxLu = Auxiliary.max(uL);
-        this.vrcLu = Auxiliary.vrc(uL, avgLu);
-        this.avgXu = Auxiliary.avg(uX);
-        this.minXu = Auxiliary.min(uX);
-        this.maxXu = Auxiliary.max(uX);
-        this.vrcXu = Auxiliary.vrc(uX, avgXu);
-        this.avgFu = Auxiliary.avgF(numOfFunctionsPerServer);
-        this.minFu = Auxiliary.minF(numOfFunctionsPerServer);
-        this.maxFu = Auxiliary.maxF(numOfFunctionsPerServer);
-        this.vrcFu = Auxiliary.vrcF(numOfFunctionsPerServer, avgFu);
-        this.totalTraffic = totalTraffic;
-        this.trafficLinks = trafficLinks;
-        this.avgPathLength = avgPathLength;
-        this.cost = cost;
-        this.numOfMigrations = numOfMigrations;
-        this.numOfReplicas = numOfReplicas;
-        setrSP(rSP);
-        setrSPD(rSPD);
-        setpXSV(pXSV);
-        setpXSVD(pXSVD);
-        setuX(uX);
-        setuL(uL);
-        setsSVP(sSVP);
-        setdSP(dSP);
+        this.scenario = scenario;
+        luSummary = new double[4];
+        xuSummary = new double[4];
+        fuSummary = new double[4];
+        sdSummary = new double[4];
+        rSP = new ArrayList<>();
+        rSPD = new ArrayList<>();
+        pXSV = new ArrayList<>();
+        pXSVD = new ArrayList<>();
+        uX = new ArrayList<>();
+        uL = new ArrayList<>();
+        sSVP = new ArrayList<>();
+        dSP = new ArrayList<>();
     }
 
-    private void setrSP(boolean rSPinput[][]) {
-        rSP = new ArrayList<>();
+    void setrSP(boolean rSPinput[][]) {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 if (rSPinput[s][p])
@@ -82,8 +60,7 @@ public class Results {
                             + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
     }
 
-    private void setrSPD(boolean rSPDinput[][][]) {
-        rSPD = new ArrayList<>();
+    void setrSPD(boolean rSPDinput[][][]) {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
@@ -94,8 +71,7 @@ public class Results {
                                 + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "]");
     }
 
-    private void setpXSV(boolean pXSVinput[][][]) {
-        pXSV = new ArrayList<>();
+    void setpXSV(boolean pXSVinput[][][]) {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int x = 0; x < pm.getServers().size(); x++)
@@ -106,8 +82,7 @@ public class Results {
                                 + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
     }
 
-    private void setpXSVD(boolean pXSVDinput[][][][]) {
-        pXSVD = new ArrayList<>();
+    void setpXSVD(boolean pXSVDinput[][][][]) {
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -120,24 +95,21 @@ public class Results {
                                     + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "]");
     }
 
-    private void setuX(List<Double> uXinput) {
-        uX = new ArrayList<>();
+    void setuX(List<Double> uXinput) {
         for (int x = 0; x < pm.getServers().size(); x++)
             uX.add("(" + (x + Auxiliary.OFFSET) + "): ["
                     + pm.getServers().get(x).getId() + "]["
                     + uXinput.get(x) + "]");
     }
 
-    private void setuL(List<Double> uLinput) {
-        uL = new ArrayList<>();
+    void setuL(List<Double> uLinput) {
         for (int l = 0; l < pm.getLinks().size(); l++)
             uL.add("(" + (l + Auxiliary.OFFSET) + "): ["
                     + pm.getLinks().get(l).getId() + "]["
                     + uLinput.get(l) + "]");
     }
 
-    private void setsSVP(boolean sSVPinput[][][]) {
-        sSVP = new ArrayList<>();
+    void setsSVP(boolean sSVPinput[][][]) {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int p = 0; p < pm.getPaths().size(); p++)
@@ -146,8 +118,7 @@ public class Results {
                                 + pm.getPaths().get(p).getNodePath());
     }
 
-    private void setdSP(double dSPinput[][]) {
-        dSP = new ArrayList<>();
+    void setdSP(double dSPinput[][]) {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 if (dSPinput[s][p] > 0)
@@ -156,12 +127,76 @@ public class Results {
                             + "[" + Auxiliary.roundDouble(dSPinput[s][p], 2) + "]");
     }
 
-    public List<String> getpXSV() {
-        return pXSV;
+    void setLinkResults(List<Double> uL) {
+        luSummary[0] = Auxiliary.avg(uL);
+        luSummary[1] = Auxiliary.min(uL);
+        luSummary[2] = Auxiliary.max(uL);
+        luSummary[3] = Auxiliary.vrc(uL, luSummary[0]);
     }
 
-    public List<String> getpXSVD() {
-        return pXSVD;
+    void setServerResults(List<Double> uX) {
+        xuSummary[0] = Auxiliary.avg(uX);
+        xuSummary[1] = Auxiliary.min(uX);
+        xuSummary[2] = Auxiliary.max(uX);
+        xuSummary[3] = Auxiliary.vrc(uX, xuSummary[0]);
+    }
+
+    void setFunctionResults(List<Integer> uF) {
+        fuSummary[0] = Auxiliary.avgF(uF);
+        fuSummary[1] = Auxiliary.minF(uF);
+        fuSummary[2] = Auxiliary.maxF(uF);
+        fuSummary[3] = Auxiliary.vrcF(uF, fuSummary[0]);
+    }
+
+    void setServiceDelayResults(List<Double> sd) {
+        sdSummary[0] = Auxiliary.avg(sd);
+        sdSummary[1] = Auxiliary.min(sd);
+        sdSummary[2] = Auxiliary.max(sd);
+        sdSummary[3] = Auxiliary.vrc(sd, sdSummary[0]);
+    }
+
+    public Scenario getScenario() {
+        return scenario;
+    }
+
+    public double[] getLuSummary() {
+        return luSummary;
+    }
+
+    public double[] getXuSummary() {
+        return xuSummary;
+    }
+
+    public double[] getFuSummary() {
+        return fuSummary;
+    }
+
+    public double[] getSdSummary() {
+        return sdSummary;
+    }
+
+    public double getAvgPathLength() {
+        return avgPathLength;
+    }
+
+    public double getTotalTraffic() {
+        return totalTraffic;
+    }
+
+    public double getTrafficLinks() {
+        return trafficLinks;
+    }
+
+    public int getMigrationsNum() {
+        return migrationsNum;
+    }
+
+    public int getReplicationsNum() {
+        return replicationsNum;
+    }
+
+    public double getCost() {
+        return cost;
     }
 
     public List<String> getrSP() {
@@ -170,6 +205,14 @@ public class Results {
 
     public List<String> getrSPD() {
         return rSPD;
+    }
+
+    public List<String> getpXSV() {
+        return pXSV;
+    }
+
+    public List<String> getpXSVD() {
+        return pXSVD;
     }
 
     public List<String> getuX() {
@@ -188,75 +231,27 @@ public class Results {
         return dSP;
     }
 
-    public double getAvgLu() {
-        return avgLu;
+    void setTotalTraffic(double totalTraffic) {
+        this.totalTraffic = totalTraffic;
     }
 
-    public double getMinLu() {
-        return minLu;
+    void setTrafficOnLinks(double trafficLinks) {
+        this.trafficLinks = trafficLinks;
     }
 
-    public double getMaxLu() {
-        return maxLu;
+    void setAvgPathLength(double avgPathLength) {
+        this.avgPathLength = avgPathLength;
     }
 
-    public double getVrcLu() {
-        return vrcLu;
+    public void setCost(double cost) {
+        this.cost = cost;
     }
 
-    public double getAvgXu() {
-        return avgXu;
+    void setMigrationsNum(int migrationsNum) {
+        this.migrationsNum = migrationsNum;
     }
 
-    public double getMinXu() {
-        return minXu;
-    }
-
-    public double getMaxXu() {
-        return maxXu;
-    }
-
-    public double getVrcXu() {
-        return vrcXu;
-    }
-
-    public double getAvgFu() {
-        return avgFu;
-    }
-
-    public double getMinFu() {
-        return minFu;
-    }
-
-    public double getMaxFu() {
-        return maxFu;
-    }
-
-    public double getVrcFu() {
-        return vrcFu;
-    }
-
-    public double getTotalTraffic() {
-        return totalTraffic;
-    }
-
-    public double getTrafficLinks() {
-        return trafficLinks;
-    }
-
-    public double getAvgPathLength() {
-        return avgPathLength;
-    }
-
-    public double getCost() {
-        return cost;
-    }
-
-    public int getNumOfMigrations() {
-        return numOfMigrations;
-    }
-
-    public int getNumOfReplicas() {
-        return numOfReplicas;
+    void setReplicationsNum(int replicationsNum) {
+        this.replicationsNum = replicationsNum;
     }
 }

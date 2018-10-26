@@ -1,5 +1,6 @@
 package results;
 
+import elements.Scenario;
 import filemanager.Parameters;
 import gurobi.GRB;
 import learning.LearningModel;
@@ -15,6 +16,7 @@ import java.util.Map;
 public class Output {
 
     private Parameters pm;
+    private Scenario scenario;
     // Elementary
     private boolean[][] rSP;
     private boolean[][][] rSPD;
@@ -29,8 +31,9 @@ public class Output {
     private boolean[][][] sSVP;
     private double[][] dSP;
 
-    public Output(Parameters pm, OptimizationModel optimizationModel) {
+    public Output(Parameters pm, Scenario scenario, OptimizationModel optimizationModel) {
         this.pm = pm;
+        this.scenario = scenario;
         try {
             rSP = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
             for (int s = 0; s < pm.getServices().size(); s++)
@@ -99,19 +102,34 @@ public class Output {
 
     public Results generateResults(double cost, Output initialOutput) {
 
-        List<Double> lu = new ArrayList<>(linkUtilizationMap().values());
-        List<Double> xu = new ArrayList<>(serverUtilizationMap().values());
-        List<Integer> numOfFunctionsPerServer = numOfFunctionsPerServer();
-        int numOfMigrations = 0;
-        int numOfReplications = 0;
+        List<Double> uL = new ArrayList<>(linkUtilizationMap().values());
+        List<Double> uX = new ArrayList<>(serverUtilizationMap().values());
+        int migrationsNum = 0;
+        int replicationsNum = 0;
         if (initialOutput != null) {
-            numOfMigrations = calculateNumberOfMigrations(initialOutput);
-            numOfReplications = calculateNumberOfReplications();
+            migrationsNum = calculateNumberOfMigrations(initialOutput);
+            replicationsNum = calculateNumberOfReplications();
         }
-        return new Results(pm, lu, xu, numOfFunctionsPerServer, pm.getTotalTrafficAux()
-                , Auxiliary.roundDouble(trafficOnLinks(), 2), Auxiliary.roundDouble(avgPathLength(), 2)
-                , Auxiliary.roundDouble(cost, 4), numOfMigrations, numOfReplications
-                , pXSV, pXSVD, rSP, rSPD, sSVP, dSP);
+        Results r = new Results(pm, scenario);
+        r.setrSP(rSP);
+        r.setrSPD(rSPD);
+        r.setpXSV(pXSV);
+        r.setpXSVD(pXSVD);
+        r.setuX(uX);
+        r.setuL(uL);
+        r.setsSVP(sSVP);
+        r.setdSP(dSP);
+        r.setLinkResults(uL);
+        r.setServerResults(uX);
+        r.setFunctionResults(numOfFunctionsPerServer());
+        r.setServiceDelayResults(serviceDelayList());
+        r.setTotalTraffic(pm.getTotalTrafficAux());
+        r.setTrafficOnLinks(Auxiliary.roundDouble(trafficOnLinks(), 2));
+        r.setAvgPathLength(Auxiliary.roundDouble(avgPathLength(), 2));
+        r.setCost(Auxiliary.roundDouble(cost, 4));
+        r.setMigrationsNum(migrationsNum);
+        r.setReplicationsNum(replicationsNum);
+        return r;
     }
 
     private int calculateNumberOfMigrations(Output initialPlacement) {
@@ -162,6 +180,15 @@ public class Output {
             numOfFunctionsPerServer.add(numOfFunctions);
         }
         return numOfFunctionsPerServer;
+    }
+
+    private List<Double> serviceDelayList() {
+        List<Double> serviceDelayList = new ArrayList<>();
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+                if (this.dSP[s][p] > 0)
+                    serviceDelayList.add(this.dSP[s][p]);
+        return serviceDelayList;
     }
 
     private double avgPathLength() {

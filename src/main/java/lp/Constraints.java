@@ -103,14 +103,17 @@ public class Constraints {
                 GRBLinExpr linkDelayExpr = new GRBLinExpr();
                 linkDelayExpr.addTerm(pathDelay, variables.rSP[s][p]);
                 GRBLinExpr processingDelayExpr = new GRBLinExpr();
-                for (int x = 0; x < pm.getServers().size(); x++) {
-                    for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                        double traffic = 0.0;
-                        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                            traffic += pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d);
-                        processingDelayExpr.addTerm(traffic * pm.getServices().get(s).getFunctions().get(v).getLoad()
-                                * pm.getServers().get(x).getProcessingDelay() / pm.getServers().get(x).getCapacity()
-                                , variables.pXSV[x][s][v]);
+                for (int n = 0; n < path.getNodePath().size(); n++) {
+                    Node nodeN = path.getNodePath().get(n);
+                    for (int x = 0; x < pm.getServers().size(); x++) {
+                        if (!pm.getServers().get(x).getNodeParent().equals(nodeN)) continue;
+                        for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                                processingDelayExpr.addTerm(pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
+                                                * pm.getServices().get(s).getFunctions().get(v).getLoad()
+                                                * pm.getServers().get(x).getProcessingDelay()
+                                                / pm.getServers().get(x).getCapacity()
+                                        , variables.pXSVD[x][s][v][d]);
                     }
                 }
                 GRBLinExpr migrationDelayExpr = new GRBLinExpr();
@@ -120,6 +123,9 @@ public class Constraints {
                 serviceDelayExpr.add(processingDelayExpr);
                 serviceDelayExpr.add(migrationDelayExpr);
                 optimizationModel.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, variables.dSP[s][p], "serviceDelay");
+                GRBLinExpr mServiceDelayExpr = new GRBLinExpr();
+                mServiceDelayExpr.multAdd(1.0 / 1000000, serviceDelayExpr);
+                optimizationModel.getGrbModel().addConstr(mServiceDelayExpr, GRB.LESS_EQUAL, variables.rSP[s][p], "serviceDelay");
             }
         }
     }

@@ -5,38 +5,38 @@ import java.util.Map;
 
 public class Scenario {
 
-    private String inputFilesName;
-    private String objective;
-    private String useCase;
-    private Map<String, Boolean> constraints;
+    private String inputFileName;
+    private String objectiveFunction;
     private boolean maximization;
+    private String model;
+    private Map<String, Boolean> constraints;
 
     public Scenario(){
         constraints = new HashMap<>();
     }
 
-    public String getInputFilesName() {
-        return inputFilesName;
+    public String getInputFileName() {
+        return inputFileName;
     }
 
-    public void setInputFilesName(String inputFilesName) {
-        this.inputFilesName = inputFilesName;
+    public void setInputFileName(String inputFileName) {
+        this.inputFileName = inputFileName;
     }
 
-    public String getObjective() {
-        return objective;
+    public String getObjectiveFunction() {
+        return objectiveFunction;
     }
 
-    public void setObjective(String objective) {
-        this.objective = objective;
+    public void setObjectiveFunction(String objectiveFunction) {
+        this.objectiveFunction = objectiveFunction;
     }
 
-    public String getUseCase() {
-        return useCase;
+    public String getModel() {
+        return model;
     }
 
-    public void setUseCase(String useCase) {
-        this.useCase = useCase;
+    public void setModel(String model) {
+        this.model = model;
     }
 
     public Map<String, Boolean> getConstraints() {

@@ -1,10 +1,10 @@
 var refreshIntervalId;
 function startOpt() {
 
-    var inputFilesName = document.getElementById("inputFilesName").value;
-    var objective = document.getElementById("objective").value;
-    var useCase = document.getElementById("useCase").value;
+    var inputFileName = document.getElementById("inputFileName").value;
+    var objectiveFunction = document.getElementById("objectiveFunction").value;
     var maximization = $("#max").is(":checked");
+    var model = document.getElementById("model").value;
     var countNumberOfUsedServers = $("#countNumberOfUsedServers").is(":checked");
     var onePathPerDemand = $("#onePathPerDemand").is(":checked");
     var activatePathForService = $("#onePathPerDemand").is(":checked");
@@ -18,10 +18,10 @@ function startOpt() {
     var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
 
     var scenario = JSON.stringify({
-            inputFilesName: inputFilesName,
-            objective: objective,
-            useCase: useCase,
+            inputFileName: inputFileName,
+            objectiveFunction: objectiveFunction,
             maximization: maximization,
+            model: model,
             constraints :{
                 countNumberOfUsedServers: countNumberOfUsedServers,
                 onePathPerDemand: onePathPerDemand,
@@ -74,17 +74,18 @@ function getResults() {
             }
         });
         if (results != null) {
-            document.getElementById("lu").innerText = results['avgLu'] + ' - ' + results['minLu'] + ' - ' + results['maxLu'] + ' - ' + results['vrcLu'];
-            document.getElementById("xu").innerText = results['avgXu'] + ' - ' + results['minXu'] + ' - ' + results['maxXu'] + ' - ' + results['vrcXu'];
-            document.getElementById("fp").innerText = results['avgFu'] + ' - ' + results['minFu'] + ' - ' + results['maxFu'] + ' - ' + results['vrcFu'];
-            document.getElementById("path").innerText = results['avgPathLength'];
-            document.getElementById("mgr-rep").innerText = results['numOfMigrations'] + ' - ' + results['numOfReplicas'];
+            document.getElementById("luSummary").innerText = results['luSummary'][0] + ' - ' + results['luSummary'][1] + ' - ' + results['luSummary'][2] + ' - ' + results['luSummary'][3];
+            document.getElementById("xuSummary").innerText = results['xuSummary'][0] + ' - ' + results['xuSummary'][1] + ' - ' + results['xuSummary'][2] + ' - ' + results['xuSummary'][3];
+            document.getElementById("fuSummary").innerText = results['fuSummary'][0] + ' - ' + results['fuSummary'][1] + ' - ' + results['fuSummary'][2] + ' - ' + results['fuSummary'][3];
+            document.getElementById("sdSummary").innerText = results['sdSummary'][0] + ' - ' + results['sdSummary'][1] + ' - ' + results['sdSummary'][2] + ' - ' + results['sdSummary'][3];
+            document.getElementById("extra").innerText = results['avgPathLength'] + ' - ' + results['totalTraffic'] + ' - ' + results['trafficLinks'];
+            document.getElementById("mgr-rep").innerText = results['migrationsNum'] + ' - ' + results['replicationsNum'];
             document.getElementById("cost").innerText = results['cost'];
         } else {
-            document.getElementById("lu").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-            document.getElementById("xu").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-            document.getElementById("fp").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-            document.getElementById("path").innerText = "0.0";
+            document.getElementById("luSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
+            document.getElementById("xuSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
+            document.getElementById("fuSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
+            document.getElementById("extra").innerText = "0.0 - 0.0 - 0.0";
             document.getElementById("mgr-rep").innerText = "0 - 0";
             document.getElementById("cost").innerText = "0.0";
         }
