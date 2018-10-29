@@ -8,14 +8,14 @@ Prerequisites
 =============
 
 - Apache Maven 3.5.2
-- Java 9
+- Java 11 or higher
 - Git
 - Gurobi solver 8.0.0 or higher
 
 Installing and running the NFV Optimization tool
 ================================================
 
-1. Install Gurobi in your local maven repoitory:
+1. Install Gurobi in your local maven repository. Change `` $PATH_TO_GUROBI_LIB$`` for the specific path where Gurobi is installed:
 
 .. code-block:: bash
 

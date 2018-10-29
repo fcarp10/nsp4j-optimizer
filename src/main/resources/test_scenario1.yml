@@ -25,14 +25,17 @@ functions:
     replicable: false
     load: 1.0
     maxShareable: 5
+    delay: 10
   - type: 1
     replicable: true
     load: 1.0
     maxShareable: 5
+    delay: 10
   - type: 2
     replicable: false
     load: 1.0
     maxShareable: 5
+    delay: 10
 trafficFlows:
   - src: "n1"
     dst: "n9"

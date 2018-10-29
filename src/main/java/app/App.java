@@ -92,7 +92,7 @@ public class App {
         GRBLinExpr expr = new GRBLinExpr();
         double weightLinks = parameters.getWeights()[0] / parameters.getLinks().size();
         double weightServers = parameters.getWeights()[1] / parameters.getServers().size();
-        double weightServiceDelays = parameters.getWeights()[2] / parameters.getPaths().size();
+        double weightServiceDelays = parameters.getWeights()[2] / (parameters.getPaths().size() * 100);
         switch (objective) {
             case NUM_OF_SERVERS_OBJ:
                 expr.add(optimizationModel.usedServersExpr());
