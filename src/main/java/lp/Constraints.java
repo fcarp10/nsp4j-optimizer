@@ -17,13 +17,13 @@ public class Constraints {
     private Variables variables;
     private Parameters pm;
 
-    public Constraints(Parameters pm, OptimizationModel optimizationModel, Scenario scenario, Output initialOutput) throws GRBException {
+    public Constraints(Parameters pm, OptimizationModel optimizationModel, Scenario scenario, Output initialPlacement) throws GRBException {
         this.pm = pm;
         this.optimizationModel = optimizationModel;
         this.variables = optimizationModel.getVariables();
         linkUtilization();
         serverUtilization();
-        serviceDelay();
+        serviceDelay(initialPlacement);
         if (scenario.getConstraints().get("countNumberOfUsedServers")) countNumberOfUsedServers();
         if (scenario.getConstraints().get("onePathPerDemand")) onePathPerDemand();
         if (scenario.getConstraints().get("activatePathForService")) activatePathForService();
@@ -34,7 +34,7 @@ public class Constraints {
         if (scenario.getConstraints().get("functionSequenceOrder")) functionSequenceOrder();
         if (scenario.getConstraints().get("noParallelPaths")) noParallelPaths();
         if (scenario.getConstraints().get("initialPlacementAsConstraints"))
-            initialPlacementAsConstraints(initialOutput);
+            initialPlacementAsConstraints(initialPlacement);
         if (scenario.getConstraints().get("synchronizationTraffic")) synchronizationTraffic();
     }
 
@@ -93,7 +93,7 @@ public class Constraints {
         }
     }
 
-    private void serviceDelay() throws GRBException {
+    private void serviceDelay(Output initialPlacement) throws GRBException {
         for (int s = 0; s < pm.getServices().size(); s++) {
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
                 Path path = pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p);
@@ -103,29 +103,37 @@ public class Constraints {
                 GRBLinExpr linkDelayExpr = new GRBLinExpr();
                 linkDelayExpr.addTerm(pathDelay, variables.rSP[s][p]);
                 GRBLinExpr processingDelayExpr = new GRBLinExpr();
-                for (int n = 0; n < path.getNodePath().size(); n++) {
-                    Node nodeN = path.getNodePath().get(n);
-                    for (int x = 0; x < pm.getServers().size(); x++) {
-                        if (!pm.getServers().get(x).getNodeParent().equals(nodeN)) continue;
-                        for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-                                processingDelayExpr.addTerm(pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-                                                * pm.getServices().get(s).getFunctions().get(v).getLoad()
-                                                * pm.getServers().get(x).getProcessingDelay()
-                                                / pm.getServers().get(x).getCapacity()
-                                        , variables.pXSVD[x][s][v][d]);
-                    }
-                }
                 GRBLinExpr migrationDelayExpr = new GRBLinExpr();
-
+                for (int n = 0; n < path.getNodePath().size(); n++)
+                    for (int x = 0; x < pm.getServers().size(); x++) {
+                        if (!pm.getServers().get(x).getNodeParent().equals(path.getNodePath().get(n))) continue;
+                        for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
+                                double load = pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
+                                        * pm.getServices().get(s).getFunctions().get(v).getLoad()
+                                        / pm.getServers().get(x).getCapacity();
+                                processingDelayExpr.addTerm(load * pm.getServers().get(x).getProcessingDelay()
+                                        , variables.dSPX[s][p][x]);
+                                if (!initialPlacement.getpXSV()[x][s][v]) continue;
+                                double delay = load * pm.getServices().get(s).getFunctions().get(v).getDelay();
+                                migrationDelayExpr.addConstant(delay);
+                                migrationDelayExpr.addTerm(-delay, variables.pXSV[x][s][v]);
+                            }
+                    }
                 GRBLinExpr serviceDelayExpr = new GRBLinExpr();
                 serviceDelayExpr.add(linkDelayExpr);
                 serviceDelayExpr.add(processingDelayExpr);
                 serviceDelayExpr.add(migrationDelayExpr);
                 optimizationModel.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, variables.dSP[s][p], "serviceDelay");
-                GRBLinExpr mServiceDelayExpr = new GRBLinExpr();
-                mServiceDelayExpr.multAdd(1.0 / 1000000, serviceDelayExpr);
-                optimizationModel.getGrbModel().addConstr(mServiceDelayExpr, GRB.LESS_EQUAL, variables.rSP[s][p], "serviceDelay");
+                for (int x = 0; x < pm.getServers().size(); x++) {
+                    optimizationModel.getGrbModel().addConstr(variables.dSPX[s][p][x], GRB.LESS_EQUAL, variables.dSP[s][p],"variableProcessingDelayExpr");
+                    optimizationModel.getGrbModel().addConstr(variables.dSPX[s][p][x], GRB.LESS_EQUAL, variables.rSP[s][p],"variableProcessingDelayExpr");
+                    GRBLinExpr variableProcessingDelayExpr = new GRBLinExpr();
+                    variableProcessingDelayExpr.addTerm(1.0, variables.dSP[s][p]);
+                    variableProcessingDelayExpr.addTerm(1.0, variables.rSP[s][p]);
+                    variableProcessingDelayExpr.addConstant(-1);
+                    optimizationModel.getGrbModel().addConstr(variables.dSPX[s][p][x], GRB.GREATER_EQUAL, variableProcessingDelayExpr,"variableProcessingDelayExpr");
+                }
             }
         }
     }
