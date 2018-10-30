@@ -1,11 +1,11 @@
 package results;
 
-import elements.Scenario;
-import filemanager.Parameters;
+import gui.elements.Scenario;
 import gurobi.GRB;
 import learning.LearningModel;
 import lp.OptimizationModel;
-import network.Server;
+import manager.Parameters;
+import manager.elements.Server;
 import org.graphstream.graph.Edge;
 
 import java.util.ArrayList;

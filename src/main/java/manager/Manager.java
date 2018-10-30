@@ -1,8 +1,10 @@
-package app;
+package manager;
 
-import elements.ResultFileWriter;
-import filemanager.ConfigFiles;
-import filemanager.Parameters;
+import gui.WebClient;
+import gui.WebServer;
+import gui.elements.Scenario;
+import org.graphstream.graph.Graph;
+import results.ResultFileWriter;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import learning.LearningModel;
@@ -14,28 +16,29 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import results.Results;
-import elements.Scenario;
+import utils.ConfigFiles;
+import utils.GraphManager;
+import utils.KShortestPathGenerator;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import static results.Auxiliary.*;
 
+public class Manager {
 
-public class App {
-
-    private static final Logger log = LoggerFactory.getLogger(App.class);
+    private static final Logger log = LoggerFactory.getLogger(Manager.class);
     private static Parameters parameters;
     private static Output initialOutput;
 
     public static void start(Scenario scenario) {
         try {
-            String path = FilenameUtils.getPath(App.class.getClassLoader().getResource(scenario.getInputFileName() + ".yml").getFile());
+            String path = FilenameUtils.getPath(Manager.class.getClassLoader().getResource(scenario.getInputFileName() + ".yml").getFile());
             if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
                 path = "/" + path;
             parameters = ConfigFiles.readParameters(path, scenario.getInputFileName() + ".yml");
             parameters.initialize(path);
-            new WebServer().initialize(parameters.getServers());
+            new WebServer().initialize(parameters);
             ResultFileWriter resultFileWriter = initializeResultFiles();
             switch (scenario.getModel()) {
                 case ALL_OPT_MODELS:
@@ -57,6 +60,20 @@ public class App {
             e.printStackTrace();
             log.error("The input files do not exist");
             WebClient.postMessage("Error: the input files do not exist");
+        }
+    }
+
+    public static void generatePaths(Scenario scenario) {
+        try {
+            String path = FilenameUtils.getPath(Manager.class.getClassLoader().getResource(scenario.getInputFileName() + ".yml").getFile());
+            if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
+                path = "/" + path;
+            Graph graph = GraphManager.importTopology(path, scenario.getInputFileName());
+            KShortestPathGenerator kShortestPathGenerator = new KShortestPathGenerator(graph, 10, 5, path, scenario.getInputFileName());
+            kShortestPathGenerator.run();
+            WebClient.postMessage("Paths generated");
+        } catch (Exception e) {
+            WebClient.postMessage("Error generating paths");
         }
     }
 

@@ -6,7 +6,7 @@
 
     <groupId>de.tubs</groupId>
     <artifactId>nfv-optimization</artifactId>
-    <version>0.7.2</version>
+    <version>0.8</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.github.francarpio</groupId>
             <artifactId>nsm4j-api</artifactId>
-            <version>0.2.4</version>
+            <version>0.3</version>
         </dependency>
         <dependency>
             <groupId>com.gurobi</groupId>
@@ -88,7 +88,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>app.Launcher</mainClass>
+                            <mainClass>manager.Launcher</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

@@ -1,9 +1,9 @@
 package lp;
 
-import filemanager.Parameters;
 import gurobi.GRB;
 import gurobi.GRBModel;
 import gurobi.GRBVar;
+import manager.Parameters;
 
 public class Variables {
 

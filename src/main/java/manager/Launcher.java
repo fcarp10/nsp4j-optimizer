@@ -1,5 +1,7 @@
-package app;
+package manager;
 
+import gui.WebClient;
+import gui.WebServer;
 import results.Auxiliary;
 
 import static spark.Spark.*;
@@ -12,5 +14,6 @@ public class Launcher {
         init();
         new Auxiliary();
         new WebServer();
+        WebClient.postMessage("Framework is ready");
     }
 }

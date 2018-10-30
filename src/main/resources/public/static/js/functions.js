@@ -1,49 +1,11 @@
-var refreshIntervalId;
-function startOpt() {
-
-    var inputFileName = document.getElementById("inputFileName").value;
-    var objectiveFunction = document.getElementById("objectiveFunction").value;
-    var maximization = $("#max").is(":checked");
-    var model = document.getElementById("model").value;
-    var countNumberOfUsedServers = $("#countNumberOfUsedServers").is(":checked");
-    var onePathPerDemand = $("#onePathPerDemand").is(":checked");
-    var activatePathForService = $("#onePathPerDemand").is(":checked");
-    var pathsConstrainedByFunctions = $("#pathsConstrainedByFunctions").is(":checked");
-    var functionPlacement = $("#functionPlacement").is(":checked");
-    var oneFunctionPerDemand = $("#oneFunctionPerDemand").is(":checked");
-    var mappingFunctionsWithDemands = $("#mappingFunctionsWithDemands").is(":checked");
-    var functionSequenceOrder = $("#functionSequenceOrder").is(":checked");
-    var noParallelPaths = $("#noParallelPaths").is(":checked");
-    var initialPlacementAsConstraints = $("#initialPlacementAsConstraints").is(":checked");
-    var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
-
-    var scenario = JSON.stringify({
-            inputFileName: inputFileName,
-            objectiveFunction: objectiveFunction,
-            maximization: maximization,
-            model: model,
-            constraints :{
-                countNumberOfUsedServers: countNumberOfUsedServers,
-                onePathPerDemand: onePathPerDemand,
-                activatePathForService: activatePathForService,
-                pathsConstrainedByFunctions: pathsConstrainedByFunctions,
-                functionPlacement: functionPlacement,
-                oneFunctionPerDemand: oneFunctionPerDemand,
-                mappingFunctionsWithDemands: mappingFunctionsWithDemands,
-                functionSequenceOrder: functionSequenceOrder,
-                noParallelPaths: noParallelPaths,
-                initialPlacementAsConstraints: initialPlacementAsConstraints,
-                synchronizationTraffic: synchronizationTraffic
-            }
-        });
-
+var refreshIntervalId = setInterval(getMessage, 2000);
+function getMessage() {
     try {
         var message = null;
         $.ajax
         ({
-            data: scenario,
-            url: "run",
-            type: "POST",
+            url: "message",
+            type: "GET",
             async: false,
             success: function (ans) {
                 message = ans;
@@ -51,10 +13,10 @@ function startOpt() {
         });
         if (message != null) {
             document.getElementById("message").innerText = message;
-            setInterval(getResults, 2000);
-            refreshIntervalId = setInterval(getMessage, 2000);
+        } else {
+            document.getElementById("message").innerText = "Framework stopped";
+            clearInterval(refreshIntervalId);
         }
-        return message;
     }
     catch (e) {
         return 0;
@@ -88,30 +50,6 @@ function getResults() {
             document.getElementById("extra").innerText = "0.0 - 0.0 - 0.0";
             document.getElementById("mgr-rep").innerText = "0 - 0";
             document.getElementById("cost").innerText = "0.0";
-        }
-    }
-    catch (e) {
-        return 0;
-    }
-}
-
-function getMessage() {
-    try {
-        var message = null;
-        $.ajax
-        ({
-            url: "message",
-            type: "GET",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
-        if (message != null) {
-            document.getElementById("message").innerText = message;
-        } else {
-            document.getElementById("message").innerText = "The server is not running";
-            clearInterval(refreshIntervalId);
         }
     }
     catch (e) {
@@ -187,4 +125,95 @@ function check(elem) {
                 document.getElementById("initialPlacementAsConstraints").disabled = true;
                 document.getElementById("synchronizationTraffic").disabled = true;
     }
+}
+
+function generateScenario() {
+
+    var inputFileName = document.getElementById("inputFileName").value;
+    var objectiveFunction = document.getElementById("objectiveFunction").value;
+    var maximization = $("#max").is(":checked");
+    var model = document.getElementById("model").value;
+    var countNumberOfUsedServers = $("#countNumberOfUsedServers").is(":checked");
+    var onePathPerDemand = $("#onePathPerDemand").is(":checked");
+    var activatePathForService = $("#onePathPerDemand").is(":checked");
+    var pathsConstrainedByFunctions = $("#pathsConstrainedByFunctions").is(":checked");
+    var functionPlacement = $("#functionPlacement").is(":checked");
+    var oneFunctionPerDemand = $("#oneFunctionPerDemand").is(":checked");
+    var mappingFunctionsWithDemands = $("#mappingFunctionsWithDemands").is(":checked");
+    var functionSequenceOrder = $("#functionSequenceOrder").is(":checked");
+    var noParallelPaths = $("#noParallelPaths").is(":checked");
+    var initialPlacementAsConstraints = $("#initialPlacementAsConstraints").is(":checked");
+    var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
+
+    var scenario = JSON.stringify({
+        inputFileName: inputFileName,
+        objectiveFunction: objectiveFunction,
+        maximization: maximization,
+        model: model,
+        constraints :{
+            countNumberOfUsedServers: countNumberOfUsedServers,
+            onePathPerDemand: onePathPerDemand,
+            activatePathForService: activatePathForService,
+            pathsConstrainedByFunctions: pathsConstrainedByFunctions,
+            functionPlacement: functionPlacement,
+            oneFunctionPerDemand: oneFunctionPerDemand,
+            mappingFunctionsWithDemands: mappingFunctionsWithDemands,
+            functionSequenceOrder: functionSequenceOrder,
+            noParallelPaths: noParallelPaths,
+            initialPlacementAsConstraints: initialPlacementAsConstraints,
+            synchronizationTraffic: synchronizationTraffic
+        }
+    });
+
+    return scenario;
+}
+
+function runOpt(){
+var scenario = generateScenario();
+    try {
+        var message = null;
+        $.ajax
+        ({
+            data: scenario,
+            url: "run",
+            type: "POST",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+        if (message != null) {
+            document.getElementById("message").innerText = message;
+            setInterval(getResults, 2000);
+        }
+        return message;
+    }
+    catch (e) {
+        return 0;
+    }
+}
+
+function generatePaths() {
+var scenario = generateScenario();
+    try {
+            var message = null;
+            $.ajax
+            ({
+                data: scenario,
+                url: "paths",
+                type: "POST",
+                async: false,
+                success: function (ans) {
+                    message = ans;
+                }
+            });
+            if (message != null) {
+                document.getElementById("message").innerText = message;
+            } else {
+                document.getElementById("message").innerText = "The server is not running";
+            }
+        }
+        catch (e) {
+            return 0;
+        }
 }

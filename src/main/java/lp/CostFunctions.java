@@ -1,12 +1,12 @@
-package elements;
+package lp;
 
 import java.util.LinkedList;
 
-public class LinearCostFunctions {
+public class CostFunctions {
 
     private LinkedList<Double[]> values = new LinkedList<>();
 
-    public LinearCostFunctions() {
+    public CostFunctions() {
     }
 
     public LinkedList<Double[]> getValues() {

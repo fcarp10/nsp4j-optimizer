@@ -1,14 +1,15 @@
-package app;
+package gui;
 
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import elements.Scenario;
-import elements.json.LinkJson;
-import elements.json.NodeJson;
-import elements.json.ServerJson;
-import filemanager.GraphManager;
-import network.Server;
+import gui.elements.LinkJson;
+import gui.elements.NodeJson;
+import gui.elements.ServerJson;
+import manager.Manager;
+import manager.Parameters;
+import gui.elements.Scenario;
+import manager.elements.Server;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import results.Results;
@@ -22,7 +23,7 @@ import java.util.Map;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
-class WebServer {
+public class WebServer {
 
     private static List<NodeJson> nodeList;
     private static Map<String, ServerJson> serverJsonMap;
@@ -30,24 +31,22 @@ class WebServer {
     private static Results results;
     private static String message;
 
-    WebServer() {
+    public WebServer() {
         nodeList = new ArrayList<>();
         serverJsonMap = new HashMap<>();
         linkJsonMap = new HashMap<>();
         interfaces();
     }
 
-    void initialize(List<Server> servers) {
+    public void initialize(Parameters parameters) {
         nodeList = new ArrayList<>();
         serverJsonMap = new HashMap<>();
         linkJsonMap = new HashMap<>();
-        List<Node> nodes = new ArrayList<>(GraphManager.getGraph().getNodeSet());
-        for (Node node : nodes)
+        for (Node node : parameters.getNodes())
             nodeList.add(new NodeJson(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#cccccc", node.getId()));
-        for (Server server : servers)
+        for (Server server : parameters.getServers())
             serverJsonMap.put(server.getId(), new ServerJson(server.getId(), server.getNodeParent().getAttribute("x"), server.getNodeParent().getAttribute("y"), "#cccccc", server.getId()));
-        List<Edge> edges = new ArrayList<>(GraphManager.getGraph().getEdgeSet());
-        for (Edge edge : edges)
+        for (Edge edge : parameters.getLinks())
             linkJsonMap.put(edge.getId(), new LinkJson(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));
     }
 
@@ -88,8 +87,14 @@ class WebServer {
 
         post("/run", (request, response) -> {
             Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-            App.start(scenario);
+            Manager.start(scenario);
             return "Running...";
+        });
+
+        post("/paths", (request, response) -> {
+            Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
+            Manager.generatePaths(scenario);
+            return "Generating paths...";
         });
 
         get("/node", (request, response) -> {

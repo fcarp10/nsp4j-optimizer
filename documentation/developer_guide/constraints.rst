@@ -422,7 +422,7 @@ This block can also be expressed as
 	\end{equation}
 
 
-To summarize both blocks of commands into one formula, we can simply interpret them as an inequation, with :math:`t_{p}^{s}` acting like the connecting link, resulting on the shown main formula stated above.
+To summarize both blocks of commands into one formula, we can simply interpret them as an inequation, with :math:`t_{p}^{s}` acting like the connecting link, resulting on the shown manager formula stated above.
 
 
 pathConstrainedByFunctions
@@ -634,7 +634,7 @@ makes sure that the following operations are executed for all services :math:`s`
 	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
 	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "oneFunctionPerDemand");
 
-will introduce a summatory function over all servers :math:`x`, that are elements of a set of servers :math:`X`, for a function :math:`f_{x,\lambda}^{v,s}`.
+will introduce a summatory function over all servers :math:`x`, that are manager.elements of a set of servers :math:`X`, for a function :math:`f_{x,\lambda}^{v,s}`.
 This function :math:`f_{x,\lambda}^{v,s}`  is then set to be equal 1 and the results are returned to *oneFunctionPerDemand*.
 
 
@@ -682,7 +682,7 @@ This next constraint expressed by the method mappingFunctionsWithDemands, ensure
 	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
 	                    model.getGrbModel().addConstr(variables.fXSVD[x][s][v][d], GRB.LESS_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
 
-ensures that for all servers :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, an element of an ordered set of VNF functions :math:`V_s`  for a service :math:`s`, for all servers :math:`x`, that are element of a set of servers :math:`X`, and for all demands :math:`\lambda`, that are elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`, the following inequation is valid. Said inequation is defined as a *variable0* :math:`f_{x,\lambda}^{v,s}`, which is set to be lesser equal to :math:`f_x^{v,s}`, and returned to *mappingFunctionsWithDemands*. 
+ensures that for all servers :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, an element of an ordered set of VNF functions :math:`V_s`  for a service :math:`s`, for all servers :math:`x`, that are element of a set of servers :math:`X`, and for all demands :math:`\lambda`, that are manager.elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`, the following inequation is valid. Said inequation is defined as a *variable0* :math:`f_{x,\lambda}^{v,s}`, which is set to be lesser equal to :math:`f_x^{v,s}`, and returned to *mappingFunctionsWithDemands*.
 	
 This first half can be interpreted as follows:
 
@@ -855,7 +855,7 @@ noParallelPaths
 
 The first specific constraint noParallelPaths ensures, as the title said, that the paths used by one service chain to forward traffic demands are restricted to one. Corresponding to the equation, it runs as follows:
 
-First it makes sure that for all services :math:`s`, that are elements of a set of service chains :math:`S`, the following operations will be valid and executed.
+First it makes sure that for all services :math:`s`, that are manager.elements of a set of service chains :math:`S`, the following operations will be valid and executed.
 
 Then implements a summatory function over all paths :math:`p`, that are an element of a set of admissible paths :math:`P_s` for a service :math:`s`, for a variable :math:`t_p^s`.
 

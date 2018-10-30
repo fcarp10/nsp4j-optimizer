@@ -1,4 +1,4 @@
-package elements;
+package results;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
@@ -13,7 +13,6 @@ import java.util.Locale;
 
 public class ResultFileWriter {
 
-    private java.io.FileWriter fileWriter;
     private String folder;
 
     public ResultFileWriter(String folderName) {

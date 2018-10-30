@@ -12,7 +12,7 @@
 
 .div-output-emphasis {
     font-weight: bold;
-    margin:5px 0 0 0;
+    margin:20px 0 0 0;
 }
 
 .jumbotron {
@@ -30,28 +30,33 @@
 }
 
 .button {
-    margin: 20px 0 10px 0;
+    margin: 10px 0 0px 0;
     border: none;
     color: white;
-    width: 100px;
     padding: 5px;
     text-align: center;
     text-decoration: none;
-    /*display: inline;*/
     font-size: 16px;
     cursor: pointer;
+    width: 100px;
     -webkit-transition-duration: 0.4s; /* Safari */
     transition-duration: 0.4s;
-}
-
-.button-submit{
-    background-color: green;
-    /*margin-top: 20px;*/
     border-radius: 20px;
 }
 
-.button:active {
+.button-run{
+    background-color: green;
+}
+.button-run:active {
     background-color: yellowgreen;
+}
+
+.button-generate{
+    background-color: gray;
+
+}
+.button-generate:active {
+    background-color: black;
 }
 
 .navbar-custom {

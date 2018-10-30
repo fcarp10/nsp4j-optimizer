@@ -1,6 +1,6 @@
 package learning;
 
-import filemanager.Parameters;
+import manager.Parameters;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -276,9 +276,9 @@ public class LearningModel {
         double cost, totalCost = 0;
         for (Double serverUtilization : ux) {
             cost = 0;
-            for (int f = 0; f < Auxiliary.linearCostFunctions.getValues().size(); f++) {
-                double value = Auxiliary.linearCostFunctions.getValues().get(f)[0] * serverUtilization
-                        + Auxiliary.linearCostFunctions.getValues().get(f)[1];
+            for (int f = 0; f < Auxiliary.costFunctions.getValues().size(); f++) {
+                double value = Auxiliary.costFunctions.getValues().get(f)[0] * serverUtilization
+                        + Auxiliary.costFunctions.getValues().get(f)[1];
                 if (value > cost)
                     cost = value;
             }

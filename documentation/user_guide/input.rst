@@ -2,12 +2,12 @@
 Input Parameters
 ****************
 
-The tool requires three different input files: the topology, the paths and the parameters files. All three files must have the same name with different extensions. The extension must be \*.dgs, \*.txt and \*.yml for the topology, paths and parameters, respectively.
+The framework requires three different input files: one describing the network topology, one with all paths listed and one for the NFV specific parameters. All three files must have exactly the same name with different extensions:\*.dgs for the topology, \*.txt for the paths and \*.yml for the parameters.
 
 Topology file
 =============
 
-The desired network topology is described using the GraphStream guidelines in a file with extesion \*.dgs. For instance:
+The desired network topology is described using the GraphStream guidelines in a file with extension \*.dgs. For instance:
 
 .. code-block:: text
 
@@ -48,9 +48,9 @@ The desired network topology is described using the GraphStream guidelines in a 
     ae n9n8 n9 > n8 capacity:1000
 
 
-``an`` adds a node. The command is followed by the unique node identifier allowing to identify this node compared to others. This name can be a single word or a string delimited by the double quote character. Values x and y on the server represent the coordinates of the nodes. For each node can be specified the number of servers (i.e serversNode), the capacity of each server (i.e. capacity) and the type of server.
+``an`` adds a node. The command is followed by a unique node identifier, that can be a single word or a string delimited by the double quote character. Values x and y on the server represent the coordinates of the nodes. For each node can be specified the number of servers (i.e serversNode), the capacity of each server (i.e. capacity) and the type of server.
 
-``ae`` adds an link. This command must be followed by the unique identifier of the link, and then the identifiers of two other nodes. For each link, the specific capacity can be specified (i.e. capacity)/
+``ae`` adds an link. This command must be followed by a unique identifier of the link, following with the identifiers of two connecting nodes. For each link, the specific capacity can be specified (i.e. capacity)/
 
 For further information on the use of a DGS file see `<http://graphstream-project.org/doc/Advanced-Concepts/The-DGS-File-Format/>`_
 
@@ -58,7 +58,7 @@ For further information on the use of a DGS file see `<http://graphstream-projec
 Paths file
 ==========
 
-The admissible paths for the topology must be specified in the path file with the same name as the topology but with extension \*.txt. For instance:
+The admissible paths for the topology must be specified in a file with the same name as the topology file, but with extension \*.txt. For instance:
 
 .. code-block:: text
 
@@ -66,53 +66,74 @@ The admissible paths for the topology must be specified in the path file with th
 	[n1, n4, n5, n3, n7, n9]
 	[n1, n4, n5, n6, n7, n9]
 
-This paths can be externally generated or generated using the already included KShortestPath tool. (TO BE EXTENDED)
+This paths can be externally generated or generated using the included KShortest Path Generator tool. For using this tool, you only need to place \*.dgs file in the same folder with the \*jar and click the path button from the graphical user interface. All the paths will be generated in a \*.txt file with the same name as the topology file.
 
-Parameters file (TO BE UPDATED)
-===============================
+Parameters file
+===============
 
-On this file the main characteristics of the network can be stablished by setting the desired values of the variables on the *Config.yml* file:
+This file describes the default parameters for the optimization model. The name of the file has to be the same as the name of the topology file, but with extension \*.yml. For instance:
 
 
 .. code-block:: yaml
 
-	networkFile: network
-	pathsFile: paths
-	gap: 0
-	weights: [0.0, 1.0]
-	serverCapacity: 1000
-	serversPerNode: 1
-	linkCapacity: 1000
-	maxReplicas: 3
-	functionTypes:
-	  0:
-	    type: 0
-	    replicable: false
-	    load: 1.0
-	  1:
-	    type: 1
-	    replicable: true
-	    load: 1.0
-	  2:
-	    type: 2
-	    replicable: false
-	    load: 1.0
-	serviceTypes:
-	  0:
-	    id: 0
-	    chain: [0, 1, 2]
-	trafficFlows:
-	  - src: "n1"
-	    dst: "n9"
-	    serviceId: 0
-	  - src: "n2"
-	    dst: "n9"
-	    serviceId: 0
-	minDemands: 3
-	maxDemands: 3
-	minBw: 100
-	maxBw: 100
+    # Optimization parameters
+    gap: 0
+    weights: [0, 0, 1.0]
 
+    # Network default parameters
+    serverCapacityDefault: 1000
+    serversNodeDefault: 1
+    serverDelayDefault: 10
+    linkCapacityDefault: 1000
+    minPathsDefault: 3
+    maxPathsDefault: 3
+    minDemandsDefault: 2
+    maxDemandsDefault: 2
+    minBwDefault: 100
+    maxBwDefault: 100
+
+    # NFV parameters
+    serviceChains:
+      - id: 0
+        chain: [0, 1, 2]
+        minPaths: 3
+        maxPaths: 3
+    functions:
+      - type: 0
+        replicable: false
+        load: 1.0
+        maxShareable: 5
+        delay: 10
+      - type: 1
+        replicable: true
+        load: 1.0
+        maxShareable: 5
+        delay: 10
+      - type: 2
+        replicable: false
+        load: 1.0
+        maxShareable: 5
+        delay: 10
+    trafficFlows:
+      - src: "n1"
+        dst: "n9"
+        serviceId: 0
+        minDemands: 3
+        maxDemands: 3
+        minBw: 100
+        maxBw: 100
+      - src: "n2"
+        dst: "n9"
+        serviceId: 0
+        minDemands: 3
+        maxDemands: 3
+        minBw: 100
+        maxBw: 100
+
+    # Auxiliary values (overhead, training iterations)
+    aux: [100, 1000]
+
+The next table describes every parameter for the model (TO BE UPDATED):
 
 +-------------------------------------------------------------------+
 | Variables of *config.yml*                                         |

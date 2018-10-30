@@ -1,7 +1,7 @@
 package lp;
 
-import filemanager.Parameters;
 import gurobi.*;
+import manager.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

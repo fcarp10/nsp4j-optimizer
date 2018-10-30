@@ -4,30 +4,15 @@ Data Structure (TO BE EXTENDED)
 
 The input data structure is generated using nsm4j-api library.
 
-Server
-======
+Parameters
+==========
 
-.. image:: /_static/server.png
-    :scale: 40 %
+.. image:: /_static/parameters.png
+    :scale: 60 %
     :align: center
 
-TrafficFlow
-===========
-
-.. image:: /_static/trafficflow.png
-    :scale: 40 %
-    :align: center
-
-Service
-=======
-
-.. image:: /_static/service.png
-    :scale: 40 %
-    :align: center
-
-Function
+Elements
 ========
 
-.. image:: /_static/function.png
-    :scale: 40 %
+.. image:: /_static/elements.png
     :align: center

@@ -4,7 +4,7 @@ package results;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import elements.LinearCostFunctions;
+import lp.CostFunctions;
 import org.decimal4j.util.DoubleRounder;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.util.List;
 public class Auxiliary {
 
     public static final int OFFSET = 0;
-    public static LinearCostFunctions linearCostFunctions;
+    public static CostFunctions costFunctions;
     public static final String NUM_OF_SERVERS_OBJ = "num_of_servers";
     public static final String COSTS_OBJ = "costs";
     public static final String UTILIZATION_OBJ = "utilization";
@@ -26,12 +26,12 @@ public class Auxiliary {
     public static final String MIGRATION_REPLICATION_RL_MODEL = "migration_replication_rl";
 
     public Auxiliary() {
-        TypeReference<LinearCostFunctions> typeReference = new TypeReference<>() {
+        TypeReference<CostFunctions> typeReference = new TypeReference<>() {
         };
         InputStream inputStream = TypeReference.class.getResourceAsStream("/aux_files/linear-cost-functions.yml");
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         try {
-            linearCostFunctions = mapper.readValue(inputStream, typeReference);
+            costFunctions = mapper.readValue(inputStream, typeReference);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,15 +1,15 @@
 package lp;
 
-import filemanager.Parameters;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBVar;
+import manager.Parameters;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import results.Output;
 import results.Auxiliary;
-import elements.Scenario;
+import gui.elements.Scenario;
 
 public class Constraints {
 
@@ -85,11 +85,11 @@ public class Constraints {
     }
 
     private void linearCostFunctions(GRBLinExpr expr, GRBVar grbVar) throws GRBException {
-        for (int l = 0; l < Auxiliary.linearCostFunctions.getValues().size(); l++) {
+        for (int l = 0; l < Auxiliary.costFunctions.getValues().size(); l++) {
             GRBLinExpr expr2 = new GRBLinExpr();
-            expr2.multAdd(Auxiliary.linearCostFunctions.getValues().get(l)[0], expr);
-            expr2.addConstant(Auxiliary.linearCostFunctions.getValues().get(l)[1]);
-            model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar, "linearCostFunctions");
+            expr2.multAdd(Auxiliary.costFunctions.getValues().get(l)[0], expr);
+            expr2.addConstant(Auxiliary.costFunctions.getValues().get(l)[1]);
+            model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar, "costFunctions");
         }
     }
 
@@ -122,7 +122,6 @@ public class Constraints {
                             }
                         }
                     }
-
                 for (int x = 0; x < pm.getServers().size(); x++) {
                     GRBLinExpr expr = new GRBLinExpr();
                     for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -137,7 +136,6 @@ public class Constraints {
                     variableProcessingDelayExpr.addConstant(-1.0);
                     model.getGrbModel().addConstr(variables.dSPX[s][p][x], GRB.GREATER_EQUAL, variableProcessingDelayExpr, "variableProcessingDelayExpr");
                 }
-
                 GRBLinExpr serviceDelayExpr = new GRBLinExpr();
                 serviceDelayExpr.add(linkDelayExpr);
                 serviceDelayExpr.add(processingDelayExpr);

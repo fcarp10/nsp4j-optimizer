@@ -1,12 +1,12 @@
-package app;
+package gui;
 
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import elements.json.LinkJson;
-import elements.json.ServerJson;
-import network.Server;
+import gui.elements.LinkJson;
+import gui.elements.ServerJson;
+import manager.elements.Server;
 import org.graphstream.graph.Edge;
 import results.Auxiliary;
 import results.Output;
@@ -23,9 +23,9 @@ import java.net.http.HttpResponse;
 import java.text.DecimalFormat;
 import java.util.*;
 
-class WebClient {
+public class WebClient {
 
-    static void updateResultsToWebApp(Output output, Results results) {
+    public static void updateResultsToWebApp(Output output, Results results) {
         if (results != null) {
             List<ServerJson> serverJsonList = generateServerStrings(output);
             List<LinkJson> linkJsonList = generateLinkStrings(output);
@@ -82,7 +82,7 @@ class WebClient {
         sendRequest(request);
     }
 
-    static void postMessage(String message) {
+    public static void postMessage(String message) {
         HttpRequest request;
         try {
             request = HttpRequest.newBuilder()

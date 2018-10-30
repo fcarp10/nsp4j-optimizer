@@ -1,8 +1,8 @@
 package results;
 
 
-import elements.Scenario;
-import filemanager.Parameters;
+import gui.elements.Scenario;
+import manager.Parameters;
 
 import java.util.ArrayList;
 import java.util.List;

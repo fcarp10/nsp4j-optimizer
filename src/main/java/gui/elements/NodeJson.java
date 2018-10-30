@@ -1,4 +1,4 @@
-package elements.json;
+package gui.elements;
 
 
 public class NodeJson {
