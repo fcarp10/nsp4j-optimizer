@@ -29,60 +29,91 @@ public class Manager {
 
     private static final Logger log = LoggerFactory.getLogger(Manager.class);
     private static Parameters parameters;
-    private static Output initialOutput;
 
-    public static void start(Scenario scenario) {
+    private static String getResourcePath(String fileName) {
         try {
-            String path = FilenameUtils.getPath(Manager.class.getClassLoader().getResource(scenario.getInputFileName() + ".yml").getFile());
+            String path = FilenameUtils.getPath(Manager.class.getClassLoader().getResource(fileName + ".yml").getFile());
             if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
                 path = "/" + path;
-            parameters = ConfigFiles.readParameters(path, scenario.getInputFileName() + ".yml");
-            parameters.initialize(path);
-            new WebServer().initialize(parameters);
-            ResultFileWriter resultFileWriter = initializeResultFiles();
-            switch (scenario.getModel()) {
-                case ALL_OPT_MODELS:
-                    runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter);
-                    runLP(MIGRATION_MODEL, scenario, resultFileWriter);
-                    runLP(REPLICATION_MODEL, scenario, resultFileWriter);
-                    runLP(MIGRATION_REPLICATION_MODEL, scenario, resultFileWriter);
-                    break;
-                case MIGRATION_REPLICATION_RL_MODEL:
-                    runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter);
-                    double objValue = runLP(MIGRATION_REPLICATION_MODEL, scenario, resultFileWriter);
-                    runRL(MIGRATION_REPLICATION_RL_MODEL, objValue, resultFileWriter);
-                    break;
-                default:
-                    runLP(scenario.getModel(), scenario, resultFileWriter);
-                    break;
-            }
+            return path;
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error("The input files do not exist");
-            WebClient.postMessage("Error: the input files do not exist");
+            printLog(ERROR, "input file not found");
+            return null;
         }
+    }
+
+    private static boolean readParameters(String pathFile, String fileName) {
+        try {
+            parameters = ConfigFiles.readParameters(pathFile, fileName + ".yml");
+            parameters.initialize(pathFile);
+            new WebServer().initialize(parameters);
+            return true;
+        } catch (Exception e) {
+            printLog(ERROR, "reading the input parameters file");
+            return false;
+        }
+    }
+
+    public static void start(Scenario scenario) {
+        Output initialPlacement = null;
+        String path = getResourcePath(scenario.getInputFileName());
+        if (path != null & readParameters(path, scenario.getInputFileName()))
+            try {
+                ResultFileWriter resultFileWriter = initializeResultFiles();
+                switch (scenario.getModel()) {
+                    case ALL_OPT_MODELS_STRING:
+                        initialPlacement = runLP(ALL_OPT_MODELS[0], scenario, resultFileWriter, null);
+                        for (int i = 1; i < ALL_OPT_MODELS.length; i++)
+                            runLP(ALL_OPT_MODELS[i], scenario, resultFileWriter, initialPlacement);
+                        break;
+                    case MIGRATION_REPLICATION_RL_MODEL:
+                        initialPlacement = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
+                        Output output = runLP(MIGRATION_REPLICATION_MODEL, scenario, resultFileWriter, initialPlacement);
+                        runRL(MIGRATION_REPLICATION_RL_MODEL, output.getCost(), resultFileWriter, initialPlacement);
+                        break;
+                    case INITIAL_PLACEMENT_MODEL:
+                        initialPlacement = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
+                        break;
+                    default:
+                        runLP(scenario.getModel(), scenario, resultFileWriter, initialPlacement);
+                        break;
+                }
+            } catch (Exception e) {
+                printLog(ERROR, "something went wrong with the model");
+            }
     }
 
     public static void generatePaths(Scenario scenario) {
-        try {
-            String path = FilenameUtils.getPath(Manager.class.getClassLoader().getResource(scenario.getInputFileName() + ".yml").getFile());
-            if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
-                path = "/" + path;
-            Graph graph = GraphManager.importTopology(path, scenario.getInputFileName());
-            KShortestPathGenerator kShortestPathGenerator = new KShortestPathGenerator(graph, 10, 5, path, scenario.getInputFileName());
-            kShortestPathGenerator.run();
-            WebClient.postMessage("Paths generated");
-        } catch (Exception e) {
-            WebClient.postMessage("Error generating paths");
-        }
+        String path = getResourcePath(scenario.getInputFileName());
+        if (path != null)
+            try {
+                Graph graph = GraphManager.importTopology(path, scenario.getInputFileName());
+                KShortestPathGenerator kShortestPathGenerator = new KShortestPathGenerator(graph, 10, 5, path, scenario.getInputFileName());
+                kShortestPathGenerator.run();
+                printLog(INFO, "paths generated");
+            } catch (Exception e) {
+                printLog(ERROR, "reading the topology file");
+            }
     }
 
-    private static double runLP(String model, Scenario scenario, ResultFileWriter resultFileWriter) throws GRBException {
+    private static void printLog(String status, String message) {
+        switch (status) {
+            case ERROR:
+                log.error(message);
+                break;
+            case INFO:
+                log.info(message);
+                break;
+        }
+        WebClient.postMessage(status + message);
+    }
+
+    private static Output runLP(String model, Scenario scenario, ResultFileWriter resultFileWriter, Output initialPlacement) throws GRBException {
         GRBLinExpr expr;
         OptimizationModel optimizationModel = new OptimizationModel(parameters);
         Variables variables = new Variables(parameters, optimizationModel.getGrbModel());
         optimizationModel.setVariables(variables);
-        new Constraints(parameters, optimizationModel, scenario, initialOutput);
+        new Constraints(parameters, optimizationModel, scenario, initialPlacement);
         if (scenario.getModel().equals(ALL_OPT_MODELS) || scenario.getModel().equals(MIGRATION_REPLICATION_RL_MODEL) && model.equals(INITIAL_PLACEMENT_MODEL))
             expr = generateExprForObjectiveFunction(optimizationModel, NUM_OF_SERVERS_OBJ);
         else
@@ -90,19 +121,16 @@ public class Manager {
         optimizationModel.setObjectiveFunction(expr, scenario.isMaximization());
         double objVal = optimizationModel.run();
         Output output = new Output(parameters, scenario, optimizationModel);
-        submitResults(output, model, objVal, resultFileWriter);
-        if (model.equals(INITIAL_PLACEMENT_MODEL))
-            initialOutput = output;
-        else
-            optimizationModel.finishModel();
-        return objVal;
+        submitResults(output, model, objVal, resultFileWriter, initialPlacement);
+        return output;
     }
 
-    private static void runRL(String model, double objValue, ResultFileWriter resultFileWriter) {
+    private static Output runRL(String model, double objValue, ResultFileWriter resultFileWriter, Output initialPlacement) {
         LearningModel learningModel = new LearningModel(parameters);
-        double objVal = learningModel.run(initialOutput, objValue);
+        double objVal = learningModel.run(initialPlacement, objValue);
         Output output = new Output(parameters, learningModel);
-        submitResults(output, model, objVal, resultFileWriter);
+        submitResults(output, model, objVal, resultFileWriter, initialPlacement);
+        return output;
     }
 
     private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel optimizationModel, String objective) throws GRBException {
@@ -137,13 +165,13 @@ public class Manager {
         return new ResultFileWriter(title.toString());
     }
 
-    private static void submitResults(Output output, String model, double objVal, ResultFileWriter resultFileWriter) {
+    private static void submitResults(Output output, String model, double objVal, ResultFileWriter resultFileWriter, Output initialPlacement) {
         if (objVal >= 0) {
-            Results results = output.generateResults(objVal, initialOutput);
+            Results results = output.generateResults(objVal, initialPlacement);
             resultFileWriter.createJsonForResults(parameters.getScenario() + "_" + model, results);
             WebClient.updateResultsToWebApp(output, results);
-            WebClient.postMessage("Solution found");
+            printLog(INFO, "solution found");
         } else
-            WebClient.postMessage("No solution");
+            printLog(INFO, "no solution found");
     }
 }

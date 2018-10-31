@@ -1,4 +1,6 @@
-var refreshIntervalId = setInterval(getMessage, 2000);
+var refreshPeriod = 1000;
+var messageIntervalId = setInterval(getMessage, refreshPeriod);
+var resultsIntervalId = setInterval(getResults, refreshPeriod);
 function getMessage() {
     try {
         var message = null;
@@ -14,13 +16,61 @@ function getMessage() {
         if (message != null) {
             document.getElementById("message").innerText = message;
         } else {
-            document.getElementById("message").innerText = "Framework stopped";
-            clearInterval(refreshIntervalId);
+            document.getElementById("message").innerText = "Info: framework not running";
+            clearInterval(messageIntervalId);
+            clearInterval(resultsIntervalId);
         }
     }
     catch (e) {
         return 0;
     }
+}
+
+function runOpt(){
+var scenario = generateScenario();
+    try {
+        var message = null;
+        $.ajax
+        ({
+            data: scenario,
+            url: "run",
+            type: "POST",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+        if (message != null) {
+            document.getElementById("message").innerText = message;
+        }
+        return message;
+    }
+    catch (e) {
+        return 0;
+    }
+}
+
+function generatePaths() {
+var scenario = generateScenario();
+    try {
+            var message = null;
+            $.ajax
+            ({
+                data: scenario,
+                url: "paths",
+                type: "POST",
+                async: false,
+                success: function (ans) {
+                    message = ans;
+                }
+            });
+            if (message != null) {
+               document.getElementById("message").innerText = message;
+            }
+        }
+        catch (e) {
+            return 0;
+        }
 }
 
 function getResults() {
@@ -166,54 +216,4 @@ function generateScenario() {
     });
 
     return scenario;
-}
-
-function runOpt(){
-var scenario = generateScenario();
-    try {
-        var message = null;
-        $.ajax
-        ({
-            data: scenario,
-            url: "run",
-            type: "POST",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
-        if (message != null) {
-            document.getElementById("message").innerText = message;
-            setInterval(getResults, 2000);
-        }
-        return message;
-    }
-    catch (e) {
-        return 0;
-    }
-}
-
-function generatePaths() {
-var scenario = generateScenario();
-    try {
-            var message = null;
-            $.ajax
-            ({
-                data: scenario,
-                url: "paths",
-                type: "POST",
-                async: false,
-                success: function (ans) {
-                    message = ans;
-                }
-            });
-            if (message != null) {
-                document.getElementById("message").innerText = message;
-            } else {
-                document.getElementById("message").innerText = "The server is not running";
-            }
-        }
-        catch (e) {
-            return 0;
-        }
 }

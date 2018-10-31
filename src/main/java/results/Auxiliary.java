@@ -22,8 +22,11 @@ public class Auxiliary {
     public static final String MIGRATION_MODEL = "migration";
     public static final String REPLICATION_MODEL = "replication";
     public static final String MIGRATION_REPLICATION_MODEL = "migration_replication";
-    public static final String ALL_OPT_MODELS = "all_optimization_models";
+    public static final String[] ALL_OPT_MODELS = new String[]{INITIAL_PLACEMENT_MODEL, MIGRATION_MODEL, REPLICATION_MODEL, MIGRATION_REPLICATION_MODEL};
+    public static final String ALL_OPT_MODELS_STRING = "all_optimization_models";
     public static final String MIGRATION_REPLICATION_RL_MODEL = "migration_replication_rl";
+    public static final String ERROR = "Error: ";
+    public static final String INFO = "Info: ";
 
     public Auxiliary() {
         TypeReference<CostFunctions> typeReference = new TypeReference<>() {
@@ -37,66 +40,38 @@ public class Auxiliary {
         }
     }
 
-    static double avg(List<Double> utilizationResults) {
-        double tmpU = 0;
-        for (Double utilizationResult : utilizationResults) tmpU += utilizationResult;
-        tmpU = tmpU / utilizationResults.size();
-        return roundDouble(tmpU, 2);
+    static double avg(List<Object> list) {
+        if (list.size() == 0) return 0;
+        double average = 0;
+        for (Object aList : list) average += Double.valueOf(aList.toString());
+        average = average / list.size();
+        return roundDouble(average, 2);
     }
 
-    static double vrc(List<Double> utilizationResults, double avg) {
+    static double vrc(List<Object> list, double avg) {
+        if (list.size() == 0) return 0;
         double variance = 0;
-        for (Double utilizationResult : utilizationResults)
-            variance += Math.pow(utilizationResult - avg, 2);
-        variance = variance / utilizationResults.size();
+        for (Object aList : list) variance += Math.pow(Double.valueOf(aList.toString()) - avg, 2);
+        variance = variance / list.size();
         return roundDouble(variance, 2);
     }
 
-    public static double max(List<Double> utilizationResults) {
+    public static double max(List<Object> list) {
+        if (list.size() == 0) return 0;
         double max = 0;
-        for (Double utilizationResult : utilizationResults)
-            if (utilizationResult > max)
-                max = utilizationResult;
+        for (Object aList : list)
+            if (Double.valueOf(aList.toString()) > max)
+                max = Double.valueOf(aList.toString());
         return roundDouble(max, 2);
     }
 
-    public static double min(List<Double> utilizationResults) {
+    public static double min(List<Object> list) {
+        if (list.size() == 0) return 0;
         double min = Double.MAX_VALUE;
-        for (Double utilizationResult : utilizationResults)
-            if (utilizationResult < min)
-                min = utilizationResult;
+        for (Object aList : list)
+            if (Double.valueOf(aList.toString()) < min)
+                min = Double.valueOf(aList.toString());
         return roundDouble(min, 2);
-    }
-
-    static double avgF(List<Integer> results) {
-        double tmp = 0;
-        for (Integer i : results) tmp += i;
-        tmp = tmp / results.size();
-        return roundDouble(tmp, 2);
-    }
-
-    static double vrcF(List<Integer> results, double avg) {
-        double variance = 0;
-        for (Integer i : results)
-            variance += Math.pow(i - avg, 2);
-        variance = variance / results.size();
-        return roundDouble(variance, 2);
-    }
-
-    static int maxF(List<Integer> results) {
-        int max = 0;
-        for (Integer i : results)
-            if (i > max)
-                max = i;
-        return max;
-    }
-
-    static int minF(List<Integer> results) {
-        int min = Integer.MAX_VALUE;
-        for (Integer i : results)
-            if (i < min)
-                min = i;
-        return min;
     }
 
     static double roundDouble(double value, int decimals) {

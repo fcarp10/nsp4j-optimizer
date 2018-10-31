@@ -128,31 +128,31 @@ public class Results {
     }
 
     void setLinkResults(List<Double> uL) {
-        luSummary[0] = Auxiliary.avg(uL);
-        luSummary[1] = Auxiliary.min(uL);
-        luSummary[2] = Auxiliary.max(uL);
-        luSummary[3] = Auxiliary.vrc(uL, luSummary[0]);
+        luSummary[0] = Auxiliary.avg(new ArrayList<>(uL));
+        luSummary[1] = Auxiliary.min(new ArrayList<>(uL));
+        luSummary[2] = Auxiliary.max(new ArrayList<>(uL));
+        luSummary[3] = Auxiliary.vrc(new ArrayList<>(uL), luSummary[0]);
     }
 
     void setServerResults(List<Double> uX) {
-        xuSummary[0] = Auxiliary.avg(uX);
-        xuSummary[1] = Auxiliary.min(uX);
-        xuSummary[2] = Auxiliary.max(uX);
-        xuSummary[3] = Auxiliary.vrc(uX, xuSummary[0]);
+        xuSummary[0] = Auxiliary.avg(new ArrayList<>(uX));
+        xuSummary[1] = Auxiliary.min(new ArrayList<>(uX));
+        xuSummary[2] = Auxiliary.max(new ArrayList<>(uX));
+        xuSummary[3] = Auxiliary.vrc(new ArrayList<>(uX), xuSummary[0]);
     }
 
     void setFunctionResults(List<Integer> uF) {
-        fuSummary[0] = Auxiliary.avgF(uF);
-        fuSummary[1] = Auxiliary.minF(uF);
-        fuSummary[2] = Auxiliary.maxF(uF);
-        fuSummary[3] = Auxiliary.vrcF(uF, fuSummary[0]);
+        fuSummary[0] = Auxiliary.avg(new ArrayList<>(uF));
+        fuSummary[1] = Auxiliary.min(new ArrayList<>(uF));
+        fuSummary[2] = Auxiliary.max(new ArrayList<>(uF));
+        fuSummary[3] = Auxiliary.vrc(new ArrayList<>(uF), fuSummary[0]);
     }
 
     void setServiceDelayResults(List<Double> sd) {
-        sdSummary[0] = Auxiliary.avg(sd);
-        sdSummary[1] = Auxiliary.min(sd);
-        sdSummary[2] = Auxiliary.max(sd);
-        sdSummary[3] = Auxiliary.vrc(sd, sdSummary[0]);
+        sdSummary[0] = Auxiliary.avg(new ArrayList<>(sd));
+        sdSummary[1] = Auxiliary.min(new ArrayList<>(sd));
+        sdSummary[2] = Auxiliary.max(new ArrayList<>(sd));
+        sdSummary[3] = Auxiliary.vrc(new ArrayList<>(sd), sdSummary[0]);
     }
 
     public Scenario getScenario() {

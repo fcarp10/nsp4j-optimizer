@@ -137,8 +137,8 @@ public class Constraints {
                     model.getGrbModel().addConstr(variables.dSPX[s][p][x], GRB.GREATER_EQUAL, variableProcessingDelayExpr, "variableProcessingDelayExpr");
                 }
                 GRBLinExpr serviceDelayExpr = new GRBLinExpr();
-                serviceDelayExpr.add(linkDelayExpr);
-                serviceDelayExpr.add(processingDelayExpr);
+//                serviceDelayExpr.add(linkDelayExpr);
+//                serviceDelayExpr.add(processingDelayExpr);
                 serviceDelayExpr.add(migrationDelayExpr);
                 model.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, variables.dSP[s][p], "serviceDelay");
             }

@@ -9,15 +9,15 @@ serverDelayDefault: 10
 linkCapacityDefault: 1000
 minPathsDefault: 3
 maxPathsDefault: 3
-minDemandsDefault: 2
-maxDemandsDefault: 2
+minDemandsDefault: 1
+maxDemandsDefault: 1
 minBwDefault: 100
 maxBwDefault: 100
 
 # NFV parameters
 serviceChains:
   - id: 0
-    chain: [0, 1, 2]
+    chain: [0, 1]
     minPaths: 3
     maxPaths: 3
 functions:
@@ -40,8 +40,8 @@ trafficFlows:
   - src: "n1"
     dst: "n9"
     serviceId: 0
-    minDemands: 3
-    maxDemands: 3
+    minDemands: 1
+    maxDemands: 1
     minBw: 100
     maxBw: 100
 #  - src: "n2"

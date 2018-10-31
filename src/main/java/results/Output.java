@@ -30,10 +30,12 @@ public class Output {
     private boolean[] pX;
     private boolean[][][] sSVP;
     private double[][] dSP;
+    private double cost;
 
     public Output(Parameters pm, Scenario scenario, OptimizationModel optimizationModel) {
         this.pm = pm;
         this.scenario = scenario;
+        this.cost = optimizationModel.getCost();
         try {
             rSP = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
             for (int s = 0; s < pm.getServices().size(); s++)
@@ -254,5 +256,9 @@ public class Output {
 
     public boolean[][][] getsSVP() {
         return sSVP;
+    }
+
+    public double getCost() {
+        return cost;
     }
 }

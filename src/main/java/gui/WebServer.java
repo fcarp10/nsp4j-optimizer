@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static results.Auxiliary.INFO;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
@@ -88,13 +89,13 @@ public class WebServer {
         post("/run", (request, response) -> {
             Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
             Manager.start(scenario);
-            return "Running...";
+            return INFO + "running the model...";
         });
 
         post("/paths", (request, response) -> {
             Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
             Manager.generatePaths(scenario);
-            return "Generating paths...";
+            return INFO + "generating paths...";
         });
 
         get("/node", (request, response) -> {

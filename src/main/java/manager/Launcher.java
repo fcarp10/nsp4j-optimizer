@@ -14,6 +14,6 @@ public class Launcher {
         init();
         new Auxiliary();
         new WebServer();
-        WebClient.postMessage("Framework is ready");
+        WebClient.postMessage("Info: framework is ready");
     }
 }

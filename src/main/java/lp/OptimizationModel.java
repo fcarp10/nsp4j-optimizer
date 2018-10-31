@@ -13,6 +13,7 @@ public class OptimizationModel {
     private GRBEnv grbEnv;
     private Variables variables;
     private Parameters parameters;
+    private double cost;
 
     public OptimizationModel(Parameters parameters) {
         this.parameters = parameters;
@@ -78,9 +79,10 @@ public class OptimizationModel {
 
     public double run() throws GRBException {
         grbModel.optimize();
-        if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL)
-            return grbModel.get(GRB.DoubleAttr.ObjVal);
-        else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
+        if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
+            cost = grbModel.get(GRB.DoubleAttr.ObjVal);
+            return cost;
+        } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
             grbModel.computeIIS();
             log.error("Model is not feasible");
         } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INF_OR_UNBD)
@@ -105,5 +107,9 @@ public class OptimizationModel {
 
     public void setVariables(Variables variables) {
         this.variables = variables;
+    }
+
+    public double getCost() {
+        return cost;
     }
 }
