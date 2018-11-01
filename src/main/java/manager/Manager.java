@@ -29,6 +29,7 @@ public class Manager {
 
     private static final Logger log = LoggerFactory.getLogger(Manager.class);
     private static Parameters parameters;
+    private static Output initialPlacement;
 
     private static String getResourcePath(String fileName) {
         try {
@@ -55,7 +56,6 @@ public class Manager {
     }
 
     public static void start(Scenario scenario) {
-        Output initialPlacement = null;
         String path = getResourcePath(scenario.getInputFileName());
         if (path != null & readParameters(path, scenario.getInputFileName()))
             try {

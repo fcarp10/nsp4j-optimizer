@@ -11,7 +11,7 @@ public class NodeJson {
 
     public NodeJson(String id, int x, int y, String favecolor, String label) {
         position = new Position(x, y);
-        data = new Data(id, favecolor, label, "ellipse", 20, 20);
+        data = new Data(id, favecolor, label, "ellipse", 25, 25);
     }
 
     public Position getPosition() {

@@ -1,9 +1,7 @@
+var refreshPeriod = 1000;
 var cy;
-window.onload = function () {
-    initializeGraph();
-    updateGraph();
-    setInterval(updateGraph, 3000);
-};
+var topologyIntervalId = setInterval(updateGraph, refreshPeriod);
+initializeGraph();
 
 function initializeGraph() {
     cy = cytoscape({
@@ -20,7 +18,7 @@ function initializeGraph() {
                 'shape': 'data(faveShape)',
                 'width': 'data(width)',
                 'height': 'data(height)',
-                'font-size': 4,
+                'font-size': 6,
                 'text-valign': 'center',
                 'text-halign': 'center',
                 'color': '#000',
@@ -33,12 +31,12 @@ function initializeGraph() {
             .css({
                 'source-label': 'data(label)',
                 'source-text-offset': 15,
-                'font-size': 5,
+                'font-size': 6,
                 'edge-text-rotation': 'autorotate',
                 'text-background-opacity': 1,
                 'text-background-color': '#f2f2f2',
                 'text-background-shape': 'roundrectangle',
-                'width': 1,
+                'width': 2,
                 'line-color': 'data(faveColor)',
                 'curve-style': 'bezier',
                 'target-arrow-shape': 'triangle',

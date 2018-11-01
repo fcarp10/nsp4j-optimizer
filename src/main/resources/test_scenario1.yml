@@ -1,6 +1,6 @@
 # Optimization parameters
 gap: 0
-weights: [0, 0, 1.0]
+weights: [0, 1.0, 0]
 
 # Network default parameters
 serverCapacityDefault: 1000
@@ -25,17 +25,17 @@ functions:
     replicable: false
     load: 1.0
     maxShareable: 5
-    delay: 10
+    delay: 100
   - type: 1
     replicable: true
     load: 1.0
     maxShareable: 5
-    delay: 10
+    delay: 200
   - type: 2
     replicable: false
     load: 1.0
     maxShareable: 5
-    delay: 10
+    delay: 100
 trafficFlows:
   - src: "n1"
     dst: "n9"

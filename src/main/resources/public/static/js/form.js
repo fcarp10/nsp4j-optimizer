@@ -1,6 +1,6 @@
 var refreshPeriod = 1000;
 var messageIntervalId = setInterval(getMessage, refreshPeriod);
-var resultsIntervalId = setInterval(getResults, refreshPeriod);
+
 function getMessage() {
     try {
         var message = null;
@@ -73,40 +73,6 @@ var scenario = generateScenario();
         }
 }
 
-function getResults() {
-    try {
-        var results = null;
-        $.ajax
-        ({
-            url: "results",
-            type: "GET",
-            async: false,
-            success: function (ans) {
-                results = ans;
-            }
-        });
-        if (results != null) {
-            document.getElementById("luSummary").innerText = results['luSummary'][0] + ' - ' + results['luSummary'][1] + ' - ' + results['luSummary'][2] + ' - ' + results['luSummary'][3];
-            document.getElementById("xuSummary").innerText = results['xuSummary'][0] + ' - ' + results['xuSummary'][1] + ' - ' + results['xuSummary'][2] + ' - ' + results['xuSummary'][3];
-            document.getElementById("fuSummary").innerText = results['fuSummary'][0] + ' - ' + results['fuSummary'][1] + ' - ' + results['fuSummary'][2] + ' - ' + results['fuSummary'][3];
-            document.getElementById("sdSummary").innerText = results['sdSummary'][0] + ' - ' + results['sdSummary'][1] + ' - ' + results['sdSummary'][2] + ' - ' + results['sdSummary'][3];
-            document.getElementById("extra").innerText = results['avgPathLength'] + ' - ' + results['totalTraffic'] + ' - ' + results['trafficLinks'];
-            document.getElementById("mgr-rep").innerText = results['migrationsNum'] + ' - ' + results['replicationsNum'];
-            document.getElementById("cost").innerText = results['cost'];
-        } else {
-            document.getElementById("luSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-            document.getElementById("xuSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-            document.getElementById("fuSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-            document.getElementById("extra").innerText = "0.0 - 0.0 - 0.0";
-            document.getElementById("mgr-rep").innerText = "0 - 0";
-            document.getElementById("cost").innerText = "0.0";
-        }
-    }
-    catch (e) {
-        return 0;
-    }
-}
-
 function check(elem) {
     document.getElementById("countNumberOfUsedServers").disabled = false;
     document.getElementById("onePathPerDemand").disabled = false;
@@ -120,28 +86,35 @@ function check(elem) {
     document.getElementById("initialPlacementAsConstraints").disabled = false;
     document.getElementById("synchronizationTraffic").disabled = false;
 
-    var useCase = document.getElementById("useCase").value;
-    if(useCase === "init"){
-        document.getElementById("noParallelPaths").checked = true;
+    document.getElementById("countNumberOfUsedServers").checked = true;
+    document.getElementById("onePathPerDemand").checked = true;
+    document.getElementById("activatePathForService").checked = true;
+    document.getElementById("pathsConstrainedByFunctions").checked = true;
+    document.getElementById("functionPlacement").checked = true;
+    document.getElementById("oneFunctionPerDemand").checked = true;
+    document.getElementById("mappingFunctionsWithDemands").checked = true;
+    document.getElementById("functionSequenceOrder").checked = true;
+    document.getElementById("noParallelPaths").checked = true;
+    document.getElementById("initialPlacementAsConstraints").checked = true;
+    document.getElementById("synchronizationTraffic").checked = true;
+
+    var model = document.getElementById("model").value;
+    if(model === "initial_placement"){
         document.getElementById("initialPlacementAsConstraints").checked = false;
         document.getElementById("synchronizationTraffic").checked = false;
     }
-    if(useCase === "mgr"){
-            document.getElementById("noParallelPaths").checked = true;
+    if(model === "migration"){
             document.getElementById("initialPlacementAsConstraints").checked = false;
             document.getElementById("synchronizationTraffic").checked = false;
     }
-    if(useCase === "rep"){
+    if(model === "replication"){
                 document.getElementById("noParallelPaths").checked = false;
-                document.getElementById("initialPlacementAsConstraints").checked = true;
-                document.getElementById("synchronizationTraffic").checked = true;
     }
-    if(useCase === "rep_mgr"){
+    if(model === "migration_replication"){
                 document.getElementById("noParallelPaths").checked = false;
                 document.getElementById("initialPlacementAsConstraints").checked = false;
-                document.getElementById("synchronizationTraffic").checked = true;
     }
-    if(useCase === "all"){
+    if(model === "all_optimization_models"){
                 document.getElementById("noParallelPaths").checked = false;
                 document.getElementById("initialPlacementAsConstraints").checked = false;
                 document.getElementById("synchronizationTraffic").checked = false;
@@ -149,7 +122,7 @@ function check(elem) {
                 document.getElementById("initialPlacementAsConstraints").disabled = true;
                 document.getElementById("synchronizationTraffic").disabled = true;
     }
-    if(useCase === "exp"){
+    if(model === "migration_replication_rl"){
                 document.getElementById("countNumberOfUsedServers").checked = false;
                 document.getElementById("onePathPerDemand").checked = false;
                 document.getElementById("activatePathForService").checked = false;
@@ -161,6 +134,7 @@ function check(elem) {
                 document.getElementById("noParallelPaths").checked = false;
                 document.getElementById("initialPlacementAsConstraints").checked = false;
                 document.getElementById("synchronizationTraffic").checked = false;
+
                 document.getElementById("setLinkUtilizationExpr").disabled = true;
                 document.getElementById("setServerUtilizationExpr").disabled = true;
                 document.getElementById("countNumberOfUsedServers").disabled = true;

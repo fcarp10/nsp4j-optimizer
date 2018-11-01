@@ -98,6 +98,8 @@ public class WebServer {
             return INFO + "generating paths...";
         });
 
+        get("/favicon.ico", (request, response) -> "");
+
         get("/node", (request, response) -> {
             response.type("application/json");
             return new Gson().toJson(nodeList);

@@ -1,6 +1,7 @@
 package results;
 
 
+import gui.elements.GraphData;
 import gui.elements.Scenario;
 import manager.Parameters;
 
@@ -23,6 +24,10 @@ public class Results {
     private int migrationsNum;
     private int replicationsNum;
     private double cost;
+    // Graphs
+    private List<GraphData> luGraph;
+    private List<GraphData> xuGraph;
+    private List<GraphData> sdGraph;
     // Elementary variables
     private transient List<String> rSP;
     private transient List<String> rSPD;
@@ -155,6 +160,47 @@ public class Results {
         sdSummary[3] = Auxiliary.vrc(new ArrayList<>(sd), sdSummary[0]);
     }
 
+    void setLuGraph(List<Double> uL) {
+        luGraph = new ArrayList<>();
+        for (int i = 0; i < 10; i++)
+            luGraph.add(new GraphData("0." + i, 0));
+        for (Double anUL : uL)
+            for (int j = 0; j < 10; j++)
+                if (anUL * 10 < j + 1 && anUL * 10 >= j) {
+                    luGraph.get(j).setValue(luGraph.get(j).getValue() + 1);
+                    break;
+                }
+    }
+
+    void setXuGraph(List<Double> uX) {
+        xuGraph = new ArrayList<>();
+        for (int i = 0; i < 10; i++)
+            xuGraph.add(new GraphData("0." + i, 0));
+        for (Double anUX : uX)
+            for (int j = 0; j < 10; j++)
+                if (anUX * 10 < j + 1 && anUX * 10 >= j) {
+                    xuGraph.get(j).setValue(xuGraph.get(j).getValue() + 1);
+                    break;
+                }
+    }
+
+    void setSdGraph(List<Double> sd) {
+        sdGraph = new ArrayList<>();
+        double min = Auxiliary.min(new ArrayList<>(sd));
+        double max = Auxiliary.max(new ArrayList<>(sd));
+        double step = (max - min) / 10;
+        if (max != min) {
+            for (int i = 0; i < 10; i++)
+                sdGraph.add(new GraphData(String.valueOf(step * i), 0));
+            for (Double anSd : sd)
+                for (int j = 0; j < 10; j++)
+                    if (anSd < Double.valueOf(sdGraph.get(j).getYear()) + step && anSd >= Double.valueOf(sdGraph.get(j).getYear())) {
+                        sdGraph.get(j).setValue(sdGraph.get(j).getValue() + 1);
+                        break;
+                    }
+        } else sdGraph.add(new GraphData(String.valueOf(max), sd.size()));
+    }
+
     public Scenario getScenario() {
         return scenario;
     }
@@ -253,5 +299,17 @@ public class Results {
 
     void setReplicationsNum(int replicationsNum) {
         this.replicationsNum = replicationsNum;
+    }
+
+    public List<GraphData> getLuGraph() {
+        return luGraph;
+    }
+
+    public List<GraphData> getXuGraph() {
+        return xuGraph;
+    }
+
+    public List<GraphData> getSdGraph() {
+        return sdGraph;
     }
 }

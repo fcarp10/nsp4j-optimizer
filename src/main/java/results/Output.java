@@ -125,6 +125,9 @@ public class Output {
         r.setServerResults(uX);
         r.setFunctionResults(numOfFunctionsPerServer());
         r.setServiceDelayResults(serviceDelayList());
+        r.setLuGraph(uL);
+        r.setXuGraph(uX);
+        r.setSdGraph(serviceDelayList());
         r.setTotalTraffic(pm.getTotalTrafficAux());
         r.setTrafficOnLinks(Auxiliary.roundDouble(trafficOnLinks(), 2));
         r.setAvgPathLength(Auxiliary.roundDouble(avgPathLength(), 2));
