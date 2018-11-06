@@ -65,14 +65,8 @@ function setSummaryResults(results){
       document.getElementById("minSd").innerText = results['sdSummary'][1];
       document.getElementById("maxSd").innerText = results['sdSummary'][2];
       document.getElementById("stdSd").innerText = results['sdSummary'][3];
-
-//    document.getElementById("luSummary").innerText = results['luSummary'][0] + ' - ' + results['luSummary'][1] + ' - ' + results['luSummary'][2] + ' - ' + results['luSummary'][3];
-//    document.getElementById("xuSummary").innerText = results['xuSummary'][0] + ' - ' + results['xuSummary'][1] + ' - ' + results['xuSummary'][2] + ' - ' + results['xuSummary'][3];
-//    document.getElementById("fuSummary").innerText = results['fuSummary'][0] + ' - ' + results['fuSummary'][1] + ' - ' + results['fuSummary'][2] + ' - ' + results['fuSummary'][3];
-//    document.getElementById("sdSummary").innerText = results['sdSummary'][0] + ' - ' + results['sdSummary'][1] + ' - ' + results['sdSummary'][2] + ' - ' + results['sdSummary'][3];
-//    document.getElementById("extra").innerText = results['avgPathLength'] + ' - ' + results['totalTraffic'] + ' - ' + results['trafficLinks'];
-//    document.getElementById("mgr-rep").innerText = results['migrationsNum'] + ' - ' + results['replicationsNum'];
-//    document.getElementById("cost").innerText = results['cost'];
+      document.getElementById("mgr").innerText = results['migrationsNum'];
+      document.getElementById("rep").innerText = results['replicationsNum'];
 }
 
 function cleanSummaryResults(){
@@ -93,13 +87,8 @@ function cleanSummaryResults(){
       document.getElementById("minSd").innerText = value;
       document.getElementById("maxSd").innerText = value;
       document.getElementById("stdSd").innerText = value;
-//    document.getElementById("luSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-//    document.getElementById("xuSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-//    document.getElementById("fuSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-//    document.getElementById("sdSummary").innerText = "0.0 - 0.0 - 0.0 - 0.0";
-//    document.getElementById("extra").innerText = "0.0 - 0.0 - 0.0";
-//    document.getElementById("mgr-rep").innerText = "0 - 0";
-//    document.getElementById("cost").innerText = "0.0";
+      document.getElementById("mgr").innerText = value;
+      document.getElementById("rep").innerText = value;
 }
 
 function initializeGraphs(data) {

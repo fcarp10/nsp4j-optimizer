@@ -17,9 +17,6 @@ function getMessage() {
             document.getElementById("message").innerText = message;
         } else {
             document.getElementById("message").innerText = "Info: framework not running";
-
-//            clearInterval(messageIntervalId);
-//            clearInterval(resultsIntervalId);
         }
     }
     catch (e) {
