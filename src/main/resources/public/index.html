@@ -29,9 +29,6 @@
             </li>
         </ul>
     </div>
-    <a class="navbar-brand" href="#">
-        <img src="static/images/logo.png" width="160" height="25" alt="">
-    </a>
 </nav>
 
 <div class="container-fluid">
@@ -151,28 +148,25 @@
         </div>
     </div>
     <div id="results" class="row">
-        <!--<div class="col-3">-->
-        <!--<h3>Summary results</h3>-->
-        <!--<hr>-->
-        <!--Link utilization (avg - min - max - std):-->
-        <!--<div class="div div-output" id="luSummary">0.0 - 0.0 - 0.0 - 0.0</div>-->
-        <!--Server utilization (avg - min - max - std):-->
-        <!--<div class="div div-output" id="xuSummary">0.0 - 0.0 - 0.0 - 0.0</div>-->
-        <!--Function placement (avg - min - max - std):-->
-        <!--<div class="div div-output" id="fuSummary">0.0 - 0.0 - 0.0 - 0.0</div>-->
-        <!--Service delay (avg - min - max - std):-->
-        <!--<div class="div div-output" id="sdSummary">0.0 - 0.0 - 0.0 - 0.0</div>-->
-        <!--Average path Length - Total traffic - Traffic on links:-->
-        <!--<div class="div div-output" id="extra">0.0 - 0.0 - 0.0</div>-->
-        <!--Number of Migrations - Replications:-->
-        <!--<div class="div div-output" id="mgr-rep">0 - 0</div>-->
-        <!--Cost value:-->
-        <!--<div class="div div-output" id="cost">0.0</div>-->
-        <!--</div>-->
         <div class="col-3">
             <h3>Summary results</h3>
             <hr>
-            <br>
+            <div class="table-responsive">
+                <table class="table table-hover ">
+                    <thead class="thead-light">
+                    <tr>
+                        <th>Migrations</th>
+                        <th id="mgr">0</th>
+                    </tr>
+                    </thead>
+                    <thead class="thead-light">
+                    <tr>
+                        <th>Replications</th>
+                        <th id="rep">0</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover ">
                     <thead class="thead-light">
@@ -186,7 +180,7 @@
                     </thead>
                     <tbody>
                     <tr>
-                        <td>Links</td>
+                        <td>Link utilization</td>
                         <td id="avgLu">0.0</td>
                         <td id="minLu">0.0</td>
                         <td id="maxLu">0.0</td>
@@ -195,7 +189,7 @@
                     </tbody>
                     <tbody>
                     <tr>
-                        <td>Servers</td>
+                        <td>Server utilization</td>
                         <td id="avgXu">0.0</td>
                         <td id="minXu">0.0</td>
                         <td id="maxXu">0.0</td>
@@ -204,7 +198,7 @@
                     </tbody>
                     <tbody>
                     <tr>
-                        <td>Functions</td>
+                        <td>Function placement</td>
                         <td id="avgF">0.0</td>
                         <td id="minF">0.0</td>
                         <td id="maxF">0.0</td>
@@ -241,13 +235,24 @@
     </div>
 </div>
 
-<footer class="footer">
-    <div class="footer-copyright text-right">© 2018 Copyright
-        <a class="navbar-brand" href="#">
-            <img src="static/images/tu-logo.png" width="170" height="50" alt="">
-        </a>
+<footer class="text-white mt-3 footer-custom">
+    <div class="container-fluid py-3">
+        <div class="row">
+            <div class="col-10">
+                <a class="navbar-brandt" href="#">
+                <img src="static/images/tu-logo.png" height="60" alt=""></a>
+                <a class="navbar-brandt" href="#">
+                    <img src="static/images/logo.png" height="40" alt=""></a>
+            </div>
+            <div class="col-2 text-right small align-self-end">
+                <a class="navbar-brand" href="https://github.com/FranCarpio">
+                    <img src="static/images/github.png" height="40">
+                </a>
+            </div>
+        </div>
     </div>
 </footer>
+
 
 <!--scripts loaded here-->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

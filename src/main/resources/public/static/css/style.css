@@ -217,13 +217,8 @@
     background:#BC213F;
 }
 
-.footer {
-   left: 0;
-   bottom: 0;
-   width: 100%;
+.footer-custom {
    background-color: #BC213F;
-   color: white;
-   text-align: center;
 }
 
 
