@@ -3,6 +3,7 @@ package manager;
 import gui.WebClient;
 import gui.WebServer;
 import gui.elements.Scenario;
+import gurobi.GRB;
 import org.graphstream.graph.Graph;
 import results.ResultFileWriter;
 import gurobi.GRBException;

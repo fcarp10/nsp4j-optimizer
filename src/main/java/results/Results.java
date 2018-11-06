@@ -13,6 +13,16 @@ public class Results {
     // Scenario
     private transient Parameters pm;
     private transient Scenario scenario;
+    // Elementary variables
+    private transient List<String> rSP;
+    private transient List<String> rSPD;
+    private transient List<String> pXSV;
+    private transient List<String> pXSVD;
+    private transient List<String> uX;
+    private transient List<String> uL;
+    // Additional variables
+    private transient List<String> sSVP;
+    private transient List<String> dSP;
     // Summary results
     private double[] luSummary;
     private double[] xuSummary;
@@ -28,16 +38,6 @@ public class Results {
     private List<GraphData> luGraph;
     private List<GraphData> xuGraph;
     private List<GraphData> sdGraph;
-    // Elementary variables
-    private transient List<String> rSP;
-    private transient List<String> rSPD;
-    private transient List<String> pXSV;
-    private transient List<String> pXSVD;
-    private transient List<String> uX;
-    private transient List<String> uL;
-    // Additional variables
-    private transient List<String> sSVP;
-    private transient List<String> dSP;
 
     Results(Parameters pm, Scenario scenario) {
         this.pm = pm;

@@ -92,11 +92,6 @@ public class OptimizationModel {
         return -1;
     }
 
-    public void finishModel() throws GRBException {
-        grbModel.dispose();
-        grbEnv.dispose();
-    }
-
     public GRBModel getGrbModel() {
         return grbModel;
     }

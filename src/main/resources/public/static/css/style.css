@@ -1,7 +1,7 @@
 #cy {
     height: 86%;
     width: 100%;
-    background: #f2f2f2;
+    background: #E9ECEF;
 }
 
 .div-output {
@@ -14,7 +14,7 @@
 }
 
 .row{
-  margin-top: 30px;
+  margin-top: 25px;
 }
 
 .container-fluid {
@@ -215,6 +215,15 @@
     height: 10px;
     border-radius: 50%;
     background:#BC213F;
+}
+
+.footer {
+   left: 0;
+   bottom: 0;
+   width: 100%;
+   background-color: #BC213F;
+   color: white;
+   text-align: center;
 }
 
 
