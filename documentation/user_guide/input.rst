@@ -2,7 +2,7 @@
 Input Parameters
 ****************
 
-The framework requires three different input files: one describing the network topology, one with all paths listed and one for the NFV specific parameters. All three files must have exactly the same name with different extensions:\*.dgs for the topology, \*.txt for the paths and \*.yml for the parameters.
+The framework requires three different input files: one describing the network topology, one with all paths listed and one for the specific parameters. All three files must have exactly the same name with different extensions:\*.dgs for the topology, \*.txt for the paths and \*.yml for the parameters.
 
 Topology file
 =============
@@ -66,12 +66,12 @@ The admissible paths for the topology must be specified in a file with the same 
 	[n1, n4, n5, n3, n7, n9]
 	[n1, n4, n5, n6, n7, n9]
 
-This paths can be externally generated or generated using the included KShortest Path Generator tool. For using this tool, you only need to place \*.dgs file in the same folder with the \*jar and click the path button from the graphical user interface. All the paths will be generated in a \*.txt file with the same name as the topology file.
+This paths can be externally generated or generated using the included KShortest Path Generator tool. For using this tool, you only need to place \*.dgs file in the same folder with the \*.jar and click the path button from the graphical user interface. All the paths will be generated in a \*.txt file with the same name as the topology file.
 
 Parameters file
 ===============
 
-This file describes the default parameters for the optimization model. The name of the file has to be the same as the name of the topology file, but with extension \*.yml. For instance:
+This file describes the default parameters for the optimization model. The name of the file has to be the same as the name of the topology file, but with extension \*.yml. An example of a parameter file is:
 
 
 .. code-block:: yaml
@@ -92,7 +92,7 @@ This file describes the default parameters for the optimization model. The name 
     minBwDefault: 100
     maxBwDefault: 100
 
-    # NFV parameters
+    # Service parameters
     serviceChains:
       - id: 0
         chain: [0, 1, 2]
@@ -154,13 +154,13 @@ The next table describes every parameter for the model (TO BE UPDATED):
 +--------------------+----------------------------------------------+
 | ``maxReplicas``    | maximum number of allowed replicas           |
 +--------------------+----------------------------------------------+
-| ``functionTypes``  | Virtual Network Functions on the network     |
+| ``functionTypes``  | set of function types                        |
 +--------------------+----------------------------------------------+
-| ``type``           | identifier of the VNF                        |
+| ``type``           | identifier of the function                   |
 +--------------------+----------------------------------------------+
-| ``replicable``     | indicates if the VNF can be replicable       |
+| ``replicable``     | indicates if the function can be replicated  |
 +--------------------+----------------------------------------------+
-| ``load``           | load of the VNF                              |
+| ``load``           | load ratio of the function                   |
 +--------------------+----------------------------------------------+
 | ``serviceTypes``   | Service Function Chains on the network       |
 +--------------------+----------------------------------------------+

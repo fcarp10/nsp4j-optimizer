@@ -2,7 +2,7 @@
 Data Structure (TO BE EXTENDED)
 *******************************
 
-The input data structure is generated using nsm4j-api library.
+The input data structure is generated using `nsp4j-api <https://github.com/FranCarpio/nsp4j-api>`_ library.
 
 Parameters
 ==========

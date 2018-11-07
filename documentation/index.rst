@@ -1,9 +1,7 @@
-NFV Optimization Docs
-=====================
+Network and Service management Planning framework for Java (nsp4j) documentation
+================================================================================
 
-Welcome to the NFV Optimization tool documentation!
-
-NFV Optimization tool, allows the user to simply model the optimization of VFN placement, replication and migration.
+The nsp4j framework allows the user to simply model the optimization of service placement.
 
 .. toctree::
    :maxdepth: 1

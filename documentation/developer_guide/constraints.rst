@@ -121,7 +121,7 @@ setServerUtilizationExpr
 	\forall s \in  S, \forall v \in V_s, \forall x \in X:  u_{x}^{v,s} = \sum_{\lambda \in \Lambda_s}  \frac{\lambda \cdot f_{x,\lambda}^{v,s} \cdot L_v}{C_x}
 	\end{equation}
 
-Similar to the previous constraint *setServerUtilizationExpr()* is an operation, that is supposed to check the utilization of a server within the service in consideration of the bandwidth of the traffic demands, the load ratio of the VNF functions and the maximum capacity of the server.
+Similar to the previous constraint *setServerUtilizationExpr()* is an operation, that is supposed to check the utilization of a server within the service in consideration of the bandwidth of the traffic demands, the load ratio of the functions and the maximum capacity of the server.
 This method, corresponding to the equations (7) + (8), is running as followed:
 
 Similar to the previous method, the loop
@@ -141,7 +141,7 @@ Following loops
 	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) { 
 
 
-all translate to summatories over all service chains :math:`s`, element of the set of service chains :math:`S`, over all VNF functions :math:`v`, element of the ordered set of VNFs :math:`V_s` in service chain :math:`s`, and over all traffic demands :math:`\lambda`, that are element of the set of demands :math:`\Lambda_s` of service chain :math:`s`.
+all translate to summatories over all service chains :math:`s`, element of the set of service chains :math:`S`, over all functions :math:`v`, element of the ordered set of functions :math:`V_s` in service chain :math:`s`, and over all traffic demands :math:`\lambda`, that are element of the set of demands :math:`\Lambda_s` of service chain :math:`s`.
 
             The subsequent commands
 
@@ -152,7 +152,7 @@ all translate to summatories over all service chains :math:`s`, element of the s
 	                                    / parameters.getServers().get(x).getCapacity()
 	                            , variables.fXSVD[x][s][v][d]);
 
-are to be interpreted as a demand :math:`\lambda`, determined by the previous loop, will be multiplied with a load ratio :math:`L_v`, influenced by the current VNF function :math:`v`. The resulting product will be divided by the maximum server capacity :math:`C_x` and multiplied with the parameter :math:`f_{x,\lambda}^{v,s}`.
+are to be interpreted as a demand :math:`\lambda`, determined by the previous loop, will be multiplied with a load ratio :math:`L_v`, influenced by the current function :math:`v`. The resulting product will be divided by the maximum server capacity :math:`C_x` and multiplied with the parameter :math:`f_{x,\lambda}^{v,s}`.
 
 A possible way to summarize this operation would be 
 
@@ -274,7 +274,7 @@ countNumberOfUsedServers
 	\end{equation}
 
 
-This next method *countNumberOfUsedServers* basically counts all servers that are used for all the VNF functions for all service chains in relation to the total number of servers. Equivalent to equation (2) from the paper, this method is running as followed:
+This next method *countNumberOfUsedServers* basically counts all servers that are used for all the functions for all service chains in relation to the total number of servers. Equivalent to equation (2) from the paper, this method is running as followed:
 
 The for-loop
 
@@ -292,13 +292,13 @@ All subsequent loops
             for (int s = 0; s < parameters.getServices().size(); s++)
                 for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
 
-are to be translated as summatories over all service chains :math:`s`, element of the set of service chains :math:`S` and over all VNF functions :math:`v`, element of a ordered set of functions :math:`V_s`  for the service chain :math:`s`, for the following expression
+are to be translated as summatories over all service chains :math:`s`, element of the set of service chains :math:`S` and over all functions :math:`v`, element of a ordered set of functions :math:`V_s`  for the service chain :math:`s`, for the following expression
 
 .. code-block:: java
 
                     expr.addTerm(1.0 / parameters.getTotalNumberOfFunctionsAux(), variables.fXSV[x][s][v]);
 
-which describes a division of :math:`1` by the total number of VNF functions, multiplied with the variable :math:`f_{x}^{v,s}`.
+which describes a division of :math:`1` by the total number of functions, multiplied with the variable :math:`f_{x}^{v,s}`.
 
 Following up
 
@@ -455,7 +455,7 @@ pathConstrainedByFunctions
 	\forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} \leq F_v^{s} \sum_{p \in P_s} t_{p}^s + 1 - F_v^{s}
 	\end{equation}
 
-This next constraint pathConstrainedByFunctions is defined to check the replicability of a VNF, determined by a parameter :math:`F_v^{s}`. Corresponding to equation (11) from the paper it is set to run as follows:
+This next constraint pathConstrainedByFunctions is defined to check the replicability of a function, determined by a parameter :math:`F_v^{s}`. Corresponding to equation (11) from the paper it is set to run as follows:
 
 First 
 
@@ -556,7 +556,7 @@ functionPlacement
 	\end{equation}
 
 
-The VNF allocation is controlled by this next constrained defined in functionPlacement. Related to equation (12) in the paper, it assigns all VNFs for a service :math:`s` in the active paths :math:`p` and is executed as followed: 
+The function allocation is controlled by this next constrained defined in functionPlacement. Related to equation (12) in the paper, it assigns all functions for a service :math:`s` in the active paths :math:`p` and is executed as followed:
 
              First of all the code lines
 
@@ -567,7 +567,7 @@ The VNF allocation is controlled by this next constrained defined in functionPla
 	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
 	                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
 
-ensure that for all services :math:`s`, that are an element of a set of service chains :math:`S`, for all paths :math:`p`, an element of a set of  admissible paths :math:`P_s`  for a service :math:`s`, for all demands :math:`\lambda`, an element of a set of traffic demands :math:`\lambda_s`  for the service :math:`s`, and for all functions :math:`v`, that are an element of a set of ordered VNF functions :math:`V_s`  for a service :math:`s`, the following operations are valid and executed.
+ensure that for all services :math:`s`, that are an element of a set of service chains :math:`S`, for all paths :math:`p`, an element of a set of  admissible paths :math:`P_s`  for a service :math:`s`, for all demands :math:`\lambda`, an element of a set of traffic demands :math:`\lambda_s`  for the service :math:`s`, and for all functions :math:`v`, that are an element of a set of ordered functions :math:`V_s`  for a service :math:`s`, the following operations are valid and executed.
 
             Following up
 
@@ -612,7 +612,7 @@ oneFunctionPerDemand
 	\end{equation}
 
 
-This method oneFunctionPerDemand is, similar to constraint (13) from the paper, ensuring that each traffic demand λ has to traverse a specific VNF :math:`v` in only one server. All of this is realized as followed:
+This method oneFunctionPerDemand is, similar to constraint (13) from the paper, ensuring that each traffic demand λ has to traverse a specific function :math:`v` in only one server. All of this is realized as followed:
 
             First of all the block
 
@@ -623,7 +623,7 @@ This method oneFunctionPerDemand is, similar to constraint (13) from the paper, 
 	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
 
 
-makes sure that the following operations are executed for all services :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, element of a set of ordered VNF functions :math:`V_s`  for a service :math:`s`, and for all demands :math:`\lambda`, that are an element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`.
+makes sure that the following operations are executed for all services :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, element of a set of ordered functions :math:`V_s`  for a service :math:`s`, and for all demands :math:`\lambda`, that are an element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`.
 
             Thereafter
 
@@ -670,7 +670,7 @@ mappingFunctionsWithDemands
 	\forall s \in  S, \forall v \in  V_s, \forall x \in X, \forall \lambda \in \Lambda_s: f_{x,\lambda}^{v,s} \leq f_x^{v,s} \leq \sum_{\lambda' \in  \Lambda_s} f_{x,\lambda'}^{v,s} 
 	\end{equation}
 
-This next constraint expressed by the method mappingFunctionsWithDemands, ensures that a VNF :math:`v` is only placed in a server :math:`x` if said server is used by at least one traffic demand. Corresponding to equation (14) in the paper, this method is executed as follows:
+This next constraint expressed by the method mappingFunctionsWithDemands, ensures that a function :math:`v` is only placed in a server :math:`x` if said server is used by at least one traffic demand. Corresponding to equation (14) in the paper, this method is executed as follows:
 
             The first block of code
 
@@ -682,7 +682,7 @@ This next constraint expressed by the method mappingFunctionsWithDemands, ensure
 	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
 	                    model.getGrbModel().addConstr(variables.fXSVD[x][s][v][d], GRB.LESS_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
 
-ensures that for all servers :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, an element of an ordered set of VNF functions :math:`V_s`  for a service :math:`s`, for all servers :math:`x`, that are element of a set of servers :math:`X`, and for all demands :math:`\lambda`, that are manager.elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`, the following inequation is valid. Said inequation is defined as a *variable0* :math:`f_{x,\lambda}^{v,s}`, which is set to be lesser equal to :math:`f_x^{v,s}`, and returned to *mappingFunctionsWithDemands*.
+ensures that for all servers :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, an element of an ordered set of functions :math:`V_s`  for a service :math:`s`, for all servers :math:`x`, that are element of a set of servers :math:`X`, and for all demands :math:`\lambda`, that are manager.elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`, the following inequation is valid. Said inequation is defined as a *variable0* :math:`f_{x,\lambda}^{v,s}`, which is set to be lesser equal to :math:`f_x^{v,s}`, and returned to *mappingFunctionsWithDemands*.
 	
 This first half can be interpreted as follows:
 
@@ -706,7 +706,7 @@ The second block
 	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
 	                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
 
-first makes sure that for all servers :math:`s`, that are element of a set of service chains :math:`S`, for all functions :math:`v`, that are element of an ordered set of VNF functions :math:`V_s`  for a service :math:`s`, and for all server :math:`x`, that are element of a set of servers :math:`X`, the following operations are realized.
+first makes sure that for all servers :math:`s`, that are element of a set of service chains :math:`S`, for all functions :math:`v`, that are element of an ordered set of functions :math:`V_s`  for a service :math:`s`, and for all server :math:`x`, that are element of a set of servers :math:`X`, the following operations are realized.
 
 Following up
 
@@ -774,7 +774,7 @@ functionSequenceOrder
     	\Bigg( \sum_{n' = 0}^{n} \sum_{x' \in X_{n'}} f_{x', \lambda}^{(v-1),s} \Bigg) + \Bigg( \sum_{x \in X_n} - f_{x, \lambda}^{v,s} \Bigg) \geq t_{p}^{\lambda,s}  - 1 \quad if \quad v>0
     \end{equation}
 
-Arguably the most complex constraint, the method functionSequenceOrder, equal to equation (15) in the paper, ensures that a traffic demand :math:`\lambda` is only to traverse VNFs in a set order. This constraint is implemented in the code as follows:
+Arguably the most complex constraint, the method functionSequenceOrder, equal to equation (15) in the paper, ensures that a traffic demand :math:`\lambda` is only to traverse functions in a set order. This constraint is implemented in the code as follows:
 
 The first few loops
 
@@ -786,7 +786,7 @@ The first few loops
 	                for (int v = 1; v < parameters.getServices().get(s).getFunctions().size(); v++) {
 	                    for (int n = 0; n < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++) {
 
-make sure that all following operations are valid and executed for all services :math:`s`, that are element of a set of service chains :math:`S`, for all demands :math:`\lambda`, that are element of a set of traffic demands :math:`\Lambda_s` for a service :math:`s`, for all paths :math:`p`, that are element of a set of admissible paths :math:`P_s` for a service :math:`s`, for all functions :math:`v`, that are element of an ordered set of VNF functions :math:`V_s`  for a service :math:`s`, starting with a function :math:`v_1`, excluding the start function :math:`v_0`,  and for all nodes :math:`n`, that are element of an ordered set of nodes :math:`N_p^s`  that are traversed by a path :math:`p` for a service :math:`s`.
+make sure that all following operations are valid and executed for all services :math:`s`, that are element of a set of service chains :math:`S`, for all demands :math:`\lambda`, that are element of a set of traffic demands :math:`\Lambda_s` for a service :math:`s`, for all paths :math:`p`, that are element of a set of admissible paths :math:`P_s` for a service :math:`s`, for all functions :math:`v`, that are element of an ordered set of functions :math:`V_s`  for a service :math:`s`, starting with a function :math:`v_1`, excluding the start function :math:`v_0`,  and for all nodes :math:`n`, that are element of an ordered set of nodes :math:`N_p^s`  that are traversed by a path :math:`p` for a service :math:`s`.
 
             Following up
 
@@ -888,7 +888,7 @@ setVariablesFromInitialPlacementAsConstraints
 
 The second specific constraint *setVariablesFromInitialPlacementAsConstrains* fixes the initial placement of functions in the network. Correlating to the equation, this constraint is implemented as follows:
 
-The code ensures that for all servers :math:`x`, that are element of a set of servers :math:`X`, for all services :math:`s`, that are element of a set of services :math:`S` and for all functions :math:`v`, that are element of a set of VNF functions :math:`V_s`  for a service s, a variable :math:`f_x^(v,s)`  will be assigned as equal to 1, if the initial output :math:`F_x^(v,s)`  was equal to 1.
+The code ensures that for all servers :math:`x`, that are element of a set of servers :math:`X`, for all services :math:`s`, that are element of a set of services :math:`S` and for all functions :math:`v`, that are element of a set of functions :math:`V_s`  for a service s, a variable :math:`f_x^(v,s)`  will be assigned as equal to 1, if the initial output :math:`F_x^(v,s)`  was equal to 1.
 
 Should that not be the case, :math:`f_x^(v,s)`  will behave like a binary variable, taking either 1 or 0 as a value.
 

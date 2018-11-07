@@ -260,8 +260,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'NFV-documentation.tex', 'Documentation',
-     'NFV Framework and Optimizer', 'manual'),
+    (master_doc, 'documentation.tex', 'Documentation',
+     'Network and Service management Planning framework for Java', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -302,7 +302,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'nfvdocumentation', 'NFV Documentation',
+    (master_doc, 'documentation', 'Network and Service management Planning framework for Java',
      [author], 1)
 ]
 
@@ -317,8 +317,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'NFVDocumentation', 'NFV Documentation',
-     author, 'NFVDocumentation', 'NFV Optimizer','Computing'),
+    (master_doc, 'Documentation', 'Network and Service management Planning framework for Java',
+     author, 'Documentation', 'Network and Service management Planning framework for Java','Computing'),
 ]
 
 # Documents to append as an appendix to all manuals.

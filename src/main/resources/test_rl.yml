@@ -13,7 +13,7 @@ maxDemandsDefault: 1
 minBwDefault: 300
 maxBwDefault: 300
 
-# NFV parameters
+# Service parameters
 serviceChains:
   - id: 0
     chain: [0, 1]

@@ -2,7 +2,7 @@
 Installation
 ************
 
-This is the installation guide for the NFV-optimization tool.
+This is the installation guide for the nsp4j-optimizer tool.
 
 Prerequisites
 =============
@@ -12,8 +12,8 @@ Prerequisites
 - Git
 - Gurobi solver 8.0.0 or higher
 
-Installing and running the NFV Optimization tool
-================================================
+Installing and running the nsp4j-optimizer tool
+===============================================
 
 1. Install Gurobi in your local maven repository. Change `` $PATH_TO_GUROBI_LIB$`` for the specific path where Gurobi is installed:
 
@@ -25,13 +25,13 @@ Installing and running the NFV Optimization tool
 
 .. code-block:: bash
 
-	git clone https://FranCarpio@bitbucket.org/FranCarpio/nfv-optimization.git
+	git clone https://carpio@bitbucket.org/carpio/nsp4j-optimizer.git
 
 3. Package the sources:
 
 .. code-block:: bash
 
-	cd /nfv-optimization
+	cd /nsp4j-optimizer
 	mvn package
 
 4. Run the created jar:
@@ -39,7 +39,7 @@ Installing and running the NFV Optimization tool
 .. code-block:: bash
 
 	cd /target
-	java -jar nfv-optimization-$VERSION$-jar-with-dependencies.jar
+	java -jar nsp4j-optimizer-$VERSION$-jar-with-dependencies.jar
 
 This will launch the application on your local machine trough the port 8080. Open your browser and access to ``localhost:8080``, you will access to the GUI:
 
