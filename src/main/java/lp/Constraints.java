@@ -57,7 +57,7 @@ public class Constraints {
                         double traffic = 0;
                         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                             traffic += pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-                                    * pm.getServices().get(s).getFunctions().get(v).getLoad();
+                                    * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
                         expr.addTerm(traffic / (int) pm.getLinks().get(l).getAttribute("capacity"), variables.sSVP[s][v][p]);
                     }
             model.getGrbModel().addConstr(expr, GRB.EQUAL, variables.uL[l], "linkUtilization");
@@ -72,11 +72,12 @@ public class Constraints {
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
                         expr.addTerm((pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-                                        * pm.getServices().get(s).getFunctions().get(v).getLoad())
+                                        * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load"))
                                         / pm.getServers().get(x).getCapacity()
                                 , variables.pXSVD[x][s][v][d]);
                     }
-                    expr.addTerm(pm.getServices().get(s).getFunctions().get(v).getLoad() * pm.getAux()[0] / pm.getServers().get(x).getCapacity()
+                    expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
+                                    * (int) pm.getAux("overhead") / pm.getServers().get(x).getCapacity()
                             , variables.pXSV[x][s][v]);
                 }
             model.getGrbModel().addConstr(expr, GRB.EQUAL, variables.uX[x], "serverUtilization");
@@ -109,7 +110,7 @@ public class Constraints {
                         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
                                 double load = pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-                                        * pm.getServices().get(s).getFunctions().get(v).getLoad()
+                                        * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
                                         / pm.getServers().get(x).getCapacity();
                                 processingDelayExpr.addTerm(load * pm.getServers().get(x).getProcessingDelay()
                                         , variables.dSPX[s][p][x]);
@@ -137,11 +138,11 @@ public class Constraints {
                             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
                                     double load = pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-                                            * pm.getServices().get(s).getFunctions().get(v).getLoad()
+                                            * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
                                             / pm.getServers().get(x).getCapacity();
                                     double initialFunctionPlacement = 0;
                                     if (initialPlacement.getpXSV()[x][s][v]) initialFunctionPlacement = 1;
-                                    double delay = load * pm.getServices().get(s).getFunctions().get(v).getDelay();
+                                    double delay = load * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("delay");
                                     migrationDelayExpr.addTerm(delay, variables.dSPX[s][p][x]);
                                     migrationDelayExpr.addTerm(-delay * initialFunctionPlacement, variables.dSPX[s][p][x]);
                                 }
@@ -201,7 +202,7 @@ public class Constraints {
                 GRBLinExpr expr = new GRBLinExpr();
                 for (int x = 0; x < pm.getServers().size(); x++)
                     expr.addTerm(1.0, variables.pXSV[x][s][v]);
-                if (pm.getServices().get(s).getFunctions().get(v).isReplicable()) {
+                if ((boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable")) {
                     GRBLinExpr expr2 = new GRBLinExpr();
                     for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                         expr2.addTerm(1.0, variables.rSP[s][p]);

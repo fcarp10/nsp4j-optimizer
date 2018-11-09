@@ -22,7 +22,6 @@
 }
 
 .button {
-    margin: 10px 0 0px 0;
     border: none;
     color: white;
     padding: 5px;
@@ -36,20 +35,24 @@
     border-radius: 5px;
 }
 
-.button-run{
+.button-red{
     background-color: #BC213F;
 }
-.button-run:active {
+.button-red:active {
     background-color: black;
 }
-
-.button-generate{
+.button-gray{
     background-color: gray;
-
 }
-.button-generate:active {
+.button-gray:active {
     background-color: black;
 }
+.button-margin{
+    margin-top: 10px;
+
+}
+
+
 
 .navbar-custom {
     background-color: #BC213F;

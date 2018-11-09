@@ -3,8 +3,8 @@ package manager;
 import gui.WebClient;
 import gui.WebServer;
 import gui.elements.Scenario;
-import gurobi.GRB;
 import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
 import results.ResultFileWriter;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
@@ -34,7 +34,7 @@ public class Manager {
 
     private static String getResourcePath(String fileName) {
         try {
-            String path = FilenameUtils.getPath(Manager.class.getClassLoader().getResource(fileName + ".yml").getFile());
+            String path = FilenameUtils.getPath(Manager.class.getClassLoader().getResource("scenarios/" + fileName + ".yml").getFile());
             if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
                 path = "/" + path;
             return path;
@@ -48,7 +48,9 @@ public class Manager {
         try {
             parameters = ConfigFiles.readParameters(pathFile, fileName + ".yml");
             parameters.initialize(pathFile);
+            checkTopologyScale();
             new WebServer().initialize(parameters);
+            printLog(INFO, "topology loaded");
             return true;
         } catch (Exception e) {
             printLog(ERROR, "reading the input parameters file");
@@ -56,32 +58,52 @@ public class Manager {
         }
     }
 
-    public static void start(Scenario scenario) {
-        String path = getResourcePath(scenario.getInputFileName());
-        if (path != null & readParameters(path, scenario.getInputFileName()))
-            try {
-                ResultFileWriter resultFileWriter = initializeResultFiles();
-                switch (scenario.getModel()) {
-                    case ALL_OPT_MODELS_STRING:
-                        initialPlacement = runLP(ALL_OPT_MODELS[0], scenario, resultFileWriter, null);
-                        for (int i = 1; i < ALL_OPT_MODELS.length; i++)
-                            runLP(ALL_OPT_MODELS[i], scenario, resultFileWriter, initialPlacement);
-                        break;
-                    case MIGRATION_REPLICATION_RL_MODEL:
-                        initialPlacement = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
-                        Output output = runLP(MIGRATION_REPLICATION_MODEL, scenario, resultFileWriter, initialPlacement);
-                        runRL(MIGRATION_REPLICATION_RL_MODEL, output.getCost(), resultFileWriter, initialPlacement);
-                        break;
-                    case INITIAL_PLACEMENT_MODEL:
-                        initialPlacement = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
-                        break;
-                    default:
-                        runLP(scenario.getModel(), scenario, resultFileWriter, initialPlacement);
-                        break;
-                }
-            } catch (Exception e) {
-                printLog(ERROR, "something went wrong with the model");
+    private static void checkTopologyScale() {
+        double scalingX = (double) parameters.getAux("scaling_x");
+        double scalingY = (double) parameters.getAux("scaling_y");
+        if (scalingX != 1.0 || scalingY != 1.0) {
+            for (Node node : parameters.getNodes()) {
+                int value = (int) Math.round((int) node.getAttribute("y") * scalingY);
+                node.setAttribute("y", value);
             }
+            for (Node node : parameters.getNodes()) {
+                int value = (int) Math.round((int) node.getAttribute("x") * scalingX);
+                node.setAttribute("x", value);
+            }
+        }
+    }
+
+    public static void loadTopology(String fileName) {
+        String path = getResourcePath(fileName);
+        if (path != null)
+            readParameters(path, fileName);
+    }
+
+    public static void start(Scenario scenario) {
+
+        try {
+            ResultFileWriter resultFileWriter = initializeResultFiles();
+            switch (scenario.getModel()) {
+                case ALL_OPT_MODELS_STRING:
+                    initialPlacement = runLP(ALL_OPT_MODELS[0], scenario, resultFileWriter, null);
+                    for (int i = 1; i < ALL_OPT_MODELS.length; i++)
+                        runLP(ALL_OPT_MODELS[i], scenario, resultFileWriter, initialPlacement);
+                    break;
+                case MIGRATION_REPLICATION_RL_MODEL:
+                    initialPlacement = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
+                    Output output = runLP(MIGRATION_REPLICATION_MODEL, scenario, resultFileWriter, initialPlacement);
+                    runRL(MIGRATION_REPLICATION_RL_MODEL, output.getCost(), resultFileWriter, initialPlacement);
+                    break;
+                case INITIAL_PLACEMENT_MODEL:
+                    initialPlacement = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
+                    break;
+                default:
+                    runLP(scenario.getModel(), scenario, resultFileWriter, initialPlacement);
+                    break;
+            }
+        } catch (Exception e) {
+            printLog(ERROR, "something went wrong with the model");
+        }
     }
 
     public static void generatePaths(Scenario scenario) {

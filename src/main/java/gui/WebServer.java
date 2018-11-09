@@ -86,6 +86,12 @@ public class WebServer {
             return 201;
         });
 
+        post("/load", (request, response) -> {
+            Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
+            Manager.loadTopology(scenario.getInputFileName());
+            return INFO + "loading the topology...";
+        });
+
         post("/run", (request, response) -> {
             Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
             Manager.start(scenario);

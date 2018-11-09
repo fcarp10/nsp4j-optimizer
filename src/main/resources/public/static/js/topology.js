@@ -1,7 +1,8 @@
 var refreshPeriod = 1000;
 var cy;
-var topologyIntervalId = setInterval(updateGraph, refreshPeriod);
-initializeGraph();
+var servers;
+var links;
+setInterval(updateGraph, refreshPeriod);
 
 function initializeGraph() {
     cy = cytoscape({
@@ -45,65 +46,63 @@ function initializeGraph() {
                 'control-point-step-size': 10
             })
     });
-}
 
-function updateGraph() {
-    cy.elements().remove();
-    var nodes = getNodes();
-    var servers = getServers();
-    var links = getLinks();
-    for (var n = 0; n < nodes.length; n++) {
-        cy.add({
-                data: {
-                    id: nodes[n]['data']['id'],
-                    faveColor: nodes[n]['data']['faveColor'],
-                    label: nodes[n]['data']['label'],
-                    faveShape: nodes[n]['data']['faveShape'],
-                    width: nodes[n]['data']['width'],
-                    height: nodes[n]['data']['height']
-                },
-                position: {
-                    x: nodes[n]['position']['x'],
-                    y: nodes[n]['position']['y']
-                },
-                classes: 'multiline-manual'
-            }
-        );
-    }
-    for (var x = 0; x < servers.length; x++) {
-        cy.add({
-                data: {
-                    id: servers[x]['data']['id'],
-                    faveColor: servers[x]['data']['faveColor'],
-                    label: servers[x]['data']['label'],
-                    faveShape: servers[x]['data']['faveShape'],
-                    width: servers[x]['data']['width'],
-                    height: servers[x]['data']['height']
-                },
-                position: {
-                    x: servers[x]['position']['x'],
-                    y: servers[x]['position']['y']
-                },
-                classes: 'multiline-manual'
-            }
-        );
-    }
-    for (var l = 0; l < links.length; l++) {
-        cy.add({
-                data: {
-                    id: links[l]['data']['id'],
-                    weight: 1,
-                    source: links[l]['data']['source'],
-                    target: links[l]['data']['target'],
-                    label: links[l]['data']['label'],
-                    faveColor: links[l]['data']['faveColor']
-                }
-            }
-        );
-    }
+    servers = getServers();
+    links = getLinks();
+    cy.add(getNodes());
+    cy.add(servers);
+    cy.add(links);
     cy.layout({
         name: 'preset'
     }).run();
+
+}
+
+function areEqual(obj1, obj2) {
+    if(obj1['data']['faveColor'] !== obj2['data']['faveColor']){
+        return false;
+    }
+    if(obj1['data']['label'] !== obj2['data']['label']){
+        return false;
+    }
+    return true;
+}
+
+function updateGraph() {
+    var updatedServers = getServers();
+    var updatedLinks = getLinks();
+    var isChange = false;
+    for (var x = 0; x < updatedServers.length; x++){
+        if(!areEqual(updatedServers[x], servers[x])){
+            servers = updatedServers;
+            isChange = true;
+            break;
+        }
+    }
+    for (var l = 0; l < links.length; l++) {
+        if(!areEqual(updatedLinks[l], links[l])){
+             links = updatedLinks;
+             isChange = true;
+             break;
+        }
+    }
+    if(isChange){
+        cy.batch(function(){
+        for (var x = 0; x < servers.length; x++){
+            cy.getElementById(servers[x]['data']['id'])
+              .data("faveColor", servers[x]['data']['faveColor'])
+              .data("label", servers[x]['data']['label'])
+              ;
+          }
+        for (var l = 0; l < links.length; l++) {
+            cy.getElementById(links[l]['data']['id'])
+              .data("faveColor", links[l]['data']['faveColor'])
+              .data("label", links[l]['data']['label'])
+              ;
+        }
+        });
+        cy.layout.run();
+    }
 }
 
 function getNodes() {

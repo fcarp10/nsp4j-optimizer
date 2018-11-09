@@ -15,9 +15,37 @@ function getMessage() {
         });
         if (message != null) {
             document.getElementById("message").innerText = message;
+            if(message == "Info: topology loaded")
+                document.getElementById("run_button").removeAttribute("disabled");
         } else {
             document.getElementById("message").innerText = "Info: framework not running";
+            document.getElementById("run_button").setAttribute("disabled", "true");
         }
+    }
+    catch (e) {
+        return 0;
+    }
+}
+
+function loadTopology(){
+var scenario = generateScenario();
+    try {
+        var message = null;
+        $.ajax
+        ({
+            data: scenario,
+            url: "load",
+            type: "POST",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+        if (message != null) {
+            document.getElementById("message").innerText = message;
+            initializeGraph();
+        }
+        return message;
     }
     catch (e) {
         return 0;

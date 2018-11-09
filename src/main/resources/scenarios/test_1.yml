@@ -1,0 +1,58 @@
+# Optimization parameters
+gap: 0
+weights: [0, 1.0, 0]
+
+# Network default parameters
+serverCapacityDefault: 1000
+serversNodeDefault: 1
+serverDelayDefault: 10
+linkCapacityDefault: 1000
+minPathsDefault: 3
+maxPathsDefault: 3
+minDemandsDefault: 1
+maxDemandsDefault: 1
+minBwDefault: 100
+maxBwDefault: 100
+
+# service parameters
+serviceChains:
+- id: 0
+  chain: [0, 1, 2]
+  attributes: {
+      "minPaths": 1,
+      "maxPaths": 2
+  }
+
+functions:
+- type: 0
+  attributes: {
+      "replicable": false,
+      "load": 1.0,
+      "delay": 10
+  }
+- type: 1
+  attributes: {
+      "replicable": true,
+      "load": 1.0,
+      "delay": 10
+  }
+- type: 2
+  attributes: {
+      "replicable": false,
+      "load": 1.0,
+      "delay": 10
+  }
+trafficFlows:
+- src: "n1"
+  dst: "n9"
+  serviceId: 0
+  minDemands: 1
+  maxDemands: 1
+  minBw: 10
+  maxBw: 10
+
+# Auxiliary values
+aux: {
+    "overhead": 100,
+    "iterations": 1000
+}

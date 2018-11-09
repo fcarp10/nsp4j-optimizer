@@ -17,25 +17,30 @@ maxBwDefault: 100
 # Service parameters
 serviceChains:
   - id: 0
-    chain: [0, 1]
-    minPaths: 3
-    maxPaths: 3
+    chain: [0, 1, 2]
+    attributes: {
+        "minPaths": 1,
+        "maxPaths": 2
+    }
 functions:
   - type: 0
-    replicable: false
-    load: 1.0
-    maxShareable: 5
-    delay: 100
+    attributes: {
+        "replicable": false,
+        "load": 1.0,
+        "delay": 10
+    }
   - type: 1
-    replicable: true
-    load: 1.0
-    maxShareable: 5
-    delay: 200
+    attributes: {
+        "replicable": false,
+        "load": 1.0,
+        "delay": 10
+    }
   - type: 2
-    replicable: false
-    load: 1.0
-    maxShareable: 5
-    delay: 100
+    attributes: {
+        "replicable": false,
+        "load": 1.0,
+        "delay": 10
+    }
 trafficFlows:
   - src: "n1"
     dst: "n9"
@@ -44,13 +49,11 @@ trafficFlows:
     maxDemands: 1
     minBw: 100
     maxBw: 100
-#  - src: "n2"
-#    dst: "n9"
-#    serviceId: 0
-#    minDemands: 3
-#    maxDemands: 3
-#    minBw: 100
-#    maxBw: 100
 
 # Auxiliary values (overhead, training iterations)
-aux: [100, 1000]
+aux: {
+    "overhead": 100,
+    "iterations": 1000,
+    "scaling_x": 0.5,
+    "scaling_y": 0.4
+}

@@ -3,8 +3,10 @@ package gui.elements;
 
 public class NodeJson {
 
-    protected Position position;
-    protected Data data;
+    Position position;
+    Data data;
+    private String classes = "multiline-manual";
+
 
     NodeJson() {
     }
@@ -28,6 +30,14 @@ public class NodeJson {
 
     public void setData(Data data) {
         this.data = data;
+    }
+
+    public String getClasses() {
+        return classes;
+    }
+
+    public void setClasses(String classes) {
+        this.classes = classes;
     }
 
     public class Position {

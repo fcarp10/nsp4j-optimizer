@@ -3,7 +3,7 @@ var linkUtilizationGraph;
 var serverUtilizationGraph;
 var serviceDelayGraph;
 
-var resultsIntervalId = setInterval(getResults, refreshPeriod);
+setInterval(getResults, refreshPeriod);
 
 var initialData= [
     { year: '0.1', value: 0 },

@@ -14,6 +14,6 @@ public class Launcher {
         init();
         new Auxiliary();
         new WebServer();
-        WebClient.postMessage("Info: framework is ready");
+        WebClient.postMessage("Info: please, load the topology");
     }
 }

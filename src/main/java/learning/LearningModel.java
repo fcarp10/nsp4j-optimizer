@@ -68,7 +68,7 @@ public class LearningModel {
     public double run(Output initialPlacement, double minCost) {
         float[] input = generateInput(initialPlacement);
         int[] environment = generateEnvironment(initialPlacement);
-        for (int i = 0; i < pm.getAux()[1]; i++)
+        for (int i = 0; i < (int) pm.getAux("interations"); i++)
             learn(input, environment, minCost, i);
         return reason(input, environment, minCost, 0);
     }
@@ -260,8 +260,9 @@ public class LearningModel {
                         }
                     }
                     if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1)
-                        ux[x] += ((demands * pm.getServices().get(s).getFunctions().get(v).getLoad())
-                                + (pm.getServices().get(s).getFunctions().get(v).getLoad() * pm.getAux()[0]))
+                        ux[x] += ((demands * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load"))
+                                + ((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
+                                * (int) pm.getAux("overhead")))
                                 / pm.getServers().get(x).getCapacity();
                 }
         }
