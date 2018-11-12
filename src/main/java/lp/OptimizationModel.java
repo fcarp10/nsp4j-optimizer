@@ -4,16 +4,20 @@ import gurobi.*;
 import manager.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import results.Auxiliary;
+
+import static results.Auxiliary.ERROR;
+import static results.Auxiliary.INFO;
+import static results.Auxiliary.printLog;
 
 public class OptimizationModel {
 
     private static final Logger log = LoggerFactory.getLogger(OptimizationModel.class);
-
     private GRBModel grbModel;
     private GRBEnv grbEnv;
     private Variables variables;
     private Parameters parameters;
-    private double cost;
+    private double objVal;
 
     public OptimizationModel(Parameters parameters) {
         this.parameters = parameters;
@@ -21,6 +25,8 @@ public class OptimizationModel {
             grbEnv = new GRBEnv();
             grbEnv.set(GRB.IntParam.LogToConsole, 0);
             grbModel = new GRBModel(grbEnv);
+            Callback cb = new Callback();
+            grbModel.setCallback(cb);
             grbModel.getEnv().set(GRB.DoubleParam.MIPGap, parameters.getGap());
         } catch (GRBException e) {
             e.printStackTrace();
@@ -80,16 +86,16 @@ public class OptimizationModel {
     public double run() throws GRBException {
         grbModel.optimize();
         if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
-            cost = grbModel.get(GRB.DoubleAttr.ObjVal);
-            log.error("optimization finished");
-            return cost;
+            objVal = grbModel.get(GRB.DoubleAttr.ObjVal);
+            printLog(log, INFO, "opt. finished [objVal --> " + objVal + "]");
+            return objVal;
         } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
 //            grbModel.computeIIS();
-            log.error("model is not feasible");
+            printLog(log, ERROR, "model is infeasible");
         } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INF_OR_UNBD)
-            log.error("solution is infinite or unbounded");
+            printLog(log, ERROR, "solution is inf. or unbd.");
         else
-            log.error("no solution, status: " + grbModel.get(GRB.IntAttr.Status));
+            printLog(log, ERROR, "no solution [status --> " + grbModel.get(GRB.IntAttr.Status) + "]");
         return -1;
     }
 
@@ -105,7 +111,36 @@ public class OptimizationModel {
         this.variables = variables;
     }
 
-    public double getCost() {
-        return cost;
+    public double getObjVal() {
+        return objVal;
+    }
+
+    private class Callback extends GRBCallback {
+
+        private int status;
+        private double gap;
+
+        Callback() {
+        }
+
+        @Override
+        protected void callback() {
+            try {
+                if (where == GRB.CB_PRESOLVE && status != GRB.CB_PRESOLVE) {
+                    status = GRB.CB_PRESOLVE;
+                    printLog(log, INFO, "pre-resolving model");
+                } else if (where == GRB.CB_MIPNODE) {
+                    double objbst = getDoubleInfo(GRB.CB_MIPNODE_OBJBST);
+                    double objbnd = getDoubleInfo(GRB.CB_MIPNODE_OBJBND);
+                    double newGap = ((objbst - objbnd) / objbnd) * 100;
+                    if (newGap != gap) {
+                        printLog(log, INFO, "gap [" + Auxiliary.roundDouble(newGap, 2) + "%]");
+                        gap = newGap;
+                    }
+                }
+            } catch (GRBException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

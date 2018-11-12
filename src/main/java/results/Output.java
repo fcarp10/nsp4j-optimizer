@@ -35,7 +35,7 @@ public class Output {
     public Output(Parameters pm, Scenario scenario, OptimizationModel optimizationModel) {
         this.pm = pm;
         this.scenario = scenario;
-        this.cost = optimizationModel.getCost();
+        this.cost = optimizationModel.getObjVal();
         try {
             rSP = new boolean[pm.getServices().size()][pm.getPathsPerTrafficFlowAux()];
             for (int s = 0; s < pm.getServices().size(); s++)

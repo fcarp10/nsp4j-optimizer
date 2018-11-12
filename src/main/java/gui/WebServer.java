@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static results.Auxiliary.INFO;
 import static spark.Spark.get;
@@ -52,6 +54,8 @@ public class WebServer {
     }
 
     private static void interfaces() {
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         post("/server", (request, response) -> {
             response.type("application/json");
@@ -89,19 +93,21 @@ public class WebServer {
         post("/load", (request, response) -> {
             Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
             Manager.loadTopology(scenario.getInputFileName());
-            return INFO + "loading the topology...";
+            return 201;
         });
 
         post("/run", (request, response) -> {
             Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-            Manager.start(scenario);
-            return INFO + "running the model...";
+            Runnable runnable = () -> Manager.start(scenario);
+            executorService.submit(runnable);
+            return 201;
         });
 
         post("/paths", (request, response) -> {
             Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-            Manager.generatePaths(scenario);
-            return INFO + "generating paths...";
+            Runnable runnable = () -> Manager.generatePaths(scenario);
+            executorService.submit(runnable);
+            return 201;
         });
 
         get("/favicon.ico", (request, response) -> "");

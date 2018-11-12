@@ -7,6 +7,7 @@ aux: {
     "minPathsDefault": 1,
     "maxPathsDefault": 5,
     "iterations": 1000,
+    "offset_results": 0,
     "scaling_x": 0.5,
     "scaling_y": 0.4
 }
@@ -23,25 +24,25 @@ functions:
 - type: 0
   attributes: {
       "replicable": false,
-      "load": 0.5,
+      "load": 1.0,
       "delay": 10
   }
 - type: 1
   attributes: {
       "replicable": true,
-      "load": 0.5,
+      "load": 1.0,
       "delay": 10
   }
 - type: 2
   attributes: {
       "replicable": false,
-      "load": 0.5,
+      "load": 1.0,
       "delay": 10
   }
 # traffic flow definitions
 trafficFlows:
 - serviceId: 0
   minDemands: 1
-  maxDemands: 1
+  maxDemands: 5
   minBw: 1
-  maxBw: 5
+  maxBw: 20

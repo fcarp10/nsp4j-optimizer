@@ -13,6 +13,7 @@ public class Results {
     // Scenario
     private transient Parameters pm;
     private transient Scenario scenario;
+    private transient int offset;
     // Elementary variables
     private transient List<String> rSP;
     private transient List<String> rSPD;
@@ -42,6 +43,7 @@ public class Results {
     Results(Parameters pm, Scenario scenario) {
         this.pm = pm;
         this.scenario = scenario;
+        this.offset = (int) pm.getAux("offset_results");
         luSummary = new double[4];
         xuSummary = new double[4];
         fuSummary = new double[4];
@@ -60,7 +62,7 @@ public class Results {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 if (rSPinput[s][p])
-                    rSP.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): ["
+                    rSP.add("(" + (s + this.offset) + "," + (p + this.offset) + "): ["
                             + pm.getServices().get(s).getId() + "]"
                             + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath());
     }
@@ -70,7 +72,7 @@ public class Results {
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                     if (rSPDinput[s][p][d])
-                        rSPD.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "," + (d + Auxiliary.OFFSET) + "): ["
+                        rSPD.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
                                 + pm.getServices().get(s).getId() + "]"
                                 + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath() + "["
                                 + pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d) + "]");
@@ -81,7 +83,7 @@ public class Results {
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int x = 0; x < pm.getServers().size(); x++)
                     if (pXSVinput[x][s][v])
-                        pXSV.add("(" + (x + Auxiliary.OFFSET) + "," + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "): ["
+                        pXSV.add("(" + (x + this.offset) + "," + (s + this.offset) + "," + (v + this.offset) + "): ["
                                 + pm.getServers().get(x).getId() + "]["
                                 + pm.getServices().get(s).getId() + "]["
                                 + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
@@ -93,7 +95,7 @@ public class Results {
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
                         if (pXSVDinput[x][s][v][d])
-                            pXSVD.add("(" + (x + Auxiliary.OFFSET) + "," + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "," + (d + Auxiliary.OFFSET) + "): ["
+                            pXSVD.add("(" + (x + this.offset) + "," + (s + this.offset) + "," + (v + this.offset) + "," + (d + this.offset) + "): ["
                                     + pm.getServers().get(x).getId() + "]["
                                     + pm.getServices().get(s).getId() + "]["
                                     + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
@@ -102,14 +104,14 @@ public class Results {
 
     void setuX(List<Double> uXinput) {
         for (int x = 0; x < pm.getServers().size(); x++)
-            uX.add("(" + (x + Auxiliary.OFFSET) + "): ["
+            uX.add("(" + (x + this.offset) + "): ["
                     + pm.getServers().get(x).getId() + "]["
                     + uXinput.get(x) + "]");
     }
 
     void setuL(List<Double> uLinput) {
         for (int l = 0; l < pm.getLinks().size(); l++)
-            uL.add("(" + (l + Auxiliary.OFFSET) + "): ["
+            uL.add("(" + (l + this.offset) + "): ["
                     + pm.getLinks().get(l).getId() + "]["
                     + uLinput.get(l) + "]");
     }
@@ -119,7 +121,7 @@ public class Results {
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                 for (int p = 0; p < pm.getPaths().size(); p++)
                     if (sSVPinput[s][v][p])
-                        sSVP.add("(" + (s + Auxiliary.OFFSET) + "," + (v + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): "
+                        sSVP.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
                                 + pm.getPaths().get(p).getNodePath());
     }
 
@@ -127,7 +129,7 @@ public class Results {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 if (dSPinput[s][p] > 0)
-                    dSP.add("(" + (s + Auxiliary.OFFSET) + "," + (p + Auxiliary.OFFSET) + "): "
+                    dSP.add("(" + (s + this.offset) + "," + (p + this.offset) + "): "
                             + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath()
                             + "[" + Auxiliary.roundDouble(dSPinput[s][p], 2) + "]");
     }

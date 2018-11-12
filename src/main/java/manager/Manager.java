@@ -39,21 +39,22 @@ public class Manager {
                 path = "/" + path;
             return path;
         } catch (Exception e) {
-            printLog(ERROR, "input file not found");
+            printLog(log, ERROR, "input file not found");
             return null;
         }
     }
 
     private static boolean readParameters(String pathFile, String fileName) {
         try {
+            printLog(log, INFO, "loading topology");
             parameters = ConfigFiles.readParameters(pathFile, fileName + ".yml");
             parameters.initialize(pathFile);
             checkTopologyScale();
             new WebServer().initialize(parameters);
-            printLog(INFO, "topology loaded");
+            printLog(log, INFO, "topology loaded");
             return true;
         } catch (Exception e) {
-            printLog(ERROR, "reading the input parameters file");
+            printLog(log, ERROR, "reading the input parameters file");
             return false;
         }
     }
@@ -82,7 +83,7 @@ public class Manager {
     public static void start(Scenario scenario) {
         try {
             ResultFileWriter resultFileWriter = initializeResultFiles();
-            printLog(INFO, "running the model...");
+            printLog(log, INFO, "initializing model");
             switch (scenario.getModel()) {
                 case ALL_OPT_MODELS_STRING:
                     initialPlacement = runLP(ALL_OPT_MODELS[0], scenario, resultFileWriter, null);
@@ -102,7 +103,7 @@ public class Manager {
                     break;
             }
         } catch (Exception e) {
-            printLog(ERROR, "something went wrong with the model");
+            printLog(log, ERROR, "something went wrong with the model");
         }
     }
 
@@ -111,37 +112,29 @@ public class Manager {
         if (path != null)
             try {
                 Graph graph = GraphManager.importTopology(path, scenario.getInputFileName());
+                printLog(log, INFO, "generating paths");
                 KShortestPathGenerator kShortestPathGenerator = new KShortestPathGenerator(graph, 10, 5, path, scenario.getInputFileName());
                 kShortestPathGenerator.run();
-                printLog(INFO, "paths generated");
+                printLog(log, INFO, "paths generated");
             } catch (Exception e) {
-                printLog(ERROR, "reading the topology file");
+                printLog(log, ERROR, "reading the topology file");
             }
-    }
-
-    private static void printLog(String status, String message) {
-        switch (status) {
-            case ERROR:
-                log.error(message);
-                break;
-            case INFO:
-                log.info(message);
-                break;
-        }
-        WebClient.postMessage(status + message);
     }
 
     private static Output runLP(String model, Scenario scenario, ResultFileWriter resultFileWriter, Output initialPlacement) throws GRBException {
         GRBLinExpr expr;
         OptimizationModel optimizationModel = new OptimizationModel(parameters);
+        printLog(log, INFO, "setting variables");
         Variables variables = new Variables(parameters, optimizationModel.getGrbModel());
         optimizationModel.setVariables(variables);
+        printLog(log, INFO, "setting constraints");
         new Constraints(parameters, optimizationModel, scenario, initialPlacement);
         if (scenario.getModel().equals(ALL_OPT_MODELS) || scenario.getModel().equals(MIGRATION_REPLICATION_RL_MODEL) && model.equals(INITIAL_PLACEMENT_MODEL))
             expr = generateExprForObjectiveFunction(optimizationModel, NUM_OF_SERVERS_OBJ);
         else
             expr = generateExprForObjectiveFunction(optimizationModel, scenario.getObjectiveFunction());
         optimizationModel.setObjectiveFunction(expr, scenario.isMaximization());
+        printLog(log, INFO, "running model");
         double objVal = optimizationModel.run();
         Output output = new Output(parameters, scenario, optimizationModel);
         submitResults(output, model, objVal, resultFileWriter, initialPlacement);
@@ -193,8 +186,6 @@ public class Manager {
             Results results = output.generateResults(objVal, initialPlacement);
             resultFileWriter.createJsonForResults(parameters.getScenario() + "_" + model, results);
             WebClient.updateResultsToWebApp(output, results);
-            printLog(INFO, "solution found");
-        } else
-            printLog(INFO, "no solution found");
+        }
     }
 }

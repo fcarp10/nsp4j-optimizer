@@ -4,8 +4,10 @@ package results;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import gui.WebClient;
 import lp.CostFunctions;
 import org.decimal4j.util.DoubleRounder;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +15,6 @@ import java.util.List;
 
 public class Auxiliary {
 
-    public static final int OFFSET = 0;
     public static CostFunctions costFunctions;
     public static final String NUM_OF_SERVERS_OBJ = "num_of_servers";
     public static final String COSTS_OBJ = "costs";
@@ -74,7 +75,19 @@ public class Auxiliary {
         return roundDouble(min, 2);
     }
 
-    static double roundDouble(double value, int decimals) {
+    public static double roundDouble(double value, int decimals) {
         return DoubleRounder.round(value, decimals);
+    }
+
+    public static void printLog(Logger log, String status, String message) {
+        switch (status) {
+            case ERROR:
+                log.error(message);
+                break;
+            case INFO:
+                log.info(message);
+                break;
+        }
+        WebClient.postMessage(status + message);
     }
 }

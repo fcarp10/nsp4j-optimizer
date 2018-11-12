@@ -135,13 +135,14 @@ public class WebClient {
     }
 
     private static Map<Server, String> generateFunctionsPerServerStringMap(Output output) {
+        int offset = (int) output.getPm().getAux("offset_results");
         Map<Server, String> functionsStringMap = new HashMap<>();
         for (int x = 0; x < output.getPm().getServers().size(); x++) {
             StringBuilder stringBuilder = new StringBuilder();
             for (int s = 0; s < output.getPm().getServices().size(); s++)
                 for (int v = 0; v < output.getPm().getServices().get(s).getFunctions().size(); v++)
                     if (output.getpXSV()[x][s][v])
-                        stringBuilder.append("f(").append(x + Auxiliary.OFFSET).append(",").append(s + Auxiliary.OFFSET).append(",").append(v + Auxiliary.OFFSET).append(")\n");
+                        stringBuilder.append("f(").append(x + offset).append(",").append(s + offset).append(",").append(v + offset).append(")\n");
             functionsStringMap.put(output.getPm().getServers().get(x), stringBuilder.toString());
         }
         return functionsStringMap;

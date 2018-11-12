@@ -42,7 +42,6 @@ var scenario = generateScenario();
             }
         });
         if (message != null) {
-            document.getElementById("message").innerText = message;
             initializeGraph();
         }
         return message;
@@ -66,10 +65,6 @@ var scenario = generateScenario();
                 message = ans;
             }
         });
-        if (message != null) {
-            document.getElementById("message").innerText = message;
-        }
-        return message;
     }
     catch (e) {
         return 0;
