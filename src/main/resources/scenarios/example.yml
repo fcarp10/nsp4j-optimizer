@@ -1,20 +1,16 @@
-# Optimization parameters
+# optimization parameters
 gap: 0
 weights: [0, 1.0, 0]
-
-# Network default parameters
-serverCapacityDefault: 1000
-serversNodeDefault: 1
-serverDelayDefault: 10
-linkCapacityDefault: 1000
-minPathsDefault: 3
-maxPathsDefault: 3
-minDemandsDefault: 1
-maxDemandsDefault: 1
-minBwDefault: 100
-maxBwDefault: 100
-
-# service parameters
+# auxiliary parameters
+aux: {
+    "overhead": 10,
+    "minPathsDefault": 3,
+    "maxPathsDefault": 3,
+    "iterations": 1000,
+    "scaling_x": 1.0,
+    "scaling_y": 1.0
+}
+# service definitions
 serviceChains:
 - id: 0
   chain: [0, 1, 2]
@@ -22,7 +18,7 @@ serviceChains:
       "minPaths": 1,
       "maxPaths": 2
   }
-
+# function definitions
 functions:
 - type: 0
   attributes: {
@@ -42,17 +38,12 @@ functions:
       "load": 1.0,
       "delay": 10
   }
+# traffic flow definitions
 trafficFlows:
-- src: "n1"
+- serviceId: 0
+  src: "n1"
   dst: "n9"
-  serviceId: 0
   minDemands: 1
   maxDemands: 1
-  minBw: 10
-  maxBw: 10
-
-# Auxiliary values
-aux: {
-    "overhead": 100,
-    "iterations": 1000
-}
+  minBw: 100
+  maxBw: 100

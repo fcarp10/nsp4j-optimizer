@@ -81,14 +81,15 @@ public class OptimizationModel {
         grbModel.optimize();
         if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
             cost = grbModel.get(GRB.DoubleAttr.ObjVal);
+            log.error("optimization finished");
             return cost;
         } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
-            grbModel.computeIIS();
-            log.error("Model is not feasible");
+//            grbModel.computeIIS();
+            log.error("model is not feasible");
         } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INF_OR_UNBD)
-            log.error("Solution is infinite or unbounded");
+            log.error("solution is infinite or unbounded");
         else
-            log.error("No solution, status: " + grbModel.get(GRB.IntAttr.Status));
+            log.error("no solution, status: " + grbModel.get(GRB.IntAttr.Status));
         return -1;
     }
 

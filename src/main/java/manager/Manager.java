@@ -80,9 +80,9 @@ public class Manager {
     }
 
     public static void start(Scenario scenario) {
-
         try {
             ResultFileWriter resultFileWriter = initializeResultFiles();
+            printLog(INFO, "running the model...");
             switch (scenario.getModel()) {
                 case ALL_OPT_MODELS_STRING:
                     initialPlacement = runLP(ALL_OPT_MODELS[0], scenario, resultFileWriter, null);

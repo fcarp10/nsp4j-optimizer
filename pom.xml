@@ -24,9 +24,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.FranCarpio</groupId>
+            <groupId>com.github.fcarp10</groupId>
             <artifactId>nsp4j-api</artifactId>
-            <version>0.4.0</version>
+            <version>0.4.2</version>
         </dependency>
         <dependency>
             <groupId>com.gurobi</groupId>

@@ -1,0 +1,35 @@
+DGS004
+test 0 0
+
+an n1 x:100 y:150 num_servers:1 server_capacity:1000 processing_delay:10
+an n2 x:150 y:100
+an n3 x:200 y:100
+an n4 x:175 y:200
+an n5 x:250 y:150
+an n6 x:300 y:150
+an n7 x:350 y:100
+an n8 x:350 y:200
+an n9 x:400 y:150
+
+ae n1n2 n1 > n2 capacity:1000
+ae n1n4 n1 > n4
+ae n2n1 n2 > n1
+ae n2n3 n2 > n3
+ae n3n2 n3 > n2
+ae n3n5 n3 > n5
+ae n3n7 n3 > n7
+ae n4n1 n4 > n1
+ae n4n5 n4 > n5
+ae n5n3 n5 > n3
+ae n5n4 n5 > n4
+ae n5n6 n5 > n6
+ae n6n5 n6 > n5
+ae n6n7 n6 > n7
+ae n6n8 n6 > n8
+ae n7n3 n7 > n3
+ae n7n6 n7 > n6
+ae n7n9 n7 > n9
+ae n8n6 n8 > n6
+ae n8n9 n8 > n9
+ae n9n7 n9 > n7
+ae n9n8 n9 > n8
