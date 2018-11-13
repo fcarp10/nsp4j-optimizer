@@ -1,5 +1,8 @@
 package learning;
 
+import gurobi.GRB;
+import gurobi.GRBException;
+import gurobi.GRBVar;
 import manager.Parameters;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -65,7 +68,7 @@ public class LearningModel {
         deepQ = new DeepQ(conf, 100000, .99f, 1024, 100, 1024, inputLength);
     }
 
-    public double run(Output initialPlacement, double minCost) {
+    public double run(Output initialPlacement, double minCost) throws GRBException {
         float[] input = generateInput(initialPlacement);
         int[] environment = generateEnvironment(initialPlacement);
         for (int i = 0; i < (int) pm.getAux("interations"); i++)
@@ -73,18 +76,20 @@ public class LearningModel {
         return reason(input, environment, minCost, 0);
     }
 
-    private float[] generateInput(Output initialOutput) {
+    private float[] generateInput(Output initialPlacement) throws GRBException {
+        GRBVar[][][] rSPD = (GRBVar[][][]) initialPlacement.getRawVariables().get("rSPD");
+        GRBVar[][][][] pXSVD = (GRBVar[][][][]) initialPlacement.getRawVariables().get("pXSVD");
         List<float[]> inputList = new ArrayList<>();
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-                    if (initialOutput.getRspdVar()[s][p][d]) {
+                    if (rSPD[s][p][d].get(GRB.DoubleAttr.X) == 1.0) {
                         float[] individualInput = new float[2 + pm.getServiceLengthAux()];
                         individualInput[0] = pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d);
                         individualInput[1] = p;
                         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                             for (int x = 0; x < pm.getServers().size(); x++)
-                                if (initialOutput.getPxsvdVar()[x][s][v][d])
+                                if (pXSVD[x][s][v][d].get(GRB.DoubleAttr.X) == 1.0)
                                     individualInput[2 + v] = x;
                         inputList.add(individualInput);
                     }
@@ -96,13 +101,14 @@ public class LearningModel {
         return inputArray;
     }
 
-    private int[] generateEnvironment(Output initialOutput) {
+    private int[] generateEnvironment(Output initialPlacement) throws GRBException {
+        GRBVar[][][] pXSV = (GRBVar[][][]) initialPlacement.getRawVariables().get("pXSV");
         int[] environment = new int[pm.getServers().size() * pm.getTotalNumberOfFunctionsAux()];
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                     int pointer = x * pm.getTotalNumberOfFunctionsAux() + s * pm.getServices().get(s).getFunctions().size() + v;
-                    if (initialOutput.getPxsvVar()[x][s][v])
+                    if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
                         environment[pointer] = 1;
                     else
                         environment[pointer] = 0;

@@ -6,6 +6,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import gui.elements.LinkJson;
 import gui.elements.ServerJson;
+import gurobi.GRB;
+import gurobi.GRBException;
+import gurobi.GRBVar;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
 import results.Output;
@@ -24,7 +27,7 @@ import java.util.*;
 
 public class WebClient {
 
-    public static void updateResultsToWebApp(Output output) {
+    public static void updateResultsToWebApp(Output output) throws GRBException {
         if (output != null) {
             List<ServerJson> serverJsonList = generateServerStrings(output);
             List<LinkJson> linkJsonList = generateLinkStrings(output);
@@ -94,7 +97,7 @@ public class WebClient {
         }
     }
 
-    private static List<ServerJson> generateServerStrings(Output output) {
+    private static List<ServerJson> generateServerStrings(Output output) throws GRBException {
         Map<Server, String> functions = generateFunctionsPerServerStringMap(output);
         List<ServerJson> serverJsonList = new ArrayList<>();
         Iterator entries = output.serverUtilizationMap().entrySet().iterator();
@@ -116,7 +119,7 @@ public class WebClient {
         return serverJsonList;
     }
 
-    private static List<LinkJson> generateLinkStrings(Output output) {
+    private static List<LinkJson> generateLinkStrings(Output output) throws GRBException {
         List<LinkJson> linkJsonList = new ArrayList<>();
         Iterator entries = output.linkUtilizationMap().entrySet().iterator();
         DecimalFormat df = new DecimalFormat("#.##");
@@ -133,14 +136,15 @@ public class WebClient {
         return linkJsonList;
     }
 
-    private static Map<Server, String> generateFunctionsPerServerStringMap(Output output) {
+    private static Map<Server, String> generateFunctionsPerServerStringMap(Output output) throws GRBException {
         int offset = (int) output.getPm().getAux("offset_results");
+        GRBVar[][][] pXSV = (GRBVar[][][]) output.getRawVariables().get("pXSV");
         Map<Server, String> functionsStringMap = new HashMap<>();
         for (int x = 0; x < output.getPm().getServers().size(); x++) {
             StringBuilder stringBuilder = new StringBuilder();
             for (int s = 0; s < output.getPm().getServices().size(); s++)
                 for (int v = 0; v < output.getPm().getServices().get(s).getFunctions().size(); v++)
-                    if (output.getPxsvVar()[x][s][v])
+                    if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
                         stringBuilder.append("f(").append(x + offset).append(",").append(s + offset).append(",").append(v + offset).append(")\n");
             functionsStringMap.put(output.getPm().getServers().get(x), stringBuilder.toString());
         }

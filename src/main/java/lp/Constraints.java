@@ -131,7 +131,8 @@ public class Constraints {
                     model.getGrbModel().addConstr(variables.dSPX[s][p][x], GRB.GREATER_EQUAL, variableProcessingDelayExpr, "variableProcessingDelayExpr");
                 }
                 GRBLinExpr migrationDelayExpr = new GRBLinExpr();
-                if (initialPlacement != null)
+                if (initialPlacement != null) {
+                    GRBVar[][][] pXSV = (GRBVar[][][]) initialPlacement.getRawVariables().get("pXSV");
                     for (int n = 0; n < path.getNodePath().size(); n++)
                         for (int x = 0; x < pm.getServers().size(); x++) {
                             if (!pm.getServers().get(x).getNodeParent().equals(path.getNodePath().get(n))) continue;
@@ -141,13 +142,14 @@ public class Constraints {
                                             * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
                                             / pm.getServers().get(x).getCapacity();
                                     double initialFunctionPlacement = 0;
-                                    if (initialPlacement.getPxsvVar()[x][s][v]) initialFunctionPlacement = 1;
+                                    if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0) initialFunctionPlacement = 1;
                                     double delay = load * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("delay");
                                     migrationDelayExpr.addTerm(delay, variables.dSPX[s][p][x]);
                                     migrationDelayExpr.addTerm(-delay * initialFunctionPlacement, variables.dSPX[s][p][x]);
                                 }
                             }
                         }
+                }
                 GRBLinExpr serviceDelayExpr = new GRBLinExpr();
                 serviceDelayExpr.add(linkDelayExpr);
                 serviceDelayExpr.add(processingDelayExpr);
@@ -291,13 +293,15 @@ public class Constraints {
         }
     }
 
-    private void initialPlacementAsConstraints(Output initialOutput) throws GRBException {
-        if (initialOutput != null)
-            for (int x = 0; x < initialOutput.getPxsvVar().length; x++)
-                for (int s = 0; s < initialOutput.getPxsvVar()[x].length; s++)
-                    for (int v = 0; v < initialOutput.getPxsvVar()[x][s].length; v++)
-                        if (initialOutput.getPxsvVar()[x][s][v])
+    private void initialPlacementAsConstraints(Output initialPlacement) throws GRBException {
+        if (initialPlacement != null) {
+            GRBVar[][][] pXSV = (GRBVar[][][]) initialPlacement.getRawVariables().get("pXSV");
+            for (int x = 0; x < pXSV.length; x++)
+                for (int s = 0; s < pXSV[x].length; s++)
+                    for (int v = 0; v < pXSV[x][s].length; v++)
+                        if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
                             model.getGrbModel().addConstr(variables.pXSV[x][s][v], GRB.EQUAL, 1, "initialPlacementAsConstraints");
+        }
     }
 
     private void synchronizationTraffic() throws GRBException {
