@@ -28,6 +28,7 @@ public class Auxiliary {
     public static final String MIGRATION_REPLICATION_RL_MODEL = "migration_replication_rl";
     public static final String ERROR = "Error: ";
     public static final String INFO = "Info: ";
+    public static final String READY = "ready";
 
     public Auxiliary() {
         TypeReference<CostFunctions> typeReference = new TypeReference<>() {

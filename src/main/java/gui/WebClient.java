@@ -8,9 +8,8 @@ import gui.elements.LinkJson;
 import gui.elements.ServerJson;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
-import results.Auxiliary;
 import results.Output;
-import results.Results;
+
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -25,14 +24,14 @@ import java.util.*;
 
 public class WebClient {
 
-    public static void updateResultsToWebApp(Output output, Results results) {
-        if (results != null) {
+    public static void updateResultsToWebApp(Output output) {
+        if (output != null) {
             List<ServerJson> serverJsonList = generateServerStrings(output);
             List<LinkJson> linkJsonList = generateLinkStrings(output);
             try {
                 postJsonServers(serverJsonList);
                 postJsonLinks(linkJsonList);
-                postResults(results);
+                postResults(output);
             } catch (URISyntaxException | InterruptedException | IOException e) {
                 e.printStackTrace();
             }
@@ -71,10 +70,10 @@ public class WebClient {
         sendRequest(request);
     }
 
-    private static void postResults(Results results) throws URISyntaxException, IOException, InterruptedException {
+    private static void postResults(Output output) throws URISyntaxException, IOException, InterruptedException {
         GsonBuilder gsonBuilder = new GsonBuilder();
         Gson gson = gsonBuilder.excludeFieldsWithModifiers(Modifier.TRANSIENT).create();
-        String stringResults = gson.toJson(results);
+        String stringResults = gson.toJson(output);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(new URI("http://localhost:8080/results"))
                 .POST(HttpRequest.BodyPublishers.ofString(stringResults))
@@ -112,7 +111,7 @@ public class WebClient {
             }
             serverJsonList.add(new ServerJson(server.getId(), server.getNodeParent().getAttribute("x")
                     , server.getNodeParent().getAttribute("y")
-                    , "#" + getColor(utilization), u.toString()));
+                    , getColor(utilization), u.toString()));
         }
         return serverJsonList;
     }
@@ -129,7 +128,7 @@ public class WebClient {
             if (value != 0)
                 label = df.format(value);
             linkJsonList.add(new LinkJson(edge.getId(), edge.getSourceNode().getId()
-                    , edge.getTargetNode().getId(), label, "#" + getColor(value)));
+                    , edge.getTargetNode().getId(), label, getColor(value)));
         }
         return linkJsonList;
     }
@@ -141,7 +140,7 @@ public class WebClient {
             StringBuilder stringBuilder = new StringBuilder();
             for (int s = 0; s < output.getPm().getServices().size(); s++)
                 for (int v = 0; v < output.getPm().getServices().get(s).getFunctions().size(); v++)
-                    if (output.getpXSV()[x][s][v])
+                    if (output.getPxsvVar()[x][s][v])
                         stringBuilder.append("f(").append(x + offset).append(",").append(s + offset).append(",").append(v + offset).append(")\n");
             functionsStringMap.put(output.getPm().getServers().get(x), stringBuilder.toString());
         }
@@ -149,7 +148,7 @@ public class WebClient {
     }
 
     private static String getColor(Double utilization) {
-        String[] colors = {"cccccc", "00cc00", "33cc00", "66cc00", "99cc00", "cccc00", "cc9900", "cc6600", "cc3300", "cc0000"};
+        String[] colors = {"Gray", "LightGray", "MediumSeaGreen", "ForestGreen", "Gold", "GoldenRod", "Orange", "Tomato", "OrangeRed", "Indigo"};
         double[] gaps = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
 
         if (utilization <= gaps[0])

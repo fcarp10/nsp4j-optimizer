@@ -3,6 +3,7 @@ var cy;
 var servers;
 var links;
 setInterval(updateGraph, refreshPeriod);
+initializeGraph();
 
 function initializeGraph() {
     cy = cytoscape({
@@ -22,7 +23,7 @@ function initializeGraph() {
                 'font-size': 6,
                 'text-valign': 'center',
                 'text-halign': 'center',
-                'color': '#000',
+                'color': 'white',
             })
             .selector('.multiline-manual')
             .css({
@@ -34,8 +35,9 @@ function initializeGraph() {
                 'source-text-offset': 15,
                 'font-size': 6,
                 'edge-text-rotation': 'autorotate',
+                'color': 'Gray',
                 'text-background-opacity': 1,
-                'text-background-color': '#f2f2f2',
+                'text-background-color': '#E9ECEF',
                 'text-background-shape': 'roundrectangle',
                 'width': 2,
                 'line-color': 'data(faveColor)',

@@ -24,7 +24,7 @@ functions:
 - type: 0
   attributes: {
       "replicable": false,
-      "load": 1.0,
+      "load": 0.5,
       "delay": 10
   }
 - type: 1
@@ -36,7 +36,7 @@ functions:
 - type: 2
   attributes: {
       "replicable": false,
-      "load": 1.0,
+      "load": 0.5,
       "delay": 10
   }
 # traffic flow definitions

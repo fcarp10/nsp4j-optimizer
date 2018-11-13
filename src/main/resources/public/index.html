@@ -45,7 +45,7 @@
                 <label for="inputFileName">Input files name</label>
                 <input type="text" class="form-control" id="inputFileName" placeholder="file name" value="example">
                 <small class="form-text text-muted">The input files must have the same name.</small>
-                <button type="button" class="button button-gray button-margin" onClick="loadTopology()">Load</button>
+                <button type="button" class="btn btn-dark button button-margin" onClick="loadTopology()">Load</button>
             </div>
             <div class="form-group">
                 <label class="my-1 mr-2" for="objectiveFunction">Objective Function</label>
@@ -78,15 +78,11 @@
                     <option value="migration_replication_rl">learning</option>
                 </select>
             </div>
-            <div class="btn-toolbar" role="toolbar">
-                <div class="btn-group mr-2" role="group" aria-label="First group">
-                    <button type="button" class="button button-gray" onClick="generatePaths()">Paths</button>
-                </div>
-                <div class="btn-group mr-2" role="group" aria-label="Second group">
-                    <button type="button" id="run_button" class="button button-red" onClick="runOpt()" disabled>Run</button>
-                </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-dark button" onClick="generatePaths()">Paths</button>
+                <button type="button" id="run_button" class="btn btn-danger button " onClick="runOpt()" disabled>Run</button>
             </div>
-            <div class="div div-output-emphasis" id="message">Info: loading...</div>
+            <div class="div div-output-emphasis" id="message"></div>
         </div>
         <div class="col-2">
             <h3>Constraints</h3>

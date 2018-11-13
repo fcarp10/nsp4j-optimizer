@@ -12,7 +12,7 @@ import gui.elements.Scenario;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
-import results.Results;
+import results.Output;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static results.Auxiliary.INFO;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
@@ -31,13 +30,15 @@ public class WebServer {
     private static List<NodeJson> nodeList;
     private static Map<String, ServerJson> serverJsonMap;
     private static Map<String, LinkJson> linkJsonMap;
-    private static Results results;
-    private static String message;
+    private static List<String> messages;
+    private static Output output;
+    private static Output initialOutput;
 
     public WebServer() {
         nodeList = new ArrayList<>();
         serverJsonMap = new HashMap<>();
         linkJsonMap = new HashMap<>();
+        messages = new ArrayList<>();
         interfaces();
     }
 
@@ -46,11 +47,11 @@ public class WebServer {
         serverJsonMap = new HashMap<>();
         linkJsonMap = new HashMap<>();
         for (Node node : parameters.getNodes())
-            nodeList.add(new NodeJson(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "#cccccc", node.getId()));
+            nodeList.add(new NodeJson(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "Gray", node.getId()));
         for (Server server : parameters.getServers())
-            serverJsonMap.put(server.getId(), new ServerJson(server.getId(), server.getNodeParent().getAttribute("x"), server.getNodeParent().getAttribute("y"), "#cccccc", server.getId()));
+            serverJsonMap.put(server.getId(), new ServerJson(server.getId(), server.getNodeParent().getAttribute("x"), server.getNodeParent().getAttribute("y"), "Gray", server.getId()));
         for (Edge edge : parameters.getLinks())
-            linkJsonMap.put(edge.getId(), new LinkJson(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "#000"));
+            linkJsonMap.put(edge.getId(), new LinkJson(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), edge.getId(), "Gray"));
     }
 
     private static void interfaces() {
@@ -81,12 +82,12 @@ public class WebServer {
 
         post("/results", (request, response) -> {
             response.type("application/json");
-            results = new Gson().fromJson(request.body(), Results.class);
+            output = new Gson().fromJson(request.body(), Output.class);
             return 201;
         });
 
         post("/message", (request, response) -> {
-            message = request.body();
+            messages.add(request.body());
             return 201;
         });
 
@@ -98,7 +99,7 @@ public class WebServer {
 
         post("/run", (request, response) -> {
             Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-            Runnable runnable = () -> Manager.start(scenario);
+            Runnable runnable = () -> initialOutput = Manager.start(scenario, initialOutput);
             executorService.submit(runnable);
             return 201;
         });
@@ -129,9 +130,13 @@ public class WebServer {
 
         get("/results", (request, response) -> {
             response.type("application/json");
-            return new Gson().toJson(results);
+            return new Gson().toJson(output);
         });
 
-        get("/message", (request, response) -> message);
+        get("/message", (request, response) -> {
+            if (messages.size() > 3)
+                messages.remove(0);
+            return messages;
+        });
     }
 }

@@ -1,14 +1,13 @@
 package lp;
 
+import gui.WebClient;
 import gurobi.*;
 import manager.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import results.Auxiliary;
 
-import static results.Auxiliary.ERROR;
-import static results.Auxiliary.INFO;
-import static results.Auxiliary.printLog;
+import static results.Auxiliary.*;
 
 public class OptimizationModel {
 
@@ -90,7 +89,6 @@ public class OptimizationModel {
             printLog(log, INFO, "opt. finished [objVal --> " + objVal + "]");
             return objVal;
         } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
-//            grbModel.computeIIS();
             printLog(log, ERROR, "model is infeasible");
         } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INF_OR_UNBD)
             printLog(log, ERROR, "solution is inf. or unbd.");

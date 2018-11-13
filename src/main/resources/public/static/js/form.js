@@ -1,5 +1,6 @@
-var refreshPeriod = 1000;
-var messageIntervalId = setInterval(getMessage, refreshPeriod);
+var refreshPeriod = 100;
+setInterval(getMessage, refreshPeriod);
+var messages = [];
 
 function getMessage() {
     try {
@@ -14,7 +15,18 @@ function getMessage() {
             }
         });
         if (message != null) {
-            document.getElementById("message").innerText = message;
+            if( message != messages[messages.length - 1]){
+                messages.push(message);
+                document.getElementById("message").innerText = "";
+                for (var i = 0; i < messages.length; i++){
+                    document.getElementById("message").innerText += messages[i] +"\n";
+                }
+                if(messages.length > 2)
+                   messages.shift();
+            }
+            if(message == "Info: ready"){
+                document.getElementById("run_button").removeAttribute("disabled");
+            }
             if(message == "Info: topology loaded")
                 document.getElementById("run_button").removeAttribute("disabled");
         } else {
@@ -53,6 +65,7 @@ var scenario = generateScenario();
 
 function runOpt(){
 var scenario = generateScenario();
+document.getElementById("run_button").setAttribute("disabled", "true");
     try {
         var message = null;
         $.ajax

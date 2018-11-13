@@ -16,7 +16,6 @@ import lp.Constraints;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import results.Results;
 import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
@@ -30,7 +29,6 @@ public class Manager {
 
     private static final Logger log = LoggerFactory.getLogger(Manager.class);
     private static Parameters parameters;
-    private static Output initialPlacement;
 
     private static String getResourcePath(String fileName) {
         try {
@@ -80,31 +78,33 @@ public class Manager {
             readParameters(path, fileName);
     }
 
-    public static void start(Scenario scenario) {
+    public static Output start(Scenario scenario, Output initialOutput) {
         try {
             ResultFileWriter resultFileWriter = initializeResultFiles();
             printLog(log, INFO, "initializing model");
             switch (scenario.getModel()) {
                 case ALL_OPT_MODELS_STRING:
-                    initialPlacement = runLP(ALL_OPT_MODELS[0], scenario, resultFileWriter, null);
+                    initialOutput = runLP(ALL_OPT_MODELS[0], scenario, resultFileWriter, null);
                     for (int i = 1; i < ALL_OPT_MODELS.length; i++)
-                        runLP(ALL_OPT_MODELS[i], scenario, resultFileWriter, initialPlacement);
+                        runLP(ALL_OPT_MODELS[i], scenario, resultFileWriter, initialOutput);
                     break;
                 case MIGRATION_REPLICATION_RL_MODEL:
-                    initialPlacement = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
-                    Output output = runLP(MIGRATION_REPLICATION_MODEL, scenario, resultFileWriter, initialPlacement);
-                    runRL(MIGRATION_REPLICATION_RL_MODEL, output.getCost(), resultFileWriter, initialPlacement);
+                    initialOutput = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
+                    Output output = runLP(MIGRATION_REPLICATION_MODEL, scenario, resultFileWriter, initialOutput);
+                    runRL(MIGRATION_REPLICATION_RL_MODEL, scenario, output.getObjVal(), resultFileWriter, initialOutput);
                     break;
                 case INITIAL_PLACEMENT_MODEL:
-                    initialPlacement = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
+                    initialOutput = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultFileWriter, null);
                     break;
                 default:
-                    runLP(scenario.getModel(), scenario, resultFileWriter, initialPlacement);
+                    runLP(scenario.getModel(), scenario, resultFileWriter, initialOutput);
                     break;
             }
+            printLog(log, INFO, "ready");
         } catch (Exception e) {
             printLog(log, ERROR, "something went wrong with the model");
         }
+        return initialOutput;
     }
 
     public static void generatePaths(Scenario scenario) {
@@ -136,15 +136,17 @@ public class Manager {
         optimizationModel.setObjectiveFunction(expr, scenario.isMaximization());
         printLog(log, INFO, "running model");
         double objVal = optimizationModel.run();
-        Output output = new Output(parameters, scenario, optimizationModel);
+        Output output = new Output(parameters, scenario);
+        output.setOptimizationModelResults(optimizationModel);
         submitResults(output, model, objVal, resultFileWriter, initialPlacement);
         return output;
     }
 
-    private static Output runRL(String model, double objValue, ResultFileWriter resultFileWriter, Output initialPlacement) {
+    private static Output runRL(String model, Scenario scenario, double objValue, ResultFileWriter resultFileWriter, Output initialPlacement) {
         LearningModel learningModel = new LearningModel(parameters);
         double objVal = learningModel.run(initialPlacement, objValue);
-        Output output = new Output(parameters, learningModel);
+        Output output = new Output(parameters, scenario);
+        output.setLearningModelResults(learningModel);
         submitResults(output, model, objVal, resultFileWriter, initialPlacement);
         return output;
     }
@@ -183,9 +185,9 @@ public class Manager {
 
     private static void submitResults(Output output, String model, double objVal, ResultFileWriter resultFileWriter, Output initialPlacement) {
         if (objVal >= 0) {
-            Results results = output.generateResults(objVal, initialPlacement);
-            resultFileWriter.createJsonForResults(parameters.getScenario() + "_" + model, results);
-            WebClient.updateResultsToWebApp(output, results);
+            output.prepareVariablesForJsonFile(objVal, initialPlacement);
+            resultFileWriter.createJsonForResults(parameters.getScenario() + "_" + model, output);
+            WebClient.updateResultsToWebApp(output);
         }
     }
 }

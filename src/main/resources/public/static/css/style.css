@@ -22,37 +22,17 @@
 }
 
 .button {
-    border: none;
+    width: 80px;
     color: white;
-    padding: 5px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 16px;
-    cursor: pointer;
-    width: 100px;
-    -webkit-transition-duration: 0.4s; /* Safari */
-    transition-duration: 0.4s;
-    border-radius: 5px;
 }
 
 .button-red{
     background-color: #BC213F;
 }
-.button-red:active {
-    background-color: black;
-}
-.button-gray{
-    background-color: gray;
-}
-.button-gray:active {
-    background-color: black;
-}
+
 .button-margin{
     margin-top: 10px;
-
 }
-
-
 
 .navbar-custom {
     background-color: #BC213F;

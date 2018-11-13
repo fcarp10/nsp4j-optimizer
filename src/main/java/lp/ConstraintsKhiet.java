@@ -141,7 +141,7 @@ public class ConstraintsKhiet {
                                             * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
                                             / pm.getServers().get(x).getCapacity();
                                     double initialFunctionPlacement = 0;
-                                    if (initialPlacement.getpXSV()[x][s][v]) initialFunctionPlacement = 1;
+                                    if (initialPlacement.getPxsvVar()[x][s][v]) initialFunctionPlacement = 1;
                                     double delay = load * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("delay");
                                     migrationDelayExpr.addTerm(delay, variables.dSPX[s][p][x]);
                                     migrationDelayExpr.addTerm(-delay * initialFunctionPlacement, variables.dSPX[s][p][x]);
@@ -293,10 +293,10 @@ public class ConstraintsKhiet {
 
     private void initialPlacementAsConstraints(Output initialOutput) throws GRBException {
         if (initialOutput != null)
-            for (int x = 0; x < initialOutput.getpXSV().length; x++)
-                for (int s = 0; s < initialOutput.getpXSV()[x].length; s++)
-                    for (int v = 0; v < initialOutput.getpXSV()[x][s].length; v++)
-                        if (initialOutput.getpXSV()[x][s][v])
+            for (int x = 0; x < initialOutput.getPxsvVar().length; x++)
+                for (int s = 0; s < initialOutput.getPxsvVar()[x].length; s++)
+                    for (int v = 0; v < initialOutput.getPxsvVar()[x][s].length; v++)
+                        if (initialOutput.getPxsvVar()[x][s][v])
                             model.getGrbModel().addConstr(variables.pXSV[x][s][v], GRB.EQUAL, 1, "initialPlacementAsConstraints");
     }
 

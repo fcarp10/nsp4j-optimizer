@@ -7,7 +7,6 @@ public class NodeJson {
     Data data;
     private String classes = "multiline-manual";
 
-
     NodeJson() {
     }
 
