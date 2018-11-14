@@ -17,10 +17,10 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-import results.Output;
+import output.Results;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import results.Auxiliary;
+import output.Auxiliary;
 
 import java.util.*;
 
@@ -68,7 +68,7 @@ public class LearningModel {
         deepQ = new DeepQ(conf, 100000, .99f, 1024, 100, 1024, inputLength);
     }
 
-    public double run(Output initialPlacement, double minCost) throws GRBException {
+    public double run(Results initialPlacement, double minCost) throws GRBException {
         float[] input = generateInput(initialPlacement);
         int[] environment = generateEnvironment(initialPlacement);
         for (int i = 0; i < (int) pm.getAux("interations"); i++)
@@ -76,7 +76,7 @@ public class LearningModel {
         return reason(input, environment, minCost, 0);
     }
 
-    private float[] generateInput(Output initialPlacement) throws GRBException {
+    private float[] generateInput(Results initialPlacement) throws GRBException {
         GRBVar[][][] rSPD = (GRBVar[][][]) initialPlacement.getRawVariables().get("rSPD");
         GRBVar[][][][] pXSVD = (GRBVar[][][][]) initialPlacement.getRawVariables().get("pXSVD");
         List<float[]> inputList = new ArrayList<>();
@@ -101,7 +101,7 @@ public class LearningModel {
         return inputArray;
     }
 
-    private int[] generateEnvironment(Output initialPlacement) throws GRBException {
+    private int[] generateEnvironment(Results initialPlacement) throws GRBException {
         GRBVar[][][] pXSV = (GRBVar[][][]) initialPlacement.getRawVariables().get("pXSV");
         int[] environment = new int[pm.getServers().size() * pm.getTotalNumberOfFunctionsAux()];
         for (int x = 0; x < pm.getServers().size(); x++)

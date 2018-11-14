@@ -1,13 +1,12 @@
 package lp;
 
-import gui.WebClient;
 import gurobi.*;
 import manager.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import results.Auxiliary;
+import output.Auxiliary;
 
-import static results.Auxiliary.*;
+import static output.Auxiliary.*;
 
 public class OptimizationModel {
 

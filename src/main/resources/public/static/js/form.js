@@ -14,22 +14,19 @@ function getMessage() {
                 message = ans;
             }
         });
-        if (message != null) {
-            if( message != messages[messages.length - 1]){
-                messages.push(message);
-                document.getElementById("message").innerText = "";
-                for (var i = 0; i < messages.length; i++){
-                    document.getElementById("message").innerText += messages[i] +"\n";
-                }
-                if(messages.length > 2)
-                   messages.shift();
-            }
-            if(message == "Info: ready"){
+        if (message != null && message != "") {
+            messages.push(message);
+            document.getElementById("message").innerText = "";
+            for (var i = 0; i < messages.length; i++)
+                document.getElementById("message").innerText += messages[i] +"\n";
+            if(messages.length > 2)
+               messages.shift();
+            if(message == "Info: ready")
                 document.getElementById("run_button").removeAttribute("disabled");
-            }
             if(message == "Info: topology loaded")
                 document.getElementById("run_button").removeAttribute("disabled");
-        } else {
+        }
+        if(message  == null) {
             document.getElementById("message").innerText = "Info: framework not running";
             document.getElementById("run_button").setAttribute("disabled", "true");
         }

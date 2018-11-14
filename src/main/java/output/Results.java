@@ -1,4 +1,4 @@
-package results;
+package output;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import gui.elements.GraphData;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Output {
+public class Results {
 
     // @JsonIgnore tag -> ignores specific variable for json result file
     // transient modifier -> ignores specific variable for posting results to web UI.
@@ -46,7 +46,16 @@ public class Output {
     private List<GraphData> xuGraph;
     private List<GraphData> sdGraph;
 
-    public Output(Parameters pm, Scenario scenario) {
+    private transient boolean[][][] placement;
+
+    public Results() {
+        stringVariables = new HashMap<>();
+        luGraph = new ArrayList<>();
+        xuGraph = new ArrayList<>();
+        sdGraph = new ArrayList<>();
+    }
+
+    public Results(Parameters pm, Scenario scenario) {
         this.pm = pm;
         this.scenario = scenario;
         this.offset = (int) pm.getAux("offset_results");
@@ -54,19 +63,22 @@ public class Output {
         xuSummary = new double[4];
         fuSummary = new double[4];
         sdSummary = new double[4];
+        luGraph = new ArrayList<>();
+        xuGraph = new ArrayList<>();
+        sdGraph = new ArrayList<>();
         rawVariables = new HashMap();
+        stringVariables = new HashMap<>();
     }
 
     public void setVariable(String key, Object variable) {
         rawVariables.put(key, variable);
     }
 
-    public void prepareVariablesForJsonFile(double objVal, Output initialOutput) throws GRBException {
-
+    public void prepareVariablesForJsonFile(double objVal, Results initialResults) throws GRBException {
         List<Double> uL = new ArrayList<>(linkUtilizationMap().values());
         List<Double> uX = new ArrayList<>(serverUtilizationMap().values());
-        if (initialOutput != null) {
-            this.migrationsNum = calculateNumberOfMigrations(initialOutput);
+        if (initialResults != null) {
+            this.migrationsNum = calculateNumberOfMigrations(initialResults);
             this.replicationsNum = calculateNumberOfReplications();
         }
         setrSP();
@@ -81,22 +93,23 @@ public class Output {
         setServerResults(uX);
         setFunctionResults(numOfFunctionsPerServer());
         setServiceDelayResults(serviceDelayList());
-        setLuGraph(uL);
-        setXuGraph(uX);
-        setSdGraph(serviceDelayList());
+        generateLuGraph(uL);
+        generateXuGraph(uX);
+        generateSdGraph(serviceDelayList());
         totalTraffic = pm.getTotalTrafficAux();
         trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
         avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
         this.objVal = Auxiliary.roundDouble(objVal, 4);
+        setPlacement();
     }
 
-    private int calculateNumberOfMigrations(Output initialPlacement) throws GRBException {
-        GRBVar[][][] pXSV = (GRBVar[][][]) initialPlacement.getRawVariables().get("pXSV");
+    private int calculateNumberOfMigrations(Results initialPlacement) throws GRBException {
+        GRBVar[][][] pXSV = (GRBVar[][][]) rawVariables.get("pXSV");
         int numOfMigrations = 0;
         for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                    if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0 && pXSV[x][s][v].get(GRB.DoubleAttr.X) == 0.0)
+                    if (initialPlacement.getPlacement()[x][s][v] && pXSV[x][s][v].get(GRB.DoubleAttr.X) == 0.0)
                         numOfMigrations++;
         return numOfMigrations;
     }
@@ -178,11 +191,11 @@ public class Output {
         return trafficOnLinks;
     }
 
-    private void setrSP() throws GRBException{
+    private void setrSP() throws GRBException {
         GRBVar[][] rSP = (GRBVar[][]) rawVariables.get("rSP");
         List<String> strings = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+        for (int s = 0; s < rSP.length; s++)
+            for (int p = 0; p < rSP[s].length; p++)
                 if (rSP[s][p].get(GRB.DoubleAttr.X) == 1.0)
                     strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): ["
                             + pm.getServices().get(s).getId() + "]"
@@ -193,9 +206,9 @@ public class Output {
     private void setrSPD() throws GRBException {
         GRBVar[][][] rSPD = (GRBVar[][][]) rawVariables.get("rSPD");
         List<String> strings = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+        for (int s = 0; s < rSPD.length; s++)
+            for (int p = 0; p < rSPD[s].length; p++)
+                for (int d = 0; d < rSPD[s][p].length; d++)
                     if (rSPD[s][p][d].get(GRB.DoubleAttr.X) == 1.0)
                         strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
                                 + pm.getServices().get(s).getId() + "]"
@@ -204,12 +217,12 @@ public class Output {
         stringVariables.put("rSPD", strings);
     }
 
-    private void setpXSV() throws GRBException{
+    private void setpXSV() throws GRBException {
         GRBVar[][][] pXSV = (GRBVar[][][]) rawVariables.get("pXSV");
         List<String> strings = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                for (int x = 0; x < pm.getServers().size(); x++)
+        for (int x = 0; x < pXSV.length; x++)
+            for (int s = 0; s < pXSV[x].length; s++)
+                for (int v = 0; v < pXSV[x][s].length; v++)
                     if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
                         strings.add("(" + (x + this.offset) + "," + (s + this.offset) + "," + (v + this.offset) + "): ["
                                 + pm.getServers().get(x).getId() + "]["
@@ -221,10 +234,10 @@ public class Output {
     private void setpXSVD() throws GRBException {
         GRBVar[][][][] pXSVD = (GRBVar[][][][]) rawVariables.get("pXSVD");
         List<String> strings = new ArrayList<>();
-        for (int x = 0; x < pm.getServers().size(); x++)
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+        for (int x = 0; x < pXSVD.length; x++)
+            for (int s = 0; s < pXSVD[x].length; s++)
+                for (int v = 0; v < pXSVD[x][s].length; v++)
+                    for (int d = 0; d < pXSVD[x][s][v].length; d++)
                         if (pXSVD[x][s][v][d].get(GRB.DoubleAttr.X) == 1.0)
                             strings.add("(" + (x + this.offset) + "," + (s + this.offset) + "," + (v + this.offset) + "," + (d + this.offset) + "): ["
                                     + pm.getServers().get(x).getId() + "]["
@@ -237,7 +250,7 @@ public class Output {
     private void setUX() throws GRBException {
         GRBVar[] uX = (GRBVar[]) rawVariables.get("uX");
         List<String> strings = new ArrayList<>();
-        for (int x = 0; x < pm.getServers().size(); x++)
+        for (int x = 0; x < uX.length; x++)
             strings.add("(" + (x + this.offset) + "): ["
                     + pm.getServers().get(x).getId() + "]["
                     + uX[x].get(GRB.DoubleAttr.X) + "]");
@@ -247,7 +260,7 @@ public class Output {
     private void setUL() throws GRBException {
         GRBVar[] uL = (GRBVar[]) rawVariables.get("uL");
         List<String> strings = new ArrayList<>();
-        for (int l = 0; l < pm.getLinks().size(); l++)
+        for (int l = 0; l < uL.length; l++)
             strings.add("(" + (l + this.offset) + "): ["
                     + pm.getLinks().get(l).getId() + "]["
                     + uL[l].get(GRB.DoubleAttr.X) + "]");
@@ -257,9 +270,9 @@ public class Output {
     private void setsSVP() throws GRBException {
         GRBVar[][][] sSVP = (GRBVar[][][]) rawVariables.get("sSVP");
         List<String> strings = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                for (int p = 0; p < pm.getPaths().size(); p++)
+        for (int s = 0; s < sSVP.length; s++)
+            for (int v = 0; v < sSVP[s].length; v++)
+                for (int p = 0; p < sSVP[s][v].length; p++)
                     if (sSVP[s][v][p].get(GRB.DoubleAttr.X) == 1.0)
                         strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
                                 + pm.getPaths().get(p).getNodePath());
@@ -269,8 +282,8 @@ public class Output {
     private void setdSP() throws GRBException {
         GRBVar[][] dSP = (GRBVar[][]) rawVariables.get("dSP");
         List<String> strings = new ArrayList<>();
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+        for (int s = 0; s < dSP.length; s++)
+            for (int p = 0; p < dSP[s].length; p++)
                 if (dSP[s][p].get(GRB.DoubleAttr.X) > 0)
                     strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): "
                             + pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath()
@@ -306,8 +319,7 @@ public class Output {
         sdSummary[3] = Auxiliary.vrc(new ArrayList<>(sd), sdSummary[0]);
     }
 
-    private void setLuGraph(List<Double> uL) {
-        luGraph = new ArrayList<>();
+    private void generateLuGraph(List<Double> uL) {
         for (int i = 0; i < 10; i++)
             luGraph.add(new GraphData("0." + i, 0));
         for (Double anUL : uL)
@@ -318,8 +330,7 @@ public class Output {
                 }
     }
 
-    private void setXuGraph(List<Double> uX) {
-        xuGraph = new ArrayList<>();
+    private void generateXuGraph(List<Double> uX) {
         for (int i = 0; i < 10; i++)
             xuGraph.add(new GraphData("0." + i, 0));
         for (Double anUX : uX)
@@ -330,8 +341,7 @@ public class Output {
                 }
     }
 
-    private void setSdGraph(List<Double> sd) {
-        sdGraph = new ArrayList<>();
+    private void generateSdGraph(List<Double> sd) {
         double min = Auxiliary.min(new ArrayList<>(sd));
         double max = Auxiliary.max(new ArrayList<>(sd));
         double step = (max - min) / 10;
@@ -345,6 +355,16 @@ public class Output {
                         break;
                     }
         } else sdGraph.add(new GraphData(String.valueOf(max), sd.size()));
+    }
+
+    private void setPlacement() throws GRBException {
+        GRBVar[][][] pXSV = (GRBVar[][][]) rawVariables.get("pXSV");
+        placement = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLengthAux()];
+        for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                    if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+                        placement[x][s][v] = true;
     }
 
     public Parameters getPm() {
@@ -413,5 +433,9 @@ public class Output {
 
     public List<GraphData> getSdGraph() {
         return sdGraph;
+    }
+
+    public boolean[][][] getPlacement() {
+        return placement;
     }
 }

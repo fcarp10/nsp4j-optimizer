@@ -2,7 +2,7 @@ package manager;
 
 import gui.WebClient;
 import gui.WebServer;
-import results.Auxiliary;
+import output.Auxiliary;
 
 import static spark.Spark.*;
 

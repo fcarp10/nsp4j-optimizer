@@ -12,13 +12,11 @@ import gui.elements.Scenario;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
-import results.Output;
+import output.Results;
+import output.ResultsManager;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,19 +28,19 @@ public class WebServer {
     private static List<NodeJson> nodeList;
     private static Map<String, ServerJson> serverJsonMap;
     private static Map<String, LinkJson> linkJsonMap;
-    private static List<String> messages;
-    private static Output output;
-    private static Output initialOutput;
+    private static Results results;
+    private static Results initialResults;
+    private static LinkedList messages;
 
     public WebServer() {
         nodeList = new ArrayList<>();
         serverJsonMap = new HashMap<>();
         linkJsonMap = new HashMap<>();
-        messages = new ArrayList<>();
+        messages = new LinkedList();
         interfaces();
     }
 
-    public void initialize(Parameters parameters) {
+    public static void initialize(Parameters parameters) {
         nodeList = new ArrayList<>();
         serverJsonMap = new HashMap<>();
         linkJsonMap = new HashMap<>();
@@ -82,12 +80,18 @@ public class WebServer {
 
         post("/results", (request, response) -> {
             response.type("application/json");
-            output = new Gson().fromJson(request.body(), Output.class);
+            results = new Gson().fromJson(request.body(), Results.class);
             return 201;
         });
 
         post("/message", (request, response) -> {
-            messages.add(request.body());
+            String message = request.body();
+            if (messages.isEmpty())
+                messages.add(message);
+            else {
+                if (!messages.peekLast().equals(message))
+                    messages.add(message);
+            }
             return 201;
         });
 
@@ -99,7 +103,7 @@ public class WebServer {
 
         post("/run", (request, response) -> {
             Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-            Runnable runnable = () -> initialOutput = Manager.start(scenario, initialOutput);
+            Runnable runnable = () -> initialResults = Manager.start(scenario, initialResults);
             executorService.submit(runnable);
             return 201;
         });
@@ -130,13 +134,13 @@ public class WebServer {
 
         get("/results", (request, response) -> {
             response.type("application/json");
-            return new Gson().toJson(output);
+            return new Gson().toJson(results);
         });
 
         get("/message", (request, response) -> {
-            if (messages.size() > 3)
-                messages.remove(0);
-            return messages;
+            if (messages.peek() != null)
+                return messages.remove();
+            return "";
         });
     }
 }

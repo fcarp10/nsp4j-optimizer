@@ -5,6 +5,9 @@ public class GraphData {
     private String year;
     private double value;
 
+    public GraphData() {
+    }
+
     public GraphData(String year, double value) {
         this.year = year;
         this.value = value;
