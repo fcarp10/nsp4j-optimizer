@@ -101,6 +101,7 @@ public class Manager {
             }
             printLog(log, INFO, "ready");
         } catch (Exception e) {
+            e.printStackTrace();
             printLog(log, ERROR, "something went wrong");
         }
         return initialResults;
@@ -135,8 +136,11 @@ public class Manager {
         optimizationModel.setObjectiveFunction(expr, scenario.isMaximization());
         printLog(log, INFO, "running model");
         double objVal = optimizationModel.run();
-        Results results = generateOutput(optimizationModel, scenario, initialPlacement);
-        submitResults(results, model, objVal, resultsManager);
+        Results results = null;
+        if(objVal != -1) {
+            results = generateOutput(optimizationModel, scenario, initialPlacement);
+            submitResults(results, model, objVal, resultsManager);
+        }
         return results;
     }
 

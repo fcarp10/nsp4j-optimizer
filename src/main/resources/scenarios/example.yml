@@ -3,7 +3,7 @@ gap: 0
 weights: [0, 1.0, 0]
 # auxiliary parameters
 aux: {
-    "overhead": 10,
+    "overhead": 1,
     "minPathsDefault": 3,
     "maxPathsDefault": 3,
     "iterations": 1000,
@@ -42,9 +42,7 @@ functions:
 # traffic flow definitions
 trafficFlows:
 - serviceId: 0
-  src: "n1"
-  dst: "n9"
   minDemands: 1
   maxDemands: 1
-  minBw: 100
-  maxBw: 100
+  minBw: 1
+  maxBw: 1
