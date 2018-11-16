@@ -5,53 +5,53 @@ import java.util.Map;
 
 public class Scenario {
 
-    private String inputFileName;
-    private String objectiveFunction;
-    private boolean maximization;
-    private String model;
-    private Map<String, Boolean> constraints;
+   private String inputFileName;
+   private String objectiveFunction;
+   private boolean maximization;
+   private String model;
+   private Map<String, Boolean> constraints;
 
-    public Scenario(){
-        constraints = new HashMap<>();
-    }
+   public Scenario() {
+      constraints = new HashMap<>();
+   }
 
-    public String getInputFileName() {
-        return inputFileName;
-    }
+   public String getInputFileName() {
+      return inputFileName;
+   }
 
-    public void setInputFileName(String inputFileName) {
-        this.inputFileName = inputFileName;
-    }
+   public void setInputFileName(String inputFileName) {
+      this.inputFileName = inputFileName;
+   }
 
-    public String getObjectiveFunction() {
-        return objectiveFunction;
-    }
+   public String getObjectiveFunction() {
+      return objectiveFunction;
+   }
 
-    public void setObjectiveFunction(String objectiveFunction) {
-        this.objectiveFunction = objectiveFunction;
-    }
+   public void setObjectiveFunction(String objectiveFunction) {
+      this.objectiveFunction = objectiveFunction;
+   }
 
-    public String getModel() {
-        return model;
-    }
+   public String getModel() {
+      return model;
+   }
 
-    public void setModel(String model) {
-        this.model = model;
-    }
+   public void setModel(String model) {
+      this.model = model;
+   }
 
-    public Map<String, Boolean> getConstraints() {
-        return constraints;
-    }
+   public Map<String, Boolean> getConstraints() {
+      return constraints;
+   }
 
-    public void setConstraints(Map<String, Boolean> constraints) {
-        this.constraints = constraints;
-    }
+   public void setConstraints(Map<String, Boolean> constraints) {
+      this.constraints = constraints;
+   }
 
-    public boolean isMaximization() {
-        return maximization;
-    }
+   public boolean isMaximization() {
+      return maximization;
+   }
 
-    public void setMaximization(boolean maximization) {
-        this.maximization = maximization;
-    }
+   public void setMaximization(boolean maximization) {
+      this.maximization = maximization;
+   }
 }
