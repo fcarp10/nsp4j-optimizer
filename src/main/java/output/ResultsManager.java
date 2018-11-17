@@ -4,6 +4,11 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gurobi.GRB;
+import gurobi.GRBEnv;
+import gurobi.GRBModel;
+import lp.Variables;
+import manager.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static output.Auxiliary.INFO;
+import static output.Aux.INFO;
 
 public class ResultsManager {
 
@@ -33,7 +38,7 @@ public class ResultsManager {
       new File(resultsFolder).mkdir();
    }
 
-   public void exportFile(String fileName, Object object) {
+   public void exportJsonFile(String fileName, Object object) {
       File jsonFile = new File(resultsFolder + "/" + fileName + ".json");
       ObjectMapper mapper = new ObjectMapper(new JsonFactory());
       DefaultPrettyPrinter.Indenter indenter = new DefaultIndenter("  ", DefaultIndenter.SYS_LF);
@@ -47,16 +52,27 @@ public class ResultsManager {
       }
    }
 
-   public static Results importFile(String path, String filename) {
+   public static GRBModel importModel(String path, String filename, Parameters pm) {
       path = path.replaceAll("%20", " ");
-      ObjectMapper mapper = new ObjectMapper(new JsonFactory());
-      Results results = null;
+      GRBModel model = null;
       try {
-         results = mapper.readValue(new File(path + filename + "_initial_placement.json"), Results.class);
-         Auxiliary.printLog(log, INFO, "initial placement loaded");
+         GRBEnv grbEnv = new GRBEnv();
+         grbEnv.set(GRB.IntParam.LogToConsole, 0);
+         model = new GRBModel(grbEnv);
+         new Variables(pm, model);
+         model.read(path + filename + "_initial_placement.mst");
+         model.optimize();
+         Aux.printLog(log, INFO, "initial placement loaded");
       } catch (Exception e) {
-         Auxiliary.printLog(log, INFO, "no initial placement found");
+         Aux.printLog(log, INFO, "no initial placement found");
       }
-      return results;
+      return model;
+   }
+
+   public void exportModel(GRBModel model, String fileName) {
+      try {
+         model.write(resultsFolder + "/" + fileName + "_initial_placement.mst");
+      } catch (Exception e) {
+      }
    }
 }

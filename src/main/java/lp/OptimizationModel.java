@@ -4,9 +4,9 @@ import gurobi.*;
 import manager.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import output.Auxiliary;
+import output.Aux;
 
-import static output.Auxiliary.*;
+import static output.Aux.*;
 
 public class OptimizationModel {
 
@@ -84,7 +84,7 @@ public class OptimizationModel {
    public double run() throws GRBException {
       grbModel.optimize();
       if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
-         objVal = Auxiliary.roundDouble(grbModel.get(GRB.DoubleAttr.ObjVal), 2);
+         objVal = Aux.roundDouble(grbModel.get(GRB.DoubleAttr.ObjVal), 2);
          printLog(log, INFO, "opt. finished [objVal --> " + objVal + "]");
          return objVal;
       } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
@@ -131,7 +131,7 @@ public class OptimizationModel {
                double objbnd = getDoubleInfo(GRB.CB_MIPNODE_OBJBND);
                double newGap = ((objbst - objbnd) / objbnd) * 100;
                if (newGap != gap) {
-                  printLog(log, INFO, "gap [" + Auxiliary.roundDouble(newGap, 2) + "%]");
+                  printLog(log, INFO, "gap [" + Aux.roundDouble(newGap, 2) + "%]");
                   gap = newGap;
                }
             }

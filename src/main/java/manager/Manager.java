@@ -5,6 +5,7 @@ import gui.WebServer;
 import gui.elements.Scenario;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
+import gurobi.GRBModel;
 import learning.LearningModel;
 import lp.Constraints;
 import lp.OptimizationModel;
@@ -14,6 +15,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import output.Aux;
 import output.Results;
 import output.ResultsManager;
 import utils.ConfigFiles;
@@ -23,7 +25,7 @@ import utils.KShortestPathGenerator;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import static output.Auxiliary.*;
+import static output.Aux.*;
 
 public class Manager {
 
@@ -76,28 +78,28 @@ public class Manager {
          readParameters(path, fileName);
    }
 
-   public static Results start(Scenario scenario, Results initialResults) {
+   public static GRBModel start(Scenario scenario, GRBModel initialModel) {
       try {
-         if (initialResults == null)
-            initialResults = ResultsManager.importFile(getResourcePath(scenario.getInputFileName()), scenario.getInputFileName());
+         if (initialModel == null)
+            initialModel = ResultsManager.importModel(getResourcePath(scenario.getInputFileName()), scenario.getInputFileName(), pm);
          ResultsManager resultsManager = initializeResultFiles();
          printLog(log, INFO, "initializing model");
          switch (scenario.getModel()) {
             case ALL_OPT_MODELS_STRING:
-               initialResults = runLP(ALL_OPT_MODELS[0], scenario, resultsManager, null);
+               initialModel = runLP(ALL_OPT_MODELS[0], scenario, resultsManager, null);
                for (int i = 1; i < ALL_OPT_MODELS.length; i++)
-                  runLP(ALL_OPT_MODELS[i], scenario, resultsManager, initialResults);
+                  runLP(ALL_OPT_MODELS[i], scenario, resultsManager, initialModel);
                break;
             case MIGRATION_REPLICATION_RL_MODEL:
-               initialResults = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultsManager, null);
-               Results results = runLP(MIGRATION_REPLICATION_MODEL, scenario, resultsManager, initialResults);
-               runRL(MIGRATION_REPLICATION_RL_MODEL, scenario, results.getObjVal(), resultsManager, initialResults);
+               initialModel = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultsManager, null);
+               GRBModel tmpModel = runLP(MIGRATION_REPLICATION_MODEL, scenario, resultsManager, initialModel);
+//               runRL(MIGRATION_REPLICATION_RL_MODEL, scenario, results.getObjVal(), resultsManager, initialModel);
                break;
             case INITIAL_PLACEMENT_MODEL:
-               initialResults = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultsManager, null);
+               initialModel = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultsManager, null);
                break;
             default:
-               runLP(scenario.getModel(), scenario, resultsManager, initialResults);
+               runLP(scenario.getModel(), scenario, resultsManager, initialModel);
                break;
          }
          printLog(log, INFO, "ready");
@@ -105,7 +107,7 @@ public class Manager {
          e.printStackTrace();
          printLog(log, ERROR, "something went wrong");
       }
-      return initialResults;
+      return initialModel;
    }
 
    public static void generatePaths(Scenario scenario) {
@@ -122,28 +124,30 @@ public class Manager {
          }
    }
 
-   private static Results runLP(String model, Scenario scenario, ResultsManager resultsManager, Results initialPlacement) throws GRBException {
+   private static GRBModel runLP(String modelName, Scenario scenario, ResultsManager resultsManager, GRBModel initialModel) throws GRBException {
       GRBLinExpr expr;
-      OptimizationModel optimizationModel = new OptimizationModel(pm);
+      OptimizationModel model = new OptimizationModel(pm);
       printLog(log, INFO, "setting variables");
-      Variables variables = new Variables(pm, optimizationModel.getGrbModel());
-      optimizationModel.setVariables(variables);
+      Variables variables = new Variables(pm, model.getGrbModel());
+      model.setVariables(variables);
       printLog(log, INFO, "setting constraints");
-      new Constraints(pm, optimizationModel, scenario, initialPlacement);
+      new Constraints(pm, model, scenario, initialModel);
       if (scenario.getModel().equals(ALL_OPT_MODELS) || scenario.getModel().equals(MIGRATION_REPLICATION_RL_MODEL)
-              && model.equals(INITIAL_PLACEMENT_MODEL))
-         expr = generateExprForObjectiveFunction(optimizationModel, NUM_OF_SERVERS_OBJ);
+              && modelName.equals(INITIAL_PLACEMENT_MODEL))
+         expr = generateExprForObjectiveFunction(model, NUM_OF_SERVERS_OBJ);
       else
-         expr = generateExprForObjectiveFunction(optimizationModel, scenario.getObjectiveFunction());
-      optimizationModel.setObjectiveFunction(expr, scenario.isMaximization());
+         expr = generateExprForObjectiveFunction(model, scenario.getObjectiveFunction());
+      model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running model");
-      double objVal = optimizationModel.run();
+      double objVal = model.run();
       Results results = null;
       if (objVal != -1) {
-         results = generateOutput(optimizationModel, scenario, initialPlacement);
-         submitResults(results, model, objVal, resultsManager);
+         results = generateResults(model, scenario, initialModel);
+         resultsManager.exportJsonFile(pm.getScenario() + "_" + modelName, results);
+         resultsManager.exportModel(model.getGrbModel(), scenario.getInputFileName());
+         WebClient.updateResultsToWebApp(results);
       }
-      return results;
+      return model.getGrbModel();
    }
 
    private static Results runRL(String model, Scenario scenario, double objValue, ResultsManager resultsManager, Results initialPlacement) throws GRBException {
@@ -151,7 +155,7 @@ public class Manager {
       double objVal = learningModel.run(initialPlacement, objValue);
       Results results = new Results(pm, scenario);
 //        output.setLearningModelResults(learningModel);
-      submitResults(results, model, objVal, resultsManager);
+//      generateResults(results, model, objVal, resultsManager);
       return results;
    }
 
@@ -187,25 +191,18 @@ public class Manager {
       return new ResultsManager(title.toString());
    }
 
-   private static void submitResults(Results results, String model, double objVal, ResultsManager resultsManager) throws GRBException {
-      if (objVal >= 0) {
-         resultsManager.exportFile(pm.getScenario() + "_" + model, results);
-         WebClient.updateResultsToWebApp(results);
-      }
-   }
-
-   private static Results generateOutput(OptimizationModel model, Scenario scenario, Results initialPlacement) throws GRBException {
+   private static Results generateResults(OptimizationModel model, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
-      results.setVariable("rSP", model.getVariables().rSP);
-      results.setVariable("rSPD", model.getVariables().rSPD);
-      results.setVariable("pXSV", model.getVariables().pXSV);
-      results.setVariable("pXSVD", model.getVariables().pXSVD);
-      results.setVariable("uL", model.getVariables().uL);
-      results.setVariable("uX", model.getVariables().uX);
-      results.setVariable("pX", model.getVariables().pX);
-      results.setVariable("sSVP", model.getVariables().sSVP);
-      results.setVariable("dSP", model.getVariables().dSP);
-      results.prepareVariablesForJsonFile(model.getObjVal(), initialPlacement);
+      results.setVariable(Aux.rSP, model.getVariables().rSP);
+      results.setVariable(Aux.rSPD, model.getVariables().rSPD);
+      results.setVariable(Aux.pXSV, model.getVariables().pXSV);
+      results.setVariable(Aux.pXSVD, model.getVariables().pXSVD);
+      results.setVariable(Aux.uL, model.getVariables().uL);
+      results.setVariable(Aux.uX, model.getVariables().uX);
+      results.setVariable(Aux.pX, model.getVariables().pX);
+      results.setVariable(Aux.sSVP, model.getVariables().sSVP);
+      results.setVariable(Aux.dSP, model.getVariables().dSP);
+      results.prepareVariablesForJsonFile(model.getObjVal(), initialModel);
       return results;
    }
 }

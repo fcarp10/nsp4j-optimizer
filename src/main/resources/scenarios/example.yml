@@ -17,14 +17,14 @@ serviceChains:
   chain: [0, 1, 2]
   attributes: {
     "minPaths": 1,
-    "maxPaths": 2
+    "maxPaths": 3
   }
 # function definitions
 functions:
 - type: 0
   attributes: {
     "replicable": false,
-    "load": 1.0,
+    "load": 0.5,
     "delay": 10
   }
 - type: 1
@@ -36,13 +36,15 @@ functions:
 - type: 2
   attributes: {
     "replicable": false,
-    "load": 1.0,
+    "load": 0.5,
     "delay": 10
   }
 # traffic flow definitions
 trafficFlows:
 - serviceId: 0
-  minDem: 1
-  maxDem: 1
-  minBw: 1
-  maxBw: 1
+  src: "n1"
+  dst: "n9"
+  minDem: 3
+  maxDem: 3
+  minBw: 200
+  maxBw: 200

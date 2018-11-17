@@ -7,6 +7,7 @@ import gui.elements.LinkJson;
 import gui.elements.NodeJson;
 import gui.elements.Scenario;
 import gui.elements.ServerJson;
+import gurobi.GRBModel;
 import manager.Manager;
 import manager.Parameters;
 import manager.elements.Server;
@@ -28,7 +29,7 @@ public class WebServer {
    private static Map<String, ServerJson> serverJsonMap;
    private static Map<String, LinkJson> linkJsonMap;
    private static Results results;
-   private static Results initialResults;
+   private static GRBModel initialModel;
    private static LinkedList messages;
 
    public WebServer() {
@@ -105,7 +106,7 @@ public class WebServer {
 
       post("/run", (request, response) -> {
          Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-         Runnable runnable = () -> initialResults = Manager.start(scenario, initialResults);
+         Runnable runnable = () -> initialModel = Manager.start(scenario, initialModel);
          executorService.submit(runnable);
          return 201;
       });

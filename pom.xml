@@ -6,7 +6,7 @@
 
     <groupId>de.tubs</groupId>
     <artifactId>nsp4j-optimizer</artifactId>
-    <version>0.9.2</version>
+    <version>0.9.3</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
