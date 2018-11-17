@@ -140,11 +140,12 @@ public class Manager {
       model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running model");
       double objVal = model.run();
-      Results results = null;
+      Results results;
       if (objVal != -1) {
          results = generateResults(model, scenario, initialModel);
          resultsManager.exportJsonFile(pm.getScenario() + "_" + modelName, results);
-         resultsManager.exportModel(model.getGrbModel(), scenario.getInputFileName());
+         if (modelName.equals(INITIAL_PLACEMENT_MODEL))
+            resultsManager.exportModel(model.getGrbModel(), scenario.getInputFileName());
          WebClient.updateResultsToWebApp(results);
       }
       return model.getGrbModel();
