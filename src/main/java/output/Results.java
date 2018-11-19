@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static output.Definitions.*;
+
 public class Results {
 
    // @JsonIgnore tag -> ignores specific variable for json result file
@@ -102,25 +104,25 @@ public class Results {
    }
 
    private int calculateNumberOfMigrations(GRBModel initialModel) throws GRBException {
-      GRBVar[][][] pXSV = (GRBVar[][][]) rawVariables.get("pXSV");
+      GRBVar[][][] pXSVvar = (GRBVar[][][]) rawVariables.get(pXSV);
       int numOfMigrations = 0;
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (initialModel.getVarByName(Auxiliary.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0
-                       && pXSV[x][s][v].get(GRB.DoubleAttr.X) == 0.0)
+               if (initialModel.getVarByName(pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0
+                       && pXSVvar[x][s][v].get(GRB.DoubleAttr.X) == 0.0)
                   numOfMigrations++;
       return numOfMigrations;
    }
 
    private int calculateNumberOfReplications() throws GRBException {
-      GRBVar[][][] pXSV = (GRBVar[][][]) rawVariables.get(Auxiliary.pXSV);
+      GRBVar[][][] pXSVvar = (GRBVar[][][]) rawVariables.get(pXSV);
       int numOfReplicas = 0;
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
             int numOfReplicasPerFunction = 0;
             for (int x = 0; x < pm.getServers().size(); x++)
-               if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+               if (pXSVvar[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
                   numOfReplicasPerFunction++;
             numOfReplicas += numOfReplicasPerFunction - 1;
          }
@@ -128,29 +130,29 @@ public class Results {
    }
 
    public Map<Edge, Double> linkUtilizationMap() throws GRBException {
-      GRBVar[] uL = (GRBVar[]) rawVariables.get(Auxiliary.uL);
+      GRBVar[] uLvar = (GRBVar[]) rawVariables.get(uL);
       Map<Edge, Double> linkMapResults = new HashMap<>();
       for (int l = 0; l < pm.getLinks().size(); l++)
-         linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(uL[l].get(GRB.DoubleAttr.X), 2));
+         linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(uLvar[l].get(GRB.DoubleAttr.X), 2));
       return linkMapResults;
    }
 
    public Map<Server, Double> serverUtilizationMap() throws GRBException {
-      GRBVar[] uX = (GRBVar[]) rawVariables.get(Auxiliary.uX);
+      GRBVar[] uXvar = (GRBVar[]) rawVariables.get(uX);
       Map<Server, Double> serverMapResults = new HashMap<>();
       for (int x = 0; x < pm.getServers().size(); x++)
-         serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(uX[x].get(GRB.DoubleAttr.X), 2));
+         serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(uXvar[x].get(GRB.DoubleAttr.X), 2));
       return serverMapResults;
    }
 
    private List<Integer> numOfFunctionsPerServer() throws GRBException {
-      GRBVar[] pX = (GRBVar[]) rawVariables.get(Auxiliary.pX);
+      GRBVar[] pXvar = (GRBVar[]) rawVariables.get(pX);
       List<Integer> numOfFunctionsPerServer = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++) {
          int numOfFunctions = 0;
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (pX[x].get(GRB.DoubleAttr.X) == 1.0)
+               if (pXvar[x].get(GRB.DoubleAttr.X) == 1.0)
                   numOfFunctions++;
          numOfFunctionsPerServer.add(numOfFunctions);
       }
@@ -158,22 +160,22 @@ public class Results {
    }
 
    private List<Double> serviceDelayList() throws GRBException {
-      GRBVar[][] dSP = (GRBVar[][]) rawVariables.get(Auxiliary.dSP);
+      GRBVar[][] dSPvar = (GRBVar[][]) rawVariables.get(dSP);
       List<Double> serviceDelayList = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            if (dSP[s][p].get(GRB.DoubleAttr.X) > 0)
-               serviceDelayList.add(Auxiliary.roundDouble(dSP[s][p].get(GRB.DoubleAttr.X), 2));
+            if (dSPvar[s][p].get(GRB.DoubleAttr.X) > 0)
+               serviceDelayList.add(Auxiliary.roundDouble(dSPvar[s][p].get(GRB.DoubleAttr.X), 2));
       return serviceDelayList;
    }
 
    private double avgPathLength() throws GRBException {
-      GRBVar[][] rSP = (GRBVar[][]) rawVariables.get(Auxiliary.rSP);
+      GRBVar[][] rSPvar = (GRBVar[][]) rawVariables.get(rSP);
       double avgPathLength = 0;
       int usedPaths = 0;
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            if (rSP[s][p].get(GRB.DoubleAttr.X) == 1.0) {
+            if (rSPvar[s][p].get(GRB.DoubleAttr.X) == 1.0) {
                avgPathLength += pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getEdgePath().size();
                usedPaths++;
             }
@@ -183,19 +185,19 @@ public class Results {
    }
 
    private double trafficOnLinks() throws GRBException {
-      GRBVar[] uL = (GRBVar[]) rawVariables.get(Auxiliary.uL);
+      GRBVar[] uLvar = (GRBVar[]) rawVariables.get(uL);
       double trafficOnLinks = 0;
       for (int l = 0; l < pm.getLinks().size(); l++)
-         trafficOnLinks += uL[l].get(GRB.DoubleAttr.X) * (int) pm.getLinks().get(l).getAttribute("capacity");
+         trafficOnLinks += uLvar[l].get(GRB.DoubleAttr.X) * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
       return trafficOnLinks;
    }
 
    private void setrSP() throws GRBException {
-      GRBVar[][] rSP = (GRBVar[][]) rawVariables.get(Auxiliary.rSP);
+      GRBVar[][] rSPvar = (GRBVar[][]) rawVariables.get(rSP);
       List<String> strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            if (rSP[s][p].get(GRB.DoubleAttr.X) == 1.0)
+            if (rSPvar[s][p].get(GRB.DoubleAttr.X) == 1.0)
                strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): ["
                        + pm.getServices().get(s).getId() + "]"
                        + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
@@ -203,12 +205,12 @@ public class Results {
    }
 
    private void setrSPD() throws GRBException {
-      GRBVar[][][] rSPD = (GRBVar[][][]) rawVariables.get(Auxiliary.rSPD);
+      GRBVar[][][] rSPDvar = (GRBVar[][][]) rawVariables.get(rSPD);
       List<String> strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               if (rSPD[s][p][d].get(GRB.DoubleAttr.X) == 1.0)
+               if (rSPDvar[s][p][d].get(GRB.DoubleAttr.X) == 1.0)
                   strings.add("(" + (s + this.offset) + "," + (p + this.offset) + ","
                           + (d + this.offset) + "): ["
                           + pm.getServices().get(s).getId() + "]"
@@ -218,12 +220,12 @@ public class Results {
    }
 
    private void setpXSV() throws GRBException {
-      GRBVar[][][] pXSV = (GRBVar[][][]) rawVariables.get(Auxiliary.pXSV);
+      GRBVar[][][] pXSVvar = (GRBVar[][][]) rawVariables.get(pXSV);
       List<String> strings = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+               if (pXSVvar[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
                   strings.add("(" + (x + this.offset) + "," + (s + this.offset) + ","
                           + (v + this.offset) + "): ["
                           + pm.getServers().get(x).getId() + "]["
@@ -233,13 +235,13 @@ public class Results {
    }
 
    private void setpXSVD() throws GRBException {
-      GRBVar[][][][] pXSVD = (GRBVar[][][][]) rawVariables.get(Auxiliary.pXSVD);
+      GRBVar[][][][] pXSVDvar = (GRBVar[][][][]) rawVariables.get(pXSVD);
       List<String> strings = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (pXSVD[x][s][v][d].get(GRB.DoubleAttr.X) == 1.0)
+                  if (pXSVDvar[x][s][v][d].get(GRB.DoubleAttr.X) == 1.0)
                      strings.add("(" + (x + this.offset) + "," + (s + this.offset)
                              + "," + (v + this.offset) + "," + (d + this.offset) + "): ["
                              + pm.getServers().get(x).getId() + "]["
@@ -250,46 +252,46 @@ public class Results {
    }
 
    private void setUX() throws GRBException {
-      GRBVar[] uX = (GRBVar[]) rawVariables.get(Auxiliary.uX);
+      GRBVar[] uXvar = (GRBVar[]) rawVariables.get(uX);
       List<String> strings = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++)
          strings.add("(" + (x + this.offset) + "): ["
                  + pm.getServers().get(x).getId() + "]["
-                 + uX[x].get(GRB.DoubleAttr.X) + "]");
+                 + uXvar[x].get(GRB.DoubleAttr.X) + "]");
       stringVariables.put("uX", strings);
    }
 
    private void setUL() throws GRBException {
-      GRBVar[] uL = (GRBVar[]) rawVariables.get(Auxiliary.uL);
+      GRBVar[] uLvar = (GRBVar[]) rawVariables.get(uL);
       List<String> strings = new ArrayList<>();
       for (int l = 0; l < pm.getLinks().size(); l++)
          strings.add("(" + (l + this.offset) + "): ["
                  + pm.getLinks().get(l).getId() + "]["
-                 + uL[l].get(GRB.DoubleAttr.X) + "]");
+                 + uLvar[l].get(GRB.DoubleAttr.X) + "]");
       stringVariables.put("uL", strings);
    }
 
    private void setsSVP() throws GRBException {
-      GRBVar[][][] sSVP = (GRBVar[][][]) rawVariables.get(Auxiliary.sSVP);
+      GRBVar[][][] sSVPvar = (GRBVar[][][]) rawVariables.get(sSVP);
       List<String> strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               if (sSVP[s][v][p].get(GRB.DoubleAttr.X) == 1.0)
+               if (sSVPvar[s][v][p].get(GRB.DoubleAttr.X) == 1.0)
                   strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
                           + pm.getPaths().get(p).getNodePath());
       stringVariables.put("sSVP", strings);
    }
 
    private void setdSP() throws GRBException {
-      GRBVar[][] dSP = (GRBVar[][]) rawVariables.get(Auxiliary.dSP);
+      GRBVar[][] dSPvar = (GRBVar[][]) rawVariables.get(dSP);
       List<String> strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            if (dSP[s][p].get(GRB.DoubleAttr.X) > 0)
+            if (dSPvar[s][p].get(GRB.DoubleAttr.X) > 0)
                strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): "
                        + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                       + "[" + Auxiliary.roundDouble(dSP[s][p].get(GRB.DoubleAttr.X), 2) + "]");
+                       + "[" + Auxiliary.roundDouble(dSPvar[s][p].get(GRB.DoubleAttr.X), 2) + "]");
       stringVariables.put("dSP", strings);
    }
 

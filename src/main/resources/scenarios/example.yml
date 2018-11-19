@@ -3,9 +3,6 @@ gap: 0
 weights: [1.0, 0, 0]
 # auxiliary parameters
 aux: {
-  "overhead": 1,
-  "minPathsDefault": 3,
-  "maxPathsDefault": 3,
   "iterations": 1000,
   "offset_results": 0,
   "scaling_x": 1.0,
@@ -25,18 +22,24 @@ functions:
   attributes: {
     "replicable": false,
     "load": 0.5,
+    "overhead": 1,
+    "sync_load": 0.5,
     "delay": 10
   }
 - type: 1
   attributes: {
     "replicable": true,
     "load": 1.0,
+    "overhead": 1,
+    "sync_load": 0.5,
     "delay": 10
   }
 - type: 2
   attributes: {
     "replicable": false,
     "load": 0.5,
+    "overhead": 1,
+    "sync_load": 0.5,
     "delay": 10
   }
 # traffic flow definitions
