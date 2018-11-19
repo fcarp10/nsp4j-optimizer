@@ -1,9 +1,574 @@
-***********
 Constraints
-***********
+===========
 
-setLinkUtilizationExpr
-======================
+Routing and VNF constraints
+---------------------------
+
+RPC1
+^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+        \forall s \in \mathbb{S},  k = 1,..., \|\Lambda_s \| :  \sum_{p \in \mathbb{P}_s} z_{p}^{k,s} = 1
+        \end{equation}
+
+.. code-block:: java
+
+	private void onePathPerDemand() throws GRBException {
+	    for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
+	            GRBLinExpr expr = new GRBLinExpr();
+
+
+This constraint we look at will limit the number of paths used for each traffic demand to 1 and is executed by the method onePathPerDemand. It runs as follows:
+
+The first two *for loops* ensure that for all service chains :math:`s`, element of a set of service chains :math:`S`, and for all traffic demands :math:`\lambda`, an element of a set of demands :math:`\Lambda_s`  for the service chain :math:`s`, the following operations will be valid.
+
+                The following code forces to 1 the summatory of all the traffic demands :math:`\lambda` of service *s* using the path *p* in order to ensure that each traffic demand only uses one path.
+
+.. code-block:: java
+
+                for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+	                expr.addTerm(1.0, variables.tSPD[s][p][d]);
+	            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
+	        }
+    	}
+
+
+
+
+RPC2
+^^^^
+
+
+RPC3
+^^^^
+
+
+RPI1
+^^^^
+
+.. math::
+    :nowrap:
+
+      \begin{equation}  \label{routing_1}  \text{RPI1:} \qquad
+        \forall s \in \mathbb{S},  \forall p \in \mathbb{ P}_s  :  \quad   \frac{ \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s} } {M} \leq z_{p}^{s} \leq \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s}
+        \end{equation}
+
+alte Formel
+
+.. math::
+    :nowrap:
+
+        \begin{equation} \label{activatePathForService}
+	\forall s \in  S, \forall \lambda \in  \Lambda_s, \forall p \in P_s : t_{p}^{\lambda, s} \leq t_{p}^{s} \leq \sum_{\lambda' \in \Lambda_s} t_{p}^{\lambda', s}
+	\end{equation}
+
+
+The method *activePathForService* is meant to ensure that when a traffic demand :math:`\lambda` is using a path :math:`p`, said path will be activated for the corresponding service :math:`s`. Following the equation, this method is executed as follows:
+
+The first block
+
+.. code-block:: java
+
+	private void activatePathForService() throws GRBException {
+	    for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+	                model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, variables.tSP[s][p], "activatePathForService");
+
+ensures that for all service chains :math:`s`, an element of a set of service chains :math:`S`, for all paths :math:`p`, element of a set of admissable paths :math:`P_s`  for a service :math:`s`, and for all demands :math:`\lambda`, element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`, a variable :math:`t_{p}^{\lambda', s}` is less equal to a variable :math:`t_{p}^{s}`.
+
+The results are then returned to activePathForService.
+
+This correlation can be portrayed in a formula as such
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+	\forall s \in  S, \forall \lambda \in  \Lambda_s, \forall p \in P_s : t_{p}^{\lambda, s} \leq t_{p}^{s}
+	\end{equation}
+
+
+The second block
+
+.. code-block:: java
+
+        for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
+
+
+starts ensuring that for all services :math:`s`, element of a set of service chains :math:`S`, and for all paths :math:`p`, element of a set of admissible paths :math:`P_s`  for a service :math:`s`, the following operations are valid.
+
+                Then it express a summatory function over all demands :math:`\lambda`, that are an element of a set of traffic demands :math:`\Lambda_s` for a certain service :math:`s`, for a function :math:`t_{p}^{\lambda, s}`. This summatory function is then defined as greater equal than a variable :math:`t_{p}^{s}`, also defined as mentioned earlier, and then likewise returned to *activePathForService*.
+
+.. code-block:: java
+
+                GRBLinExpr expr = new GRBLinExpr();
+	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+	                expr.addTerm(1.0, variables.tSPD[s][p][d]);
+	            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.tSP[s][p], "activatePathForService");
+	        }
+	}
+
+
+
+This block can also be expressed as
+
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+	     z_{p}^{s} \leq \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s}
+	    \end{equation}
+
+
+To summarize both blocks of commands into one formula, we can simply interpret them as an inequation, with :math:`t_{p}^{s}` acting like the connecting link, resulting on the shown manager formula stated above.
+
+
+
+VAI1
+^^^^
+
+
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+        \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}, \forall x \in \mathbb{X} :  \quad \frac{ \sum_{k=1 }^{\|\Lambda_s \|}      f_{x,k}^{v,s} }  {\|\Lambda_s \|} \leq f_x^{v,s} \leq   \sum_{k=1 }^{\|\Lambda_s \|}   f_{x,k}^{v,s}
+        \end{equation}
+
+
+
+alte Formel !!!!
+
+.. math::
+    :nowrap:
+
+        \begin{equation} \label{mappingFunctionsWithDemands}
+	    \forall s \in  S, \forall v \in  V_s, \forall x \in X, \forall \lambda \in \Lambda_s: f_{x,\lambda}^{v,s} \leq f_x^{v,s} \leq \sum_{\lambda' \in  \Lambda_s} f_{x,\lambda'}^{v,s}
+    	\end{equation}
+
+
+
+.. code-block:: java
+
+	private void mappingFunctionsWithDemands() throws GRBException {
+
+	    for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+	            for (int x = 0; x < parameters.getServers().size(); x++)
+	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+	                    model.getGrbModel().addConstr(variables.fXSVD[x][s][v][d], GRB.LESS_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
+
+	    for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+	            for (int x = 0; x < parameters.getServers().size(); x++) {
+	                GRBLinExpr expr = new GRBLinExpr();
+	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
+	                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
+	            }
+	}
+
+
+
+This next constraint expressed by the method mappingFunctionsWithDemands, ensures that a function :math:`v` is only placed in a server :math:`x` if said server is used by at least one traffic demand. Corresponding to equation (14) in the paper, this method is executed as follows:
+
+                The first block of code
+
+.. code-block:: java
+
+        for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+	            for (int x = 0; x < parameters.getServers().size(); x++)
+	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+	                    model.getGrbModel().addConstr(variables.fXSVD[x][s][v][d], GRB.LESS_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
+
+ensures that for all servers :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, an element of an ordered set of functions :math:`V_s`  for a service :math:`s`, for all servers :math:`x`, that are element of a set of servers :math:`X`, and for all demands :math:`\lambda`, that are manager.elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`, the following inequation is valid. Said inequation is defined as a *variable0* :math:`f_{x,\lambda}^{v,s}`, which is set to be lesser equal to :math:`f_x^{v,s}`, and returned to *mappingFunctionsWithDemands*.
+
+This first half can be interpreted as follows:
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+	    \forall s \in  S, \forall v \in  V_s, \forall x \in X, \forall \lambda \in \Lambda_s: f_{x,\lambda}^{v,s} \leq f_x^{v,s}
+	    \end{equation}
+
+
+The second block
+
+.. code-block:: java
+
+        for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+	            for (int x = 0; x < parameters.getServers().size(); x++) {
+	                GRBLinExpr expr = new GRBLinExpr();
+	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
+	                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
+
+first makes sure that for all servers :math:`s`, that are element of a set of service chains :math:`S`, for all functions :math:`v`, that are element of an ordered set of functions :math:`V_s`  for a service :math:`s`, and for all server :math:`x`, that are element of a set of servers :math:`X`, the following operations are realized.
+
+Following up
+
+.. code-block:: java
+
+                    GRBLinExpr expr = new GRBLinExpr();
+	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
+	                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
+
+Express a summatory function over all demands :math:`\lambda`, that are an element of a set of traffic demands :math:`\Lambda_s` for a service :math:`s`, for a variable :math:`f_{x,\lambda}^{v,s}` that is then set to be greater equal than a variable :math:`f_x^{v,s}`  and the results are also sent back to *mappingFunctionsWithDemands*.
+
+A possible mathematical translation for this block could be
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+        \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}, \forall x \in \mathbb{X} :  \quad f_x^{v,s} \leq   \sum_{k=1 }^{\|\Lambda_s \|}   f_{x,k}^{v,s}
+        \end{equation}
+
+Combining both inequations from the first and the second half of the method will result in the initial shown equation.
+
+
+
+
+
+
+VAI3
+^^^^
+
+.. math::
+    :nowrap:
+
+      \begin{equation}
+	    \forall s \in \mathbb{S},  \forall x \in \mathbb{X} :     \quad    \frac{ \sum_{s \in \mathbb{S}} \sum_{v \in \mathbb{V}_s} f_x^{v,s}} {M} \leq f^s_x  \leq  \sum_{s \in \mathbb{S}}  \sum_{v \in  \mathbb{V}_s} f_x^{v,s}
+     \end{equation}
+
+
+.. code-block:: java
+
+    public void countNumberOfUsedServers() throws GRBException {
+        for (int x = 0; x < parameters.getServers().size(); x++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            GRBLinExpr expr2 = new GRBLinExpr();
+            for (int s = 0; s < parameters.getServices().size(); s++)
+                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
+                    expr.addTerm(1.0 / parameters.getTotalNumberOfFunctionsAux(), variables.fXSV[x][s][v]);
+                    expr2.addTerm(1.0, variables.fXSV[x][s][v]);
+                }
+            model.getGrbModel().addConstr(variables.fX[x], GRB.GREATER_EQUAL, expr, "countNumberOfUsedServers");
+            model.getGrbModel().addConstr(variables.fX[x], GRB.LESS_EQUAL, expr2, "countNumberOfUsedServers");
+        }
+    }
+
+
+This next method *countNumberOfUsedServers* basically counts all servers that are used for all the functions for all service chains in relation to the total number of servers. Equivalent to equation (2) from the paper, this method is running as followed:
+
+The for-loop
+
+.. code-block:: java
+
+        for (int x = 0; x < parameters.getServers().size(); x++) {
+
+makes sure, that for all servers :math:`x`, element of the the set of servers :math:`X` in the network will be regarded in the following operation.
+
+All subsequent loops
+
+.. code-block:: java
+
+            GRBLinExpr expr2 = new GRBLinExpr();
+            for (int s = 0; s < parameters.getServices().size(); s++)
+                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+
+are to be translated as summatories over all service chains :math:`s`, element of the set of service chains :math:`S` and over all functions :math:`v`, element of a ordered set of functions :math:`V_s`  for the service chain :math:`s`, for the following expression
+
+.. code-block:: java
+
+                    expr.addTerm(1.0 / parameters.getTotalNumberOfFunctionsAux(), variables.fXSV[x][s][v]);
+
+which describes a division of :math:`1` by the total number of functions, multiplied with the variable :math:`f_{x}^{v,s}`.
+
+Following up
+
+.. code-block:: java
+
+            model.getGrbModel().addConstr(variables.fX[x], GRB.GREATER_EQUAL, expr, "countNumberOfUsedServers");
+
+sets a new variable :math:`f_x` as greater equal to the term defined in the previous expression.
+This result will then be returned again as *countNumberOfUsedServers*.
+
+
+
+
+VNF allocation constraints
+--------------------------
+
+
+VAC1
+^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+        \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}, \forall p \in \mathbb{ P}_s, k = 1,..., \|\Lambda_s \| :   \quad      z_{p}^{k, s} \leq  \sum_{i=1}^{ | \Pi^s_{p}|} \sum_{x \in \mathbb{ X}_{ n^{p,s}_i} } f_{x,k}^{v,s}  \text{ ,}
+        \end{equation}
+
+
+
+.. code-block:: java
+
+	private void functionPlacement() throws GRBException {
+
+	    for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+	                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
+	                    GRBLinExpr expr = new GRBLinExpr();
+	                    for (int n = 0; n < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
+	                        for (int x = 0; x < parameters.getServers().size(); x++)
+	                            if (parameters.getServers().get(x).getNodeParent().equals(parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
+	                                expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
+	                    model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
+	                }
+	}
+
+
+
+The function allocation is controlled by this next constrained defined in functionPlacement. Related to equation (12) in the paper, it assigns all functions for a service :math:`s` in the active paths :math:`p` and is executed as followed:
+
+                 First of all the code lines
+
+.. code-block:: java
+
+        for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+	                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
+
+ensure that for all services :math:`s`, that are an element of a set of service chains :math:`S`, for all paths :math:`p`, an element of a set of  admissible paths :math:`P_s`  for a service :math:`s`, for all demands :math:`\lambda`, an element of a set of traffic demands :math:`\lambda_s`  for the service :math:`s`, and for all functions :math:`v`, that are an element of a set of ordered functions :math:`V_s`  for a service :math:`s`, the following operations are valid and executed.
+
+                Following up
+
+.. code-block:: java
+
+                        GRBLinExpr expr = new GRBLinExpr();
+	                    for (int n = 0; n < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
+	                        for (int x = 0; x < parameters.getServers().size(); x++)
+	                            if (parameters.getServers().get(x).getNodeParent().equals(parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
+	                                expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
+	                    model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
+
+then introduces a summatory function over all nodes :math:`n`, that are element of the set of nodes :math:`N_p^s` that are traversed by the path :math:`p` for a service :math:`s`, and over all the servers :math:`x`, that are element of a set of servers :math:`X_p` that are also traversed by :math:`p`, for a function :math:`f_{x,\lambda}^{v,s}`, if the current node equals the parent node.
+
+A variable :math:`t_{p}^{\lambda, s}` is then set to be less equal to this function :math:`f_{x,\lambda}^{v,s}` and the result is then returned to functionPlacement.
+
+
+
+
+
+
+VAC2
+^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+        \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}, k = 1,..., \|\Lambda_s \| :   \quad         \sum_{x \in  \mathbb{ X}} f_{x,k}^{v,s} = 1
+        \end{equation}
+
+
+
+.. code-block:: java
+
+	private void oneFunctionPerDemand() throws GRBException {
+
+	    for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
+	                GRBLinExpr expr = new GRBLinExpr();
+	                for (int x = 0; x < parameters.getServers().size(); x++)
+	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
+	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "oneFunctionPerDemand");
+	            }
+	}
+
+
+
+This method oneFunctionPerDemand is, similar to constraint (13) from the paper, ensuring that each traffic demand λ has to traverse a specific function :math:`v` in only one server. All of this is realized as followed:
+
+                First of all the block
+
+.. code-block:: java
+
+        for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
+
+
+makes sure that the following operations are executed for all services :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, element of a set of ordered functions :math:`V_s`  for a service :math:`s`, and for all demands :math:`\lambda`, that are an element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`.
+
+                Thereafter
+
+.. code-block:: java
+
+                    GRBLinExpr expr = new GRBLinExpr();
+	                for (int x = 0; x < parameters.getServers().size(); x++)
+	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
+	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "oneFunctionPerDemand");
+
+will introduce a summatory function over all servers :math:`x`, that are manager.elements of a set of servers :math:`X`, for a function :math:`f_{x,\lambda}^{v,s}`.
+This function :math:`f_{x,\lambda}^{v,s}`  is then set to be equal 1 and the results are returned to *oneFunctionPerDemand*.
+
+
+
+
+VAC3
+^^^^
+
+
+
+Replication constraints
+-----------------------
+
+VRC2
+^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+        \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}:    \quad      \sum_{x \in  \mathbb{X}} f_x^{v,s} =  F^{v,s}_R \sum_{p \in  \mathbb{P}_s} z_{p}^s + 1 -F^{v,s}_R
+        \end{equation}
+
+alte Formel !!!
+
+.. math::
+    :nowrap:
+
+        \begin{equation} \label{pathsConstrainedByFunctions}
+	    \forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} \leq F_v^{s} \sum_{p \in P_s} t_{p}^s + 1 - F_v^{s}
+	    \end{equation}
+
+
+.. code-block:: java
+
+	private void pathsConstrainedByFunctions() throws GRBException {
+
+	    for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
+	            GRBLinExpr expr = new GRBLinExpr();
+	            for (int x = 0; x < parameters.getServers().size(); x++)
+	                expr.addTerm(1.0, variables.fXSV[x][s][v]);
+	            if (parameters.getServices().get(s).getFunctions().get(v).isReplicable()) {
+	                GRBLinExpr expr2 = new GRBLinExpr();
+	                for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+	                    expr2.addTerm(1.0, variables.tSP[s][p]);
+	                model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
+	            } else
+	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
+	        }
+	}
+
+
+This next constraint pathConstrainedByFunctions is defined to check the replicability of a function, determined by a parameter :math:`F_v^{s}`. Corresponding to equation (11) from the paper it is set to run as follows:
+
+First
+
+.. code-block:: java
+
+        for (int s = 0; s < parameters.getServices().size(); s++)
+	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
+
+
+makes sure that all following operations are valid and to be executed for all services :math:`s`, an element of a set service chains :math:`S`, and for all functions :math:`v`, that are element of a set of ordered functions :math:`V_s`  for a service :math:`s`.
+
+
+.. code-block:: java
+
+                for (int x = 0; x < parameters.getServers().size(); x++)
+	                expr.addTerm(1.0, variables.fXSV[x][s][v]);
+
+will then give us a summatory function over all servers :math:`x`, that are element of the set of servers :math:`X` in the network, for a variable :math:`f_x^{v,s}`.
+
+This first half of the method describes this formula:
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+	\forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s}
+	\end{equation}
+
+
+In the next lines of code this if-loop is initiated
+
+.. code-block:: java
+
+                if (parameters.getServices().get(s).getFunctions().get(v).isReplicable()) {
+	                GRBLinExpr expr2 = new GRBLinExpr();
+	                for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+	                    expr2.addTerm(1.0, variables.tSP[s][p]);
+	                model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
+	            } else
+	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
+
+For all replicable functions :math:`v` of the service :math:`s` a new expression is defined as a summatory function over all paths :math:`p`, that are element of a set of admissible paths :math:`P_s`  for the service :math:`s`, for a variable :math:`t_{p}^s`.
+
+This new expression is then set as equal to the first expression, mentioned above. So if the loop is true, this formula will be taking effect:
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+	\forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} = \sum_{p \in P_s} t_{p}^s
+	\end{equation}
+
+If the loop is false however, meaning that the function is not replicable, the first expression will just be equal to :math:`1`, which would translate to:
+
+.. math::
+    :nowrap:
+
+        	\begin{equation}
+	\forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} = 1
+	\end{equation}
+
+Both results would be returned to *pathConstrainedByFunctions*, regardless if the function is replicable or not.
+
+At this point it is noteworthy, that we can summarize the if-loop into one formula by introducing a variable :math:`F_v^{s}`, that can take the values :math:`1` for a replicable function of a service :math:`s` or :math:`0` for a non replicable function. Doing this we have to make sure that in both cases the original values of the two equations is not changed.
+
+                A form this equation might take would be this one introduced in the paper as equation (11).
+
+                In this the variable :math:`F_v^{s}`  acts as a stand-in for the if-loop, with :math:`F = 1` canceling out :math:`(1- F_v^{s})` ensuring that only the summatory function will be considered, and with :math:`F = 0` canceling out the summatory function so that the left half is only equal to :math:`1`.
+
+
+
+
+Network / server utilization and capacity constraints
+-----------------------------------------------------
+
+LTC 1 setLinkUtilizationExpr
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. math::
+    :nowrap:
+
+    \begin{equation}\label{link-traffic}
+    \forall e \in  \mathbb{E} :   \quad   \gamma_{e}   =  \sum_{s \in  \mathbb{S}}  \sum_{p \in \mathbb{P}_s}   \gamma^s_{p}  \cdot \delta_{e}(p) = \sum_{s \in  \mathbb{S}}  \sum_{p \in \mathbb{P}_s}   \sum_{k=1 }^{|\Lambda_s|}     \lambda^s_k \cdot  z_{p}^{k,s}  \cdot \delta_{e}(p)   \leq C_{e} \text{ ,}
+    \end{equation}
+
+The first constraint we look at in the code is *setLinkUtilizationExpr()*, which meant to check if a link is utilized in consideration of the paths that might traverse the link, the bandwidth of the traffic demand :math:`\lambda_k` and the maximum capacity of the link.
+
 
 .. code-block:: java
 
@@ -24,14 +589,6 @@ setLinkUtilizationExpr
         }
     }
 
-.. math::
-  :nowrap:
-
-    \begin{equation}
-    \forall \ell \in L: u_{\ell}  =  \frac{1}{C_\ell} \sum_{s \in  S} \sum_{\lambda \in  \Lambda_s} \sum_{p \in P_s} \lambda \cdot  t_{p}^{\lambda,s}  \cdot T_{p}^\ell  \leq 1
-    \end{equation}
-
-The first constraint we look at in the code is *setLinkUtilizationExpr()*, which correlates to equation (6) in the paper, meant to check if a link is utilized in consideration of the paths that might traverse the link, the bandwidth of the traffic demand :math:`\lambda` and the maximum capacity of the link.
 
 The method itself is performed as followed:
 
@@ -41,7 +598,7 @@ The first loop
 
         for (int l = 0; l < parameters.getLinks().size(); l++) {
 
-makes sure that all links :math:`l`, element of the set of link, are to be considered when executing the following operations.
+makes sure that all links :math:`e` (l), element of the set of link, are to be considered when executing the following operations.
 
             Starting a new expression with
 
@@ -60,8 +617,7 @@ the loops then express the summatories over all service chains :math:`s` , eleme
                     if (!parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).contains(parameters.getLinks().get(l)))
                         continue;
 
-makes sure that the operation will only continue if the current service chain s and the currently used path p contain the link :math:`l` we are looking at. If that is not the case the operation will end here. 
-            In the mathematical model this is portrayed by the parameter :math:`T_{p}^\ell`, that will enter the equation as multiplier by :math:`1` , if the link :math:`l` is used by path p and service chain :math:`s` , or by :math:`0`, if it is not. In case of a multiplication with :math:`0` , the whole equation will equal :math:`0` and the observed link will not be utilized.
+makes sure that the operation will only continue if the current service chain s and the currently used path p contain the link :math:`e` we are looking at. If that is not the case the operation will end here. In the mathematical model this is portrayed by the parameter :math:`\delta_{l}^p`, that will enter the equation as multiplier by :math:`1` , if the link :math:`e` is used by path p and service chain :math:`s` , or by :math:`0`, if it is not. In case of a multiplication with :math:`0` , the whole equation will equal :math:`0` and the observed link will not be utilized.
 
 On the other hand, if the parameter :math:`T_{p}^\ell` equals :math:`1`, the following will be executed:
 
@@ -87,7 +643,9 @@ defining the equation as the link utilization :math:`u_l`, returning the results
 
 
 setServerUtilizationExpr
-========================
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 .. code-block:: java
 
 	private void setServerUtilizationExpr() throws GRBException {                                                       
@@ -178,8 +736,8 @@ COMMENT: overhead still missing in the code?
 
 
 
-setLinearCostFunctions
-======================
+OFC1 and OFC2
+^^^^^^^^^^^^^
 
 .. code-block:: java
 
@@ -247,488 +805,9 @@ This result is roughly to be translated as
 All results will then be returned to *setLinearCostFunctions*.
 
 
-countNumberOfUsedServers
-========================
 
-.. code-block:: java
 
-    public void countNumberOfUsedServers() throws GRBException {
-        for (int x = 0; x < parameters.getServers().size(); x++) {
-            GRBLinExpr expr = new GRBLinExpr();
-            GRBLinExpr expr2 = new GRBLinExpr();
-            for (int s = 0; s < parameters.getServices().size(); s++)
-                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-                    expr.addTerm(1.0 / parameters.getTotalNumberOfFunctionsAux(), variables.fXSV[x][s][v]);
-                    expr2.addTerm(1.0, variables.fXSV[x][s][v]);
-                }
-            model.getGrbModel().addConstr(variables.fX[x], GRB.GREATER_EQUAL, expr, "countNumberOfUsedServers");
-            model.getGrbModel().addConstr(variables.fX[x], GRB.LESS_EQUAL, expr2, "countNumberOfUsedServers");
-        }
-    }
 
-.. math::
-  :nowrap:
-
-    \begin{equation}
-	\forall x \in X: \frac{1}{|V|} \sum_{s \in S} \sum_{v \in V_s} f_{x}^{v,s} \leq  f_x 
-	\end{equation}
-
-
-This next method *countNumberOfUsedServers* basically counts all servers that are used for all the functions for all service chains in relation to the total number of servers. Equivalent to equation (2) from the paper, this method is running as followed:
-
-The for-loop
-
-.. code-block:: java
-
-        for (int x = 0; x < parameters.getServers().size(); x++) {
-
-makes sure, that for all servers :math:`x`, element of the the set of servers :math:`X` in the network will be regarded in the following operation.
-
-All subsequent loops
-
-.. code-block:: java
-
-            GRBLinExpr expr2 = new GRBLinExpr();
-            for (int s = 0; s < parameters.getServices().size(); s++)
-                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
-
-are to be translated as summatories over all service chains :math:`s`, element of the set of service chains :math:`S` and over all functions :math:`v`, element of a ordered set of functions :math:`V_s`  for the service chain :math:`s`, for the following expression
-
-.. code-block:: java
-
-                    expr.addTerm(1.0 / parameters.getTotalNumberOfFunctionsAux(), variables.fXSV[x][s][v]);
-
-which describes a division of :math:`1` by the total number of functions, multiplied with the variable :math:`f_{x}^{v,s}`.
-
-Following up
-
-.. code-block:: java
-
-            model.getGrbModel().addConstr(variables.fX[x], GRB.GREATER_EQUAL, expr, "countNumberOfUsedServers");
-
-sets a new variable :math:`f_x` as greater equal to the term defined in the previous expression. 
-This result will then be returned again as *countNumberOfUsedServers*.
-
-A resulting equation describing this operation could be
-
-.. math::
-  :nowrap:
-
-    \begin{equation}
-	\forall x \in X:  \sum_{s \in S} \sum_{v \in V_s} \frac{1}{|V|} f_{x}^{v,s} \leq  f_x
-	\end{equation}
-
-
-onePathPerDemand
-================
-
-.. code-block:: java
-
-	private void onePathPerDemand() throws GRBException {
-	    for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-	            GRBLinExpr expr = new GRBLinExpr();
-
-.. math::
-  :nowrap:
-
-    \begin{equation} \label{onePathPerDemand}
-	\forall s \in  S, \forall \lambda \in  \Lambda_s: \sum_{p \in P_s} t_{p}^{\lambda,s} = 1
-	\end{equation}
-
-This constraint we look at will limit the number of paths used for each traffic demand to 1 and is executed by the method onePathPerDemand. It runs as follows:
-
-The first two *for loops* ensure that for all service chains :math:`s`, element of a set of service chains :math:`S`, and for all traffic demands :math:`\lambda`, an element of a set of demands :math:`\Lambda_s`  for the service chain :math:`s`, the following operations will be valid.
-
-            The following code forces to 1 the summatory of all the traffic demands :math:`\lambda` of service *s* using the path *p* in order to ensure that each traffic demand only uses one path.
-
-.. code-block:: java
-
-                for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                expr.addTerm(1.0, variables.tSPD[s][p][d]);
-	            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
-	        }
-    	}
-
-
-activatePathForService
-======================
-
-.. math::
-  :nowrap:
-
-    \begin{equation} \label{activatePathForService}
-	\forall s \in  S, \forall \lambda \in  \Lambda_s, \forall p \in P_s : t_{p}^{\lambda, s} \leq t_{p}^{s} \leq \sum_{\lambda' \in \Lambda_s} t_{p}^{\lambda', s}
-	\end{equation}
-
-
-The method *activePathForService* is meant to ensure that when a traffic demand :math:`\lambda` is using a path :math:`p`, said path will be activated for the corresponding service :math:`s`. Following the equation, this method is executed as follows:
-
-The first block 
-
-.. code-block:: java
-	
-	private void activatePathForService() throws GRBException {
-	    for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, variables.tSP[s][p], "activatePathForService");
-
-ensures that for all service chains :math:`s`, an element of a set of service chains :math:`S`, for all paths :math:`p`, element of a set of admissable paths :math:`P_s`  for a service :math:`s`, and for all demands :math:`\lambda`, element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`, a variable :math:`t_{p}^{\lambda', s}` is less equal to a variable :math:`t_{p}^{s}`. 
-
-The results are then returned to activePathForService.
-
-This correlation can be portrayed in a formula as such
-
-.. math::
-  :nowrap:
-
-    \begin{equation}
-	\forall s \in  S, \forall \lambda \in  \Lambda_s, \forall p \in P_s : t_{p}^{\lambda, s} \leq t_{p}^{s}
-	\end{equation}
-
-
-The second block 
-
-.. code-block:: java
-
-        for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
-
-
-starts ensuring that for all services :math:`s`, element of a set of service chains :math:`S`, and for all paths :math:`p`, element of a set of admissible paths :math:`P_s`  for a service :math:`s`, the following operations are valid.
-
-            Then it express a summatory function over all demands :math:`\lambda`, that are an element of a set of traffic demands :math:`\Lambda_s` for a certain service :math:`s`, for a function :math:`t_{p}^{\lambda, s}`. This summatory function is then defined as greater equal than a variable :math:`t_{p}^{s}`, also defined as mentioned earlier, and then likewise returned to *activePathForService*.
-
-.. code-block:: java
-
-                GRBLinExpr expr = new GRBLinExpr();
-	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                expr.addTerm(1.0, variables.tSPD[s][p][d]);
-	            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.tSP[s][p], "activatePathForService");
-	        }
-	}
-
-
-
-This block can also be expressed as
-
-
-.. math::
-  :nowrap:
-
-    \begin{equation}
-	\forall s \in  S, \forall p \in P_s :  t_{p}^{s} \leq \sum_{\lambda' \in \Lambda_s} t_{p}^{\lambda', s}
-	\end{equation}
-
-
-To summarize both blocks of commands into one formula, we can simply interpret them as an inequation, with :math:`t_{p}^{s}` acting like the connecting link, resulting on the shown manager formula stated above.
-
-
-pathConstrainedByFunctions
-==========================
-
-
-.. code-block:: java
-
-	private void pathsConstrainedByFunctions() throws GRBException {
-
-	    for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-	            GRBLinExpr expr = new GRBLinExpr();
-	            for (int x = 0; x < parameters.getServers().size(); x++)
-	                expr.addTerm(1.0, variables.fXSV[x][s][v]);
-	            if (parameters.getServices().get(s).getFunctions().get(v).isReplicable()) {
-	                GRBLinExpr expr2 = new GRBLinExpr();
-	                for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                    expr2.addTerm(1.0, variables.tSP[s][p]);
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
-	            } else
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
-	        }
-	}
-
-.. math::
-  :nowrap:
-
-    \begin{equation} \label{pathsConstrainedByFunctions}
-	\forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} \leq F_v^{s} \sum_{p \in P_s} t_{p}^s + 1 - F_v^{s}
-	\end{equation}
-
-This next constraint pathConstrainedByFunctions is defined to check the replicability of a function, determined by a parameter :math:`F_v^{s}`. Corresponding to equation (11) from the paper it is set to run as follows:
-
-First 
-
-.. code-block:: java
-
-        for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-
-
-makes sure that all following operations are valid and to be executed for all services :math:`s`, an element of a set service chains :math:`S`, and for all functions :math:`v`, that are element of a set of ordered functions :math:`V_s`  for a service :math:`s`.
-
-
-.. code-block:: java
-
-                for (int x = 0; x < parameters.getServers().size(); x++)
-	                expr.addTerm(1.0, variables.fXSV[x][s][v]);
-
-will then give us a summatory function over all servers :math:`x`, that are element of the set of servers :math:`X` in the network, for a variable :math:`f_x^{v,s}`.
-
-This first half of the method describes this formula:
-
-.. math::
-  :nowrap:
-
-    \begin{equation}
-	\forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} 
-	\end{equation}
-
-
-In the next lines of code this if-loop is initiated
-
-.. code-block:: java
-
-                if (parameters.getServices().get(s).getFunctions().get(v).isReplicable()) {
-	                GRBLinExpr expr2 = new GRBLinExpr();
-	                for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                    expr2.addTerm(1.0, variables.tSP[s][p]);
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
-	            } else
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
-
-For all replicable functions :math:`v` of the service :math:`s` a new expression is defined as a summatory function over all paths :math:`p`, that are element of a set of admissible paths :math:`P_s`  for the service :math:`s`, for a variable :math:`t_{p}^s`.
-
-This new expression is then set as equal to the first expression, mentioned above. So if the loop is true, this formula will be taking effect:
-
-.. math::
-  :nowrap:
-
-    \begin{equation}
-	\forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} = \sum_{p \in P_s} t_{p}^s
-	\end{equation}
-
-If the loop is false however, meaning that the function is not replicable, the first expression will just be equal to :math:`1`, which would translate to:
-
-.. math::
-  :nowrap:
-
-    	\begin{equation}
-	\forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} = 1
-	\end{equation}
-
-Both results would be returned to *pathConstrainedByFunctions*, regardless if the function is replicable or not.
-
-At this point it is noteworthy, that we can summarize the if-loop into one formula by introducing a variable :math:`F_v^{s}`, that can take the values :math:`1` for a replicable function of a service :math:`s` or :math:`0` for a non replicable function. Doing this we have to make sure that in both cases the original values of the two equations is not changed.
-
-            A form this equation might take would be this one introduced in the paper as equation (11).
-
-            In this the variable :math:`F_v^{s}`  acts as a stand-in for the if-loop, with :math:`F = 1` canceling out :math:`(1- F_v^{s})` ensuring that only the summatory function will be considered, and with :math:`F = 0` canceling out the summatory function so that the left half is only equal to :math:`1`.
-
-
-
-functionPlacement
-=================
-
-
-.. code-block:: java
-
-	private void functionPlacement() throws GRBException {
-
-	    for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-	                    GRBLinExpr expr = new GRBLinExpr();
-	                    for (int n = 0; n < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
-	                        for (int x = 0; x < parameters.getServers().size(); x++)
-	                            if (parameters.getServers().get(x).getNodeParent().equals(parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
-	                                expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-	                    model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
-	                }
-	}
-
-.. math::
-  :nowrap:
-
-    \begin{equation}  \label{functionPlacement}
-	\forall s \in  S, \forall p \in P_s, \forall \lambda \in \Lambda_s, \forall v \in  V_s: t_{p}^{\lambda, s} \leq \sum_{x \in X_p} f_{x,\lambda}^{v,s} 
-	\end{equation}
-
-
-The function allocation is controlled by this next constrained defined in functionPlacement. Related to equation (12) in the paper, it assigns all functions for a service :math:`s` in the active paths :math:`p` and is executed as followed:
-
-             First of all the code lines
-
-.. code-block:: java
-
-        for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++) {
-
-ensure that for all services :math:`s`, that are an element of a set of service chains :math:`S`, for all paths :math:`p`, an element of a set of  admissible paths :math:`P_s`  for a service :math:`s`, for all demands :math:`\lambda`, an element of a set of traffic demands :math:`\lambda_s`  for the service :math:`s`, and for all functions :math:`v`, that are an element of a set of ordered functions :math:`V_s`  for a service :math:`s`, the following operations are valid and executed.
-
-            Following up
-
-.. code-block:: java
-
-                        GRBLinExpr expr = new GRBLinExpr();
-	                    for (int n = 0; n < parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
-	                        for (int x = 0; x < parameters.getServers().size(); x++)
-	                            if (parameters.getServers().get(x).getNodeParent().equals(parameters.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
-	                                expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-	                    model.getGrbModel().addConstr(variables.tSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
-
-then introduces a summatory function over all nodes :math:`n`, that are element of the set of nodes :math:`N_p^s` that are traversed by the path :math:`p` for a service :math:`s`, and over all the servers :math:`x`, that are element of a set of servers :math:`X_p` that are also traversed by :math:`p`, for a function :math:`f_{x,\lambda}^{v,s}`, if the current node equals the parent node. 
-
-A variable :math:`t_{p}^{\lambda, s}` is then set to be less equal to this function :math:`f_{x,\lambda}^{v,s}` and the result is then returned to functionPlacement. 
-
-
-
-oneFunctionPerDemand
-====================
-
-
-.. code-block:: java
-
-	private void oneFunctionPerDemand() throws GRBException {
-
-	    for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
-	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-	                GRBLinExpr expr = new GRBLinExpr();
-	                for (int x = 0; x < parameters.getServers().size(); x++)
-	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "oneFunctionPerDemand");
-	            }
-	}
-
-.. math::
-  :nowrap:
-
-    \begin{equation} \label{oneFunctionPerDemand}
-	\forall s \in S, \forall v \in  V_s, \forall \lambda \in \Lambda_s: \sum_{x \in  X} f_{x,\lambda}^{v,s} = 1
-	\end{equation}
-
-
-This method oneFunctionPerDemand is, similar to constraint (13) from the paper, ensuring that each traffic demand λ has to traverse a specific function :math:`v` in only one server. All of this is realized as followed:
-
-            First of all the block
-
-.. code-block:: java
-
-        for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
-	            for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-
-
-makes sure that the following operations are executed for all services :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, element of a set of ordered functions :math:`V_s`  for a service :math:`s`, and for all demands :math:`\lambda`, that are an element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`.
-
-            Thereafter
-
-.. code-block:: java
-
-                    GRBLinExpr expr = new GRBLinExpr();
-	                for (int x = 0; x < parameters.getServers().size(); x++)
-	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "oneFunctionPerDemand");
-
-will introduce a summatory function over all servers :math:`x`, that are manager.elements of a set of servers :math:`X`, for a function :math:`f_{x,\lambda}^{v,s}`.
-This function :math:`f_{x,\lambda}^{v,s}`  is then set to be equal 1 and the results are returned to *oneFunctionPerDemand*.
-
-
-mappingFunctionsWithDemands
-===========================
-
-
-
-.. code-block:: java
-
-	private void mappingFunctionsWithDemands() throws GRBException {
-
-	    for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
-	            for (int x = 0; x < parameters.getServers().size(); x++)
-	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                    model.getGrbModel().addConstr(variables.fXSVD[x][s][v][d], GRB.LESS_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
-
-	    for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
-	            for (int x = 0; x < parameters.getServers().size(); x++) {
-	                GRBLinExpr expr = new GRBLinExpr();
-	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-	                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
-	            }
-	}
-
-.. math::
-  :nowrap:
-
-    	\begin{equation} \label{mappingFunctionsWithDemands}
-	\forall s \in  S, \forall v \in  V_s, \forall x \in X, \forall \lambda \in \Lambda_s: f_{x,\lambda}^{v,s} \leq f_x^{v,s} \leq \sum_{\lambda' \in  \Lambda_s} f_{x,\lambda'}^{v,s} 
-	\end{equation}
-
-This next constraint expressed by the method mappingFunctionsWithDemands, ensures that a function :math:`v` is only placed in a server :math:`x` if said server is used by at least one traffic demand. Corresponding to equation (14) in the paper, this method is executed as follows:
-
-            The first block of code
-
-.. code-block:: java
-
-        for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
-	            for (int x = 0; x < parameters.getServers().size(); x++)
-	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                    model.getGrbModel().addConstr(variables.fXSVD[x][s][v][d], GRB.LESS_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
-
-ensures that for all servers :math:`s`, an element of a set of service chains :math:`S`, for all functions :math:`v`, an element of an ordered set of functions :math:`V_s`  for a service :math:`s`, for all servers :math:`x`, that are element of a set of servers :math:`X`, and for all demands :math:`\lambda`, that are manager.elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`, the following inequation is valid. Said inequation is defined as a *variable0* :math:`f_{x,\lambda}^{v,s}`, which is set to be lesser equal to :math:`f_x^{v,s}`, and returned to *mappingFunctionsWithDemands*.
-	
-This first half can be interpreted as follows:
-
-.. math::
-  :nowrap:
-
-    	\begin{equation}
-	\forall s \in  S, \forall v \in  V_s, \forall x \in X, \forall \lambda \in \Lambda_s: f_{x,\lambda}^{v,s} \leq f_x^{v,s} 
-	\end{equation}
-
-
-The second block
-
-.. code-block:: java
-
-        for (int s = 0; s < parameters.getServices().size(); s++)
-	        for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
-	            for (int x = 0; x < parameters.getServers().size(); x++) {
-	                GRBLinExpr expr = new GRBLinExpr();
-	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-	                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
-
-first makes sure that for all servers :math:`s`, that are element of a set of service chains :math:`S`, for all functions :math:`v`, that are element of an ordered set of functions :math:`V_s`  for a service :math:`s`, and for all server :math:`x`, that are element of a set of servers :math:`X`, the following operations are realized.
-
-Following up
-
-.. code-block:: java
-
-                    GRBLinExpr expr = new GRBLinExpr();
-	                for (int d = 0; d < parameters.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                    expr.addTerm(1.0, variables.fXSVD[x][s][v][d]);
-	                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.fXSV[x][s][v], "mappingFunctionsWithDemands");
-
-Express a summatory function over all demands :math:`\lambda`, that are an element of a set of traffic demands :math:`\Lambda_s` for a service :math:`s`, for a variable :math:`f_{x,\lambda}^{v,s}` that is then set to be greater equal than a variable :math:`f_x^{v,s}`  and the results are also sent back to *mappingFunctionsWithDemands*.
-
-A possible mathematical translation for this block could be
-
-.. math::
-  :nowrap:
-
-    	\begin{equation}
-	\forall s \in  S, \forall v \in  V_s, \forall x \in X, \forall \lambda \in \Lambda_s: f_x^{v,s} \leq \sum_{\lambda' \in  \Lambda_s} f_{x,\lambda'}^{v,s} 
-	\end{equation}
-
-Combining both inequations from the first and the second half of the method will result in the initial shown equation.
 
 
 functionSequenceOrder
