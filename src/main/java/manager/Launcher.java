@@ -2,7 +2,7 @@ package manager;
 
 import gui.WebClient;
 import gui.WebServer;
-import output.Aux;
+import output.Auxiliary;
 
 import static spark.Spark.*;
 
@@ -12,7 +12,7 @@ public class Launcher {
       port(8080);
       staticFiles.location("/public");
       init();
-      new Aux();
+      new Auxiliary();
       new WebServer();
       WebClient.postMessage("Info: please, load the topology");
    }

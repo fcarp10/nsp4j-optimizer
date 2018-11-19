@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-public class Aux {
+public class Auxiliary {
 
    public static CostFunctions costFunctions;
    public static final String NUM_OF_SERVERS_OBJ = "num_of_servers";
@@ -43,7 +43,7 @@ public class Aux {
    public static final String dSP = "dSP";
    public static final String dSPX = "dSPX";
 
-   public Aux() {
+   public Auxiliary() {
       TypeReference<CostFunctions> typeReference = new TypeReference<>() {
       };
       InputStream inputStream = TypeReference.class.getResourceAsStream("/aux_files/linear-cost-functions.yml");

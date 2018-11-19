@@ -19,7 +19,7 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import output.Aux;
+import output.Auxiliary;
 import output.Results;
 
 import java.util.*;
@@ -283,9 +283,9 @@ public class LearningModel {
       double cost, totalCost = 0;
       for (Double serverUtilization : ux) {
          cost = 0;
-         for (int f = 0; f < Aux.costFunctions.getValues().size(); f++) {
-            double value = Aux.costFunctions.getValues().get(f)[0] * serverUtilization
-                    + Aux.costFunctions.getValues().get(f)[1];
+         for (int f = 0; f < Auxiliary.costFunctions.getValues().size(); f++) {
+            double value = Auxiliary.costFunctions.getValues().get(f)[0] * serverUtilization
+                    + Auxiliary.costFunctions.getValues().get(f)[1];
             if (value > cost)
                cost = value;
          }

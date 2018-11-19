@@ -15,7 +15,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import output.Aux;
+import output.Auxiliary;
 import output.Results;
 import output.ResultsManager;
 import utils.ConfigFiles;
@@ -25,7 +25,7 @@ import utils.KShortestPathGenerator;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import static output.Aux.*;
+import static output.Auxiliary.*;
 
 public class Manager {
 
@@ -194,15 +194,15 @@ public class Manager {
 
    private static Results generateResults(OptimizationModel model, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
-      results.setVariable(Aux.rSP, model.getVariables().rSP);
-      results.setVariable(Aux.rSPD, model.getVariables().rSPD);
-      results.setVariable(Aux.pXSV, model.getVariables().pXSV);
-      results.setVariable(Aux.pXSVD, model.getVariables().pXSVD);
-      results.setVariable(Aux.uL, model.getVariables().uL);
-      results.setVariable(Aux.uX, model.getVariables().uX);
-      results.setVariable(Aux.pX, model.getVariables().pX);
-      results.setVariable(Aux.sSVP, model.getVariables().sSVP);
-      results.setVariable(Aux.dSP, model.getVariables().dSP);
+      results.setVariable(Auxiliary.rSP, model.getVariables().rSP);
+      results.setVariable(Auxiliary.rSPD, model.getVariables().rSPD);
+      results.setVariable(Auxiliary.pXSV, model.getVariables().pXSV);
+      results.setVariable(Auxiliary.pXSVD, model.getVariables().pXSVD);
+      results.setVariable(Auxiliary.uL, model.getVariables().uL);
+      results.setVariable(Auxiliary.uX, model.getVariables().uX);
+      results.setVariable(Auxiliary.pX, model.getVariables().pX);
+      results.setVariable(Auxiliary.sSVP, model.getVariables().sSVP);
+      results.setVariable(Auxiliary.dSP, model.getVariables().dSP);
       results.prepareVariablesForJsonFile(model.getObjVal(), initialModel);
       return results;
    }

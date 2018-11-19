@@ -6,7 +6,7 @@ import manager.Parameters;
 import manager.elements.Service;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
-import output.Aux;
+import output.Auxiliary;
 
 public class Constraints {
 
@@ -85,10 +85,10 @@ public class Constraints {
    }
 
    private void linearCostFunctions(GRBLinExpr expr, GRBVar grbVar) throws GRBException {
-      for (int l = 0; l < Aux.costFunctions.getValues().size(); l++) {
+      for (int l = 0; l < Auxiliary.costFunctions.getValues().size(); l++) {
          GRBLinExpr expr2 = new GRBLinExpr();
-         expr2.multAdd(Aux.costFunctions.getValues().get(l)[0], expr);
-         expr2.addConstant(Aux.costFunctions.getValues().get(l)[1]);
+         expr2.multAdd(Auxiliary.costFunctions.getValues().get(l)[0], expr);
+         expr2.addConstant(Auxiliary.costFunctions.getValues().get(l)[1]);
          model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar, "costFunctions");
       }
    }
@@ -139,7 +139,7 @@ public class Constraints {
                                    * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
                                    / pm.getServers().get(x).getCapacity();
                            double initialFunctionPlacement = 0;
-                           if (initialModel.getVarByName(Aux.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
+                           if (initialModel.getVarByName(Auxiliary.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
                               initialFunctionPlacement = 1;
                            double delay = load * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("delay");
                            migrationDelayExpr.addTerm(delay, vars.dSPX[s][p][x]);
@@ -301,7 +301,7 @@ public class Constraints {
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (initialModel.getVarByName(Aux.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
+                  if (initialModel.getVarByName(Auxiliary.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
                      model.getGrbModel().addConstr(vars.pXSV[x][s][v], GRB.EQUAL, 1, "initialPlacementAsConstraints");
       }
    }

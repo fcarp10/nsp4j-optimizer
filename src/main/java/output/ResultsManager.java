@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static output.Aux.INFO;
+import static output.Auxiliary.INFO;
 
 public class ResultsManager {
 
@@ -62,9 +62,9 @@ public class ResultsManager {
          new Variables(pm, model);
          model.read(path + filename + "_initial_placement.mst");
          model.optimize();
-         Aux.printLog(log, INFO, "initial placement loaded");
+         Auxiliary.printLog(log, INFO, "initial placement loaded");
       } catch (Exception e) {
-         Aux.printLog(log, INFO, "no initial placement found");
+         Auxiliary.printLog(log, INFO, "no initial placement found");
       }
       return model;
    }
