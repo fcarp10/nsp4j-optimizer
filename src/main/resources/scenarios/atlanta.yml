@@ -1,11 +1,8 @@
 # optimization parameters
-gap: 0
+gap: 0.001
 weights: [0, 1.0, 0]
 # auxiliary parameters
 aux: {
-  "overhead": 10,
-  "minPathsDefault": 1,
-  "maxPathsDefault": 5,
   "iterations": 1000,
   "offset_results": 0,
   "scaling_x": 0.5,
@@ -25,19 +22,25 @@ functions:
   attributes: {
     "replicable": false,
     "load": 0.5,
-    "delay": 10
+    "overhead": 10,
+    "sync_load": 0.1,
+    "process_delay": 10
   }
 - type: 1
   attributes: {
     "replicable": true,
     "load": 1.0,
-    "delay": 10
+    "overhead": 10,
+    "sync_load": 0.2,
+    "process_delay": 10
   }
 - type: 2
   attributes: {
     "replicable": false,
     "load": 0.5,
-    "delay": 10
+    "overhead": 10,
+    "sync_load": 0.1,
+    "process_delay": 10
   }
 # traffic flow definitions
 trafficFlows:

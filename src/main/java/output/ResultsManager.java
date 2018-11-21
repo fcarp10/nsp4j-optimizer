@@ -54,7 +54,7 @@ public class ResultsManager {
 
    public static GRBModel importModel(String path, String filename, Parameters pm) {
       path = path.replaceAll("%20", " ");
-      GRBModel model = null;
+      GRBModel model;
       try {
          GRBEnv grbEnv = new GRBEnv();
          grbEnv.set(GRB.IntParam.LogToConsole, 0);
@@ -63,10 +63,11 @@ public class ResultsManager {
          model.read(path + filename + "_initial_placement.mst");
          model.optimize();
          Auxiliary.printLog(log, INFO, "initial placement loaded");
+         return model;
       } catch (Exception e) {
          Auxiliary.printLog(log, INFO, "no initial placement found");
+         return null;
       }
-      return model;
    }
 
    public void exportModel(GRBModel model, String fileName) {

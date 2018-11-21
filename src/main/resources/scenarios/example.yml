@@ -24,7 +24,7 @@ functions:
     "load": 0.5,
     "overhead": 1,
     "sync_load": 0.5,
-    "delay": 10
+    "process_delay": 10
   }
 - type: 1
   attributes: {
@@ -32,7 +32,7 @@ functions:
     "load": 1.0,
     "overhead": 1,
     "sync_load": 0.5,
-    "delay": 10
+    "process_delay": 10
   }
 - type: 2
   attributes: {
@@ -40,13 +40,11 @@ functions:
     "load": 0.5,
     "overhead": 1,
     "sync_load": 0.5,
-    "delay": 10
+    "process_delay": 10
   }
 # traffic flow definitions
 trafficFlows:
 - serviceId: 0
-  src: "n1"
-  dst: "n9"
   minDem: 3
   maxDem: 3
   minBw: 200

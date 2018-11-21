@@ -54,7 +54,7 @@
                     <option value="utilization">utilization</option>
                 </select>
             </div>
-            <div class="radio-margin">
+            <div>
                 <form>
                     <label class="radio">Min
                         <input type="radio" name="min-max" id="min" checked>
@@ -87,10 +87,8 @@
         <div class="col-2">
             <h3>Constraints</h3>
             <hr>
-            <div class="title-margin">
-                <h6>Basic Constraints</h6>
-            </div>
-            <form id="common-constraints">
+            <div class="form-group">
+                <label class="my-1 mr-2" for="objectiveFunction">Basic Constraints</label>
                 <label class="check ">Count number of used servers
                     <input type="checkbox" id="countNumberOfUsedServers" checked>
                     <span class="checkmark"></span>
@@ -123,11 +121,9 @@
                     <input type="checkbox" id="functionSequenceOrder" checked>
                     <span class="checkmark"></span>
                 </label>
-            </form>
-            <div class="title-margin">
-                <h6>Additional Constraints</h6>
             </div>
-            <form id="use-case-constraints">
+            <div class="form-group">
+                <label class="my-1 mr-2" for="objectiveFunction">Additional Constraints</label>
                 <label class="check ">No parallel Paths
                     <input type="checkbox" id="noParallelPaths" checked>
                     <span class="checkmark"></span>
@@ -140,7 +136,7 @@
                     <input type="checkbox" id="synchronizationTraffic" checked>
                     <span class="checkmark"></span>
                 </label>
-            </form>
+            </div>
         </div>
     </div>
     <div id="results" class="row">
@@ -153,10 +149,6 @@
                     <tr>
                         <th>Migrations</th>
                         <th id="mgr">0</th>
-                    </tr>
-                    </thead>
-                    <thead class="thead-light">
-                    <tr>
                         <th>Replications</th>
                         <th id="rep">0</th>
                     </tr>
@@ -194,7 +186,7 @@
                     </tbody>
                     <tbody>
                     <tr>
-                        <td>Function placement</td>
+                        <td>Placement</td>
                         <td id="avgF">0.0</td>
                         <td id="minF">0.0</td>
                         <td id="maxF">0.0</td>

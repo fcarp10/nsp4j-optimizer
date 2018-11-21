@@ -39,6 +39,7 @@ public class Constraints {
             initialPlacementAsConstraints(initialModel);
          if (scenario.getConstraints().get("synchronizationTraffic")) synchronizationTraffic();
       } catch (Exception e) {
+         e.printStackTrace();
       }
    }
 

@@ -1,5 +1,5 @@
 #cy {
-    height: 520px;
+    height: 525px;
     width: 100%;
     background: #E9ECEF;
 }
@@ -14,7 +14,7 @@
 }
 
 .row{
-  margin-top: 25px;
+  margin-top: 20px;
 }
 
 .container-fluid {
@@ -53,22 +53,6 @@
 .navbar-custom .nav-item.active .nav-link,
 .navbar-custom .nav-item:hover .nav-link {
     color: #ffffff;
-}
-
-.select-style, option {
-    width: 120px ;
-}
-
-.radio-margin {
-    margin: 5px 0 0px 0;
-}
-
-.title-margin {
-    margin: 15px 0 5px 0;
-}
-
-.input-style {
-    width: 140px ;
 }
 
 /* The check */
