@@ -79,28 +79,28 @@ public class Manager {
          readParameters(path, fileName);
    }
 
-   public static GRBModel start(Scenario scenario, GRBModel initialModel) {
+   public static GRBModel start(Scenario scen, GRBModel initialModel) {
       try {
          if (initialModel == null)
-            initialModel = ResultsManager.importModel(getResourcePath(scenario.getInputFileName()), scenario.getInputFileName(), pm);
+            initialModel = ResultsManager.importModel(getResourcePath(scen.getInputFileName()), scen.getInputFileName(), pm);
          ResultsManager resultsManager = initializeResultFiles();
          printLog(log, INFO, "initializing model");
-         switch (scenario.getModel()) {
+         switch (scen.getModel()) {
             case ALL_OPT_MODELS_STRING:
-               initialModel = runLP(ALL_OPT_MODELS[0], scenario, resultsManager, null);
+               initialModel = runLP(ALL_OPT_MODELS[0], scen, resultsManager, null);
                for (int i = 1; i < ALL_OPT_MODELS.length; i++)
-                  runLP(ALL_OPT_MODELS[i], scenario, resultsManager, initialModel);
+                  runLP(ALL_OPT_MODELS[i], scen, resultsManager, initialModel);
                break;
             case MIGRATION_REPLICATION_RL_MODEL:
-               initialModel = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultsManager, null);
-               GRBModel tmpModel = runLP(MIGRATION_REPLICATION_MODEL, scenario, resultsManager, initialModel);
+               initialModel = runLP(INITIAL_PLACEMENT_MODEL, scen, resultsManager, null);
+               GRBModel tmpModel = runLP(MIGRATION_REPLICATION_MODEL, scen, resultsManager, initialModel);
 //               runRL(MIGRATION_REPLICATION_RL_MODEL, scenario, results.getObjVal(), resultsManager, initialModel);
                break;
             case INITIAL_PLACEMENT_MODEL:
-               initialModel = runLP(INITIAL_PLACEMENT_MODEL, scenario, resultsManager, null);
+               initialModel = runLP(INITIAL_PLACEMENT_MODEL, scen, resultsManager, null);
                break;
             default:
-               runLP(scenario.getModel(), scenario, resultsManager, initialModel);
+               runLP(scen.getModel(), scen, resultsManager, initialModel);
                break;
          }
          printLog(log, INFO, "ready");
@@ -117,8 +117,8 @@ public class Manager {
          try {
             Graph graph = GraphManager.importTopology(path, scenario.getInputFileName());
             printLog(log, INFO, "generating paths");
-            KShortestPathGenerator kShortestPathGenerator = new KShortestPathGenerator(graph, 10, 5, path, scenario.getInputFileName());
-            kShortestPathGenerator.run();
+            KShortestPathGenerator k = new KShortestPathGenerator(graph, 10, 5, path, scenario.getInputFileName());
+            k.run();
             printLog(log, INFO, "paths generated");
          } catch (Exception e) {
             printLog(log, ERROR, "reading the topology file");

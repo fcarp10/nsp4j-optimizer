@@ -14,7 +14,8 @@ serviceChains:
   chain: [0, 1, 2]
   attributes: {
     "minPaths": 1,
-    "maxPaths": 5
+    "maxPaths": 5,
+    "functionsServer": 1
   }
 # function definitions
 functions:
@@ -22,7 +23,7 @@ functions:
   attributes: {
     "replicable": false,
     "load": 0.5,
-    "overhead": 10,
+    "overhead": 0,
     "sync_load": 0.1,
     "process_delay": 10
   }
@@ -30,7 +31,7 @@ functions:
   attributes: {
     "replicable": true,
     "load": 1.0,
-    "overhead": 10,
+    "overhead": 0,
     "sync_load": 0.2,
     "process_delay": 10
   }
@@ -38,7 +39,7 @@ functions:
   attributes: {
     "replicable": false,
     "load": 0.5,
-    "overhead": 10,
+    "overhead": 0,
     "sync_load": 0.1,
     "process_delay": 10
   }

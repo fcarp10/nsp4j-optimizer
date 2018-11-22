@@ -93,10 +93,11 @@ public class Results {
       setLinkResults(uL);
       setServerResults(uX);
       setFunctionResults(numOfFunctionsPerServer());
-      setServiceDelayResults(serviceDelayList());
+      List<Double> serviceDelayList = serviceDelayList();
+      setServiceDelayResults(serviceDelayList);
       generateLuGraph(uL);
       generateXuGraph(uX);
-      generateSdGraph(serviceDelayList());
+      generateSdGraph(serviceDelayList);
       totalTraffic = pm.getTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
       avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
@@ -324,10 +325,11 @@ public class Results {
    }
 
    private void generateLuGraph(List<Double> uL) {
-      for (int i = 0; i < 10; i++)
+      int xPoints = 10;
+      for (int i = 0; i < xPoints; i++)
          luGraph.add(new GraphData("0." + i, 0));
       for (Double anUL : uL)
-         for (int j = 0; j < 10; j++)
+         for (int j = 0; j < xPoints; j++)
             if (anUL * 10 < j + 1 && anUL * 10 >= j) {
                luGraph.get(j).setValue(luGraph.get(j).getValue() + 1);
                break;
@@ -335,10 +337,11 @@ public class Results {
    }
 
    private void generateXuGraph(List<Double> uX) {
-      for (int i = 0; i < 10; i++)
+      int xPoints = 10;
+      for (int i = 0; i < xPoints; i++)
          xuGraph.add(new GraphData("0." + i, 0));
       for (Double anUX : uX)
-         for (int j = 0; j < 10; j++)
+         for (int j = 0; j < xPoints; j++)
             if (anUX * 10 < j + 1 && anUX * 10 >= j) {
                xuGraph.get(j).setValue(xuGraph.get(j).getValue() + 1);
                break;
@@ -346,14 +349,15 @@ public class Results {
    }
 
    private void generateSdGraph(List<Double> sd) {
+      int xPoints = 10;
       double min = Auxiliary.min(new ArrayList<>(sd));
       double max = Auxiliary.max(new ArrayList<>(sd));
-      double step = Auxiliary.roundDouble((max - min) / 10, 2);
+      double step = Auxiliary.roundDouble((max - min) / xPoints, 2);
       if (max != min) {
-         for (int i = 0; i < 10; i++)
-            sdGraph.add(new GraphData(String.valueOf(step * i), 0));
+         for (int i = 0; i < xPoints + 1; i++)
+            sdGraph.add(new GraphData(String.valueOf((step * i) + min), 0));
          for (Double anSd : sd)
-            for (int j = 0; j < 10; j++)
+            for (int j = 0; j < xPoints + 1; j++)
                if (anSd < Double.valueOf(sdGraph.get(j).getYear()) + step
                        && anSd >= Double.valueOf(sdGraph.get(j).getYear())) {
                   sdGraph.get(j).setValue(sdGraph.get(j).getValue() + 1);

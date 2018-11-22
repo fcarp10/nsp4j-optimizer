@@ -1,6 +1,6 @@
 # optimization parameters
 gap: 0
-weights: [1.0, 0, 0]
+weights: [0, 1.0, 0]
 # auxiliary parameters
 aux: {
   "iterations": 1000,
@@ -14,7 +14,8 @@ serviceChains:
   chain: [0, 1, 2]
   attributes: {
     "minPaths": 1,
-    "maxPaths": 3
+    "maxPaths": 3,
+    "functionsServer": 1
   }
 # function definitions
 functions:
@@ -45,7 +46,9 @@ functions:
 # traffic flow definitions
 trafficFlows:
 - serviceId: 0
+  src: "n1"
+  dst: "n9"
   minDem: 3
   maxDem: 3
-  minBw: 200
-  maxBw: 200
+  minBw: 150
+  maxBw: 150

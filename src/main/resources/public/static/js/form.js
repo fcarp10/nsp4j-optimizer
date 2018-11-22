@@ -1,5 +1,7 @@
-var refreshPeriod = 100;
-setInterval(getMessage, refreshPeriod);
+var shortPeriod = 200;
+var longPeriod = 3000;
+var intervalMessages = setInterval(getMessage, longPeriod);
+var connected = false;
 var messages = [];
 
 function getMessage() {
@@ -21,14 +23,27 @@ function getMessage() {
                 document.getElementById("message").innerText += messages[i] +"\n";
             if(messages.length > 2)
                messages.shift();
-            if(message == "Info: ready")
+            if(message == "Info: ready"){
                 document.getElementById("run_button").removeAttribute("disabled");
-            if(message == "Info: topology loaded")
+                longRefresh();
+            }
+            if(message == "Info: topology loaded"){
                 document.getElementById("run_button").removeAttribute("disabled");
+                longRefresh();
+            }
+            if(!connected){
+                shortRefresh();
+                connected = true;
+            }
         }
         if(message  == null) {
             document.getElementById("message").innerText = "Info: framework not running";
             document.getElementById("run_button").setAttribute("disabled", "true");
+            clearInterval(intervalMessages);
+            if(connected) {
+                longRefresh();
+                connected = false;
+            }
         }
     }
     catch (e) {
@@ -36,7 +51,18 @@ function getMessage() {
     }
 }
 
+function shortRefresh() {
+   clearInterval(intervalMessages);
+   intervalMessages = setInterval(getMessage, shortPeriod);
+}
+
+function longRefresh() {
+    clearInterval(intervalMessages);
+    intervalMessages = setInterval(getMessage, longPeriod);
+}
+
 function loadTopology(){
+shortRefresh();
 var scenario = generateScenario();
     try {
         var message = null;
@@ -61,6 +87,7 @@ var scenario = generateScenario();
 }
 
 function runOpt(){
+shortRefresh();
 var scenario = generateScenario();
 document.getElementById("run_button").setAttribute("disabled", "true");
     try {
@@ -82,6 +109,7 @@ document.getElementById("run_button").setAttribute("disabled", "true");
 }
 
 function generatePaths() {
+shortRefresh();
 var scenario = generateScenario();
     try {
             var message = null;
@@ -116,6 +144,9 @@ function check(elem) {
     document.getElementById("noParallelPaths").disabled = false;
     document.getElementById("initialPlacementAsConstraints").disabled = false;
     document.getElementById("synchronizationTraffic").disabled = false;
+    document.getElementById("constraintReplications").disabled = false;
+    document.getElementById("numFunctionsPerServer").disabled = false;
+    document.getElementById("fixSrcDstFunctions").disabled = false;
 
     document.getElementById("countNumberOfUsedServers").checked = true;
     document.getElementById("onePathPerDemand").checked = true;
@@ -165,6 +196,9 @@ function check(elem) {
                 document.getElementById("noParallelPaths").checked = false;
                 document.getElementById("initialPlacementAsConstraints").checked = false;
                 document.getElementById("synchronizationTraffic").checked = false;
+                document.getElementById("constraintReplications").checked = false;
+                document.getElementById("numFunctionsPerServer").checked = false;
+                document.getElementById("fixSrcDstFunctions").checked = false;
 
                 document.getElementById("setLinkUtilizationExpr").disabled = true;
                 document.getElementById("setServerUtilizationExpr").disabled = true;
@@ -179,6 +213,9 @@ function check(elem) {
                 document.getElementById("noParallelPaths").disabled = true;
                 document.getElementById("initialPlacementAsConstraints").disabled = true;
                 document.getElementById("synchronizationTraffic").disabled = true;
+                document.getElementById("constraintReplications").disabled = true;
+                document.getElementById("numFunctionsPerServer").disabled = true;
+                document.getElementById("fixSrcDstFunctions").disabled = true;
     }
 }
 
@@ -199,6 +236,9 @@ function generateScenario() {
     var noParallelPaths = $("#noParallelPaths").is(":checked");
     var initialPlacementAsConstraints = $("#initialPlacementAsConstraints").is(":checked");
     var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
+    var constraintReplications = $("#constraintReplications").is(":checked");
+    var numFunctionsPerServer = $("#numFunctionsPerServer").is(":checked");
+    var fixSrcDstFunctions = $("#fixSrcDstFunctions").is(":checked");
 
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
@@ -216,7 +256,10 @@ function generateScenario() {
             functionSequenceOrder: functionSequenceOrder,
             noParallelPaths: noParallelPaths,
             initialPlacementAsConstraints: initialPlacementAsConstraints,
-            synchronizationTraffic: synchronizationTraffic
+            synchronizationTraffic: synchronizationTraffic,
+            constraintReplications: constraintReplications,
+            numFunctionsPerServer: numFunctionsPerServer,
+            fixSrcDstFunctions: fixSrcDstFunctions
         }
     });
 
