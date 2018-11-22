@@ -7,6 +7,8 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import output.Auxiliary;
 
+import java.util.List;
+
 public class ConstraintsKhiet {
 
     private OptimizationModel model;
@@ -32,6 +34,7 @@ public class ConstraintsKhiet {
         if (scenario.getConstraints().get("initialPlacementAsConstraints"))
             initialPlacementAsConstraints(initialModel);
         if (scenario.getConstraints().get("synchronizationTraffic")) synchronizationTraffic();
+        test();
     }
 
     private void linkUtilization() throws GRBException {
@@ -185,7 +188,7 @@ public class ConstraintsKhiet {
                 GRBLinExpr expr2 = new GRBLinExpr();
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                     expr.addTerm(1.0, vars.rSPD[s][p][d]);
-                    expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() /10, vars.rSPD[s][p][d]);
+                    expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() / 10, vars.rSPD[s][p][d]);
                 }
                 model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.rSP[s][p], "activatePathForService");
                 model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.rSP[s][p], "activatePathForService");
@@ -310,7 +313,29 @@ public class ConstraintsKhiet {
                     }
             }
     }
+    //check parameters used
 
+    private void test() {
+        for (int s = 0; s < pm.getServices().size(); s++) {
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                int minPaths = (int) pm.getServices().get(s).getAttribute("minPaths");
+                boolean replicable = (boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable");
+                double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                int overhead = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead");
+                List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+                for (int i = 0; i < sharedNF.size(); i++) {
+                    System.out.println(sharedNF.get(i));
+                }
+                System.out.println(load);
+                System.out.println(replicable);
+                System.out.println(minPaths);
+                System.out.println(overhead);
+            }
+        }
+
+    }
+
+    //Use Case Constraints
     private void noParallelPaths() throws GRBException {
         for (int s = 0; s < pm.getServices().size(); s++) {
             GRBLinExpr expr = new GRBLinExpr();
