@@ -1,0 +1,33 @@
+DGS004
+test 0 0
+
+an n1 x:100 y:150 num_servers:2 server_capacity:1    processing_delay:10 type:0 MaxSFC:5 VMmax:10
+an n2 x:150 y:100 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:1 VMmax:100
+an n3 x:200 y:100 num_servers:2 server_capacity:1    processing_delay:10 type:0 MaxSFC:3 VMmax:10
+an n4 x:175 y:200 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:3 VMmax:5
+an n5 x:250 y:150 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:3 VMmax:1
+an n6 x:350 y:100 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:1 VMmax:10
+an n7 x:350 y:200 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:5 VMmax:100
+an n8 x:400 y:150 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:4 VMmax:2
+
+
+ae n1n2 n1 > n2 capacity:1000
+ae n1n4 n1 > n4
+ae n2n1 n2 > n1
+ae n2n3 n2 > n3
+ae n3n2 n3 > n2
+ae n3n5 n3 > n5
+ae n3n6 n3 > n6
+ae n4n1 n4 > n1
+ae n4n5 n4 > n5
+ae n5n3 n5 > n3
+ae n5n4 n5 > n4
+ae n5n6 n5 > n6
+ae n5n7 n5 > n7
+ae n6n3 n6 > n3
+ae n6n5 n6 > n5
+ae n6n8 n6 > n8
+ae n7n5 n7 > n5
+ae n7n8 n7 > n8
+ae n8n6 n8 > n6
+ae n8n7 n8 > n7

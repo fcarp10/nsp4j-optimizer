@@ -8,6 +8,7 @@ import gurobi.GRBLinExpr;
 import gurobi.GRBModel;
 import learning.LearningModel;
 import lp.Constraints;
+import lp.ConstraintsKhiet;
 import lp.OptimizationModel;
 import lp.Variables;
 import org.apache.commons.io.FilenameUtils;
@@ -131,7 +132,7 @@ public class Manager {
       Variables variables = new Variables(pm, model.getGrbModel());
       model.setVariables(variables);
       printLog(log, INFO, "setting constraints");
-      new Constraints(pm, model, scenario, initialModel);
+      new ConstraintsKhiet(pm, model, scenario, initialModel);
       if (scenario.getModel().equals(ALL_OPT_MODELS) || scenario.getModel().equals(MIGRATION_REPLICATION_RL_MODEL)
               && modelName.equals(INITIAL_PLACEMENT_MODEL))
          expr = generateExprForObjectiveFunction(model, NUM_OF_SERVERS_OBJ);
