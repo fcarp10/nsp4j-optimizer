@@ -325,8 +325,7 @@ public class Constraints {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
-               for (int y = 0; y < pm.getServers().size(); y++) {
-                  if (x == y) continue;
+               for (int y = x + 1; y < pm.getServers().size(); y++) {
                   model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.pXSV[x][s][v], "");
                   model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.pXSV[y][s][v], "");
                   GRBLinExpr expr = new GRBLinExpr();

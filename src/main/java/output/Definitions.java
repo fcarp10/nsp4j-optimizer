@@ -18,7 +18,7 @@ public class Definitions {
    public static final String ERROR = "Error: ";
    public static final String INFO = "Info: ";
    public static final String READY = "ready";
-   // variables
+   // primary variables
    public static final String rSP = "rSP";
    public static final String rSPD = "rSPD";
    public static final String pXSV = "pXSV";
@@ -27,6 +27,7 @@ public class Definitions {
    public static final String kX = "kX";
    public static final String uL = "uL";
    public static final String uX = "uX";
+   // secondary variables
    public static final String pX = "pX";
    public static final String gSVXY = "gSVXY";
    public static final String sSVP = "sSVP";

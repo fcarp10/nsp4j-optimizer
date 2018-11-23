@@ -23,24 +23,24 @@ functions:
   attributes: {
     "replicable": false,
     "load": 0.5,
-    "overhead": 1,
-    "sync_load": 0.5,
+    "overhead": 0,
+    "sync_load": 0.1,
     "process_delay": 10
   }
 - type: 1
   attributes: {
     "replicable": true,
     "load": 1.0,
-    "overhead": 1,
-    "sync_load": 0.5,
+    "overhead": 0,
+    "sync_load": 0.2,
     "process_delay": 10
   }
 - type: 2
   attributes: {
     "replicable": false,
     "load": 0.5,
-    "overhead": 1,
-    "sync_load": 0.5,
+    "overhead": 0,
+    "sync_load": 0.1,
     "process_delay": 10
   }
 # traffic flow definitions
@@ -48,7 +48,7 @@ trafficFlows:
 - serviceId: 0
   src: "n1"
   dst: "n9"
-  minDem: 3
-  maxDem: 3
-  minBw: 150
-  maxBw: 150
+  minDem: 2
+  maxDem: 2
+  minBw: 400
+  maxBw: 400

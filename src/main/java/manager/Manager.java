@@ -15,7 +15,6 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import output.Auxiliary;
 import output.Results;
 import output.ResultsManager;
 import utils.ConfigFiles;
@@ -35,7 +34,8 @@ public class Manager {
 
    private static String getResourcePath(String fileName) {
       try {
-         String path = FilenameUtils.getPath(Manager.class.getClassLoader().getResource("scenarios/" + fileName + ".yml").getFile());
+         String path = FilenameUtils.getPath(Manager.class.getClassLoader()
+                 .getResource("scenarios/" + fileName + ".yml").getFile());
          if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
             path = "/" + path;
          return path;
@@ -195,15 +195,19 @@ public class Manager {
 
    private static Results generateResults(OptimizationModel model, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
+      // primary variables
       results.setVariable(rSP, model.getVariables().rSP);
       results.setVariable(rSPD, model.getVariables().rSPD);
       results.setVariable(pXSV, model.getVariables().pXSV);
       results.setVariable(pXSVD, model.getVariables().pXSVD);
       results.setVariable(uL, model.getVariables().uL);
       results.setVariable(uX, model.getVariables().uX);
+      // secondary
       results.setVariable(pX, model.getVariables().pX);
+      results.setVariable(gSVXY, model.getVariables().gSVXY);
       results.setVariable(sSVP, model.getVariables().sSVP);
       results.setVariable(dSP, model.getVariables().dSP);
+      results.setVariable(dSPX, model.getVariables().dSPX);
       results.prepareVariablesForJsonFile(model.getObjVal(), initialModel);
       return results;
    }
