@@ -277,18 +277,19 @@ public class Results {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
-               for (int y = x + 1; y < pm.getServers().size(); y++)
-                  if (gSVXYvar[s][v][x][y].get(GRB.DoubleAttr.X) == 1.0)
-                     strings.add("(" + (s + this.offset) + "," + (v + this.offset)
-                             + "," + (x + this.offset) + "," + (y + this.offset) + "): ["
-                             + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
+               for (int y = 0; y < pm.getServers().size(); y++)
+                  if (x != y)
+                     if (gSVXYvar[s][v][x][y].get(GRB.DoubleAttr.X) == 1.0)
+                        strings.add("(" + (s + this.offset) + "," + (v + this.offset)
+                                + "," + (x + this.offset) + "," + (y + this.offset) + "): ["
+                                + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
       stringVariables.put(gSVXY, strings);
 
       // prepare sSVP
       strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            for (int p = 0; p < pm.getPaths().size(); p++)
                if (sSVPvar[s][v][p].get(GRB.DoubleAttr.X) == 1.0)
                   strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
                           + pm.getPaths().get(p).getNodePath());

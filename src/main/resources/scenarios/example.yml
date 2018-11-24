@@ -24,7 +24,7 @@ functions:
     "replicable": false,
     "load": 0.5,
     "overhead": 0,
-    "sync_load": 0.1,
+    "sync_load": 0.0,
     "process_delay": 10
   }
 - type: 1
@@ -32,7 +32,7 @@ functions:
     "replicable": true,
     "load": 1.0,
     "overhead": 0,
-    "sync_load": 0.2,
+    "sync_load": 0.0,
     "process_delay": 10
   }
 - type: 2
@@ -40,7 +40,7 @@ functions:
     "replicable": false,
     "load": 0.5,
     "overhead": 0,
-    "sync_load": 0.1,
+    "sync_load": 0.0,
     "process_delay": 10
   }
 # traffic flow definitions
@@ -50,5 +50,5 @@ trafficFlows:
   dst: "n9"
   minDem: 2
   maxDem: 2
-  minBw: 400
-  maxBw: 400
+  minBw: 300
+  maxBw: 300

@@ -4,7 +4,6 @@ import gurobi.GRB;
 import gurobi.GRBModel;
 import gurobi.GRBVar;
 import manager.Parameters;
-import output.Auxiliary;
 import output.Definitions;
 
 public class Variables {
@@ -77,9 +76,10 @@ public class Variables {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int x = 0; x < pm.getServers().size(); x++)
-                  for (int y = x + 1; y < pm.getServers().size(); y++)
-                     gSVXY[s][v][x][y] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                             , Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "]");
+                  for (int y = 0; y < pm.getServers().size(); y++)
+                     if (x != y)
+                        gSVXY[s][v][x][y] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
+                                , Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "]");
          sSVP = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getPaths().size()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)

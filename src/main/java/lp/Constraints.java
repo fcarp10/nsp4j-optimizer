@@ -10,8 +10,6 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import output.Auxiliary;
 
-import java.util.List;
-
 import static output.Definitions.*;
 
 public class Constraints {
@@ -325,24 +323,25 @@ public class Constraints {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
-               for (int y = x + 1; y < pm.getServers().size(); y++) {
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.pXSV[x][s][v], "");
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.pXSV[y][s][v], "");
-                  GRBLinExpr expr = new GRBLinExpr();
-                  expr.addTerm(1.0, vars.pXSV[x][s][v]);
-                  expr.addTerm(1.0, vars.pXSV[y][s][v]);
-                  expr.addConstant(-1.0);
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, "");
-                  expr = new GRBLinExpr();
-                  for (int p = 0; p < pm.getPaths().size(); p++) {
-                     Path pa = pm.getPaths().get(p);
-                     if (pa.getNodePath().get(0).equals(pm.getServers().get(x).getParent())
-                             & pa.getNodePath().get(pa.getNodePath().size() - 1)
-                             .equals(pm.getServers().get(y).getParent()))
-                        expr.addTerm(1.0, vars.sSVP[s][v][p]);
+               for (int y = 0; y < pm.getServers().size(); y++)
+                  if (x != y) {
+                     model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.pXSV[x][s][v], "");
+                     model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.pXSV[y][s][v], "");
+                     GRBLinExpr expr = new GRBLinExpr();
+                     expr.addTerm(1.0, vars.pXSV[x][s][v]);
+                     expr.addTerm(1.0, vars.pXSV[y][s][v]);
+                     expr.addConstant(-1.0);
+                     model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, "");
+                     expr = new GRBLinExpr();
+                     for (int p = 0; p < pm.getPaths().size(); p++) {
+                        Path pa = pm.getPaths().get(p);
+                        if (pa.getNodePath().get(0).equals(pm.getServers().get(x).getParent())
+                                & pa.getNodePath().get(pa.getNodePath().size() - 1)
+                                .equals(pm.getServers().get(y).getParent()))
+                           expr.addTerm(1.0, vars.sSVP[s][v][p]);
+                     }
+                     model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.gSVXY[s][v][x][y], "");
                   }
-                  model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.gSVXY[s][v][x][y], "");
-               }
    }
 
    private void constraintReplications() throws GRBException {

@@ -1,7 +1,7 @@
 DGS004
 test 0 0
 
-an n1 x:283 y:248 num_servers:2 server_capacity:1000 processing_delay:10
+an n1 x:283 y:248 num_servers:1 server_capacity:1000 processing_delay:10
 an n2 x:451 y:201
 an n3 x:516 y:230
 an n4 x:324 y:43
