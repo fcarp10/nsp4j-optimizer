@@ -23,24 +23,24 @@ functions:
   attributes: {
     "replicable": false,
     "load": 0.5,
-    "overhead": 0,
-    "sync_load": 0.0,
+    "overhead": 10,
+    "sync_load": 0.01,
     "process_delay": 0
   }
 - type: 1
   attributes: {
     "replicable": true,
     "load": 1.0,
-    "overhead": 0,
-    "sync_load": 0.0,
+    "overhead": 10,
+    "sync_load": 0.01,
     "process_delay": 0
   }
 - type: 2
   attributes: {
     "replicable": false,
     "load": 0.5,
-    "overhead": 0,
-    "sync_load": 0.0,
+    "overhead": 10,
+    "sync_load": 0.01,
     "process_delay": 0
   }
 # traffic flow definitions
