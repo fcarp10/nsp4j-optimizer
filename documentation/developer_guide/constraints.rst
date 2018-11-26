@@ -171,7 +171,7 @@ Constrain VAI1
     :nowrap:
 
         \begin{equation} \label{VAI1}
-        \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}, \forall x \in \mathbb{X} :  \quad \frac{ \sum_{k=1 }^{\|\Lambda_s \|}      f_{x,k}^{v,s} }  {\|\Lambda_s \|} \leq f_x^{v,s} \leq   \sum_{k=1 }^{\|\Lambda_s \|}   f_{x,k}^{v,s}
+         \forall s \in \mathbb{S},  \forall v \in {\mathbb{V}_s}, \forall x \in \mathbb{X} :  \quad \frac{ \sum_{k=1 }^{\|\Lambda_s \|}      f_{x,k}^{v,s} }  {\|\Lambda_s \|} \leq f_x^{v,s} \leq   \sum_{k=1 }^{\|\Lambda_s \|}   f_{x,k}^{v,s}
         \end{equation}
 
 
@@ -256,7 +256,7 @@ Constrain VAI3
     :nowrap:
 
       \begin{equation} \label{VAI3}
-	    \forall s \in \mathbb{S},  \forall x \in \mathbb{X} :     \quad    \frac{ \sum_{s \in \mathbb{S}} \sum_{v \in \mathbb{V}_s} f_x^{v,s}} {M} \leq f^s_x  \leq  \sum_{s \in \mathbb{S}}  \sum_{v \in  \mathbb{V}_s} f_x^{v,s}
+	     \forall x \in \mathbb{X} :     \quad    \frac{ \sum_{s \in \mathbb{S}} \sum_{v \in \mathbb{V}_s} f_x^{v,s}} {M} \leq f_x  \leq  \sum_{s \in \mathbb{S}}  \sum_{v \in  \mathbb{V}_s} f_x^{v,s}
      \end{equation}
 
 

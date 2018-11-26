@@ -9,43 +9,40 @@ Topology file
 
 The desired network topology is described using the GraphStream guidelines in a file with extension \*.dgs. For instance:
 
-.. code-block:: text
+.. code-block:: yaml
 
-	DGS004
-	test 0 0
+    DGS004
+    test 0 0
 
-    an n1 x:100 y:150 capacity:1000 serversNode: 1 type: 0
-    an n2 x:150 y:100 capacity:1000 serversNode: 1 type: 0
-    an n3 x:200 y:100 capacity:1000 serversNode: 1 type: 0
-    an n4 x:175 y:200 capacity:1000 serversNode: 1 type: 0
-    an n5 x:250 y:150 capacity:1000 serversNode: 1 type: 0
-    an n6 x:300 y:150 capacity:1000 serversNode: 1 type: 0
-    an n7 x:350 y:100 capacity:1000 serversNode: 1 type: 0
-    an n8 x:350 y:200 capacity:1000 serversNode: 1 type: 0
-    an n9 x:400 y:150 capacity:1000 serversNode: 1 type: 0
+    an n1 x:250 y:150 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:5 VMmax:10
+    an n2 x:175 y:200 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:5 VMmax:10
+    an n3 x:200 y:100 num_servers:2 server_capacity:1    processing_delay:10 type:0 MaxSFC:5 VMmax:10
+    an n4 x:100 y:150 num_servers:2 server_capacity:1    processing_delay:10 type:0 MaxSFC:5 VMmax:10
+    an n5 x:150 y:100 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:5 VMmax:10
+    an n6 x:350 y:200 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:5 VMmax:10
+    an n7 x:350 y:100 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:5 VMmax:10
+    an n8 x:400 y:150 num_servers:2 server_capacity:1000 processing_delay:10 type:0 MaxSFC:5 VMmax:10
 
     ae n1n2 n1 > n2 capacity:1000
-    ae n1n4 n1 > n4 capacity:1000
+    ae n1n3 n1 > n3 capacity:1000
+    ae n1n6 n1 > n6 capacity:1000
+    ae n1n7 n1 > n7 capacity:1000
     ae n2n1 n2 > n1 capacity:1000
-    ae n2n3 n2 > n3 capacity:1000
-    ae n3n2 n3 > n2 capacity:1000
+    ae n2n4 n2 > n4 capacity:1000
+    ae n3n1 n3 > n1 capacity:1000
     ae n3n5 n3 > n5 capacity:1000
     ae n3n7 n3 > n7 capacity:1000
-    ae n4n1 n4 > n1 capacity:1000
+    ae n4n2 n4 > n2 capacity:1000
     ae n4n5 n4 > n5 capacity:1000
     ae n5n3 n5 > n3 capacity:1000
     ae n5n4 n5 > n4 capacity:1000
-    ae n5n6 n5 > n6 capacity:1000
-    ae n6n5 n6 > n5 capacity:1000
-    ae n6n7 n6 > n7 capacity:1000
+    ae n6n1 n6 > n1 capacity:1000
     ae n6n8 n6 > n8 capacity:1000
+    ae n7n1 n7 > n1 capacity:1000
     ae n7n3 n7 > n3 capacity:1000
-    ae n7n6 n7 > n6 capacity:1000
-    ae n7n9 n7 > n9 capacity:1000
+    ae n7n8 n7 > n8 capacity:1000
     ae n8n6 n8 > n6 capacity:1000
-    ae n8n9 n8 > n9 capacity:1000
-    ae n9n7 n9 > n7 capacity:1000
-    ae n9n8 n9 > n8 capacity:1000
+    ae n8n7 n8 > n7 capacity:1000
 
 
 ``an`` adds a node. The command is followed by a unique node identifier, that can be a single word or a string delimited by the double quote character. Values x and y on the server represent the coordinates of the nodes. For each node can be specified the number of servers (i.e serversNode), the capacity of each server (i.e. capacity) and the type of server.
@@ -62,9 +59,13 @@ The admissible paths for the topology must be specified in a file with the same 
 
 .. code-block:: text
 
-	[n1, n2, n3, n7, n9]
-	[n1, n4, n5, n3, n7, n9]
-	[n1, n4, n5, n6, n7, n9]
+    [n4, n5, n3, n7]
+    [n4, n2, n1, n7]
+    [n4, n5, n3, n1, n7]
+    [n4, n2, n1, n6, n8]
+    [n4, n2, n1, n7, n8]
+    [n4, n5, n3, n7, n8]
+
 
 This paths can be externally generated or generated using the included KShortest Path Generator tool. For using this tool, you only need to place \*.dgs file in the same folder with the \*.jar and click the path button from the graphical user interface. All the paths will be generated in a \*.txt file with the same name as the topology file.
 
@@ -76,72 +77,224 @@ This file describes the default parameters for the optimization model. The name 
 
 .. code-block:: yaml
 
-    # Optimization parameters
+    # optimization parameters
     gap: 0
-    weights: [0, 0, 1.0]
-
-    # Network default parameters
-    serverCapacityDefault: 1000
-    serversNodeDefault: 1
-    serverDelayDefault: 10
-    linkCapacityDefault: 1000
-    minPathsDefault: 3
-    maxPathsDefault: 3
-    minDemandsDefault: 2
-    maxDemandsDefault: 2
-    minBwDefault: 100
-    maxBwDefault: 100
-
-    # Service parameters
+    weights: [0.5, 0.5, 0]
+    # auxiliary parameters
+    aux: {
+     "overhead": 0,
+     "minPathsDefault": 3,
+     "maxPathsDefault": 3,
+     "iterations": 1000,
+     "offset_results": 1,
+     "scaling_x": 1.0,
+    "scaling_y": 1.0
+    }
+    # service definitions
     serviceChains:
-      - id: 0
-        chain: [0, 1, 2]
-        minPaths: 3
-        maxPaths: 3
+    - id: 1
+     chain: [1, 2, 4, 3]
+     attributes: {
+        "sharedNF": [1, 0, 0, 1],
+        "minPaths": 3,
+        "maxPaths": 3,
+        "minReplica": 1,
+        "maxReplica": 3,
+        "maxVNFserver": 10
+    }
+    - id: 2
+    chain: [1, 3, 5]
+    attributes: {
+        "sharedNF": [1, 1, 0],
+        "minPaths": 2,
+        "maxPaths": 2,
+        "minReplica": 1,
+        "maxReplica": 3,
+        "maxVNFserver": 5
+    }
+    # function definitions
     functions:
-      - type: 0
-        replicable: false
-        load: 1.0
-        maxShareable: 5
-        delay: 10
-      - type: 1
-        replicable: true
-        load: 1.0
-        maxShareable: 5
-        delay: 10
-      - type: 2
-        replicable: false
-        load: 1.0
-        maxShareable: 5
-        delay: 10
+    - type: 1
+    attributes: {
+        "replicable": false,
+        "load": 1.0,
+        "overhead": 10,
+        "maxLoad": 200,
+        "maxsubflows":  4,
+        "maxSharedSFC": 5,
+        "maxSharedVNF": 10,
+        "maxInstances": 1,
+        "delay": 10
+    }
+    - type: 2
+    attributes: {
+        "replicable": true,
+        "load": 1.0,
+        "overhead": 10,
+        "maxLoad": 200,
+        "maxsubflows": 4,
+        "maxSharedSFC": 1,
+        "maxSharedVNF": 1,
+        "maxInstances": 1,
+        "delay": 10
+    }
+    - type: 3
+    attributes: {
+        "replicable": true,
+        "load": 1.0,
+        "overhead": 10,
+        "maxLoad": 200,
+        "maxsubflows": 4,
+        "maxSharedSFC": 5,
+        "maxSharedVNF": 3,
+        "maxInstances": 1,
+        "delay": 10
+    }
+    - type: 4
+    attributes: {
+        "replicable": false,
+        "load": 1.0,
+        "overhead": 10,
+        "maxLoad": 200,
+        "maxsubflows": 4,
+        "maxSharedSFC": 1,
+        "maxSharedVNF": 1,
+        "maxInstances": 1,
+        "delay": 10
+    }
+    - type: 5
+    attributes: {
+        "replicable": false,
+        "load": 1.0,
+        "overhead": 10,
+        "maxLoad": 200,
+        "maxsubflows": 4,
+        "maxSharedSFC": 1,
+        "maxSharedVNF": 1,
+        "maxInstances": 1,
+        "delay": 10
+    }
+    # traffic flow definitions
     trafficFlows:
-      - src: "n1"
-        dst: "n9"
-        serviceId: 0
-        minDemands: 3
-        maxDemands: 3
-        minBw: 100
-        maxBw: 100
-      - src: "n2"
-        dst: "n9"
-        serviceId: 0
-        minDemands: 3
-        maxDemands: 3
-        minBw: 100
-        maxBw: 100
+    - serviceId: 1
+    src: "n4"
+    dst: "n8"
+    minDem: 3
+    maxDem: 3
+    minBw: 75
+    maxBw: 75
+    - serviceId: 2
+    src: "n5"
+    dst: "n6"
+    minDem: 2
+    maxDem: 2
+    minBw: 150
+    maxBw: 150
 
-    # Auxiliary values (overhead, training iterations)
-    aux: [100, 1000]
+
+
 
 The next table describes every parameter for the model (TO BE UPDATED):
 
 +-------------------------------------------------------------------+
 | Variables of *config.yml*                                         |
 +====================+==============================================+
-| ``networkFile``    | name of the file containing the network data |
+| Definition of optimization parameters                             |
 +--------------------+----------------------------------------------+
-| ``pathsFile``      | name of the file containing the paths data   |
+| ``gap``            | gap optimization value                       |
 +--------------------+----------------------------------------------+
+| ``weights``        | weight of migration, server and link costs   |
++--------------------+----------------------------------------------+
+| auxiliary parameters                                              |
++--------------------+----------------------------------------------+
+|``aux``             | global and default parameter                 |
++--------------------+----------------------------------------------+
+| ``overhead``       |                                              |
++--------------------+----------------------------------------------+
+| ``minPathsDefault``| minimum number of used paths                 |
++--------------------+----------------------------------------------+
+| ``maxPathsDefault``| maximum number of used paths                 |
++--------------------+----------------------------------------------+
+| ``iterations``     |                                              |
++--------------------+----------------------------------------------+
+| ``offset_results`` | if 0, numbering starts with 0; else with 1   |
++--------------------+----------------------------------------------+
+| ``scaling_x``      |                                              |
++--------------------+----------------------------------------------+
+| ``scaling_y``      |                                              |
++--------------------+----------------------------------------------+
+| Definition of network functions                                   |
++--------------------+----------------------------------------------+
+| ``functions``      | set of function types                        |
++--------------------+----------------------------------------------+
+| ``type``           | identifier of the function                   |
++--------------------+----------------------------------------------+
+| ``attributes``     | parameters of this network function          |
++--------------------+----------------------------------------------+
+| ``replicable``     | indicates if the function can be replicated  |
++--------------------+----------------------------------------------+
+| ``load``           | packet rate to processing load ratio         |
++--------------------+----------------------------------------------+
+| ``overhead``       |                                              |
++--------------------+----------------------------------------------+
+| ``maxLoad``        | maximum load the VNF can process             |
++--------------------+----------------------------------------------+
+| ``maxsubflows``    | maximum number of traffic flows for the VNF  |
++--------------------+----------------------------------------------+
+| ``maxSharedSFC``   | VNF can shared by a maximum # of SFC         |
++--------------------+----------------------------------------------+
+| ``maxSharedVNF``   | VNF can shared by maximum # of VNFs of a SFC |
++--------------------+----------------------------------------------+
+| ``maxinstances``   | maximum # of instances of this NF at a server|
++--------------------+----------------------------------------------+
+| ``delay``          |                                              |
++--------------------+----------------------------------------------+
+| Definition of service chains                                      |
++--------------------+----------------------------------------------+
+| ``serviceChains``  | Service Function Chains on the network       |
++--------------------+----------------------------------------------+
+| ``id``             | identifier of the SFC                        |
++--------------------+----------------------------------------------+
+| ``chain``          | identifier of the SFC                        |
++--------------------+----------------------------------------------+
+| ``attributes``     | indicates if the function can be replicated  |
++--------------------+----------------------------------------------+
+| ``sharedNF``       | indicates if the function can be replicated  |
++--------------------+----------------------------------------------+
+| ``minPaths``       | number of servers on each node               |
++--------------------+----------------------------------------------+
+| ``maxPaths``       | capacity of the links measured on  units     |
++--------------------+----------------------------------------------+
+| ``minReplica``     | minimum number of allowed replicas           |
++--------------------+----------------------------------------------+
+| ``maxReplica``     | maximum number of allowed replicas           |
++--------------------+----------------------------------------------+
+| ``maxVNFserver``   | capacity of the links measured on  units     |
++--------------------+----------------------------------------------+
+| Definition of traffic flows                                       |
++--------------------+----------------------------------------------+
+| ``trafficFlows``   | traffic flows on the network                 |
++--------------------+----------------------------------------------+
+| ``serviceId``      | identifier of the traffic flow               |
++--------------------+----------------------------------------------+
+| ``src``            | source node of the traffic flow              |
++--------------------+----------------------------------------------+
+| ``dst``            | destination node of the traffic flow         |
++--------------------+----------------------------------------------+
+| ``minDem``         | minimum number of possible traffic demands   |
++--------------------+----------------------------------------------+
+| ``maxDem``         | maximum number of possible traffic demands   |
++--------------------+----------------------------------------------+
+| ``minBw``          | minimum Bandwidth                            |
++--------------------+----------------------------------------------+
+| ``maxBw``          | maximum Bandwidth                            |
++--------------------+----------------------------------------------+
+
+
+
++-------------------------------------------------------------------+
+| Variables of *config.yml*                                         |
++====================+==============================================+
 | ``gap``            | gap optimization value                       |
 +--------------------+----------------------------------------------+
 | ``weights``        | weight of migration, server and link costs   |
@@ -182,8 +335,6 @@ The next table describes every parameter for the model (TO BE UPDATED):
 +--------------------+----------------------------------------------+
 | ``maxBw``          | maximum Bandwidth                            |
 +--------------------+----------------------------------------------+
-
-
 
 
 
