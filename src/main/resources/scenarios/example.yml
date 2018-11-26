@@ -17,6 +17,13 @@ serviceChains:
     "maxPaths": 3,
     "functionsServer": 1
   }
+- id: 1
+  chain: [0, 1, 1, 1, 2]
+  attributes: {
+    "minPaths": 3,
+    "maxPaths": 3,
+    "functionsServer": 1
+  }
 # function definitions
 functions:
 - type: 0
@@ -45,9 +52,16 @@ functions:
   }
 # traffic flow definitions
 trafficFlows:
-- serviceId: 0
+#- serviceId: 0
+#  src: "n1"
+#  dst: "n9"
+#  minDem: 3
+#  maxDem: 3
+#  minBw: 300
+#  maxBw: 300
+- serviceId: 1
   src: "n1"
-  dst: "n9"
+  dst: "n8"
   minDem: 3
   maxDem: 3
   minBw: 300

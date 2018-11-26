@@ -1,6 +1,6 @@
 # optimization parameters
-gap: 0
-weights: [0, 1.0, 0]
+gap: 0.005
+weights: [1.0, 0, 0]
 # auxiliary parameters
 aux: {
   "iterations": 1000,
@@ -10,43 +10,56 @@ aux: {
 }
 # service definitions
 serviceChains:
-- id: 0
-  chain: [0, 1, 2]
-  attributes: {
-    "minPaths": 1,
-    "maxPaths": 5,
-    "functionsServer": 1
-  }
+  - id: 0
+    chain: [0, 1, 2]
+    attributes: {
+      "minPaths": 1,
+      "maxPaths": 5,
+      "functionsServer": 1
+    }
+  - id: 1
+    chain: [0, 1, 1, 2]
+    attributes: {
+      "minPaths": 1,
+      "maxPaths": 5,
+      "functionsServer": 1
+    }
+  - id: 2
+    chain: [0, 1, 1, 1, 2]
+    attributes: {
+      "minPaths": 1,
+      "maxPaths": 5,
+      "functionsServer": 1
+    }
 # function definitions
 functions:
-- type: 0
-  attributes: {
-    "replicable": false,
-    "load": 0.5,
-    "overhead": 10,
-    "sync_load": 0.01,
-    "process_delay": 0
-  }
-- type: 1
-  attributes: {
-    "replicable": true,
-    "load": 1.0,
-    "overhead": 10,
-    "sync_load": 0.01,
-    "process_delay": 0
-  }
-- type: 2
-  attributes: {
-    "replicable": false,
-    "load": 0.5,
-    "overhead": 10,
-    "sync_load": 0.01,
-    "process_delay": 0
-  }
+  - type: 0
+    attributes: {
+      "replicable": false,
+      "load": 0.5,
+      "overhead": 0,
+      "sync_load": 0.0,
+      "process_delay": 0
+    }
+  - type: 1
+    attributes: {
+      "replicable": true,
+      "load": 1.0,
+      "overhead": 0,
+      "sync_load": 0.0,
+      "process_delay": 0
+    }
+  - type: 2
+    attributes: {
+      "replicable": false,
+      "load": 0.5,
+      "overhead": 0,
+      "sync_load": 0.0,
+      "process_delay": 0
+    }
 # traffic flow definitions
 trafficFlows:
-- serviceId: 0
-  minDem: 1
-  maxDem: 5
-  minBw: 1
-  maxBw: 10
+  - minDem: 1
+    maxDem: 5
+    minBw: 1
+    maxBw: 20
