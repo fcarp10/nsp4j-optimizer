@@ -132,7 +132,11 @@ public class OptimizationModel {
                double objbnd = getDoubleInfo(GRB.CB_MIPNODE_OBJBND);
                double newGap = ((objbst - objbnd) / objbnd) * 100;
                if (newGap != gap) {
-                  printLog(log, INFO, "gap [" + Auxiliary.roundDouble(newGap, 2) + "%]");
+                  newGap = Auxiliary.roundDouble(newGap, 2);
+                  if (newGap <= 100)
+                     printLog(log, INFO, "gap [" + newGap + "%]");
+                  else
+                     printLog(log, INFO, "reducing solution space");
                   gap = newGap;
                }
             }

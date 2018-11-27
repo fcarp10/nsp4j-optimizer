@@ -47,10 +47,10 @@
                 <button type="button" class="btn btn-dark button button-margin" onClick="loadTopology()">Load</button>
             </div>
             <div class="form-group">
-                <label class="my-1 mr-2" for="objectiveFunction">Objective Function</label>
+                <label class="my-1 mr-2" for="objectiveFunction">Objective function</label>
                 <select class="form-control custom-select my-1 mr-sm-2" id="objectiveFunction">
                     <option value="num_of_servers">num of servers</option>
-                    <option value="costs">utilization costs</option>
+                    <option value="costs">linear cost functions</option>
                     <option value="utilization">utilization</option>
                 </select>
             </div>
@@ -88,7 +88,7 @@
             <h3>Constraints</h3>
             <hr>
             <div class="form-group">
-                <label class="my-1 mr-2" for="objectiveFunction">Basic Constraints</label>
+                <label class="my-1 mr-2" for="objectiveFunction">Basic constraints</label>
                 <label class="check ">Count number of used servers
                     <input type="checkbox" id="countNumberOfUsedServers" checked>
                     <span class="checkmark"></span>
@@ -123,8 +123,8 @@
                 </label>
             </div>
             <div class="form-group">
-                <label class="my-1 mr-2" for="objectiveFunction">Additional Constraints</label>
-                <label class="check ">No parallel Paths
+                <label class="my-1 mr-2" for="objectiveFunction">Additional constraints</label>
+                <label class="check ">No parallel paths
                     <input type="checkbox" id="noParallelPaths" checked>
                     <span class="checkmark"></span>
                 </label>
@@ -136,7 +136,7 @@
                     <input type="checkbox" id="synchronizationTraffic">
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Constraint Replications
+                <label class="check ">Constraint replications
                     <input type="checkbox" id="constraintReplications">
                     <span class="checkmark"></span>
                 </label>
@@ -218,17 +218,17 @@
             </div>
         </div>
         <div class="col-3">
-            <h3>Link Utilization</h3>
+            <h3>Link utilization</h3>
             <hr>
             <div id="linkUtilization"></div>
         </div>
         <div class="col-3">
-            <h3>Server Utilization</h3>
+            <h3>Server utilization</h3>
             <hr>
             <div id="serverUtilization"></div>
         </div>
         <div class="col-3">
-            <h3>Service Delay</h3>
+            <h3>Service delay</h3>
             <hr>
             <div id="serviceDelay"></div>
         </div>

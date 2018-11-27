@@ -22,14 +22,13 @@ public class Results {
    // scenario
    @JsonIgnore
    private transient Parameters pm;
-   private transient Scenario scenario;
    @JsonIgnore
    private transient int offset;
    @JsonIgnore
    private transient Map<String, Object> rawVariables;
-   private Map<String, List<String>> stringVariables;
-
-   // summary results
+   // for printing
+   private transient Scenario scenario;
+   // summary
    private double[] luSummary;
    private double[] xuSummary;
    private double[] fuSummary;
@@ -40,7 +39,8 @@ public class Results {
    private int migrationsNum;
    private int replicationsNum;
    private double objVal;
-
+   // variables
+   private Map<String, List<String>> stringVariables;
    // graphs
    private List<GraphData> luGraph;
    private List<GraphData> xuGraph;
@@ -355,7 +355,8 @@ public class Results {
       double step = Auxiliary.roundDouble((max - min) / xPoints, 2);
       if (max != min) {
          for (int i = 0; i < xPoints + 1; i++)
-            sdGraph.add(new GraphData(String.valueOf((step * i) + min), 0));
+            sdGraph.add(new GraphData(String.valueOf(
+                    Auxiliary.roundDouble((step * i) + min, 2)), 0));
          for (Double anSd : sd)
             for (int j = 0; j < xPoints + 1; j++)
                if (anSd < Double.valueOf(sdGraph.get(j).getYear()) + step
