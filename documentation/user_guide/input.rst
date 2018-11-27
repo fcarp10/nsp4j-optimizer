@@ -52,6 +52,32 @@ The desired network topology is described using the GraphStream guidelines in a 
 For further information on the use of a DGS file see `<http://graphstream-project.org/doc/Advanced-Concepts/The-DGS-File-Format/>`_
 
 
+The next table describes every parameter for the topology file:
+
++----------------------------------------------------------------------+
+| Variables of *example.dgs*                                           |
++======================+===============================================+
+| Definition of node parameters                                        |
++----------------------+-----------------------------------------------+
+| ``num_servers``      | number of servers per network node            |
++----------------------+-----------------------------------------------+
+| ``server_capacity``  | processing capacity of a server               |
++----------------------+-----------------------------------------------+
+| ``processing_delay`` | processing delay of a server                  |
++----------------------+-----------------------------------------------+
+| ``type``             | type of the node (experimental)               |
++----------------------+-----------------------------------------------+
+| ``MaxSFC``           | maximum number of SFCs per server             |
++----------------------+-----------------------------------------------+
+| ``VMmax``            | maximum number ov VMs per server              |
++----------------------+-----------------------------------------------+
+| Definition of link parameters                                        |
++----------------------+-----------------------------------------------+
+|``capacity``          | (bandwidth) capacity of a link                |
++----------------------+-----------------------------------------------+
+
+
+
 Paths file
 ==========
 
@@ -194,147 +220,98 @@ This file describes the default parameters for the optimization model. The name 
 
 
 
-The next table describes every parameter for the model (TO BE UPDATED):
+The next table describes every parameter for the model:
 
-+-------------------------------------------------------------------+
-| Variables of *config.yml*                                         |
-+====================+==============================================+
-| Definition of optimization parameters                             |
-+--------------------+----------------------------------------------+
-| ``gap``            | gap optimization value                       |
-+--------------------+----------------------------------------------+
-| ``weights``        | weight of migration, server and link costs   |
-+--------------------+----------------------------------------------+
-| auxiliary parameters                                              |
-+--------------------+----------------------------------------------+
-|``aux``             | global and default parameter                 |
-+--------------------+----------------------------------------------+
-| ``overhead``       |                                              |
-+--------------------+----------------------------------------------+
-| ``minPathsDefault``| minimum number of used paths                 |
-+--------------------+----------------------------------------------+
-| ``maxPathsDefault``| maximum number of used paths                 |
-+--------------------+----------------------------------------------+
-| ``iterations``     |                                              |
-+--------------------+----------------------------------------------+
-| ``offset_results`` | if 0, numbering starts with 0; else with 1   |
-+--------------------+----------------------------------------------+
-| ``scaling_x``      |                                              |
-+--------------------+----------------------------------------------+
-| ``scaling_y``      |                                              |
-+--------------------+----------------------------------------------+
-| Definition of network functions                                   |
-+--------------------+----------------------------------------------+
-| ``functions``      | set of function types                        |
-+--------------------+----------------------------------------------+
-| ``type``           | identifier of the function                   |
-+--------------------+----------------------------------------------+
-| ``attributes``     | parameters of this network function          |
-+--------------------+----------------------------------------------+
-| ``replicable``     | indicates if the function can be replicated  |
-+--------------------+----------------------------------------------+
-| ``load``           | packet rate to processing load ratio         |
-+--------------------+----------------------------------------------+
-| ``overhead``       |                                              |
-+--------------------+----------------------------------------------+
-| ``maxLoad``        | maximum load the VNF can process             |
-+--------------------+----------------------------------------------+
-| ``maxsubflows``    | maximum number of traffic flows for the VNF  |
-+--------------------+----------------------------------------------+
-| ``maxSharedSFC``   | VNF can shared by a maximum # of SFC         |
-+--------------------+----------------------------------------------+
-| ``maxSharedVNF``   | VNF can shared by maximum # of VNFs of a SFC |
-+--------------------+----------------------------------------------+
-| ``maxinstances``   | maximum # of instances of this NF at a server|
-+--------------------+----------------------------------------------+
-| ``delay``          |                                              |
-+--------------------+----------------------------------------------+
-| Definition of service chains                                      |
-+--------------------+----------------------------------------------+
-| ``serviceChains``  | Service Function Chains on the network       |
-+--------------------+----------------------------------------------+
-| ``id``             | identifier of the SFC                        |
-+--------------------+----------------------------------------------+
-| ``chain``          | identifier of the SFC                        |
-+--------------------+----------------------------------------------+
-| ``attributes``     | indicates if the function can be replicated  |
-+--------------------+----------------------------------------------+
-| ``sharedNF``       | indicates if the function can be replicated  |
-+--------------------+----------------------------------------------+
-| ``minPaths``       | number of servers on each node               |
-+--------------------+----------------------------------------------+
-| ``maxPaths``       | capacity of the links measured on  units     |
-+--------------------+----------------------------------------------+
-| ``minReplica``     | minimum number of allowed replicas           |
-+--------------------+----------------------------------------------+
-| ``maxReplica``     | maximum number of allowed replicas           |
-+--------------------+----------------------------------------------+
-| ``maxVNFserver``   | capacity of the links measured on  units     |
-+--------------------+----------------------------------------------+
-| Definition of traffic flows                                       |
-+--------------------+----------------------------------------------+
-| ``trafficFlows``   | traffic flows on the network                 |
-+--------------------+----------------------------------------------+
-| ``serviceId``      | identifier of the traffic flow               |
-+--------------------+----------------------------------------------+
-| ``src``            | source node of the traffic flow              |
-+--------------------+----------------------------------------------+
-| ``dst``            | destination node of the traffic flow         |
-+--------------------+----------------------------------------------+
-| ``minDem``         | minimum number of possible traffic demands   |
-+--------------------+----------------------------------------------+
-| ``maxDem``         | maximum number of possible traffic demands   |
-+--------------------+----------------------------------------------+
-| ``minBw``          | minimum Bandwidth                            |
-+--------------------+----------------------------------------------+
-| ``maxBw``          | maximum Bandwidth                            |
-+--------------------+----------------------------------------------+
-
-
-
-+-------------------------------------------------------------------+
-| Variables of *config.yml*                                         |
-+====================+==============================================+
-| ``gap``            | gap optimization value                       |
-+--------------------+----------------------------------------------+
-| ``weights``        | weight of migration, server and link costs   |
-+--------------------+----------------------------------------------+
-| ``serverCapacity`` | capacity of the server measured on  units    |
-+--------------------+----------------------------------------------+
-| ``serversPerNode`` | number of servers on each node               |
-+--------------------+----------------------------------------------+
-| ``linkCapacity``   | capacity of the links measured on  units     |
-+--------------------+----------------------------------------------+
-| ``maxReplicas``    | maximum number of allowed replicas           |
-+--------------------+----------------------------------------------+
-| ``functionTypes``  | set of function types                        |
-+--------------------+----------------------------------------------+
-| ``type``           | identifier of the function                   |
-+--------------------+----------------------------------------------+
-| ``replicable``     | indicates if the function can be replicated  |
-+--------------------+----------------------------------------------+
-| ``load``           | load ratio of the function                   |
-+--------------------+----------------------------------------------+
-| ``serviceTypes``   | Service Function Chains on the network       |
-+--------------------+----------------------------------------------+
-| ``id``             | identifier of the SFC                        |
-+--------------------+----------------------------------------------+
-| ``trafficFlows``   | traffic flows on the network                 |
-+--------------------+----------------------------------------------+
-| ``src``            | source node of the traffic flow              |
-+--------------------+----------------------------------------------+
-| ``dst``            | destination node of the traffic flow         |
-+--------------------+----------------------------------------------+
-| ``serviceId``      | identifier of the traffic flow               |
-+--------------------+----------------------------------------------+
-| ``minDemands``     | minimum number of possible traffic demands   |
-+--------------------+----------------------------------------------+
-| ``maxDemands``     | maximum number of possible traffic demands   |
-+--------------------+----------------------------------------------+
-| ``minBw``          | minimum Bandwidth                            |
-+--------------------+----------------------------------------------+
-| ``maxBw``          | maximum Bandwidth                            |
-+--------------------+----------------------------------------------+
-
-
-
++----------------------------------------------------------------------+
+| Variables of *example.yml*                                           |
++====================+=================================================+
+| Definition of optimization parameters                                |
++--------------------+-------------------------------------------------+
+| ``gap``            | gap optimization value                          |
++--------------------+-------------------------------------------------+
+| ``weights``        | weight of migration, server and link costs      |
++--------------------+-------------------------------------------------+
+| auxiliary parameters                                                 |
++--------------------+-------------------------------------------------+
+|``aux``             | global and default parameter                    |
++--------------------+-------------------------------------------------+
+| ``overhead``       |                                                 |
++--------------------+-------------------------------------------------+
+| ``minPathsDefault``| minimum number of used paths                    |
++--------------------+-------------------------------------------------+
+| ``maxPathsDefault``| maximum number of used paths                    |
++--------------------+-------------------------------------------------+
+| ``iterations``     |                                                 |
++--------------------+-------------------------------------------------+
+| ``offset_results`` | if 0, numbering starts with 0; else with 1      |
++--------------------+-------------------------------------------------+
+| ``scaling_x``      |                                                 |
++--------------------+-------------------------------------------------+
+| ``scaling_y``      |                                                 |
++--------------------+-------------------------------------------------+
+| Definition of network functions                                      |
++--------------------+-------------------------------------------------+
+| ``functions``      | set of network function (NF) types              |
++--------------------+-------------------------------------------------+
+| ``type``           | identifier of the function                      |
++--------------------+-------------------------------------------------+
+| ``attributes``     | parameters of this network function             |
++--------------------+-------------------------------------------------+
+| ``replicable``     | indicates if the NF can be replicated           |
++--------------------+-------------------------------------------------+
+| ``load``           | packet rate to processing load ratio            |
++--------------------+-------------------------------------------------+
+| ``overhead``       | processing overhead for a NF instance           |
++--------------------+-------------------------------------------------+
+| ``maxLoad``        | maximum load the NF can process                 |
++--------------------+-------------------------------------------------+
+| ``maxsubflows``    | maximum number of traffic flows for the NF      |
++--------------------+-------------------------------------------------+
+| ``maxSharedSFC``   | maximum # of SFC that can share the NF          |
++--------------------+-------------------------------------------------+
+| ``maxSharedVNF``   | maximum # of VNFs per SFC that can share the NF |
++--------------------+-------------------------------------------------+
+| ``maxinstances``   | maximum # of instances of this NF at a server   |
++--------------------+-------------------------------------------------+
+| ``delay``          |                                                 |
++--------------------+-------------------------------------------------+
+| Definition of service chains                                         |
++--------------------+-------------------------------------------------+
+| ``serviceChains``  | Service Function Chains (SFC) on the network    |
++--------------------+-------------------------------------------------+
+| ``id``             | identifier of the SFC                           |
++--------------------+-------------------------------------------------+
+| ``chain``          | set of VNFs of the SFC                          |
++--------------------+-------------------------------------------------+
+| ``attributes``     | parameters of the SFC                           |
++--------------------+-------------------------------------------------+
+| ``sharedNF``       | indicates if a VNF can be shared by other SFC   |
++--------------------+-------------------------------------------------+
+| ``minPaths``       | minimum # of active paths usable by the SFC     |
++--------------------+-------------------------------------------------+
+| ``maxPaths``       | maximum # of active paths usable by the SFC     |
++--------------------+-------------------------------------------------+
+| ``minReplica``     | minimum number of allowed replicas              |
++--------------------+-------------------------------------------------+
+| ``maxReplica``     | maximum number of allowed replicas              |
++--------------------+-------------------------------------------------+
+| ``maxVNFserver``   | maximum # of VNFs the SFC can place on server   |
++--------------------+-------------------------------------------------+
+| Definition of traffic flows on the network                           |
++--------------------+-------------------------------------------------+
+| ``trafficFlows``   | set of demands (subflows) a traffic flow contain|
++--------------------+-------------------------------------------------+
+| ``serviceId``      | identifier of SFC the traffic flow belongs to   |
++--------------------+-------------------------------------------------+
+| ``src``            | source node of the traffic flow                 |
++--------------------+-------------------------------------------------+
+| ``dst``            | destination node of the traffic flow            |
++--------------------+-------------------------------------------------+
+| ``minDem``         | minimum # of demands of the traffic flow        |
++--------------------+-------------------------------------------------+
+| ``maxDem``         | maximum # of demands of the traffic flow        |
++--------------------+-------------------------------------------------+
+| ``minBw``          | minimum Bandwidth of a demand                   |
++--------------------+-------------------------------------------------+
+| ``maxBw``          | maximum Bandwidth of a demand                   |
++--------------------+-------------------------------------------------+
