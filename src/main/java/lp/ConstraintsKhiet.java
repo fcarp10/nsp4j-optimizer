@@ -36,7 +36,6 @@ public class ConstraintsKhiet {
         if (scenario.getConstraints().get("initialPlacementAsConstraints"))
             initialPlacementAsConstraints(initialModel);
         if (scenario.getConstraints().get("synchronizationTraffic")) synchronizationTraffic();
-        test();
     }
 
     private void linkUtilization() throws GRBException {
