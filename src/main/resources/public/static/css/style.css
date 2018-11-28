@@ -21,13 +21,8 @@
     width: 95%;
 }
 
-.button {
+.button-width {
     width: 80px;
-    color: white;
-}
-
-.button-red{
-    background-color: #BC213F;
 }
 
 .button-margin{

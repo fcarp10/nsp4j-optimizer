@@ -10,55 +10,57 @@ aux: {
 }
 # service definitions
 serviceChains:
-- id: 0
-  chain: [0, 1, 2]
-  attributes: {
-    "minPaths": 3,
-    "maxPaths": 3,
-    "functionsServer": 1
-  }
-- id: 1
-  chain: [0, 1, 1, 1, 2]
-  attributes: {
-    "minPaths": 3,
-    "maxPaths": 3,
-    "functionsServer": 1
-  }
+  - id: 0
+    chain: [0, 1, 2]
+    attributes: {
+      "minPaths": 3,
+      "maxPaths": 3,
+      "functionsServer": 1,
+      "max_delay": 200
+    }
+  - id: 1
+    chain: [0, 1, 1, 1, 2]
+    attributes: {
+      "minPaths": 3,
+      "maxPaths": 3,
+      "functionsServer": 1,
+      "max_delay": 200
+    }
 # function definitions
 functions:
-- type: 0
-  attributes: {
-    "replicable": false,
-    "load": 1.0,
-    "overhead": 0,
-    "sync_load": 0.0,
-    "process_delay": 0
-  }
-- type: 1
-  attributes: {
-    "replicable": true,
-    "load": 1.0,
-    "overhead": 0,
-    "sync_load": 0.0,
-    "process_delay": 0
-  }
-- type: 2
-  attributes: {
-    "replicable": false,
-    "load": 1.0,
-    "overhead": 0,
-    "sync_load": 0.0,
-    "process_delay": 0
-  }
+  - type: 0
+    attributes: {
+      "replicable": false,
+      "load": 1.0,
+      "overhead": 0,
+      "sync_load": 0.0,
+      "process_delay": 0
+    }
+  - type: 1
+    attributes: {
+      "replicable": true,
+      "load": 1.0,
+      "overhead": 0,
+      "sync_load": 0.0,
+      "process_delay": 0
+    }
+  - type: 2
+    attributes: {
+      "replicable": false,
+      "load": 1.0,
+      "overhead": 0,
+      "sync_load": 0.0,
+      "process_delay": 0
+    }
 # traffic flow definitions
 trafficFlows:
-- serviceId: 0
-  src: "n1"
-  dst: "n9"
-  minDem: 3
-  maxDem: 3
-  minBw: 300
-  maxBw: 300
+  - serviceId: 0
+    src: "n1"
+    dst: "n9"
+    minDem: 3
+    maxDem: 3
+    minBw: 300
+    maxBw: 300
 #- serviceId: 1
 #  src: "n1"
 #  dst: "n8"

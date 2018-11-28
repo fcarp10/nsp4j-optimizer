@@ -164,7 +164,7 @@ public class Constraints {
             serviceDelayExpr.add(linkDelayExpr);
             serviceDelayExpr.add(procDelayExpr);
             serviceDelayExpr.add(migrationDelayExpr);
-            model.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, vars.dSP[s][p], "");
+            model.getGrbModel().addConstr(vars.dS[s], GRB.GREATER_EQUAL, serviceDelayExpr, "");
          }
       }
    }
@@ -226,17 +226,17 @@ public class Constraints {
 
    private void functionPlacement() throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++) {
-         Service se = pm.getServices().get(s);
-         for (int p = 0; p < se.getTrafficFlow().getPaths().size(); p++)
-            for (int d = 0; d < se.getTrafficFlow().getDemands().size(); d++)
-               for (int v = 0; v < se.getFunctions().size(); v++) {
-                  GRBLinExpr expr = new GRBLinExpr();
-                  for (int n = 0; n < se.getTrafficFlow().getPaths().get(p).getNodePath().size(); n++)
+         Service service = pm.getServices().get(s);
+         for (int p = 0; p < service.getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
+               for (int v = 0; v < service.getFunctions().size(); v++) {
+                  GRBLinExpr middleExpr = new GRBLinExpr();
+                  for (int n = 0; n < service.getTrafficFlow().getPaths().get(p).getNodePath().size(); n++)
                      for (int x = 0; x < pm.getServers().size(); x++)
-                        if (pm.getServers().get(x).getParent().equals(
-                                pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n)))
-                           expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
-                  model.getGrbModel().addConstr(vars.rSPD[s][p][d], GRB.LESS_EQUAL, expr, "");
+                        if (pm.getServers().get(x).getParent()
+                                .equals(service.getTrafficFlow().getPaths().get(p).getNodePath().get(n)))
+                           middleExpr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
+                  model.getGrbModel().addConstr(vars.rSPD[s][p][d], GRB.LESS_EQUAL, middleExpr, "");
                }
       }
    }

@@ -25,10 +25,12 @@ function getMessage() {
                messages.shift();
             if(message == "Info: ready"){
                 document.getElementById("run_button").removeAttribute("disabled");
+                document.getElementById("stop_button").setAttribute("disabled", "true");
                 longRefresh();
             }
             if(message == "Info: topology loaded"){
                 document.getElementById("run_button").removeAttribute("disabled");
+                document.getElementById("stop_button").setAttribute("disabled", "true");
                 longRefresh();
             }
             if(!connected){
@@ -39,6 +41,7 @@ function getMessage() {
         if(message  == null) {
             document.getElementById("message").innerText = "Info: framework not running";
             document.getElementById("run_button").setAttribute("disabled", "true");
+            document.getElementById("stop_button").setAttribute("disabled", "true");
             clearInterval(intervalMessages);
             if(connected) {
                 longRefresh();
@@ -90,6 +93,7 @@ function runOpt(){
 shortRefresh();
 var scenario = generateScenario();
 document.getElementById("run_button").setAttribute("disabled", "true");
+document.getElementById("stop_button").removeAttribute("disabled");
     try {
         var message = null;
         $.ajax
@@ -97,6 +101,27 @@ document.getElementById("run_button").setAttribute("disabled", "true");
             data: scenario,
             url: "run",
             type: "POST",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+    }
+    catch (e) {
+        return 0;
+    }
+}
+
+function stopOpt(){
+longRefresh();
+document.getElementById("stop_button").setAttribute("disabled", "true");
+document.getElementById("run_button").removeAttribute("disabled");
+    try {
+        var message = null;
+        $.ajax
+        ({
+            url: "stop",
+            type: "GET",
             async: false,
             success: function (ans) {
                 message = ans;

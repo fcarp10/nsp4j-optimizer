@@ -31,6 +31,7 @@ public class Manager {
 
    private static final Logger log = LoggerFactory.getLogger(Manager.class);
    private static Parameters pm;
+   private static boolean interrupted;
 
    private static String getResourcePath(String fileName) {
       try {
@@ -81,6 +82,7 @@ public class Manager {
 
    public static GRBModel start(Scenario scen, GRBModel initialModel) {
       try {
+         interrupted = false;
          if (initialModel == null)
             initialModel = ResultsManager.importModel(getResourcePath(scen.getInputFileName()), scen.getInputFileName(), pm);
          ResultsManager resultsManager = initializeResultFiles();
@@ -111,13 +113,18 @@ public class Manager {
       return initialModel;
    }
 
+   public static void stop() {
+      interrupted = true;
+   }
+
    public static void generatePaths(Scenario scenario) {
       String path = getResourcePath(scenario.getInputFileName());
       if (path != null)
          try {
             Graph graph = GraphManager.importTopology(path, scenario.getInputFileName());
             printLog(log, INFO, "generating paths");
-            KShortestPathGenerator k = new KShortestPathGenerator(graph, 10, 5, path, scenario.getInputFileName());
+            KShortestPathGenerator k = new KShortestPathGenerator(graph, 10
+                    , 5, path, scenario.getInputFileName());
             k.run();
             printLog(log, INFO, "paths generated");
          } catch (Exception e) {
@@ -165,7 +172,7 @@ public class Manager {
       GRBLinExpr expr = new GRBLinExpr();
       double weightLinks = pm.getWeights()[0] / pm.getLinks().size();
       double weightServers = pm.getWeights()[1] / pm.getServers().size();
-      double weightServiceDelays = pm.getWeights()[2] / (pm.getPaths().size() * 100);
+      double weightServiceDelays = pm.getWeights()[2];
       switch (obj) {
          case NUM_OF_SERVERS_OBJ:
             expr.add(model.usedServersExpr());
@@ -206,9 +213,13 @@ public class Manager {
       results.setVariable(pX, model.getVariables().pX);
       results.setVariable(gSVXY, model.getVariables().gSVXY);
       results.setVariable(sSVP, model.getVariables().sSVP);
-      results.setVariable(dSP, model.getVariables().dSP);
+      results.setVariable(dS, model.getVariables().dS);
       results.setVariable(dSPX, model.getVariables().dSPX);
       results.prepareVariablesForJsonFile(model.getObjVal(), initialModel);
       return results;
+   }
+
+   public static boolean isInterrupted() {
+      return interrupted;
    }
 }

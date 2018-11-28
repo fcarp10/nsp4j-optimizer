@@ -1,6 +1,7 @@
 package lp;
 
 import gurobi.*;
+import manager.Manager;
 import manager.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,8 +78,7 @@ public class OptimizationModel {
    public GRBLinExpr serviceDelayExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
       for (int s = 0; s < parameters.getServices().size(); s++)
-         for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            expr.addTerm(weight, variables.dSP[s][p]);
+         expr.addTerm(weight / (int) parameters.getServices().get(s).getAttribute("max_delay"), variables.dS[s]);
       return expr;
    }
 
@@ -92,8 +92,10 @@ public class OptimizationModel {
          printLog(log, ERROR, "model is infeasible");
       } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INF_OR_UNBD)
          printLog(log, ERROR, "solution is inf. or unbd.");
+      else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INTERRUPTED)
+         printLog(log, INFO, "optimization interrupted");
       else
-         printLog(log, ERROR, "no solution [status --> " + grbModel.get(GRB.IntAttr.Status) + "]");
+         printLog(log, ERROR, "no solution [status: " + grbModel.get(GRB.IntAttr.Status) + "]");
       return -1;
    }
 
@@ -114,7 +116,6 @@ public class OptimizationModel {
    }
 
    private class Callback extends GRBCallback {
-
       private int status;
       private double gap;
 
@@ -130,9 +131,8 @@ public class OptimizationModel {
             } else if (where == GRB.CB_MIPNODE) {
                double objbst = getDoubleInfo(GRB.CB_MIPNODE_OBJBST);
                double objbnd = getDoubleInfo(GRB.CB_MIPNODE_OBJBND);
-               double newGap = ((objbst - objbnd) / objbnd) * 100;
+               double newGap = Auxiliary.roundDouble(((objbst - objbnd) / objbnd) * 100, 2);
                if (newGap != gap) {
-                  newGap = Auxiliary.roundDouble(newGap, 2);
                   if (newGap <= 100)
                      printLog(log, INFO, "gap [" + newGap + "%]");
                   else
@@ -140,6 +140,8 @@ public class OptimizationModel {
                   gap = newGap;
                }
             }
+            if (Manager.isInterrupted())
+               abort();
          } catch (GRBException e) {
             e.printStackTrace();
          }

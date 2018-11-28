@@ -44,7 +44,10 @@
                 <label for="inputFileName">Input files name</label>
                 <input type="text" class="form-control" id="inputFileName" placeholder="file name" value="example">
                 <small class="form-text text-muted">The input files must have the same name.</small>
-                <button type="button" class="btn btn-dark button button-margin" onClick="loadTopology()">Load</button>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-dark button-width button-margin" onClick="loadTopology()">Load</button>
+                    <button type="button" class="btn btn-light button-width button-margin" onClick="generatePaths()">Paths</button>
+                </div>
             </div>
             <div class="form-group">
                 <label class="my-1 mr-2" for="objectiveFunction">Objective function</label>
@@ -78,9 +81,8 @@
                 </select>
             </div>
             <div class="btn-group">
-                <button type="button" class="btn btn-dark button" onClick="generatePaths()">Paths</button>
-                <button type="button" id="run_button" class="btn btn-danger button " onClick="runOpt()" disabled>Run
-                </button>
+                <button type="button" id="run_button" class="btn btn-success button-width" onClick="runOpt()" disabled>Run</button>
+                <button type="button" id="stop_button" class="btn btn-danger button-width" onClick="stopOpt()" disabled>Stop</button>
             </div>
             <div class="div div-output-emphasis" id="message"></div>
         </div>

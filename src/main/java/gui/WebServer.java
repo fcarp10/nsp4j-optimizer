@@ -104,6 +104,13 @@ public class WebServer {
          return 201;
       });
 
+      post("/paths", (request, response) -> {
+         Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
+         Runnable runnable = () -> Manager.generatePaths(scenario);
+         executorService.submit(runnable);
+         return 201;
+      });
+
       post("/run", (request, response) -> {
          Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
          Runnable runnable = () -> initialModel = Manager.start(scenario, initialModel);
@@ -111,10 +118,8 @@ public class WebServer {
          return 201;
       });
 
-      post("/paths", (request, response) -> {
-         Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-         Runnable runnable = () -> Manager.generatePaths(scenario);
-         executorService.submit(runnable);
+      get("/stop", (request, response) -> {
+         Manager.stop();
          return 201;
       });
 

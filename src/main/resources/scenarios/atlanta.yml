@@ -1,5 +1,5 @@
 # optimization parameters
-gap: 0.005
+gap: 0
 weights: [0, 0, 1.0]
 # auxiliary parameters
 aux: {
@@ -15,21 +15,24 @@ serviceChains:
     attributes: {
       "minPaths": 1,
       "maxPaths": 5,
-      "functionsServer": 1
+      "functionsServer": 1,
+      "max_delay": 200
     }
   - id: 1
     chain: [0, 1, 1, 2]
     attributes: {
       "minPaths": 1,
       "maxPaths": 5,
-      "functionsServer": 1
+      "functionsServer": 1,
+      "max_delay": 200
     }
   - id: 2
     chain: [0, 1, 1, 1, 2]
     attributes: {
       "minPaths": 1,
       "maxPaths": 5,
-      "functionsServer": 1
+      "functionsServer": 1,
+      "max_delay": 200
     }
 # function definitions
 functions:

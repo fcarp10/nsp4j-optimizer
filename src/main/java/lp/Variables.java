@@ -21,7 +21,7 @@ public class Variables {
    public GRBVar[] pX;
    public GRBVar[][][][] gSVXY;
    public GRBVar[][][] sSVP;
-   public GRBVar[][] dSP;
+   public GRBVar[] dS;
    public GRBVar[][][] dSPX;
 
    public Variables(Parameters pm, GRBModel model) {
@@ -86,11 +86,9 @@ public class Variables {
                for (int p = 0; p < pm.getPaths().size(); p++)
                   sSVP[s][v][p] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
                           , Definitions.sSVP + "[" + s + "][" + v + "][" + p + "]");
-         dSP = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()];
+         dS = new GRBVar[pm.getServices().size()];
          for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               dSP[s][p] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                       , Definitions.dSP + "[" + s + "][" + p + "]");
+            dS[s] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Definitions.dS + "[" + s + "]");
          dSPX = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getServers().size()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
