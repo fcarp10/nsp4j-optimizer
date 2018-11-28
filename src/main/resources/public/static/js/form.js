@@ -199,6 +199,8 @@ function generateScenario() {
     var noParallelPaths = $("#noParallelPaths").is(":checked");
     var initialPlacementAsConstraints = $("#initialPlacementAsConstraints").is(":checked");
     var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
+    var pathsConstrainedByFunctionsVRC1 = $("#pathsConstrainedByFunctionsVRC1").is(":checked");
+    var numberOfActivePathsBoundByService = $("#numberOfActivePathsBoundByService").is(":checked");
 
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
@@ -216,7 +218,9 @@ function generateScenario() {
             functionSequenceOrder: functionSequenceOrder,
             noParallelPaths: noParallelPaths,
             initialPlacementAsConstraints: initialPlacementAsConstraints,
-            synchronizationTraffic: synchronizationTraffic
+            synchronizationTraffic: synchronizationTraffic,
+            pathsConstrainedByFunctionsVRC1: pathsConstrainedByFunctionsVRC1,
+            numberOfActivePathsBoundByService: numberOfActivePathsBoundByService
         }
     });
 
