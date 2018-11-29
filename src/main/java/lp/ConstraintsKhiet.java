@@ -363,6 +363,10 @@ public class ConstraintsKhiet {
                 System.out.println(overhead);
             }
         }
+        for (int x = 0; x < pm.getServers().size(); x++) {
+            int maxSFC = (int) pm.getServers().get(x).getParent().getAttribute("MaxSFC");
+            System.out.println(maxSFC);
+        }
 
     }
 
