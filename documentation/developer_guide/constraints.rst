@@ -46,6 +46,15 @@ The first two *for loops* ensure that for all service chains :math:`s` , element
 Constrain RPC2
 ^^^^^^^^^^^^^^
 
+.. math::
+    :nowrap:
+
+        \begin{equation} \label{rmax}   \text{RPC2:} \qquad
+	        \forall s \in \mathbb{S}:  \quad     R^s_{MIN}  \leq \sum_{p\in \mathbb{P}_s} z_{p}^s \leq R^s_{MAX}.
+        \end{equation}
+
+
+
 .. code-block:: java
 
     private void numberOfActivePathsBoundByService() throws GRBException {
@@ -690,6 +699,27 @@ Constrain VRC1
         \begin{equation} \label{pathsConstrainedByFunctions}
 	    \forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} \leq F_v^{s} \sum_{p \in P_s} t_{p}^s + 1 - F_v^{s}
 	    \end{equation}
+
+
+.. code-block:: java
+
+    private void pathsConstrainedByFunctionsVRC1() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                GRBLinExpr expr = new GRBLinExpr();
+                for (int x = 0; x < pm.getServers().size(); x++)
+                    expr.addTerm(1.0, vars.pXSV[x][s][v]);
+                if ((boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable")) {
+                    GRBLinExpr expr2 = new GRBLinExpr();
+                    for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                        expr2.addTerm(1.0, vars.rSP[s][p]);
+                    model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "pathsConstrainedByFunctions");
+                } else
+                    model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, "pathsConstrainedByFunctions");
+            }
+    }
+
+
 
 
 The constrain defined by VRC1 is almost identical to constrain VRC2 described above. The difference is the :math:`\leq` condition, which establishes the rigth side of the equation as an upper bound. In the code this can be seen from *model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "pathsConstrainedByFunctions")*;
