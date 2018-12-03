@@ -2,7 +2,11 @@
 Input Parameters
 ****************
 
-The framework requires three different input files: one describing the network topology, one with all paths listed and one for the specific parameters. All three files must have exactly the same name with different extensions:\*.dgs for the topology, \*.txt for the paths and \*.yml for the parameters.
+The framework requires three different input files: one describing the network topology, one with all paths listed and one for the specific parameters. All three files must have exactly the same name with different extensions:\*.dgs for the topology, \*.txt for the paths and \*.yml for the parameters. The following example is illustrated in the input files.
+
+.. image:: /_static/example.png
+        :align: center
+
 
 Topology file
 =============
@@ -129,7 +133,7 @@ This file describes the default parameters for the optimization model. The name 
         "maxVNFserver": 10
     }
     - id: 2
-    chain: [1, 3, 5]
+    chain: [1, 3, 2]
     attributes: {
         "sharedNF": [1, 1, 0],
         "minPaths": 2,
@@ -159,8 +163,8 @@ This file describes the default parameters for the optimization model. The name 
         "overhead": 10,
         "maxLoad": 200,
         "maxsubflows": 4,
-        "maxSharedSFC": 1,
-        "maxSharedVNF": 1,
+        "maxSharedSFC": 5,
+        "maxSharedVNF": 3,
         "maxInstances": 1,
         "delay": 10
     }
@@ -171,8 +175,8 @@ This file describes the default parameters for the optimization model. The name 
         "overhead": 10,
         "maxLoad": 200,
         "maxsubflows": 4,
-        "maxSharedSFC": 5,
-        "maxSharedVNF": 3,
+        "maxSharedSFC": 1,
+        "maxSharedVNF": 1,
         "maxInstances": 1,
         "delay": 10
     }
@@ -229,7 +233,7 @@ The next table describes every parameter for the model:
 +--------------------+-------------------------------------------------+
 | ``gap``            | gap optimization value                          |
 +--------------------+-------------------------------------------------+
-| ``weights``        | weight of migration, server and link costs      |
+| ``weights``        | cost weights: link (W1), server (W2), delay (W3)|
 +--------------------+-------------------------------------------------+
 | auxiliary parameters                                                 |
 +--------------------+-------------------------------------------------+

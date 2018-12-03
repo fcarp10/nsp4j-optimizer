@@ -41,11 +41,41 @@ Installing and running the nsp4j-optimizer tool
 	cd /target
 	java -jar nsp4j-optimizer-$VERSION$-jar-with-dependencies.jar
 
-This will launch the application on your local machine trough the port 8080. Open your browser and access to ``localhost:8080``, you will access to the GUI:
+This will launch the application on your local machine trough the port 8080.
 
-.. image:: /_static/interface.png
-    :align: center
 
 NOTE: in Linux or Mac OS distributions you might need to specify the Java library path ``-Djava.library.path=/opt/gurobi810/linux64/lib/``.
 
 NOTE: in Ubuntu, add a file named ``randomLibs.conf`` to the directory ``/etc/ld.so.conf.d/``. Add the next line to this file: ``/opt/gurobi810/linux64/lib/`` (according to your Gurobi version). Finally, run the following command in the terminal: ``sudo ldconfig``.
+
+
+Running the nsp4j-optimizer tool
+================================
+
+Open your browser and access to ``localhost:8080``, you will access to the GUI:
+
+.. image:: /_static/interface.png
+    :align: center
+
+
+
+Input files name:
+^^^^^^^^^^^^^^^^^
+
+The file name  *example* will identify 3 different input files with names The framework requires three different input files:  example.dgs, example.yml and example.txt. The description can be found in section *Input Parameters*.
+
+
+Objective function:
+^^^^^^^^^^^^^^^^^^^
+
+There are 3 different combination of weighted functions that can be used as optimization target. The objective functions are defined in section *Optimization models*.
+
+Model:
+^^^^^^
+
+The objective functions defined above can be used to build different optimization models, where each of the objective functions can be chosen as an alternative. The optimization mmodels are i) Initial placement; ii) Migration; iii) Replication; and iv) Replication and mMigration. For each model, one of the objective functions can be freely chosen, where in principle all general constraints can be applied.
+
+Constraints:
+^^^^^^^^^^^^
+
+Depending on the selected optimization model, some of the constraints are automatically preselected. Further constraints can be added depending on the special topology, VNF architecture and design assumptions. All constraints are documented in section *Constraints*.  It should be noted that although it is possible to select arbitrary constraints, the validity is not checked by the program.

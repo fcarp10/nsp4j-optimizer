@@ -5,10 +5,31 @@ Optimization Model
 
 
 
-Parameters and Variables
-========================
+Parameters
+==========
 
 The parameters and variables used on the following formulas are shown on the following tables.
+
+
+**Network and Server parameters from input file** *example.dgs*
+
++------------------+---------+--------------------+-----------------------------------------------------------------------------------------+
+| Name	           |   Type  |  Symbol            | Code access for Service Chain parameters                                                |
++==================+=========+====================+=========================================================================================+
+| num_servers      | Integer | :math:`X_n`        | int numServers = (int) pm.getServers().get(x).getParent().getAttribute ("num_servers")  |
++------------------+---------+--------------------+-----------------------------------------------------------------------------------------+
+| server_capacity  | Integer | :math:`C_x`        | int capacity = (int) pm.getServers().get(x).getParent().getAttribute ("server_capacity”)|
++------------------+---------+--------------------+-----------------------------------------------------------------------------------------+
+| processing_delay | Integer | :math:`T_{P_x}`    | int delay = (int) pm.getServers().get(x).getParent().getAttribute ("processing_delay")  |
++------------------+---------+--------------------+-----------------------------------------------------------------------------------------+
+| type             | Integer | :math:`T_{X_n}`    | int type = (int) pm.getServers().get(x).getParent().getAttribute ("type")               |
++------------------+---------+--------------------+-----------------------------------------------------------------------------------------+
+| MaxSFC           | Integer | :math:`\hat{S}_x`  | int maxSFC = (int) pm.getServers().get(x).getParent().getAttribute ("MaxSFC")           |
++------------------+---------+--------------------+-----------------------------------------------------------------------------------------+
+| VMmax            | Integer | :math:`\hat{VM}_x` | int vmMax = (int) pm.getServers().get(x).getParent().getAttribute ("VMmax")             |
++------------------+---------+--------------------+-----------------------------------------------------------------------------------------+
+
+
 
 **VNF parameters from input file** *example.yml*
 
@@ -50,7 +71,6 @@ The parameters and variables used on the following formulas are shown on the fol
 
 
 
-
 **Network topology and traffic parameters**
 
 +-----------------------------+------------+----------------------------------------------------------------------------------------------------+
@@ -74,6 +94,11 @@ The parameters and variables used on the following formulas are shown on the fol
 +-----------------------------+------------+----------------------------------------------------------------------------------------------------+
 | :math:`\delta_{e}(p)`       |            |  true if path *p* traverses link *e*                                                               |
 +-----------------------------+------------+----------------------------------------------------------------------------------------------------+
+
+
+
+Variables
+=========
 
 
 **Binary decision variables**
@@ -105,4 +130,52 @@ The parameters and variables used on the following formulas are shown on the fol
 +-----------------------------+-------------+----------------------------------------------------------------------------------------------------+
 |:math:`u_x`                  | uX          | Constraint integer 0 <= uL <= 1 ;utilization of server *x*                                         |
 +-----------------------------+-------------+----------------------------------------------------------------------------------------------------+
+
+
+Variable pX[x]
+^^^^^^^^^^^^^^
+
+.. code-block:: java
+
+    pX = new GRBVar[pm.getServers().size()];
+    for (int x = 0; x < pm.getServers().size(); x++)
+        this.pX[x] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, Auxiliary.pX + "[" + x + "]");
+
+Variable kL[l]
+^^^^^^^^^^^^^^
+
+.. code-block:: java
+
+    kL = new GRBVar[pm.getLinks().size()];
+    for (int l = 0; l < pm.getLinks().size(); l++)
+        kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Auxiliary.kL + "[" + l + "]");
+
+Variable kX[x]
+^^^^^^^^^^^^^^
+
+.. code-block:: java
+
+    kX = new GRBVar[pm.getServers().size()];
+    for (int x = 0; x < pm.getServers().size(); x++)
+        kX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Auxiliary.kX + "[" + x + "]");
+
+
+Variable uL[l]
+^^^^^^^^^^^^^^
+
+.. code-block:: java
+
+    uL = new GRBVar[pm.getLinks().size()];
+    for (int l = 0; l < pm.getLinks().size(); l++)
+        uL[l] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, Auxiliary.uL + "[" + l + "]");
+
+
+Variable uX[x]
+^^^^^^^^^^^^^^
+
+.. code-block:: java
+
+    uX = new GRBVar[pm.getServers().size()];
+    for (int x = 0; x < pm.getServers().size(); x++)
+        uX[x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, Auxiliary.uX + "[" + x + "]");
 

@@ -43,8 +43,23 @@ The first two *for loops* ensure that for all service chains :math:`s` , element
     	}
 
 
-RPC2
-^^^^
+Constrain RPC2
+^^^^^^^^^^^^^^
+
+.. code-block:: java
+
+    private void numberOfActivePathsBoundByService() throws GRBException {
+        for (int s=0; s < pm.getServices().size(); s++) {
+            int rmin = (int) pm.getServices().get(s).getAttribute("minPaths");
+            int rmax = (int) pm.getServices().get(s).getAttribute("maxPaths");
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int p=0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+                expr.addTerm(1.0, vars.rSP[s][p]);
+            }
+            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, rmax, "numberOfActivePathsBoundByService");
+            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, rmin, "numberOfActivePathsBoundByService");
+        }
+    }
 
 
 
@@ -565,7 +580,7 @@ Replication constraints
 
 
 Constrain VRC2
-^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
 
 .. math::
     :nowrap:
@@ -667,7 +682,7 @@ At this point it is noteworthy, that we can summarize the if-loop into one formu
 
 
 Constrain VRC1
-^^^^
+^^^^^^^^^^^^^^
 
 .. math::
     :nowrap:
@@ -1043,27 +1058,6 @@ if the initial variable is equal to 1. The output of this method will be returne
 Objective functions
 -------------------
 
-Ggf. ist dieser Code-Block wichtig ???
-
-
-.. code-block:: java
-
-   public OptimizationModel(Parameters parameters) {
-      this.parameters = parameters;
-      try {
-         grbEnv = new GRBEnv();
-         grbEnv.set(GRB.IntParam.LogToConsole, 0);
-         grbModel = new GRBModel(grbEnv);
-         Callback cb = new Callback();
-         grbModel.setCallback(cb);
-         grbModel.getEnv().set(GRB.DoubleParam.MIPGap, parameters.getGap());
-      } catch (GRBException e) {
-         e.printStackTrace();
-      }
-   }
-
-
-
 
 Optimization selector
 ^^^^^^^^^^^^^^^^^^^^^
@@ -1204,4 +1198,52 @@ serverCostsExpr(), again taking the weight  :math:`W_2` in consideration, firsts
          expr.addTerm(weight, variables.kX[x]);
       return expr;
    }
+
+
+Objective OF6
+^^^^^^^^^^^^^
+
+Delay function
+
+.. code-block:: java
+
+    public GRBLinExpr serviceDelayExpr(double weight) {
+        GRBLinExpr expr = new GRBLinExpr();
+        for (int s = 0; s < parameters.getServices().size(); s++)
+            for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                expr.addTerm(weight, variables.dSP[s][p]);
+        return expr;
+    }
+
+
+Objective Function for Optimization Models
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The graphical interface allows to select a combination of different objective functions, which are in detail OF1; a combination of OF4 + OF5; or OF2+OF3.
+The weighting factors are given by the input parameters.
+
+
+
+.. code-block:: java
+
+    private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, String obj) throws GRBException {
+        GRBLinExpr expr = new GRBLinExpr();
+        double weightLinks = pm.getWeights()[0] / pm.getLinks().size();
+        double weightServers = pm.getWeights()[1] / pm.getServers().size();
+        double weightServiceDelays = pm.getWeights()[2] / (pm.getPaths().size() * 100);
+        switch (obj) {
+            case NUM_OF_SERVERS_OBJ:
+                expr.add(model.usedServersExpr());
+                break;
+            case COSTS_OBJ:
+                expr.add(model.linkCostsExpr(weightLinks));
+                expr.add(model.serverCostsExpr(weightServers));
+                expr.add(model.serviceDelayExpr(weightServiceDelays));
+                break;
+            case UTILIZATION_OBJ:
+                expr.add(model.linkUtilizationExpr(weightLinks));
+                expr.add(model.serverUtilizationExpr(weightServers));
+                break;
+     }
+     return expr;
 
