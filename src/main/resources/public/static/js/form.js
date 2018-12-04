@@ -158,112 +158,71 @@ var scenario = generateScenario();
 }
 
 function check(elem) {
-    document.getElementById("countNumberOfUsedServers").disabled = false;
-    document.getElementById("onePathPerDemand").disabled = false;
-    document.getElementById("activatePathForService").disabled = false;
-    document.getElementById("pathsConstrainedByFunctions").disabled = false;
-    document.getElementById("functionPlacement").disabled = false;
-    document.getElementById("oneFunctionPerDemand").disabled = false;
-    document.getElementById("mappingFunctionsWithDemands").disabled = false;
-    document.getElementById("functionSequenceOrder").disabled = false;
-    document.getElementById("noParallelPaths").disabled = false;
-    document.getElementById("initialPlacementAsConstraints").disabled = false;
-    document.getElementById("synchronizationTraffic").disabled = false;
-    document.getElementById("constraintReplications").disabled = false;
-    document.getElementById("numFunctionsPerServer").disabled = false;
-    document.getElementById("fixSrcDstFunctions").disabled = false;
 
-    document.getElementById("countNumberOfUsedServers").checked = true;
-    document.getElementById("onePathPerDemand").checked = true;
-    document.getElementById("activatePathForService").checked = true;
-    document.getElementById("pathsConstrainedByFunctions").checked = true;
-    document.getElementById("functionPlacement").checked = true;
-    document.getElementById("oneFunctionPerDemand").checked = true;
-    document.getElementById("mappingFunctionsWithDemands").checked = true;
-    document.getElementById("functionSequenceOrder").checked = true;
-    document.getElementById("noParallelPaths").checked = true;
-    document.getElementById("initialPlacementAsConstraints").checked = true;
-    document.getElementById("synchronizationTraffic").checked = true;
+    // Common constraints
+    document.getElementById("rpc1").checked = true;
+    document.getElementById("rpc2").checked = true;
+    document.getElementById("pfc1").checked = true;
+    document.getElementById("pfc2").checked = true;
+    document.getElementById("fdc1").checked = true;
+    document.getElementById("fdc2").checked = true;
+    document.getElementById("fdc3").checked = true;
+    document.getElementById("fdc4").checked = true;
 
+    // Model specific constraints
     var model = document.getElementById("model").value;
     if(model === "initial_placement"){
-        document.getElementById("initialPlacementAsConstraints").checked = false;
-        document.getElementById("synchronizationTraffic").checked = false;
+        document.getElementById("ipc").checked = true;
+        document.getElementById("ipmgrc").checked = true;
+        document.getElementById("repc").checked = false;
     }
     if(model === "migration"){
-            document.getElementById("initialPlacementAsConstraints").checked = false;
-            document.getElementById("synchronizationTraffic").checked = false;
+        document.getElementById("ipc").checked = false;
+        document.getElementById("ipmgrc").checked = true;
+        document.getElementById("repc").checked = false;
     }
     if(model === "replication"){
-                document.getElementById("noParallelPaths").checked = false;
+        document.getElementById("ipc").checked = false;
+        document.getElementById("ipmgrc").checked = false;
+        document.getElementById("repc").checked = true;
     }
     if(model === "migration_replication"){
-                document.getElementById("noParallelPaths").checked = false;
-                document.getElementById("initialPlacementAsConstraints").checked = false;
+        document.getElementById("ipc").checked = false;
+        document.getElementById("ipmgrc").checked = false;
+        document.getElementById("repc").checked = false;
     }
-    if(model === "all_optimization_models"){
-                document.getElementById("noParallelPaths").checked = false;
-                document.getElementById("initialPlacementAsConstraints").checked = false;
-                document.getElementById("synchronizationTraffic").checked = false;
-                document.getElementById("noParallelPaths").disabled = true;
-                document.getElementById("initialPlacementAsConstraints").disabled = true;
-                document.getElementById("synchronizationTraffic").disabled = true;
-    }
-    if(model === "migration_replication_rl"){
-                document.getElementById("countNumberOfUsedServers").checked = false;
-                document.getElementById("onePathPerDemand").checked = false;
-                document.getElementById("activatePathForService").checked = false;
-                document.getElementById("pathsConstrainedByFunctions").checked = false;
-                document.getElementById("functionPlacement").checked = false;
-                document.getElementById("oneFunctionPerDemand").checked = false;
-                document.getElementById("mappingFunctionsWithDemands").checked = false;
-                document.getElementById("functionSequenceOrder").checked = false;
-                document.getElementById("noParallelPaths").checked = false;
-                document.getElementById("initialPlacementAsConstraints").checked = false;
-                document.getElementById("synchronizationTraffic").checked = false;
-                document.getElementById("constraintReplications").checked = false;
-                document.getElementById("numFunctionsPerServer").checked = false;
-                document.getElementById("fixSrcDstFunctions").checked = false;
 
-                document.getElementById("setLinkUtilizationExpr").disabled = true;
-                document.getElementById("setServerUtilizationExpr").disabled = true;
-                document.getElementById("countNumberOfUsedServers").disabled = true;
-                document.getElementById("onePathPerDemand").disabled = true;
-                document.getElementById("activatePathForService").disabled = true;
-                document.getElementById("pathsConstrainedByFunctions").disabled = true;
-                document.getElementById("functionPlacement").disabled = true;
-                document.getElementById("oneFunctionPerDemand").disabled = true;
-                document.getElementById("mappingFunctionsWithDemands").disabled = true;
-                document.getElementById("functionSequenceOrder").disabled = true;
-                document.getElementById("noParallelPaths").disabled = true;
-                document.getElementById("initialPlacementAsConstraints").disabled = true;
-                document.getElementById("synchronizationTraffic").disabled = true;
-                document.getElementById("constraintReplications").disabled = true;
-                document.getElementById("numFunctionsPerServer").disabled = true;
-                document.getElementById("fixSrcDstFunctions").disabled = true;
-    }
+    document.getElementById("rc").checked = false;
+    document.getElementById("fxc").checked = false;
+    document.getElementById("sdc").checked = false;
 }
 
 function generateScenario() {
-
+    //model
     var inputFileName = document.getElementById("inputFileName").value;
     var objectiveFunction = document.getElementById("objectiveFunction").value;
     var maximization = $("#max").is(":checked");
     var model = document.getElementById("model").value;
-    var countNumberOfUsedServers = $("#countNumberOfUsedServers").is(":checked");
-    var onePathPerDemand = $("#onePathPerDemand").is(":checked");
-    var activatePathForService = $("#onePathPerDemand").is(":checked");
-    var pathsConstrainedByFunctions = $("#pathsConstrainedByFunctions").is(":checked");
-    var functionPlacement = $("#functionPlacement").is(":checked");
-    var oneFunctionPerDemand = $("#oneFunctionPerDemand").is(":checked");
-    var mappingFunctionsWithDemands = $("#mappingFunctionsWithDemands").is(":checked");
-    var functionSequenceOrder = $("#functionSequenceOrder").is(":checked");
-    var noParallelPaths = $("#noParallelPaths").is(":checked");
-    var initialPlacementAsConstraints = $("#initialPlacementAsConstraints").is(":checked");
-    var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
-    var constraintReplications = $("#constraintReplications").is(":checked");
-    var numFunctionsPerServer = $("#numFunctionsPerServer").is(":checked");
-    var fixSrcDstFunctions = $("#fixSrcDstFunctions").is(":checked");
+
+    // Common constraints
+    var rpc1 = $("#rpc1").is(":checked");
+    var rpc2 = $("#rpc2").is(":checked");
+    var pfc1 = $("#pfc1").is(":checked");
+    var pfc2 = $("#pfc2").is(":checked");
+    var fdc1 = $("#fdc1").is(":checked");
+    var fdc2 = $("#fdc2").is(":checked");
+    var fdc3 = $("#fdc3").is(":checked");
+    var fdc4 = $("#fdc4").is(":checked");
+
+    // Model specific constraints
+    var ipc = $("#ipc").is(":checked");
+    var ipmgrc = $("#ipmgrc").is(":checked");
+    var repc = $("#repc").is(":checked");
+
+    // Extra constraints
+    var rc = $("#rc").is(":checked");
+    var fxc = $("#fxc").is(":checked");
+    var sdc = $("#sdc").is(":checked");
 
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
@@ -271,20 +230,23 @@ function generateScenario() {
         maximization: maximization,
         model: model,
         constraints :{
-            countNumberOfUsedServers: countNumberOfUsedServers,
-            onePathPerDemand: onePathPerDemand,
-            activatePathForService: activatePathForService,
-            pathsConstrainedByFunctions: pathsConstrainedByFunctions,
-            functionPlacement: functionPlacement,
-            oneFunctionPerDemand: oneFunctionPerDemand,
-            mappingFunctionsWithDemands: mappingFunctionsWithDemands,
-            functionSequenceOrder: functionSequenceOrder,
-            noParallelPaths: noParallelPaths,
-            initialPlacementAsConstraints: initialPlacementAsConstraints,
-            synchronizationTraffic: synchronizationTraffic,
-            constraintReplications: constraintReplications,
-            numFunctionsPerServer: numFunctionsPerServer,
-            fixSrcDstFunctions: fixSrcDstFunctions
+            // Common constraints
+            rpc1: rpc1,
+            rpc2: rpc2,
+            pfc1: pfc1,
+            pfc2: pfc2,
+            fdc1: fdc1,
+            fdc2: fdc2,
+            fdc3: fdc3,
+            fdc4: fdc4,
+            // Model specific constraints
+            ipc: ipc,
+            ipmgrc: ipmgrc,
+            repc: repc,
+            // Extra constraints
+            rc: rc,
+            fxc: fxc,
+            sdc: sdc
         }
     });
 

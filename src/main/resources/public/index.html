@@ -32,7 +32,7 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-8">
+        <div class="col-9">
             <h3>Topology</h3>
             <hr>
             <div id="cy"></div>
@@ -75,8 +75,8 @@
                     <option value="initial_placement">initial placement</option>
                     <option value="migration">migration</option>
                     <option value="replication">replication</option>
-                    <option value="migration_replication">rep. & mgr.</option>
-                    <option value="all_optimization_models">all opt. models</option>
+                    <option value="migration_replication">migration and replication</option>
+                    <option value="all_optimization_models">run all models</option>
                     <option value="migration_replication_rl">learning</option>
                 </select>
             </div>
@@ -86,71 +86,76 @@
             </div>
             <div class="div div-output-emphasis" id="message"></div>
         </div>
-        <div class="col-2">
+        <div class="col-1">
             <h3>Constraints</h3>
             <hr>
             <div class="form-group">
-                <label class="my-1 mr-2" for="objectiveFunction">Basic constraints</label>
-                <label class="check ">Count number of used servers
-                    <input type="checkbox" id="countNumberOfUsedServers" checked>
+                <label class="my-1 mr-2" for="objectiveFunction">Common</label>
+                <label class="check ">RPC1
+                    <input type="checkbox" id="rpc1" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">One path per demand
-                    <input type="checkbox" id="onePathPerDemand" checked>
+                <label class="check ">RPC2
+                    <input type="checkbox" id="rpc2" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Activate path for service
-                    <input type="checkbox" id="activatePathForService" checked>
+                <label class="check ">PFC1
+                    <input type="checkbox" id="pfc1" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Paths constrained by functions
-                    <input type="checkbox" id="pathsConstrainedByFunctions" checked>
+                <label class="check ">PFC2
+                    <input type="checkbox" id="pfc2" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Function placement
-                    <input type="checkbox" id="functionPlacement" checked>
+                <label class="check ">FDC1
+                    <input type="checkbox" id="fdc1" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">One function per demand
-                    <input type="checkbox" id="oneFunctionPerDemand" checked>
+                <label class="check ">FDC2
+                    <input type="checkbox" id="fdc2" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Mapping func. with demands
-                    <input type="checkbox" id="mappingFunctionsWithDemands" checked>
+                <label class="check ">FDC3
+                    <input type="checkbox" id="fdc3" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Functions sequence order
-                    <input type="checkbox" id="functionSequenceOrder" checked>
+                <label class="check ">FDC4
+                    <input type="checkbox" id="fdc4">
                     <span class="checkmark"></span>
                 </label>
             </div>
             <div class="form-group">
-                <label class="my-1 mr-2" for="objectiveFunction">Additional constraints</label>
-                <label class="check ">No parallel paths
-                    <input type="checkbox" id="noParallelPaths" checked>
+                <label class="my-1 mr-2" for="objectiveFunction">Model specific</label>
+                <label class="check ">IPC
+                    <input type="checkbox" id="ipc" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Initial placement as constraints
-                    <input type="checkbox" id="initialPlacementAsConstraints">
+                <label class="check ">IPMGRC
+                    <input type="checkbox" id="ipmgrc" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Synchronization traffic
-                    <input type="checkbox" id="synchronizationTraffic">
+                <label class="check ">REPC
+                    <input type="checkbox" id="repc">
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Constraint replications
-                    <input type="checkbox" id="constraintReplications">
+
+            </div>
+            <div class="form-group">
+                <label class="my-1 mr-2" for="objectiveFunction">Extra</label>
+                <label class="check ">RC
+                    <input type="checkbox" id="rc">
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Functions per server
-                    <input type="checkbox" id="numFunctionsPerServer">
+                <label class="check ">FXC
+                    <input type="checkbox" id="fxc">
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Fix src-dst functions
-                    <input type="checkbox" id="fixSrcDstFunctions">
+                <label class="check ">SDC
+                    <input type="checkbox" id="sdc">
                     <span class="checkmark"></span>
                 </label>
             </div>
+
         </div>
     </div>
     <div id="results" class="row">
