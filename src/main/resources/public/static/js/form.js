@@ -3,6 +3,7 @@ var longPeriod = 3000;
 var intervalMessages = setInterval(getMessage, longPeriod);
 var connected = false;
 var messages = [];
+var numMessages = 4;
 
 function getMessage() {
     try {
@@ -21,7 +22,7 @@ function getMessage() {
             document.getElementById("message").innerText = "";
             for (var i = 0; i < messages.length; i++)
                 document.getElementById("message").innerText += messages[i] +"\n";
-            if(messages.length > 2)
+            if(messages.length >= numMessages)
                messages.shift();
             if(message == "Info: ready"){
                 document.getElementById("run_button").removeAttribute("disabled");

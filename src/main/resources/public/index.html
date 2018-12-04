@@ -33,134 +33,147 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-9">
-            <h3>Topology</h3>
+            <h4>Topology</h4>
             <hr>
             <div id="cy"></div>
         </div>
-        <div class="col-2">
-            <h3>Model</h3>
+        <div class="col-3">
+            <h4>Parameters</h4>
             <hr>
-            <div class="form-group">
-                <label for="inputFileName">Input files name</label>
-                <input type="text" class="form-control" id="inputFileName" placeholder="file name" value="example">
-                <small class="form-text text-muted">The input files must have the same name.</small>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-dark button-width button-margin" onClick="loadTopology()">Load</button>
-                    <button type="button" class="btn btn-light button-width button-margin" onClick="generatePaths()">Paths</button>
+            <div class="row">
+                <div class="col-8">
+                    <div class="form-group">
+                        <label for="inputFileName">Input files name</label>
+                        <input type="text" class="form-control" id="inputFileName" placeholder="file name"
+                               value="example">
+                        <small class="form-text text-muted">The input files must have the same name.</small>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-dark button-width button-margin"
+                                    onClick="loadTopology()">
+                                Load
+                            </button>
+                            <button type="button" class="btn btn-light button-width button-margin"
+                                    onClick="generatePaths()">Paths
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="my-1 mr-2" for="objectiveFunction">Objective function</label>
+                        <select class="form-control custom-select my-1 mr-sm-2" id="objectiveFunction">
+                            <option value="num_of_servers">num of servers</option>
+                            <option value="costs">linear cost functions</option>
+                            <option value="utilization">utilization</option>
+                        </select>
+                    </div>
+                    <div>
+                        <form>
+                            <label class="radio">Min
+                                <input type="radio" name="min-max" id="min" checked>
+                                <span class="checkround"></span>
+                            </label>
+                            <label class="radio">Max
+                                <input type="radio" name="min-max" id="max">
+                                <span class="checkround"></span>
+                            </label>
+                        </form>
+                    </div>
+                    <div class="form-group">
+                        <label class="my-1 mr-2" for="model">Model</label>
+                        <select class="form-control custom-select my-1 mr-sm-2" id="model" onChange="check(this);">
+                            <option value="initial_placement">initial placement</option>
+                            <option value="migration">migration</option>
+                            <option value="replication">replication</option>
+                            <option value="migration_replication">migration and replication</option>
+                            <option value="all_optimization_models">run all models</option>
+                            <option value="migration_replication_rl">learning</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" id="run_button" class="btn btn-success button-width" onClick="runOpt()"
+                                disabled>Run
+                        </button>
+                        <button type="button" id="stop_button" class="btn btn-danger button-width" onClick="stopOpt()"
+                                disabled>Stop
+                        </button>
+                    </div>
+                    <div class="div div-output-emphasis" id="message"></div>
+                </div>
+                <div class="col-4">
+                    <h5>Constraints</h5>
+                    <div class="form-group">
+                        <label class="my-1 mr-2" for="objectiveFunction">Common</label>
+                        <label class="check ">RPC1
+                            <input type="checkbox" id="rpc1" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">RPC2
+                            <input type="checkbox" id="rpc2" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">PFC1
+                            <input type="checkbox" id="pfc1" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">PFC2
+                            <input type="checkbox" id="pfc2" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">FDC1
+                            <input type="checkbox" id="fdc1" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">FDC2
+                            <input type="checkbox" id="fdc2" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">FDC3
+                            <input type="checkbox" id="fdc3" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">FDC4
+                            <input type="checkbox" id="fdc4">
+                            <span class="checkmark"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="my-1 mr-2" for="objectiveFunction">Specific</label>
+                        <label class="check ">IPC
+                            <input type="checkbox" id="ipc" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">IPMGRC
+                            <input type="checkbox" id="ipmgrc" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">REPC
+                            <input type="checkbox" id="repc">
+                            <span class="checkmark"></span>
+                        </label>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="my-1 mr-2" for="objectiveFunction">Extra</label>
+                        <label class="check ">RC
+                            <input type="checkbox" id="rc">
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">FXC
+                            <input type="checkbox" id="fxc">
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">SDC
+                            <input type="checkbox" id="sdc">
+                            <span class="checkmark"></span>
+                        </label>
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <label class="my-1 mr-2" for="objectiveFunction">Objective function</label>
-                <select class="form-control custom-select my-1 mr-sm-2" id="objectiveFunction">
-                    <option value="num_of_servers">num of servers</option>
-                    <option value="costs">linear cost functions</option>
-                    <option value="utilization">utilization</option>
-                </select>
-            </div>
-            <div>
-                <form>
-                    <label class="radio">Min
-                        <input type="radio" name="min-max" id="min" checked>
-                        <span class="checkround"></span>
-                    </label>
-                    <label class="radio">Max
-                        <input type="radio" name="min-max" id="max">
-                        <span class="checkround"></span>
-                    </label>
-                </form>
-            </div>
-            <div class="form-group">
-                <label class="my-1 mr-2" for="model">Model</label>
-                <select class="form-control custom-select my-1 mr-sm-2" id="model" onChange="check(this);">
-                    <option value="initial_placement">initial placement</option>
-                    <option value="migration">migration</option>
-                    <option value="replication">replication</option>
-                    <option value="migration_replication">migration and replication</option>
-                    <option value="all_optimization_models">run all models</option>
-                    <option value="migration_replication_rl">learning</option>
-                </select>
-            </div>
-            <div class="btn-group">
-                <button type="button" id="run_button" class="btn btn-success button-width" onClick="runOpt()" disabled>Run</button>
-                <button type="button" id="stop_button" class="btn btn-danger button-width" onClick="stopOpt()" disabled>Stop</button>
-            </div>
-            <div class="div div-output-emphasis" id="message"></div>
-        </div>
-        <div class="col-1">
-            <h3>Constraints</h3>
-            <hr>
-            <div class="form-group">
-                <label class="my-1 mr-2" for="objectiveFunction">Common</label>
-                <label class="check ">RPC1
-                    <input type="checkbox" id="rpc1" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">RPC2
-                    <input type="checkbox" id="rpc2" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">PFC1
-                    <input type="checkbox" id="pfc1" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">PFC2
-                    <input type="checkbox" id="pfc2" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">FDC1
-                    <input type="checkbox" id="fdc1" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">FDC2
-                    <input type="checkbox" id="fdc2" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">FDC3
-                    <input type="checkbox" id="fdc3" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">FDC4
-                    <input type="checkbox" id="fdc4">
-                    <span class="checkmark"></span>
-                </label>
-            </div>
-            <div class="form-group">
-                <label class="my-1 mr-2" for="objectiveFunction">Model specific</label>
-                <label class="check ">IPC
-                    <input type="checkbox" id="ipc" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">IPMGRC
-                    <input type="checkbox" id="ipmgrc" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">REPC
-                    <input type="checkbox" id="repc">
-                    <span class="checkmark"></span>
-                </label>
-
-            </div>
-            <div class="form-group">
-                <label class="my-1 mr-2" for="objectiveFunction">Extra</label>
-                <label class="check ">RC
-                    <input type="checkbox" id="rc">
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">FXC
-                    <input type="checkbox" id="fxc">
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">SDC
-                    <input type="checkbox" id="sdc">
-                    <span class="checkmark"></span>
-                </label>
-            </div>
-
         </div>
     </div>
+
     <div id="results" class="row">
         <div class="col-3">
-            <h3>Summary results</h3>
+            <h4>Summary results</h4>
             <hr>
             <div class="table-responsive">
                 <table class="table table-hover ">
@@ -225,17 +238,17 @@
             </div>
         </div>
         <div class="col-3">
-            <h3>Link utilization</h3>
+            <h4>Link utilization</h4>
             <hr>
             <div id="linkUtilization"></div>
         </div>
         <div class="col-3">
-            <h3>Server utilization</h3>
+            <h4>Server utilization</h4>
             <hr>
             <div id="serverUtilization"></div>
         </div>
         <div class="col-3">
-            <h3>Service delay</h3>
+            <h4>Service delay</h4>
             <hr>
             <div id="serviceDelay"></div>
         </div>
