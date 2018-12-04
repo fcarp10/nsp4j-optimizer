@@ -86,7 +86,7 @@ public class OptimizationModel {
       grbModel.optimize();
       if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
          objVal = Auxiliary.roundDouble(grbModel.get(GRB.DoubleAttr.ObjVal), 2);
-         printLog(log, INFO, "opt. finished [objVal --> " + objVal + "]");
+         printLog(log, INFO, "finished [" + objVal + "]");
          return objVal;
       } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
          printLog(log, ERROR, "model is infeasible");
@@ -95,7 +95,7 @@ public class OptimizationModel {
       else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INTERRUPTED)
          printLog(log, INFO, "optimization interrupted");
       else
-         printLog(log, ERROR, "no solution [status: " + grbModel.get(GRB.IntAttr.Status) + "]");
+         printLog(log, ERROR, "no solution [" + grbModel.get(GRB.IntAttr.Status) + "]");
       return -1;
    }
 
