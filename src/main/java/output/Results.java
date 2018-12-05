@@ -136,13 +136,13 @@ public class Results {
    }
 
    private List<Integer> numOfFunctionsPerServer() throws GRBException {
-      GRBVar[] pXvar = (GRBVar[]) rawVariables.get(pX);
+      GRBVar[][][] pXSVvar = (GRBVar[][][]) rawVariables.get(pXSV);
       List<Integer> numOfFunctionsPerServer = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++) {
          int numOfFunctions = 0;
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (pXvar[x].get(GRB.DoubleAttr.X) == 1.0)
+               if (pXSVvar[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
                   numOfFunctions++;
          numOfFunctionsPerServer.add(numOfFunctions);
       }
