@@ -1,5 +1,5 @@
 # optimization parameters
-gap: 0
+gap: 0.05
 weights: [0, 0, 1.0]
 # auxiliary parameters
 aux: {

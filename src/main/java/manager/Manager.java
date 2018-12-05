@@ -83,8 +83,7 @@ public class Manager {
    public static GRBModel start(Scenario scen, GRBModel initialModel) {
       try {
          interrupted = false;
-         if (initialModel == null)
-            initialModel = ResultsManager.importModel(getResourcePath(scen.getInputFileName()), scen.getInputFileName(), pm);
+         initialModel = ResultsManager.importModel(getResourcePath(scen.getInputFileName()), scen.getInputFileName(), pm);
          ResultsManager resultsManager = initializeResultFiles();
          printLog(log, INFO, "initializing model");
          switch (scen.getModel()) {
