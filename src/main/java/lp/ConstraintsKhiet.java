@@ -32,6 +32,7 @@ public class ConstraintsKhiet {
         if (scenario.getConstraints().get("functionSequenceOrder")) functionSequenceOrder();
         if (scenario.getConstraints().get("pathsConstrainedByFunctionsVRC1")) pathsConstrainedByFunctionsVRC1();
         if (scenario.getConstraints().get("numberOfActivePathsBoundByService")) numberOfActivePathsBoundByService();
+        if (scenario.getConstraints().get("constraintVRC3")) constraintVRC3();
         if (scenario.getConstraints().get("noParallelPaths")) noParallelPaths();
         if (scenario.getConstraints().get("initialPlacementAsConstraints"))
             initialPlacementAsConstraints(initialModel);
@@ -333,7 +334,7 @@ public class ConstraintsKhiet {
     }
 
     private void numberOfActivePathsBoundByService() throws GRBException {
-        for (int s=0; s < pm.getServices().size(); s++) {
+        for (int s = 0; s < pm.getServices().size(); s++) {
             int rmin = (int) pm.getServices().get(s).getAttribute("minPaths");
             int rmax = (int) pm.getServices().get(s).getAttribute("maxPaths");
             GRBLinExpr expr = new GRBLinExpr();
@@ -342,6 +343,25 @@ public class ConstraintsKhiet {
             }
             model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, rmax, "numberOfActivePathsBoundByService");
             model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, rmin, "numberOfActivePathsBoundByService");
+        }
+    }
+
+    private void constraintVRC3() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++) {
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                GRBLinExpr expr = new GRBLinExpr();
+                for (int x = 0; x < pm.getServers().size(); x++)
+                    expr.addTerm(1.0, vars.pXSV[x][s][v]);
+                boolean replicable = (boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable");
+                if (replicable) {
+                    int minRep = (int) pm.getServices().get(s).getAttribute("minReplica") + 1;
+                    int maxRep = (int) pm.getServices().get(s).getAttribute("maxReplica") + 1;
+                    model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, minRep, "constraintVRC3");
+                    model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxRep, "constraintVRC3");
+                } else {
+                    model.getGrbModel().addConstr(expr, GRB.EQUAL, 1, "constraintVRC3");
+                }
+            }
         }
     }
 
@@ -410,5 +430,16 @@ public class ConstraintsKhiet {
                                 expr.addTerm(1.0, vars.sSVP[s][v][p]);
                         model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.gSVXY[s][v][x][y], "synchronizationTraffic");
                     }
+    }
+    private void constraintReplications() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                expr.addTerm(1.0, vars.rSP[s][p]);
+            int minPaths = (int) pm.getServices().get(s).getAttribute("minPaths");
+            int maxPaths = (int) pm.getServices().get(s).getAttribute("maxPaths");
+            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, minPaths, "");
+            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxPaths, "");
+        }
     }
 }
