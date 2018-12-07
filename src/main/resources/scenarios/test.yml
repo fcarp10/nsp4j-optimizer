@@ -14,9 +14,9 @@ aux: {
 # service definitions
 serviceChains:
 - id: 0
-  chain: [1, 2, 4, 3, 6, 5]
+  chain: [4, 2, 1, 6, 8]
   attributes: {
-    "sharedNF": [1, 0, 0, 1, 0, 0],
+    "sharedNF": [0, 1, 1, 0, 0],
     "minPaths": 3,
     "maxPaths": 3,
     "minReplica": 1,
@@ -24,9 +24,9 @@ serviceChains:
     "maxVNFserver": 2
   }
 - id: 1
-  chain: [1, 3, 7]
+  chain: [4, 5, 3, 7, 8]
   attributes: {
-    "sharedNF": [1, 1, 0],
+    "sharedNF": [0, 1, 1, 0, 0],
     "minPaths": 2,
     "maxPaths": 2,
     "minReplica": 1,
@@ -83,54 +83,7 @@ functions:
     "maxInstances": 5,
     "delay": 10
   }
-- type: 4
-  attributes: {
-    "replicable": false,
-    "load": 1.0,
-    "overhead": 10,
-    "maxLoad": 200,
-    "maxsubflows": 4,
-    "maxSharedSFC": 2,
-    "maxSharedVNF": 3,
-    "maxInstances": 5,
-    "delay": 10
-  }
-- type: 5
-  attributes: {
-    "replicable": false,
-    "load": 1.0,
-    "overhead": 10,
-    "maxLoad": 200,
-    "maxsubflows": 4,
-    "maxSharedSFC": 2,
-    "maxSharedVNF": 3,
-    "maxInstances": 5,
-    "delay": 10
-  }
-- type: 6
-  attributes: {
-    "replicable": true,
-    "load": 1.0,
-    "overhead": 10,
-    "maxLoad": 200,
-    "maxsubflows": 4,
-    "maxSharedSFC": 2,
-    "maxSharedVNF": 3,
-    "maxInstances": 5,
-    "delay": 10
-  }
-- type: 7
-  attributes: {
-    "replicable": true,
-    "load": 1.0,
-    "overhead": 10,
-    "maxLoad": 200,
-    "maxsubflows": 4,
-    "maxSharedSFC": 2,
-    "maxSharedVNF": 3,
-    "maxInstances": 5,
-    "delay": 10
-  }
+
 # traffic flow definitions
 trafficFlows:
 - serviceId: 0

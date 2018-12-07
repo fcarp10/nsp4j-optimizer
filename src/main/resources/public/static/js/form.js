@@ -105,17 +105,6 @@ var scenario = generateScenario();
 }
 
 function check(elem) {
-    document.getElementById("countNumberOfUsedServers").disabled = false;
-    document.getElementById("onePathPerDemand").disabled = false;
-    document.getElementById("activatePathForService").disabled = false;
-    document.getElementById("pathsConstrainedByFunctions").disabled = false;
-    document.getElementById("functionPlacement").disabled = false;
-    document.getElementById("oneFunctionPerDemand").disabled = false;
-    document.getElementById("mappingFunctionsWithDemands").disabled = false;
-    document.getElementById("functionSequenceOrder").disabled = false;
-    document.getElementById("noParallelPaths").disabled = false;
-    document.getElementById("initialPlacementAsConstraints").disabled = false;
-    document.getElementById("synchronizationTraffic").disabled = false;
 
     document.getElementById("countNumberOfUsedServers").checked = true;
     document.getElementById("onePathPerDemand").checked = true;
@@ -145,41 +134,6 @@ function check(elem) {
                 document.getElementById("noParallelPaths").checked = false;
                 document.getElementById("initialPlacementAsConstraints").checked = false;
     }
-    if(model === "all_optimization_models"){
-                document.getElementById("noParallelPaths").checked = false;
-                document.getElementById("initialPlacementAsConstraints").checked = false;
-                document.getElementById("synchronizationTraffic").checked = false;
-                document.getElementById("noParallelPaths").disabled = true;
-                document.getElementById("initialPlacementAsConstraints").disabled = true;
-                document.getElementById("synchronizationTraffic").disabled = true;
-    }
-    if(model === "migration_replication_rl"){
-                document.getElementById("countNumberOfUsedServers").checked = false;
-                document.getElementById("onePathPerDemand").checked = false;
-                document.getElementById("activatePathForService").checked = false;
-                document.getElementById("pathsConstrainedByFunctions").checked = false;
-                document.getElementById("functionPlacement").checked = false;
-                document.getElementById("oneFunctionPerDemand").checked = false;
-                document.getElementById("mappingFunctionsWithDemands").checked = false;
-                document.getElementById("functionSequenceOrder").checked = false;
-                document.getElementById("noParallelPaths").checked = false;
-                document.getElementById("initialPlacementAsConstraints").checked = false;
-                document.getElementById("synchronizationTraffic").checked = false;
-
-                document.getElementById("setLinkUtilizationExpr").disabled = true;
-                document.getElementById("setServerUtilizationExpr").disabled = true;
-                document.getElementById("countNumberOfUsedServers").disabled = true;
-                document.getElementById("onePathPerDemand").disabled = true;
-                document.getElementById("activatePathForService").disabled = true;
-                document.getElementById("pathsConstrainedByFunctions").disabled = true;
-                document.getElementById("functionPlacement").disabled = true;
-                document.getElementById("oneFunctionPerDemand").disabled = true;
-                document.getElementById("mappingFunctionsWithDemands").disabled = true;
-                document.getElementById("functionSequenceOrder").disabled = true;
-                document.getElementById("noParallelPaths").disabled = true;
-                document.getElementById("initialPlacementAsConstraints").disabled = true;
-                document.getElementById("synchronizationTraffic").disabled = true;
-    }
 }
 
 function generateScenario() {
@@ -201,6 +155,7 @@ function generateScenario() {
     var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
     var pathsConstrainedByFunctionsVRC1 = $("#pathsConstrainedByFunctionsVRC1").is(":checked");
     var numberOfActivePathsBoundByService = $("#numberOfActivePathsBoundByService").is(":checked");
+    var constraintVRC3 = $("#constraintVRC3").is(":checked");
 
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
@@ -220,7 +175,8 @@ function generateScenario() {
             initialPlacementAsConstraints: initialPlacementAsConstraints,
             synchronizationTraffic: synchronizationTraffic,
             pathsConstrainedByFunctionsVRC1: pathsConstrainedByFunctionsVRC1,
-            numberOfActivePathsBoundByService: numberOfActivePathsBoundByService
+            numberOfActivePathsBoundByService: numberOfActivePathsBoundByService,
+            constraintVRC3: constraintVRC3
         }
     });
 
