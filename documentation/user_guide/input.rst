@@ -336,7 +336,7 @@ The first blocks shows the used *input files, objective function* and *optimizat
 +===========+==================================+
 | RPC1      | onePathPerDemand                 |
 +-----------+----------------------------------+
-| RPC2      |                                  |
+| RPC2      | numberOfActivePathsBoundByService|
 +-----------+----------------------------------+
 | RPC3      | noParallelPaths                  |
 +-----------+----------------------------------+
@@ -355,6 +355,8 @@ The first blocks shows the used *input files, objective function* and *optimizat
 | VRC1      | pathsConstrainedByFunctionsVRC1  |
 +-----------+----------------------------------+
 | VRC2      | pathsConstrainedByFunctions      |
++-----------+----------------------------------+
+| VRC3      | constraintVRC3                   |
 +-----------+----------------------------------+
 | IPC1      | initialPlacementAsConstraints    |
 +-----------+----------------------------------+

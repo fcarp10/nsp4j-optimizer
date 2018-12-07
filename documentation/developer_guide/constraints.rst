@@ -726,6 +726,44 @@ The constrain defined by VRC1 is almost identical to constrain VRC2 described ab
 
 
 
+
+Constrain VRC3
+^^^^^^^^^^^^^^
+
+
+.. math::
+    :nowrap:
+
+        \begin{equation} \label{VNFvmax}  \qquad
+             \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}:   \quad    F^{v,s}_{Rmin} + 1  \leq \sum_{x \in \mathbb{X}} f_x^{v,s}   \leq F^{v,s}_{Rmax} + 1
+        \end{equation}
+
+
+.. code-block:: java
+
+   private void constraintVRC3() throws GRBException {             //VRC 3
+        for (int s = 0; s < pm.getServices().size(); s++) {
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                GRBLinExpr expr = new GRBLinExpr();
+                for (int x = 0; x < pm.getServers().size(); x++)
+                    expr.addTerm(1.0, vars.pXSV[x][s][v]);
+                boolean replicable = (boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable");
+                if (replicable) {
+                    int minRep = (int) pm.getServices().get(s).getAttribute("minReplica") + 1;
+                    int maxRep = (int) pm.getServices().get(s).getAttribute("maxReplica") + 1;
+                    model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, minRep, "constraintVRC3");
+                    model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxRep, "constraintVRC3");
+                } else {
+                    model.getGrbModel().addConstr(expr, GRB.EQUAL, 1, "constraintVRC3");
+                }
+            }
+        }
+    }
+
+
+
+
+
 Network / server utilization and capacity constraints
 -----------------------------------------------------
 
