@@ -33,6 +33,7 @@ public class ConstraintsKhiet {
         if (scenario.getConstraints().get("pathsConstrainedByFunctionsVRC1")) pathsConstrainedByFunctionsVRC1();
         if (scenario.getConstraints().get("numberOfActivePathsBoundByService")) numberOfActivePathsBoundByService();
         if (scenario.getConstraints().get("constraintVRC3")) constraintVRC3();
+        if (scenario.getConstraints().get("constraintVSC1")) constraintVSC1();
         if (scenario.getConstraints().get("noParallelPaths")) noParallelPaths();
         if (scenario.getConstraints().get("initialPlacementAsConstraints"))
             initialPlacementAsConstraints(initialModel);
@@ -363,6 +364,17 @@ public class ConstraintsKhiet {
                 }
             }
         }
+    }
+
+    private void constraintVSC1() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int x = 0; x < pm.getServers().size(); x++) {
+                GRBLinExpr expr = new GRBLinExpr();
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                    expr.addTerm(1.0, vars.pXSV[x][s][v]);
+                int maxVNF = (int) pm.getServices().get(s).getAttribute("maxVNFserver");
+                model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxVNF, "constraintVSC1");
+            }
     }
 
     //check parameters used
