@@ -1,8 +1,6 @@
-# optimization parameters
-gap: 0
-weights: [0, 0, 1.0]
 # auxiliary parameters
 aux: {
+  "gap": 0.0,
   "iterations": 1000,
   "offset_results": 0,
   "scaling_x": 1.0,

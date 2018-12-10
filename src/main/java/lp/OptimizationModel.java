@@ -27,7 +27,7 @@ public class OptimizationModel {
          grbModel = new GRBModel(grbEnv);
          Callback cb = new Callback();
          grbModel.setCallback(cb);
-         grbModel.getEnv().set(GRB.DoubleParam.MIPGap, parameters.getGap());
+         grbModel.getEnv().set(GRB.DoubleParam.MIPGap, (double) parameters.getAux().get("gap"));
       } catch (GRBException e) {
          e.printStackTrace();
       }

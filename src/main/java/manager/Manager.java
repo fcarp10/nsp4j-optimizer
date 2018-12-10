@@ -21,9 +21,6 @@ import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
 import static output.Auxiliary.*;
 import static output.Definitions.*;
 
@@ -55,7 +52,7 @@ public class Manager {
          WebServer.initialize(pm);
          printLog(log, INFO, "topology loaded");
       } catch (Exception e) {
-         printLog(log, ERROR, "reading the input parameters file");
+         printLog(log, ERROR, "input parameters");
       }
    }
 
@@ -86,7 +83,7 @@ public class Manager {
          GRBModel importedModel = ResultsManager.importModel(getResourcePath(scen.getInputFileName()), scen.getInputFileName(), pm);
          if (initialModel == null && importedModel != null)
             initialModel = importedModel;
-         ResultsManager resultsManager = initializeResultFiles();
+         ResultsManager resultsManager = new ResultsManager(pm.getScenario());
          printLog(log, INFO, "initializing model");
          switch (scen.getModel()) {
             case ALL_OPT_MODELS_STRING:
@@ -141,18 +138,16 @@ public class Manager {
       model.setVariables(variables);
       printLog(log, INFO, "setting constraints");
       new Constraints(pm, model, scenario, initialModel);
-      if (scenario.getModel().equals(ALL_OPT_MODELS) || scenario.getModel().equals(MIGRATION_REPLICATION_RL_MODEL)
-              && modelName.equals(INITIAL_PLACEMENT_MODEL))
-         expr = generateExprForObjectiveFunction(model, NUM_OF_SERVERS_OBJ);
-      else
-         expr = generateExprForObjectiveFunction(model, scenario.getObjectiveFunction());
+      expr = generateExprForObjectiveFunction(model, scenario);
       model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running model");
       double objVal = model.run();
       Results results;
       if (objVal != -1) {
+         String resultsFileName = pm.getScenario() + "_" + modelName;
          results = generateResults(model, scenario, initialModel);
-         resultsManager.exportJsonFile(pm.getScenario() + "_" + modelName, results);
+         resultsManager.exportJsonFile(resultsFileName, results);
+         resultsManager.exportTextFile(resultsFileName, results);
          if (modelName.equals(INITIAL_PLACEMENT_MODEL))
             resultsManager.exportModel(model.getGrbModel(), scenario.getInputFileName());
          WebClient.updateResultsToWebApp(results);
@@ -169,12 +164,13 @@ public class Manager {
       return results;
    }
 
-   private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, String obj) throws GRBException {
+   private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, Scenario scenario) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
-      double weightLinks = pm.getWeights()[0] / pm.getLinks().size();
-      double weightServers = pm.getWeights()[1] / pm.getServers().size();
-      double weightServiceDelays = pm.getWeights()[2];
-      switch (obj) {
+      String[] weights = scenario.getWeights().split("-");
+      double weightLinks = Double.valueOf(weights[0]) / pm.getLinks().size();
+      double weightServers = Double.valueOf(weights[1]) / pm.getServers().size();
+      double weightServiceDelays = Double.valueOf(weights[2]);
+      switch (scenario.getObjectiveFunction()) {
          case NUM_OF_SERVERS_OBJ:
             expr.add(model.usedServersExpr());
             break;
@@ -189,16 +185,6 @@ public class Manager {
             break;
       }
       return expr;
-   }
-
-   private static ResultsManager initializeResultFiles() {
-      NumberFormat formatter = new DecimalFormat("#.##");
-      StringBuilder title = new StringBuilder();
-      title.append(formatter.format(pm.getWeights()[0]));
-      if (pm.getWeights().length > 1)
-         for (int i = 1; i < pm.getWeights().length; i++)
-            title.append("-").append(formatter.format(pm.getWeights()[i]));
-      return new ResultsManager(title.toString());
    }
 
    private static Results generateResults(OptimizationModel model, Scenario scenario, GRBModel initialModel) throws GRBException {

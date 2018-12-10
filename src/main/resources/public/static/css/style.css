@@ -1,5 +1,5 @@
 #cy {
-    height: 540px;
+    height: 600px;
     width: 100%;
     background: #E9ECEF;
 }
@@ -48,6 +48,11 @@
 .navbar-custom .nav-item.active .nav-link,
 .navbar-custom .nav-item:hover .nav-link {
     color: #ffffff;
+}
+
+.input-number{
+ max-width: 33%;
+ text-align: center;
 }
 
 /* The check */

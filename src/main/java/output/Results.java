@@ -135,7 +135,7 @@ public class Results {
       return serverMapResults;
    }
 
-   private List<Integer> numOfFunctionsPerServer() throws GRBException {
+   List<Integer> numOfFunctionsPerServer() throws GRBException {
       GRBVar[][][] pXSVvar = (GRBVar[][][]) rawVariables.get(pXSV);
       List<Integer> numOfFunctionsPerServer = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++) {
@@ -149,7 +149,7 @@ public class Results {
       return numOfFunctionsPerServer;
    }
 
-   private List<Double> serviceDelayList() throws GRBException {
+   List<Double> serviceDelayList() throws GRBException {
       GRBVar[] dSvar = (GRBVar[]) rawVariables.get(dS);
       List<Double> serviceDelayList = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)

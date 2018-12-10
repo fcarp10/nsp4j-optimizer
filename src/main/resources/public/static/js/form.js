@@ -3,7 +3,7 @@ var longPeriod = 3000;
 var intervalMessages = setInterval(getMessage, longPeriod);
 var connected = false;
 var messages = [];
-var numMessages = 4;
+var numMessages = 3;
 
 function getMessage() {
     try {
@@ -198,11 +198,16 @@ function check(elem) {
     document.getElementById("sdc").checked = false;
 }
 
+function setDecimals(value) {
+    value = value.toFixed(1);
+}
+
 function generateScenario() {
     //model
     var inputFileName = document.getElementById("inputFileName").value;
     var objectiveFunction = document.getElementById("objectiveFunction").value;
     var maximization = $("#max").is(":checked");
+    var weights = parseFloat(document.getElementById("lu").value).toFixed(1) + "-" + parseFloat(document.getElementById("xu").value).toFixed(1) + "-" + parseFloat(document.getElementById("sd").value).toFixed(1);
     var model = document.getElementById("model").value;
 
     // Common constraints
@@ -229,6 +234,7 @@ function generateScenario() {
         inputFileName: inputFileName,
         objectiveFunction: objectiveFunction,
         maximization: maximization,
+        weights: weights,
         model: model,
         constraints :{
             // Common constraints
