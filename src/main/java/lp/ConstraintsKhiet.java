@@ -81,8 +81,8 @@ public class ConstraintsKhiet {
                                         / pm.getServers().get(x).getCapacity()
                                 , vars.pXSVD[x][s][v][d]);
                     }
-                    expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
-                                    * (int) pm.getAux("overhead") / pm.getServers().get(x).getCapacity()
+                    expr.addTerm((int) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
+                                    / pm.getServers().get(x).getCapacity()
                             , vars.pXSV[x][s][v]);
                 }
             model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uX[x], "serverUtilization");

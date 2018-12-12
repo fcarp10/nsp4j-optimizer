@@ -39,7 +39,7 @@ functions:
   attributes: {
     "replicable": false,
     "load": 1.0,
-    "overhead": 10,
+    "overhead": 20,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
@@ -63,7 +63,7 @@ functions:
   attributes: {
     "replicable": true,
     "load": 1.0,
-    "overhead": 10,
+    "overhead": 20,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
@@ -87,7 +87,7 @@ functions:
   attributes: {
     "replicable": false,
     "load": 1.0,
-    "overhead": 10,
+    "overhead": 30,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
