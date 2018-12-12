@@ -33,7 +33,10 @@ public class ConstraintsKhiet {
         if (scenario.getConstraints().get("pathsConstrainedByFunctionsVRC1")) pathsConstrainedByFunctionsVRC1();
         if (scenario.getConstraints().get("numberOfActivePathsBoundByService")) numberOfActivePathsBoundByService();
         if (scenario.getConstraints().get("constraintVRC3")) constraintVRC3();
+        if (scenario.getConstraints().get("constraintVAI2")) constraintVAI2();
         if (scenario.getConstraints().get("constraintVSC1")) constraintVSC1();
+        if (scenario.getConstraints().get("constraintVSC2")) constraintVSC2();
+        if (scenario.getConstraints().get("constraintVSC3")) constraintVSC3();
         if (scenario.getConstraints().get("noParallelPaths")) noParallelPaths();
         if (scenario.getConstraints().get("initialPlacementAsConstraints"))
             initialPlacementAsConstraints(initialModel);
@@ -366,6 +369,20 @@ public class ConstraintsKhiet {
         }
     }
 
+    private void constraintVAI2() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int x = 0; x < pm.getServers().size(); x++) {
+                GRBLinExpr expr = new GRBLinExpr();
+                GRBLinExpr expr2 = new GRBLinExpr();
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                    expr.addTerm(1.0, vars.pXSV[x][s][v]);
+                    expr2.addTerm(1.0 / pm.getServices().get(s).getFunctions().size(), vars.pXSV[x][s][v]);
+                }
+                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.pXS[x][s], "constraintVAI2");
+                model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXS[x][s], "constraintVAI2");
+            }
+    }
+
     private void constraintVSC1() throws GRBException {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int x = 0; x < pm.getServers().size(); x++) {
@@ -375,6 +392,28 @@ public class ConstraintsKhiet {
                 int maxVNF = (int) pm.getServices().get(s).getAttribute("maxVNFserver");
                 model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxVNF, "constraintVSC1");
             }
+    }
+
+    private void constraintVSC2() throws GRBException {
+        for(int x = 0; x < pm.getServers().size(); x++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int s = 0; s < pm.getServices().size(); s++)
+                expr.addTerm(1.0, vars.pXS[x][s]);
+            int maxSFC = pm.getServers().get(x).getParent().getAttribute("MaxSFC");
+            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxSFC, "constraintVSC2");
+        }
+    }
+
+    private void constraintVSC3() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                for (int x = 0; x < pm.getServers().size(); x++) {
+                    GRBLinExpr expr = new GRBLinExpr();
+                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                        expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
+                    int maxSubflow = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxsubflows");
+                    model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxSubflow, "constraintVSC3");
+                }
     }
 
     //check parameters used

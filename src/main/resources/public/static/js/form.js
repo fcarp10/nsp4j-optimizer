@@ -156,7 +156,10 @@ function generateScenario() {
     var pathsConstrainedByFunctionsVRC1 = $("#pathsConstrainedByFunctionsVRC1").is(":checked");
     var numberOfActivePathsBoundByService = $("#numberOfActivePathsBoundByService").is(":checked");
     var constraintVRC3 = $("#constraintVRC3").is(":checked");
+    var constraintVAI2 = $("#constraintVAI2").is(":checked");
     var constraintVSC1 = $("#constraintVSC1").is(":checked");
+    var constraintVSC2 = $("#constraintVSC2").is(":checked");
+    var constraintVSC3 = $("#constraintVSC3").is(":checked");
 
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
@@ -178,7 +181,10 @@ function generateScenario() {
             pathsConstrainedByFunctionsVRC1: pathsConstrainedByFunctionsVRC1,
             numberOfActivePathsBoundByService: numberOfActivePathsBoundByService,
             constraintVRC3: constraintVRC3,
-            constraintVSC1: constraintVSC1
+            constraintVAI2: constraintVAI2,
+            constraintVSC1: constraintVSC1,
+            constraintVSC2: constraintVSC2,
+            constraintVSC3: constraintVSC3
         }
     });
 
