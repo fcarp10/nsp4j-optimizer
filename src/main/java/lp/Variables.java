@@ -19,6 +19,7 @@ public class Variables {
    public GRBVar[] uX;
    // Additional
    public GRBVar[] pX;
+   public GRBVar[][] pXS;
    public GRBVar[][][][] gSVXY;
    public GRBVar[][][] sSVP;
    public GRBVar[][] dSP;
@@ -70,6 +71,11 @@ public class Variables {
          for (int x = 0; x < pm.getServers().size(); x++)
             this.pX[x] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
                     , Auxiliary.pX + "[" + x + "]");
+         pXS = new GRBVar[pm.getServers().size()][pm.getServices().size()];
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               pXS[x][s] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
+                       , Auxiliary.pXSV + "[" + x + "][" + s + "]");
          gSVXY = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm.getServers().size()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
