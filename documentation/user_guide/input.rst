@@ -344,6 +344,8 @@ The first blocks shows the used *input files, objective function* and *optimizat
 +-----------+----------------------------------+
 | VAI1      | mappingFunctionsWithDemands      |
 +-----------+----------------------------------+
+| VAI2      | constraintVAI2                   |
++-----------+----------------------------------+
 | VAI3      | countNumberOfUsedServers         |
 +-----------+----------------------------------+
 | VAC1      | functionPlacement                |
@@ -357,6 +359,12 @@ The first blocks shows the used *input files, objective function* and *optimizat
 | VRC2      | pathsConstrainedByFunctions      |
 +-----------+----------------------------------+
 | VRC3      | constraintVRC3                   |
++-----------+----------------------------------+
+| VSC1      | constraintVSC1                   |
++-----------+----------------------------------+
+| VSC2      | constraintVSC2                   |
++-----------+----------------------------------+
+| VSC3      | constraintVSC3                   |
 +-----------+----------------------------------+
 | IPC1      | initialPlacementAsConstraints    |
 +-----------+----------------------------------+

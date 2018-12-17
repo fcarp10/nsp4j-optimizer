@@ -73,7 +73,7 @@ The parameters and variables used on the following formulas are shown on the fol
 +--------------+--------------+--------------------------+---------------------------------------------------------------------------------------------------------+
 | maxSharedVNF | Integer      | :math:`\tilde{V}^f`      | int maxSharedVNF = (int) pm.getServices().get(s).getFunctions().get(v). getAttribute("maxSharedVNF")    |
 +--------------+--------------+--------------------------+---------------------------------------------------------------------------------------------------------+
-| maxInstance  | Integer      | :math:`\hat{\theta}^f`   | int maxInstances = (int) pm.getServices().get(s).getFunctions().get(v). getAttribute("maxInstances")    |
+| maxInstance  | Integer      | :math:`\hat{\Theta}^f`   | int maxInstances = (int) pm.getServices().get(s).getFunctions().get(v). getAttribute("maxInstances")    |
 +--------------+--------------+--------------------------+---------------------------------------------------------------------------------------------------------+
 | Parameters of traffic flows for SFC *s*                                                                                                                          |
 +--------------+--------------+--------------------------+---------------------------------------------------------------------------------------------------------+

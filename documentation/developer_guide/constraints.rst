@@ -270,6 +270,35 @@ Combining both inequations from the first and the second half of the method will
 
 
 
+Constrain VAI2
+^^^^^^^^^^^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+           \forall s \in \mathbb{S}, \forall x \in \mathbb{X}:  \quad \frac{ \sum_{ v \in \mathbb{V}_s}  f_{x}^{v,s} }  {\| \mathbb{V}_s \|} \leq  f_x^{s}  \leq \sum_{ v \in \mathbb{V}_s}  f_{x}^{v,s}
+        \end{equation}
+
+
+.. code-block:: java
+
+   private void constraintVAI2() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int x = 0; x < pm.getServers().size(); x++) {
+                GRBLinExpr expr = new GRBLinExpr();
+                GRBLinExpr expr2 = new GRBLinExpr();
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                    expr.addTerm(1.0, vars.pXSV[x][s][v]);
+                    expr2.addTerm(1.0 / pm.getServices().get(s).getFunctions().size(), vars.pXSV[x][s][v]);
+                }
+                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.pXS[x][s], "constraintVAI2");
+                model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXS[x][s], "constraintVAI2");
+            }
+    }
+
+
+
 
 
 
@@ -726,7 +755,6 @@ The constrain defined by VRC1 is almost identical to constrain VRC2 described ab
 
 
 
-
 Constrain VRC3
 ^^^^^^^^^^^^^^
 
@@ -761,6 +789,88 @@ Constrain VRC3
     }
 
 
+
+
+
+VNF assignment constraints
+--------------------------
+
+Constrain VSC1
+^^^^^^^^^^^^^^
+
+
+.. math::
+    :nowrap:
+
+        \begin{equation} \label{max-server-vnf-chain}   \qquad
+        \forall s \in  \mathbb{S}, \forall x \in \mathbb{X}: \quad   \sum_{v \in  \mathbb{V}_s}  f_x^{v,s} \leq   \hat{\text{V}}^s_{x}  \equiv \hat{\text{V}}^s
+        \end{equation}
+
+
+.. code-block:: java
+
+    private void constraintVSC1() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int x = 0; x < pm.getServers().size(); x++) {
+                GRBLinExpr expr = new GRBLinExpr();
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                    expr.addTerm(1.0, vars.pXSV[x][s][v]);
+                int maxVNF = (int) pm.getServices().get(s).getAttribute("maxVNFserver");
+                model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxVNF, "constraintVSC1");
+            }
+    }
+
+
+Constrain VSC2
+^^^^^^^^^^^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{equation} \label{max-server-SFC-chain}   \qquad
+         \forall x \in \mathbb{X}: \quad   \sum_{s \in  \mathbb{S}}  f_x^s \leq  \hat{\text{S}_x}
+        \end{equation}
+
+
+.. code-block:: java
+
+     private void constraintVSC2() throws GRBException {
+        for(int x = 0; x < pm.getServers().size(); x++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int s = 0; s < pm.getServices().size(); s++)
+                expr.addTerm(1.0, vars.pXS[x][s]);
+            int maxSFC = pm.getServers().get(x).getParent().getAttribute("MaxSFC");
+            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxSFC, "constraintVSC2");
+        }
+    }
+
+
+
+
+Constrain VSC3
+^^^^^^^^^^^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{equation} \label{max-flow-vnf}  \qquad
+             \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}, \forall x \in \mathbb{X} :   \quad      \sum_{k=1}^{| \Lambda_s|}  f_{x,k}^{v,s} \leq     \tilde{\Lambda}^{F_{NF}(v,s)}
+        \end{equation}
+
+
+.. code-block:: java
+
+     private void constraintVSC3() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                for (int x = 0; x < pm.getServers().size(); x++) {
+                    GRBLinExpr expr = new GRBLinExpr();
+                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                        expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
+                    int maxSubflow = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxsubflows");
+                    model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxSubflow, "constraintVSC3");
+                }
+    }
 
 
 
