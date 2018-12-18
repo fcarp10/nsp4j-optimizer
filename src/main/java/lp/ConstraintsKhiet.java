@@ -37,6 +37,7 @@ public class ConstraintsKhiet {
         if (scenario.getConstraints().get("constraintVSC1")) constraintVSC1();
         if (scenario.getConstraints().get("constraintVSC2")) constraintVSC2();
         if (scenario.getConstraints().get("constraintVSC3")) constraintVSC3();
+        if (scenario.getConstraints().get("constraintDIC1")) constraintDIC1();
         if (scenario.getConstraints().get("noParallelPaths")) noParallelPaths();
         if (scenario.getConstraints().get("initialPlacementAsConstraints"))
             initialPlacementAsConstraints(initialModel);
@@ -342,7 +343,7 @@ public class ConstraintsKhiet {
             int rmin = (int) pm.getServices().get(s).getAttribute("minPaths");
             int rmax = (int) pm.getServices().get(s).getAttribute("maxPaths");
             GRBLinExpr expr = new GRBLinExpr();
-            for (int p=0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
                 expr.addTerm(1.0, vars.rSP[s][p]);
             }
             model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, rmax, "numberOfActivePathsBoundByService");
@@ -395,7 +396,7 @@ public class ConstraintsKhiet {
     }
 
     private void constraintVSC2() throws GRBException {
-        for(int x = 0; x < pm.getServers().size(); x++) {
+        for (int x = 0; x < pm.getServers().size(); x++) {
             GRBLinExpr expr = new GRBLinExpr();
             for (int s = 0; s < pm.getServices().size(); s++)
                 expr.addTerm(1.0, vars.pXS[x][s]);
@@ -413,6 +414,24 @@ public class ConstraintsKhiet {
                         expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
                     int maxSubflow = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxsubflows");
                     model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxSubflow, "constraintVSC3");
+                }
+    }
+
+    private void constraintDIC1() throws GRBException {
+        for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                    List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+                    for (int i = 0; i < sharedNF.size(); i++)
+                        if (sharedNF.get(i) == 0) {
+                            double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                            GRBLinExpr expr = new GRBLinExpr();
+                            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                                expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                            int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                            int maxInt = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
+                            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxLoad * maxInt, "constraintDIC1");
+                        }
                 }
     }
 
@@ -482,6 +501,7 @@ public class ConstraintsKhiet {
                         model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.gSVXY[s][v][x][y], "synchronizationTraffic");
                     }
     }
+
     private void constraintReplications() throws GRBException {
         for (int s = 0; s < pm.getServices().size(); s++) {
             GRBLinExpr expr = new GRBLinExpr();

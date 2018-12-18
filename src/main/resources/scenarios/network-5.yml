@@ -39,7 +39,7 @@ functions:
   attributes: {
     "replicable": false,
     "load": 1.0,
-    "overhead": 20,
+    "overhead": 20.0,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
@@ -51,7 +51,7 @@ functions:
   attributes: {
     "replicable": false,
     "load": 1.0,
-    "overhead": 10,
+    "overhead": 10.0,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
@@ -63,7 +63,7 @@ functions:
   attributes: {
     "replicable": true,
     "load": 1.0,
-    "overhead": 20,
+    "overhead": 20.0,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
@@ -75,7 +75,7 @@ functions:
   attributes: {
     "replicable": true,
     "load": 1.0,
-    "overhead": 10,
+    "overhead": 10.0,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
@@ -87,7 +87,7 @@ functions:
   attributes: {
     "replicable": false,
     "load": 1.0,
-    "overhead": 30,
+    "overhead": 30.0,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
@@ -99,7 +99,7 @@ functions:
   attributes: {
     "replicable": false,
     "load": 1.0,
-    "overhead": 10,
+    "overhead": 10.0,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
@@ -111,7 +111,7 @@ functions:
   attributes: {
     "replicable": true,
     "load": 1.0,
-    "overhead": 10,
+    "overhead": 10.0,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,
@@ -123,7 +123,7 @@ functions:
   attributes: {
     "replicable": true,
     "load": 1.0,
-    "overhead": 10,
+    "overhead": 10.0,
     "maxLoad": 200,
     "maxsubflows": 4,
     "maxSharedSFC": 2,

@@ -160,6 +160,7 @@ function generateScenario() {
     var constraintVSC1 = $("#constraintVSC1").is(":checked");
     var constraintVSC2 = $("#constraintVSC2").is(":checked");
     var constraintVSC3 = $("#constraintVSC3").is(":checked");
+    var constraintDIC1 = $("#constraintDIC1").is(":checked");
 
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
@@ -184,7 +185,8 @@ function generateScenario() {
             constraintVAI2: constraintVAI2,
             constraintVSC1: constraintVSC1,
             constraintVSC2: constraintVSC2,
-            constraintVSC3: constraintVSC3
+            constraintVSC3: constraintVSC3,
+            constraintDIC1: constraintDIC1
         }
     });
 
