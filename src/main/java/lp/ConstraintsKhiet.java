@@ -83,6 +83,7 @@ public class ConstraintsKhiet {
                                 , vars.pXSVD[x][s][v][d]);
                     }
                     expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
+                                    * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances")
                                     / pm.getServers().get(x).getCapacity()
                             , vars.pXSV[x][s][v]);
                 }
