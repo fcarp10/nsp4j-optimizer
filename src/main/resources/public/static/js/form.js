@@ -1,4 +1,4 @@
-var refreshPeriod = 100;
+var refreshPeriod = 500;
 setInterval(getMessage, refreshPeriod);
 var messages = [];
 
@@ -120,15 +120,19 @@ function check(elem) {
 
     var model = document.getElementById("model").value;
     if(model === "initial_placement"){
+        document.getElementById("noParallelPaths").checked = true;
         document.getElementById("initialPlacementAsConstraints").checked = false;
         document.getElementById("synchronizationTraffic").checked = false;
     }
     if(model === "migration"){
+            document.getElementById("noParallelPaths").checked = true;
             document.getElementById("initialPlacementAsConstraints").checked = false;
             document.getElementById("synchronizationTraffic").checked = false;
     }
     if(model === "replication"){
                 document.getElementById("noParallelPaths").checked = false;
+                document.getElementById("initialPlacementAsConstraints").checked = true;
+                document.getElementById("synchronizationTraffic").checked = false;
     }
     if(model === "migration_replication"){
                 document.getElementById("noParallelPaths").checked = false;
@@ -142,25 +146,25 @@ function generateScenario() {
     var objectiveFunction = document.getElementById("objectiveFunction").value;
     var maximization = $("#max").is(":checked");
     var model = document.getElementById("model").value;
-    var countNumberOfUsedServers = $("#countNumberOfUsedServers").is(":checked");
-    var onePathPerDemand = $("#onePathPerDemand").is(":checked");
-    var activatePathForService = $("#onePathPerDemand").is(":checked");
-    var pathsConstrainedByFunctions = $("#pathsConstrainedByFunctions").is(":checked");
-    var functionPlacement = $("#functionPlacement").is(":checked");
-    var oneFunctionPerDemand = $("#oneFunctionPerDemand").is(":checked");
-    var mappingFunctionsWithDemands = $("#mappingFunctionsWithDemands").is(":checked");
-    var functionSequenceOrder = $("#functionSequenceOrder").is(":checked");
-    var noParallelPaths = $("#noParallelPaths").is(":checked");
-    var initialPlacementAsConstraints = $("#initialPlacementAsConstraints").is(":checked");
+    var VAI3 = $("#countNumberOfUsedServers").is(":checked");
+    var RPC1 = $("#onePathPerDemand").is(":checked");
+    var RPI1 = $("#onePathPerDemand").is(":checked");
+    var VRC2 = $("#pathsConstrainedByFunctions").is(":checked");
+    var VAC1 = $("#functionPlacement").is(":checked");
+    var VAC2 = $("#oneFunctionPerDemand").is(":checked");
+    var VAI1 = $("#mappingFunctionsWithDemands").is(":checked");
+    var VAC3 = $("#functionSequenceOrder").is(":checked");
+    var RPC3 = $("#noParallelPaths").is(":checked");
+    var IPC1 = $("#initialPlacementAsConstraints").is(":checked");
     var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
-    var pathsConstrainedByFunctionsVRC1 = $("#pathsConstrainedByFunctionsVRC1").is(":checked");
-    var numberOfActivePathsBoundByService = $("#numberOfActivePathsBoundByService").is(":checked");
-    var constraintVRC3 = $("#constraintVRC3").is(":checked");
-    var constraintVAI2 = $("#constraintVAI2").is(":checked");
-    var constraintVSC1 = $("#constraintVSC1").is(":checked");
-    var constraintVSC2 = $("#constraintVSC2").is(":checked");
-    var constraintVSC3 = $("#constraintVSC3").is(":checked");
-    var constraintDIC1 = $("#constraintDIC1").is(":checked");
+    var VRC1 = $("#pathsConstrainedByFunctionsVRC1").is(":checked");
+    var RPC2 = $("#numberOfActivePathsBoundByService").is(":checked");
+    var VRC3 = $("#constraintVRC3").is(":checked");
+    var VAI2 = $("#constraintVAI2").is(":checked");
+    var VSC1 = $("#constraintVSC1").is(":checked");
+    var VSC2 = $("#constraintVSC2").is(":checked");
+    var VSC3 = $("#constraintVSC3").is(":checked");
+    var DIC1 = $("#constraintDIC1").is(":checked");
 
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
@@ -168,25 +172,25 @@ function generateScenario() {
         maximization: maximization,
         model: model,
         constraints :{
-            countNumberOfUsedServers: countNumberOfUsedServers,
-            onePathPerDemand: onePathPerDemand,
-            activatePathForService: activatePathForService,
-            pathsConstrainedByFunctions: pathsConstrainedByFunctions,
-            functionPlacement: functionPlacement,
-            oneFunctionPerDemand: oneFunctionPerDemand,
-            mappingFunctionsWithDemands: mappingFunctionsWithDemands,
-            functionSequenceOrder: functionSequenceOrder,
-            noParallelPaths: noParallelPaths,
-            initialPlacementAsConstraints: initialPlacementAsConstraints,
-            synchronizationTraffic: synchronizationTraffic,
-            pathsConstrainedByFunctionsVRC1: pathsConstrainedByFunctionsVRC1,
-            numberOfActivePathsBoundByService: numberOfActivePathsBoundByService,
-            constraintVRC3: constraintVRC3,
-            constraintVAI2: constraintVAI2,
-            constraintVSC1: constraintVSC1,
-            constraintVSC2: constraintVSC2,
-            constraintVSC3: constraintVSC3,
-            constraintDIC1: constraintDIC1
+            RPC1: RPC1,
+            RPI1: RPI1,
+            VAI1: VAI1,
+            VAI2: VAI2,
+            VAI3: VAI3,
+            VAC1: VAC1,
+            VAC2: VAC2,
+            VAC3: VAC3,
+            RPC2: RPC2,
+            RPC3: RPC3,
+            VRC1: VRC1,
+            VRC2: VRC2,
+            VRC3: VRC3,
+            VSC1: VSC1,
+            VSC2: VSC2,
+            VSC3: VSC3,
+            DIC1: DIC1,
+            IPC1: IPC1,
+            synchronizationTraffic: synchronizationTraffic
         }
     });
 

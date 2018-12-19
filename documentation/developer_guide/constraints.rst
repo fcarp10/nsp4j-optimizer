@@ -877,6 +877,7 @@ Constrain VSC3
 Network / server utilization and capacity constraints
 -----------------------------------------------------
 
+
 Constrains LTC1 and OFC1
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1113,6 +1114,42 @@ sends the server utilization to the method *setLinearCostFunctions* for further 
         \begin{equation}  \textbf{OFC2} \qquad
 	    \forall x \in X, \forall y \in Y: k_{x} \geq y \big( u_{x} \big)
 	    \end{equation}
+
+
+
+
+Constrain DIC1
+^^^^^^^^^^^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{multline} \label{VNFproc-dedicated}   \qquad
+        \forall x \in \mathbb{X}, \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s},  \forall (v,s)|  F_M^{v,s} =0:   \\
+            L_T^{F_{NF}(v,s)}   \sum_{k=1 }^{|\Lambda_s|}    \lambda^s_k  \cdot f_{x,k}^{v,s}   \  \leq   \hat{ \Theta}^{F_{NF}(v,s)}_x  \cdot C^{F_{NF}(v,s)}_{P}  \text{  , }
+        \end{multline}
+
+
+
+.. code-block:: java
+
+     private void constraintDIC1() throws GRBException {
+        for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                    List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+                    for (int i = 0; i < sharedNF.size(); i++)
+                        if (sharedNF.get(i) == 0) {
+                            double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                            GRBLinExpr expr = new GRBLinExpr();
+                            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                                expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                            int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                            int maxInt = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
+                            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxLoad * maxInt, "constraintDIC1");
+                        }
+                }
+    }
 
 
 

@@ -63,7 +63,7 @@ The parameters and variables used on the following formulas are shown on the fol
 +--------------+--------------+--------------------------+---------------------------------------------------------------------------------------------------------+
 | load	       | Double       | :math:`L_T^f`	         | double load = (double) pm.getServices().get(s).getFunctions().get(v) .getAttribute("load")              |
 +--------------+--------------+--------------------------+---------------------------------------------------------------------------------------------------------+
-| overhead     | Integer      | :math:`L_O^f`            | int overhead = (int) pm.getServices().get(s).getFunctions().get(v). getAttribute("overhead")            |
+| overhead     | Double       | :math:`L_O^f`            | int overhead = (int) pm.getServices().get(s).getFunctions().get(v). getAttribute("overhead")            |
 +--------------+--------------+--------------------------+---------------------------------------------------------------------------------------------------------+
 | maxLoad      | Integer      | :math:`C_P^f`	         | int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v). getAttribute("maxLoad")              |
 +--------------+--------------+--------------------------+---------------------------------------------------------------------------------------------------------+

@@ -90,90 +90,101 @@
             <div class="title-margin">
                 <h6>Basic Constraints</h6>
             </div>
-            <form id="common-constraints">
-                <label class="check ">Count number of used servers
-                    <input type="checkbox" id="countNumberOfUsedServers" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">One path per demand
+            <!--<form id="common-constraints">-->
+                <label class="check ">RPC1: One path per demand
                     <input type="checkbox" id="onePathPerDemand" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Activate path for service
+                <label class="check ">RPI1: Activate path for SFC
                     <input type="checkbox" id="activatePathForService" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Paths constrained by functions
-                    <input type="checkbox" id="pathsConstrainedByFunctions" checked>
+                <label class="check ">VAI1: Server used by VNF of SFC
+                     <input type="checkbox" id="mappingFunctionsWithDemands" checked>
+                     <span class="checkmark"></span>
+                 </label>
+                 <label class="check ">VAI2: Server used by SFC
+                      <input type="checkbox" id="constraintVAI2" checked>
+                      <span class="checkmark"></span>
+                </label>
+                <label class="check ">VAI3: Server used
+                    <input type="checkbox" id="countNumberOfUsedServers" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Function placement
+                <label class="check ">VAC1: All VNFs of SFC per Path
                     <input type="checkbox" id="functionPlacement" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">One function per demand
+                <label class="check ">VAC2: Server per subflow & VNF
                     <input type="checkbox" id="oneFunctionPerDemand" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Mapping func. with demands
-                    <input type="checkbox" id="mappingFunctionsWithDemands" checked>
+
+                <label class="check ">VAC3: VNF sequence order
+                    <input type="checkbox" id="functionSequenceOrder" checked>
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Functions sequence order
-                    <input type="checkbox" id="functionSequenceOrder" checked>
+            <!--</form>-->
+            <div class="title-margin">
+                <h6>Path Constraints</h6>
+            </div>
+            <!--<form id="use-case-constraints">-->
+                <label class="check ">RPC2: # Paths bounded
+                    <input type="checkbox" id="numberOfActivePathsBoundByService">
+                    <span class="checkmark"></span>
+                </label>
+                <label class="check ">RPC3: Only one Path
+                    <input type="checkbox" id="noParallelPaths" checked>
                     <span class="checkmark"></span>
                 </label>
             </form>
             <div class="title-margin">
-                <h6>Additional Constraints</h6>
+                <h6>VNF Replication Constraints</h6>
             </div>
-            <form id="use-case-constraints">
-                <label class="check ">No parallel Paths
-                    <input type="checkbox" id="noParallelPaths" checked>
+                 <label class="check ">VRC1: # Replica <= # Paths
+                     <input type="checkbox" id="pathsConstrainedByFunctionsVRC1">
+                     <span class="checkmark"></span>
+                 </label>
+                 <label class="check ">VRC2: # Replica = # Paths
+                    <input type="checkbox" id="pathsConstrainedByFunctions" checked>
                     <span class="checkmark"></span>
-                </label>
-                <label class="check ">Initial placement as constraints
-                    <input type="checkbox" id="initialPlacementAsConstraints" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">Synchronization traffic
-                    <input type="checkbox" id="synchronizationTraffic" checked>
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">Paths constrained by functions VRC1
-                    <input type="checkbox" id="pathsConstrainedByFunctionsVRC1">
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">Number of active paths bound by service
-                    <input type="checkbox" id="numberOfActivePathsBoundByService">
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">Constraint VRC3
+                 </label>
+                 <label class="check ">VRC3: # Replica bounded
                     <input type="checkbox" id="constraintVRC3">
                     <span class="checkmark"></span>
-                </label>
-                </label>
-                <label class="check ">Constraint VAI2
-                    <input type="checkbox" id="constraintVAI2">
-                    <span class="checkmark"></span>
-                </label>
-                <label class="check ">Constraint VSC1
+                 </label>
+            <div class="title-margin">
+                <h6>VNF Placement Constraints</h6>
+            </div>
+                <label class="check ">VSC1: # VNFs of SFC per server
                     <input type="checkbox" id="constraintVSC1">
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Constraint VSC2
+                <label class="check ">VSC2: # SFCs per server
                     <input type="checkbox" id="constraintVSC2">
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Constraint VSC3
+                <label class="check ">VSC3: # Subflows per VNF
                     <input type="checkbox" id="constraintVSC3">
                     <span class="checkmark"></span>
                 </label>
-                <label class="check ">Constraint DIC1
+                <label class="check ">DIC1: Processing load per VNF
                     <input type="checkbox" id="constraintDIC1">
                     <span class="checkmark"></span>
                 </label>
-            </form>
+            <div class="title-margin">
+                <h6>Additional Constraints</h6>
+            </div>
+            <!--<form id="use-case-constraints">-->
+                <label class="check ">IPC1: Initial placement
+                    <input type="checkbox" id="initialPlacementAsConstraints">
+                    <span class="checkmark"></span>
+                </label>
+                 <label class="check ">Synchronization traffic
+                    <input type="checkbox" id="synchronizationTraffic">
+                    <span class="checkmark"></span>
+                 </label>
+            <!--</form>-->
         </div>
     </div>
     <div id="results" class="row">

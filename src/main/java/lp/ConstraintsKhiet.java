@@ -22,24 +22,24 @@ public class ConstraintsKhiet {
         linkUtilization();
         serverUtilization();
         serviceDelay(initialModel);
-        if (scenario.getConstraints().get("countNumberOfUsedServers")) countNumberOfUsedServers();
-        if (scenario.getConstraints().get("onePathPerDemand")) onePathPerDemand();
-        if (scenario.getConstraints().get("activatePathForService")) activatePathForService();
-        if (scenario.getConstraints().get("pathsConstrainedByFunctions")) pathsConstrainedByFunctions();
-        if (scenario.getConstraints().get("functionPlacement")) functionPlacement();
-        if (scenario.getConstraints().get("oneFunctionPerDemand")) oneFunctionPerDemand();
-        if (scenario.getConstraints().get("mappingFunctionsWithDemands")) mappingFunctionsWithDemands();
-        if (scenario.getConstraints().get("functionSequenceOrder")) functionSequenceOrder();
-        if (scenario.getConstraints().get("pathsConstrainedByFunctionsVRC1")) pathsConstrainedByFunctionsVRC1();
-        if (scenario.getConstraints().get("numberOfActivePathsBoundByService")) numberOfActivePathsBoundByService();
-        if (scenario.getConstraints().get("constraintVRC3")) constraintVRC3();
-        if (scenario.getConstraints().get("constraintVAI2")) constraintVAI2();
-        if (scenario.getConstraints().get("constraintVSC1")) constraintVSC1();
-        if (scenario.getConstraints().get("constraintVSC2")) constraintVSC2();
-        if (scenario.getConstraints().get("constraintVSC3")) constraintVSC3();
-        if (scenario.getConstraints().get("constraintDIC1")) constraintDIC1();
-        if (scenario.getConstraints().get("noParallelPaths")) noParallelPaths();
-        if (scenario.getConstraints().get("initialPlacementAsConstraints"))
+        if (scenario.getConstraints().get("VAI3")) countNumberOfUsedServers();
+        if (scenario.getConstraints().get("RPC1")) onePathPerDemand();
+        if (scenario.getConstraints().get("RPI1")) activatePathForService();
+        if (scenario.getConstraints().get("VRC2")) pathsConstrainedByFunctions();
+        if (scenario.getConstraints().get("VAC1")) functionPlacement();
+        if (scenario.getConstraints().get("VAC2")) oneFunctionPerDemand();
+        if (scenario.getConstraints().get("VAI1")) mappingFunctionsWithDemands();
+        if (scenario.getConstraints().get("VAC3")) functionSequenceOrder();
+        if (scenario.getConstraints().get("VRC1")) pathsConstrainedByFunctionsVRC1();
+        if (scenario.getConstraints().get("RPC2")) numberOfActivePathsBoundByService();
+        if (scenario.getConstraints().get("VRC3")) constraintVRC3();
+        if (scenario.getConstraints().get("VAI2")) constraintVAI2();
+        if (scenario.getConstraints().get("VSC1")) constraintVSC1();
+        if (scenario.getConstraints().get("VSC2")) constraintVSC2();
+        if (scenario.getConstraints().get("VSC3")) constraintVSC3();
+        if (scenario.getConstraints().get("DIC1")) constraintDIC1();
+        if (scenario.getConstraints().get("RPC3")) noParallelPaths();
+        if (scenario.getConstraints().get("IPC1"))
             initialPlacementAsConstraints(initialModel);
         if (scenario.getConstraints().get("synchronizationTraffic")) synchronizationTraffic();
     }
