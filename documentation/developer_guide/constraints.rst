@@ -1024,7 +1024,7 @@ COMMENT: overhead is missing in the code
 
 .. code-block:: java
 
-	private void serverUtilization() throws GRBException {
+    private void serverUtilization() throws GRBException {
         for (int x = 0; x < pm.getServers().size(); x++) {
             GRBLinExpr expr = new GRBLinExpr();
             for (int s = 0; s < pm.getServices().size(); s++)
@@ -1035,14 +1035,16 @@ COMMENT: overhead is missing in the code
                                         / pm.getServers().get(x).getCapacity()
                                 , vars.pXSVD[x][s][v][d]);
                     }
-                    expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
-                                    * (int) pm.getAux("overhead") / pm.getServers().get(x).getCapacity()
+                    expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
+                                    * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances")
+                                    / pm.getServers().get(x).getCapacity()
                             , vars.pXSV[x][s][v]);
                 }
             model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uX[x], "serverUtilization");
             linearCostFunctions(expr, vars.kX[x]);
         }
     }
+
 
 
 
@@ -1103,7 +1105,7 @@ The last line
 
 .. code-block:: java
 
-	        setLinearCostFunctions(expr, variables.kX[x]);
+	        linearCostFunctions(expr, variables.kX[x]);
 
 sends the server utilization to the method *setLinearCostFunctions* for further computing the penalty cost function, which defines the constrain
 
