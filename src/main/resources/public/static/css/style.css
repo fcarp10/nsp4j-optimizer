@@ -13,7 +13,7 @@
     margin:20px 0 0 0;
 }
 
-.row{
+.row-container{
   margin-top: 25px;
 }
 
@@ -21,13 +21,8 @@
     width: 95%;
 }
 
-.button {
+.button-width {
     width: 80px;
-    color: white;
-}
-
-.button-red{
-    background-color: #BC213F;
 }
 
 .button-margin{
@@ -64,7 +59,7 @@
 }
 
 .title-margin {
-    margin: 15px 0 5px 0;
+    margin-top: 15px;
 }
 
 .input-style {

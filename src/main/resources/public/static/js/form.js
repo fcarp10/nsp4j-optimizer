@@ -1,6 +1,9 @@
-var refreshPeriod = 500;
-setInterval(getMessage, refreshPeriod);
+var shortPeriod = 200;
+var longPeriod = 3000;
+var intervalMessages = setInterval(getMessage, longPeriod);
+var connected = false;
 var messages = [];
+var numMessages = 3;
 
 function getMessage() {
     try {
@@ -19,16 +22,32 @@ function getMessage() {
             document.getElementById("message").innerText = "";
             for (var i = 0; i < messages.length; i++)
                 document.getElementById("message").innerText += messages[i] +"\n";
-            if(messages.length > 2)
+            if(messages.length >= numMessages)
                messages.shift();
-            if(message == "Info: ready")
+            if(message == "Info: ready"){
                 document.getElementById("run_button").removeAttribute("disabled");
-            if(message == "Info: topology loaded")
+                document.getElementById("stop_button").setAttribute("disabled", "true");
+                longRefresh();
+            }
+            if(message == "Info: topology loaded"){
                 document.getElementById("run_button").removeAttribute("disabled");
+                document.getElementById("stop_button").setAttribute("disabled", "true");
+                longRefresh();
+            }
+            if(!connected){
+                shortRefresh();
+                connected = true;
+            }
         }
         if(message  == null) {
             document.getElementById("message").innerText = "Info: framework not running";
             document.getElementById("run_button").setAttribute("disabled", "true");
+            document.getElementById("stop_button").setAttribute("disabled", "true");
+            clearInterval(intervalMessages);
+            if(connected) {
+                longRefresh();
+                connected = false;
+            }
         }
     }
     catch (e) {
@@ -36,7 +55,18 @@ function getMessage() {
     }
 }
 
+function shortRefresh() {
+   clearInterval(intervalMessages);
+   intervalMessages = setInterval(getMessage, shortPeriod);
+}
+
+function longRefresh() {
+    clearInterval(intervalMessages);
+    intervalMessages = setInterval(getMessage, longPeriod);
+}
+
 function loadTopology(){
+shortRefresh();
 var scenario = generateScenario();
     try {
         var message = null;
@@ -61,8 +91,10 @@ var scenario = generateScenario();
 }
 
 function runOpt(){
+shortRefresh();
 var scenario = generateScenario();
 document.getElementById("run_button").setAttribute("disabled", "true");
+document.getElementById("stop_button").removeAttribute("disabled");
     try {
         var message = null;
         $.ajax
@@ -81,7 +113,29 @@ document.getElementById("run_button").setAttribute("disabled", "true");
     }
 }
 
+function stopOpt(){
+longRefresh();
+document.getElementById("stop_button").setAttribute("disabled", "true");
+document.getElementById("run_button").removeAttribute("disabled");
+    try {
+        var message = null;
+        $.ajax
+        ({
+            url: "stop",
+            type: "GET",
+            async: false,
+            success: function (ans) {
+                message = ans;
+            }
+        });
+    }
+    catch (e) {
+        return 0;
+    }
+}
+
 function generatePaths() {
+shortRefresh();
 var scenario = generateScenario();
     try {
             var message = null;
