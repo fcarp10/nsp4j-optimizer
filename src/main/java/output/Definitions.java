@@ -6,14 +6,14 @@ public class Definitions {
    public static final String COSTS_OBJ = "costs";
    public static final String UTILIZATION_OBJ = "utilization";
    // models
-   public static final String INITIAL_PLACEMENT_MODEL = "initial_placement";
-   public static final String MIGRATION_MODEL = "migration";
-   public static final String REPLICATION_MODEL = "replication";
-   public static final String MIGRATION_REPLICATION_MODEL = "migration_replication";
+   public static final String INITIAL_PLACEMENT = "initial_placement";
+   public static final String MIGRATION = "migration";
+   public static final String REPLICATION = "replication";
+   public static final String MIGRATION_REPLICATION = "migration_replication";
    public static final String[] ALL_OPT_MODELS = new String[]{
-           INITIAL_PLACEMENT_MODEL, MIGRATION_MODEL, REPLICATION_MODEL, MIGRATION_REPLICATION_MODEL};
-   public static final String ALL_OPT_MODELS_STRING = "all_optimization_models";
-   public static final String MIGRATION_REPLICATION_RL_MODEL = "migration_replication_rl";
+           INITIAL_PLACEMENT, MIGRATION, REPLICATION, MIGRATION_REPLICATION};
+   public static final String ALL_CASES = "all_optimization_models";
+   public static final String REINFORCEMENT_LEARNING = "migration_replication_rl";
    // logs and messages
    public static final String ERROR = "Error: ";
    public static final String INFO = "Info: ";

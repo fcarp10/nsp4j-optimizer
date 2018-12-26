@@ -2,8 +2,9 @@ package learning;
 
 import gurobi.GRB;
 import gurobi.GRBException;
-import gurobi.GRBVar;
+import gurobi.GRBModel;
 import manager.Parameters;
+import manager.elements.Function;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -20,7 +21,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import output.Auxiliary;
-import output.Results;
+import output.Definitions;
 
 import java.util.*;
 
@@ -30,13 +31,15 @@ public class LearningModel {
    private Parameters pm;
    private DeepQ deepQ;
    private final double THRESHOLD = 1.0;
-   private double ux[];
-   private double ul[];
-   private boolean xsvd[][][][];
-   private boolean xsv[][][];
-   private boolean sp[][];
-   private boolean spd[][][];
-   private boolean svp[][][];
+   private double objVal;
+
+   // Elementary variables
+   private boolean[][] rSP;
+   private boolean[][][] rSPD;
+   private boolean[][][] pXSV;
+   private boolean[][][][] pXSVD;
+   private double[] uL;
+   private double[] uX;
 
    public LearningModel(Parameters pm) {
       this.pm = pm;
@@ -68,28 +71,26 @@ public class LearningModel {
       deepQ = new DeepQ(conf, 100000, .99f, 1024, 100, 1024, inputLength);
    }
 
-   public double run(Results initialPlacement, double minCost) throws GRBException {
+   public void run(GRBModel initialPlacement, double minCost) throws GRBException {
       float[] input = generateInput(initialPlacement);
       int[] environment = generateEnvironment(initialPlacement);
-      for (int i = 0; i < (int) pm.getAux("interations"); i++)
+      for (int i = 0; i < (int) pm.getAux("iterations"); i++)
          learn(input, environment, minCost, i);
-      return reason(input, environment, minCost, 0);
+      this.objVal = reason(input, environment, minCost, 0);
    }
 
-   private float[] generateInput(Results initialPlacement) throws GRBException {
-      GRBVar[][][] rSPD = (GRBVar[][][]) initialPlacement.getRawVariables().get("rSPD");
-      GRBVar[][][][] pXSVD = (GRBVar[][][][]) initialPlacement.getRawVariables().get("pXSVD");
+   private float[] generateInput(GRBModel initialPlacement) throws GRBException {
       List<float[]> inputList = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-               if (rSPD[s][p][d].get(GRB.DoubleAttr.X) == 1.0) {
+               if (initialPlacement.getVarByName(Definitions.rSPD + "[" + s + "][" + p + "][" + d + "]").get(GRB.DoubleAttr.X) == 1.0) {
                   float[] individualInput = new float[2 + pm.getServiceLength()];
                   individualInput[0] = pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
                   individualInput[1] = p;
                   for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                      for (int x = 0; x < pm.getServers().size(); x++)
-                        if (pXSVD[x][s][v][d].get(GRB.DoubleAttr.X) == 1.0)
+                        if (initialPlacement.getVarByName(Definitions.pXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "]").get(GRB.DoubleAttr.X) == 1.0)
                            individualInput[2 + v] = x;
                   inputList.add(individualInput);
                }
@@ -101,14 +102,13 @@ public class LearningModel {
       return inputArray;
    }
 
-   private int[] generateEnvironment(Results initialPlacement) throws GRBException {
-      GRBVar[][][] pXSV = (GRBVar[][][]) initialPlacement.getRawVariables().get("pXSV");
+   private int[] generateEnvironment(GRBModel initialPlacement) throws GRBException {
       int[] environment = new int[pm.getServers().size() * pm.getTotalNumFunctions()];
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                int pointer = x * pm.getTotalNumFunctions() + s * pm.getServices().get(s).getFunctions().size() + v;
-               if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+               if (initialPlacement.getVarByName(Definitions.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
                   environment[pointer] = 1;
                else
                   environment[pointer] = 0;
@@ -237,7 +237,7 @@ public class LearningModel {
 
    private void chooseServersPerDemand(Map<Integer, List<Path>> tSP, int[] environment) {
       Random rnd = new Random();
-      xsvd = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm.getDemandsTrafficFlow()];
+      pXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm.getDemandsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
             Path path = tSP.get(s).get(rnd.nextInt(tSP.get(s).size()));
@@ -247,7 +247,7 @@ public class LearningModel {
                   for (int x = 0; x < pm.getServers().size(); x++)
                      if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
                         if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
-                           xsvd[x][s][v][d] = true;
+                           pXSVD[x][s][v][d] = true;
                            break outerLoop;
                         }
             }
@@ -255,33 +255,36 @@ public class LearningModel {
    }
 
    private void calculateServerUtilization(int[] environment) {
-      ux = new double[pm.getServers().size()];
+      uX = new double[pm.getServers().size()];
       for (int x = 0; x < pm.getServers().size(); x++) {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                double demands = 0;
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-                  if (xsvd[x][s][v][d]) {
+                  if (pXSVD[x][s][v][d]) {
                      demands += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
                   }
                }
-               if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1)
-                  ux[x] += ((demands * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load"))
-                          + ((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
-                          * (int) pm.getAux("overhead")))
+               if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
+                  Function function = pm.getServices().get(s).getFunctions().get(v);
+                  uX[x] += ((demands * (double) function.getAttribute("load"))
+                          + ((double) function.getAttribute("load")
+                          * (int) function.getAttribute("overhead")))
                           / pm.getServers().get(x).getCapacity();
+               }
+
             }
       }
    }
 
    private void calculateLinkUtilization(int[] environment) {
-      ul = new double[pm.getLinks().size()];
+      uL = new double[pm.getLinks().size()];
       // TODO
    }
 
    private double computeReward() {
       double cost, totalCost = 0;
-      for (Double serverUtilization : ux) {
+      for (Double serverUtilization : uX) {
          cost = 0;
          for (int f = 0; f < Auxiliary.costFunctions.getValues().size(); f++) {
             double value = Auxiliary.costFunctions.getValues().get(f)[0] * serverUtilization
@@ -295,18 +298,18 @@ public class LearningModel {
    }
 
    private void computeFunctionsServers() {
-      xsv = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+      pXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (xsvd[x][s][v][d])
-                     xsv[x][s][v] = true;
+                  if (pXSVD[x][s][v][d])
+                     pXSV[x][s][v] = true;
    }
 
    private void computePaths() {
-      sp = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
-      spd = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
+      rSP = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
+      rSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
       // TODO
    }
 
@@ -314,33 +317,32 @@ public class LearningModel {
       // TODO
    }
 
-   public double[] getUx() {
-      return ux;
+   public double[] getuX() {
+      return uX;
    }
 
-   public double[] getUl() {
-      return ul;
+   public double[] getuL() {
+      return uL;
    }
 
-   public boolean[][][][] getXsvd() {
-      return xsvd;
+   public boolean[][][][] getpXSVD() {
+      return pXSVD;
    }
 
-   public boolean[][][] getXsv() {
-      return xsv;
+   public boolean[][][] getpXSV() {
+      return pXSV;
    }
 
-   public boolean[][] getSp() {
-      return sp;
+   public boolean[][] getrSP() {
+      return rSP;
    }
 
-   public boolean[][][] getSpd() {
-      return spd;
-   }
-
-   public boolean[][][] getSvp() {
-      return svp;
+   public boolean[][][] getrSPD() {
+      return rSPD;
    }
 
 
+   public double getObjVal() {
+      return objVal;
+   }
 }

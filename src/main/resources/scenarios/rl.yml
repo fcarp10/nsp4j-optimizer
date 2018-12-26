@@ -1,0 +1,45 @@
+# auxiliary parameters
+aux: {
+  "gap": 0.0,
+  "iterations": 1000,
+  "offset_results": 0,
+  "scaling_x": 1.0,
+  "scaling_y": 1.0
+}
+# service definitions
+serviceChains:
+  - id: 0
+    chain: [0, 1]
+    attributes: {
+      "minPaths": 3,
+      "maxPaths": 3,
+      "functionsServer": 1,
+      "max_delay": 200
+    }
+# function definitions
+functions:
+  - type: 0
+    attributes: {
+      "replicable": false,
+      "load": 1.0,
+      "overhead": 0,
+      "sync_load": 0.0,
+      "process_delay": 0
+    }
+  - type: 1
+    attributes: {
+      "replicable": false,
+      "load": 1.0,
+      "overhead": 0,
+      "sync_load": 0.0,
+      "process_delay": 0
+    }
+# traffic flow definitions
+trafficFlows:
+  - serviceId: 0
+    src: "n1"
+    dst: "n2"
+    minDem: 1
+    maxDem: 1
+    minBw: 500
+    maxBw: 500
