@@ -5,6 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import gui.WebClient;
+import gurobi.GRB;
+import gurobi.GRBException;
+import gurobi.GRBVar;
 import lp.CostFunctions;
 import org.decimal4j.util.DoubleRounder;
 import org.slf4j.Logger;
@@ -13,7 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import static output.Definitions.*;
+import static output.Definitions.ERROR;
+import static output.Definitions.INFO;
 
 public class Auxiliary {
 
@@ -79,5 +83,58 @@ public class Auxiliary {
             break;
       }
       WebClient.postMessage(status + message);
+   }
+
+   public static boolean[] convertVariablesToBooleans(GRBVar[] var) throws GRBException {
+      boolean[] convertedVar = new boolean[var.length];
+      for (int i = 0; i < var.length; i++) {
+         if (var[i] == null) continue;
+         if (var[i].get(GRB.DoubleAttr.X) == 1.0)
+            convertedVar[i] = true;
+      }
+      return convertedVar;
+   }
+
+   public static boolean[][] convertVariablesToBooleans(GRBVar[][] var) throws GRBException {
+      boolean[][] convertedVar = new boolean[var.length][var[0].length];
+      for (int i = 0; i < var.length; i++)
+         for (int j = 0; j < var[i].length; j++) {
+            if (var[i][j] == null) continue;
+            if (var[i][j].get(GRB.DoubleAttr.X) == 1.0)
+               convertedVar[i][j] = true;
+         }
+      return convertedVar;
+   }
+
+   public static boolean[][][] convertVariablesToBooleans(GRBVar[][][] var) throws GRBException {
+      boolean[][][] convertedVar = new boolean[var.length][var[0].length][var[0][0].length];
+      for (int i = 0; i < var.length; i++)
+         for (int j = 0; j < var[i].length; j++)
+            for (int k = 0; k < var[i][j].length; k++) {
+               if (var[i][j][k] == null) continue;
+               if (var[i][j][k].get(GRB.DoubleAttr.X) == 1.0)
+                  convertedVar[i][j][k] = true;
+            }
+      return convertedVar;
+   }
+
+   public static boolean[][][][] convertVariablesToBooleans(GRBVar[][][][] var) throws GRBException {
+      boolean[][][][] convertedVar = new boolean[var.length][var[0].length][var[0][0].length][var[0][0][0].length];
+      for (int i = 0; i < var.length; i++)
+         for (int j = 0; j < var[i].length; j++)
+            for (int k = 0; k < var[i][j].length; k++)
+               for (int l = 0; l < var[i][j][k].length; l++) {
+                  if (var[i][j][k][l] == null) continue;
+                  if (var[i][j][k][l].get(GRB.DoubleAttr.X) == 1.0)
+                     convertedVar[i][j][k][l] = true;
+               }
+      return convertedVar;
+   }
+
+   public static double[] convertVariablesToDoubles(GRBVar[] var) throws GRBException {
+      double[] convertedVar = new double[var.length];
+      for (int i = 0; i < var.length; i++)
+         convertedVar[i] = var[i].get(GRB.DoubleAttr.X);
+      return convertedVar;
    }
 }

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gurobi.*;
 import lp.Variables;
 import manager.Parameters;
-import org.graphstream.graph.Edge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import static output.Definitions.*;
 
@@ -95,17 +97,17 @@ public class ResultsManager {
             partialVarName = fileName + "_" + caseName;
          else partialVarName = fileName;
          // Link utilization
-         GRBVar[] uLvar = (GRBVar[]) results.getRawVariables().get(uL);
+         double[] uLvar = (double[]) results.getRawVariables().get(uL);
          StringBuilder uL = new StringBuilder("lu_" + partialVarName + " = [");
          for (int l = 0; l < results.getPm().getLinks().size(); l++)
-            uL.append(Auxiliary.roundDouble(uLvar[l].get(GRB.DoubleAttr.X), 3)).append(", ");
+            uL.append(Auxiliary.roundDouble(uLvar[l], 3)).append(", ");
          uL = new StringBuilder(uL.substring(0, uL.length() - 2));
          uL.append("]\n");
          // Server utilization
-         GRBVar[] uXvar = (GRBVar[]) results.getRawVariables().get(uX);
+         double[] uXvar = (double[]) results.getRawVariables().get(uX);
          StringBuilder uX = new StringBuilder("xu_" + partialVarName + " = [");
          for (int x = 0; x < results.getPm().getServers().size(); x++)
-            uX.append(Auxiliary.roundDouble(uXvar[x].get(GRB.DoubleAttr.X), 3)).append(", ");
+            uX.append(Auxiliary.roundDouble(uXvar[x], 3)).append(", ");
          uX = new StringBuilder(uX.substring(0, uX.length() - 2));
          uX.append("]\n");
          // Function Placement
@@ -129,10 +131,6 @@ public class ResultsManager {
          printer.close();
       } catch (IOException e) {
          e.printStackTrace();
-      } catch (GRBException e) {
-         e.printStackTrace();
       }
-
-
    }
 }

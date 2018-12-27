@@ -3,15 +3,14 @@ package output;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import gui.elements.GraphData;
 import gui.elements.Scenario;
-import gurobi.GRB;
-import gurobi.GRBException;
-import gurobi.GRBModel;
-import gurobi.GRBVar;
 import manager.Parameters;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static output.Definitions.*;
 
@@ -72,11 +71,11 @@ public class Results {
       rawVariables.put(key, variable);
    }
 
-   public void prepareVariablesForJsonFile(double objVal, GRBModel initialModel) throws GRBException {
+   public void prepareVariablesForJsonFile(double objVal, boolean[][][] initialPlacement) {
       List<Double> uL = new ArrayList<>(linkUtilizationMap().values());
       List<Double> uX = new ArrayList<>(serverUtilizationMap().values());
-      if (initialModel != null)
-         this.migrationsNum = countNumOfMigrations(initialModel);
+      if (initialPlacement != null)
+         this.migrationsNum = countNumOfMigrations(initialPlacement);
       this.replicationsNum = countNumOfReplications();
       prepareVariablesForPrinting();
       setSummaryResults(luSummary, uL);
@@ -93,78 +92,77 @@ public class Results {
       this.objVal = Auxiliary.roundDouble(objVal, 4);
    }
 
-   private int countNumOfMigrations(GRBModel initialModel) throws GRBException {
-      GRBVar[][][] pXSVvar = (GRBVar[][][]) rawVariables.get(pXSV);
+   private int countNumOfMigrations(boolean[][][] initialPlacement) {
+      boolean[][][] pXSVvar = (boolean[][][]) rawVariables.get(pXSV);
       int totalMigrations = 0;
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (initialModel.getVarByName(pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0
-                       && pXSVvar[x][s][v].get(GRB.DoubleAttr.X) == 0.0)
+               if (initialPlacement[x][s][v] && !pXSVvar[x][s][v])
                   totalMigrations++;
       return totalMigrations;
    }
 
-   private int countNumOfReplications() throws GRBException {
-      GRBVar[][][] pXSVvar = (GRBVar[][][]) rawVariables.get(pXSV);
+   private int countNumOfReplications() {
+      boolean[][][] pXSVvar = (boolean[][][]) rawVariables.get(pXSV);
       int totalReplicas = 0;
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
             int replicasPerFunction = -1;
             for (int x = 0; x < pm.getServers().size(); x++)
-               if (pXSVvar[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+               if (pXSVvar[x][s][v])
                   replicasPerFunction++;
             totalReplicas += replicasPerFunction;
          }
       return totalReplicas;
    }
 
-   public Map<Edge, Double> linkUtilizationMap() throws GRBException {
-      GRBVar[] uLvar = (GRBVar[]) rawVariables.get(uL);
+   public Map<Edge, Double> linkUtilizationMap() {
+      double[] uLvar = (double[]) rawVariables.get(uL);
       Map<Edge, Double> linkMapResults = new HashMap<>();
       for (int l = 0; l < pm.getLinks().size(); l++)
-         linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(uLvar[l].get(GRB.DoubleAttr.X), 2));
+         linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(uLvar[l], 2));
       return linkMapResults;
    }
 
-   public Map<Server, Double> serverUtilizationMap() throws GRBException {
-      GRBVar[] uXvar = (GRBVar[]) rawVariables.get(uX);
+   public Map<Server, Double> serverUtilizationMap() {
+      double[] uXvar = (double[]) rawVariables.get(uX);
       Map<Server, Double> serverMapResults = new HashMap<>();
       for (int x = 0; x < pm.getServers().size(); x++)
-         serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(uXvar[x].get(GRB.DoubleAttr.X), 2));
+         serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(uXvar[x], 2));
       return serverMapResults;
    }
 
-   List<Integer> numOfFunctionsPerServer() throws GRBException {
-      GRBVar[][][] pXSVvar = (GRBVar[][][]) rawVariables.get(pXSV);
+   List<Integer> numOfFunctionsPerServer() {
+      boolean[][][] pXSVvar = (boolean[][][]) rawVariables.get(pXSV);
       List<Integer> numOfFunctionsPerServer = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++) {
          int numOfFunctions = 0;
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (pXSVvar[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+               if (pXSVvar[x][s][v])
                   numOfFunctions++;
          numOfFunctionsPerServer.add(numOfFunctions);
       }
       return numOfFunctionsPerServer;
    }
 
-   List<Double> serviceDelayList() throws GRBException {
-      GRBVar[] dSvar = (GRBVar[]) rawVariables.get(dS);
+   List<Double> serviceDelayList() {
+      double[] dSvar = (double[]) rawVariables.get(dS);
       List<Double> serviceDelayList = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
-         if (dSvar[s].get(GRB.DoubleAttr.X) > 0)
-            serviceDelayList.add(Auxiliary.roundDouble(dSvar[s].get(GRB.DoubleAttr.X), 2));
+         if (dSvar[s] > 0)
+            serviceDelayList.add(Auxiliary.roundDouble(dSvar[s], 2));
       return serviceDelayList;
    }
 
-   private double avgPathLength() throws GRBException {
-      GRBVar[][] rSPvar = (GRBVar[][]) rawVariables.get(rSP);
+   private double avgPathLength() {
+      boolean[][] rSPvar = (boolean[][]) rawVariables.get(rSP);
       double avgPathLength = 0;
       int usedPaths = 0;
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            if (rSPvar[s][p].get(GRB.DoubleAttr.X) == 1.0) {
+            if (rSPvar[s][p]) {
                avgPathLength += pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getEdgePath().size();
                usedPaths++;
             }
@@ -173,34 +171,34 @@ public class Results {
       return avgPathLength;
    }
 
-   private double trafficOnLinks() throws GRBException {
-      GRBVar[] uLvar = (GRBVar[]) rawVariables.get(uL);
+   private double trafficOnLinks() {
+      double[] uLvar = (double[]) rawVariables.get(uL);
       double trafficOnLinks = 0;
       for (int l = 0; l < pm.getLinks().size(); l++)
-         trafficOnLinks += uLvar[l].get(GRB.DoubleAttr.X) * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
+         trafficOnLinks += uLvar[l] * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
       return trafficOnLinks;
    }
 
-   private void prepareVariablesForPrinting() throws GRBException {
+   private void prepareVariablesForPrinting() {
       // primary variables
-      GRBVar[][] rSPvar = (GRBVar[][]) rawVariables.get(rSP);
-      GRBVar[][][] rSPDvar = (GRBVar[][][]) rawVariables.get(rSPD);
-      GRBVar[][][] pXSVvar = (GRBVar[][][]) rawVariables.get(pXSV);
-      GRBVar[][][][] pXSVDvar = (GRBVar[][][][]) rawVariables.get(pXSVD);
-      GRBVar[] uXvar = (GRBVar[]) rawVariables.get(uX);
-      GRBVar[] uLvar = (GRBVar[]) rawVariables.get(uL);
+      boolean[][] rSPvar = (boolean[][]) rawVariables.get(rSP);
+      boolean[][][] rSPDvar = (boolean[][][]) rawVariables.get(rSPD);
+      boolean[][][] pXSVvar = (boolean[][][]) rawVariables.get(pXSV);
+      boolean[][][][] pXSVDvar = (boolean[][][][]) rawVariables.get(pXSVD);
+      double[] uXvar = (double[]) rawVariables.get(uX);
+      double[] uLvar = (double[]) rawVariables.get(uL);
       // secondary variables
-      GRBVar[] pXvar = (GRBVar[]) rawVariables.get(pX);
-      GRBVar[][][][] gSVXYvar = (GRBVar[][][][]) rawVariables.get(gSVXY);
-      GRBVar[][][] sSVPvar = (GRBVar[][][]) rawVariables.get(sSVP);
-      GRBVar[] dSvar = (GRBVar[]) rawVariables.get(dS);
-      GRBVar[][][] dSPXvar = (GRBVar[][][]) rawVariables.get(dSPX);
+      boolean[] pXvar = (boolean[]) rawVariables.get(pX);
+      boolean[][][][] gSVXYvar = (boolean[][][][]) rawVariables.get(gSVXY);
+      boolean[][][] sSVPvar = (boolean[][][]) rawVariables.get(sSVP);
+      double[] dSvar = (double[]) rawVariables.get(dS);
+      boolean[][][] dSPXvar = (boolean[][][]) rawVariables.get(dSPX);
 
       // prepare rSP
       List<String> strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            if (rSPvar[s][p].get(GRB.DoubleAttr.X) == 1.0)
+            if (rSPvar[s][p])
                strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): ["
                        + pm.getServices().get(s).getId() + "]"
                        + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
@@ -211,7 +209,7 @@ public class Results {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               if (rSPDvar[s][p][d].get(GRB.DoubleAttr.X) == 1.0)
+               if (rSPDvar[s][p][d])
                   strings.add("(" + (s + this.offset) + "," + (p + this.offset) + ","
                           + (d + this.offset) + "): ["
                           + pm.getServices().get(s).getId() + "]"
@@ -224,7 +222,7 @@ public class Results {
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (pXSVvar[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+               if (pXSVvar[x][s][v])
                   strings.add("(" + (x + this.offset) + "," + (s + this.offset) + ","
                           + (v + this.offset) + "): ["
                           + pm.getServers().get(x).getId() + "]["
@@ -238,7 +236,7 @@ public class Results {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (pXSVDvar[x][s][v][d].get(GRB.DoubleAttr.X) == 1.0)
+                  if (pXSVDvar[x][s][v][d])
                      strings.add("(" + (x + this.offset) + "," + (s + this.offset)
                              + "," + (v + this.offset) + "," + (d + this.offset) + "): ["
                              + pm.getServers().get(x).getId() + "]["
@@ -252,7 +250,7 @@ public class Results {
       for (int x = 0; x < pm.getServers().size(); x++)
          strings.add("(" + (x + this.offset) + "): ["
                  + pm.getServers().get(x).getId() + "]["
-                 + uXvar[x].get(GRB.DoubleAttr.X) + "]");
+                 + uXvar[x] + "]");
       stringVariables.put(uX, strings);
 
       // prepare uL
@@ -260,13 +258,13 @@ public class Results {
       for (int l = 0; l < pm.getLinks().size(); l++)
          strings.add("(" + (l + this.offset) + "): ["
                  + pm.getLinks().get(l).getId() + "]["
-                 + uLvar[l].get(GRB.DoubleAttr.X) + "]");
+                 + uLvar[l] + "]");
       stringVariables.put(uL, strings);
 
       // prepare pX
       strings = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++)
-         if (pXvar[x].get(GRB.DoubleAttr.X) == 1.0)
+         if (pXvar[x])
             strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]");
       stringVariables.put(pX, strings);
 
@@ -277,7 +275,7 @@ public class Results {
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int y = 0; y < pm.getServers().size(); y++)
                   if (x != y)
-                     if (gSVXYvar[s][v][x][y].get(GRB.DoubleAttr.X) == 1.0)
+                     if (gSVXYvar[s][v][x][y])
                         strings.add("(" + (s + this.offset) + "," + (v + this.offset)
                                 + "," + (x + this.offset) + "," + (y + this.offset) + "): ["
                                 + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
@@ -288,7 +286,7 @@ public class Results {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int p = 0; p < pm.getPaths().size(); p++)
-               if (sSVPvar[s][v][p].get(GRB.DoubleAttr.X) == 1.0)
+               if (sSVPvar[s][v][p])
                   strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
                           + pm.getPaths().get(p).getNodePath());
       stringVariables.put(sSVP, strings);
@@ -296,9 +294,9 @@ public class Results {
       // prepare dS
       strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
-         if (dSvar[s].get(GRB.DoubleAttr.X) > 0)
+         if (dSvar[s] > 0)
             strings.add("(" + (s + this.offset) + "): "
-                    + "[" + Auxiliary.roundDouble(dSvar[s].get(GRB.DoubleAttr.X), 2) + "]");
+                    + "[" + Auxiliary.roundDouble(dSvar[s], 2) + "]");
       stringVariables.put(dS, strings);
 
       // prepare dSPX
@@ -306,7 +304,7 @@ public class Results {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int x = 0; x < pm.getServers().size(); x++)
-               if (dSPXvar[s][p][x].get(GRB.DoubleAttr.X) == 1.0)
+               if (dSPXvar[s][p][x])
                   strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (x + this.offset) + "): "
                           + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
                           + "[" + pm.getServers().get(x).getId() + "]");

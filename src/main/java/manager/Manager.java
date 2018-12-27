@@ -16,6 +16,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import output.Auxiliary;
 import output.Results;
 import output.ResultsManager;
 import utils.ConfigFiles;
@@ -145,7 +146,7 @@ public class Manager {
       Results results;
       if (objVal != -1 && withResults) {
          String resultsFileName = pm.getScenario() + "_" + modelName;
-         results = generateResultsForLP(model, scenario, initialModel);
+         results = generateResultsForLP(model, scenario);
          resultsManager.exportJsonFile(resultsFileName, results);
          resultsManager.exportTextFile(resultsFileName, results);
          if (modelName.equals(INITIAL_PLACEMENT))
@@ -159,7 +160,7 @@ public class Manager {
       String resultsFileName = pm.getScenario();
       LearningModel learningModel = new LearningModel(pm);
       learningModel.run(initialModel, mgrRepModel.get(GRB.DoubleAttr.ObjVal));
-      Results results = generateResultsForRL(learningModel, scenario, initialModel);
+      Results results = generateResultsForRL(learningModel, scenario);
       resultsManager.exportJsonFile(resultsFileName, results);
       resultsManager.exportTextFile(resultsFileName, results);
    }
@@ -187,30 +188,34 @@ public class Manager {
       return expr;
    }
 
-   private static Results generateResultsForLP(OptimizationModel optimizationModel, Scenario scenario, GRBModel initialModel) throws GRBException {
+   private static Results generateResultsForLP(OptimizationModel optimizationModel, Scenario scenario) throws GRBException {
       Results results = new Results(pm, scenario);
       // primary variables
-      results.setVariable(rSP, optimizationModel.getVariables().rSP);
-      results.setVariable(rSPD, optimizationModel.getVariables().rSPD);
-      results.setVariable(pXSV, optimizationModel.getVariables().pXSV);
-      results.setVariable(pXSVD, optimizationModel.getVariables().pXSVD);
-      results.setVariable(uL, optimizationModel.getVariables().uL);
-      results.setVariable(uX, optimizationModel.getVariables().uX);
+      results.setVariable(rSP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().rSP));
+      results.setVariable(rSPD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().rSPD));
+      results.setVariable(pXSV, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSV));
+      results.setVariable(pXSVD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSVD));
+      results.setVariable(uL, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().uL));
+      results.setVariable(uX, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().uX));
       // secondary
-      results.setVariable(pX, optimizationModel.getVariables().pX);
-      results.setVariable(gSVXY, optimizationModel.getVariables().gSVXY);
-      results.setVariable(sSVP, optimizationModel.getVariables().sSVP);
-      results.setVariable(dS, optimizationModel.getVariables().dS);
-      results.setVariable(dSPX, optimizationModel.getVariables().dSPX);
-      results.prepareVariablesForJsonFile(optimizationModel.getObjVal(), initialModel);
+      results.setVariable(pX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pX));
+      results.setVariable(gSVXY, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().gSVXY));
+      results.setVariable(sSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().sSVP));
+      results.setVariable(dS, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dS));
+      results.setVariable(dSPX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().dSPX));
+      results.prepareVariablesForJsonFile(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSV));
       return results;
    }
 
-   private static Results generateResultsForRL(LearningModel learningModel, Scenario scenario, GRBModel initialModel) throws GRBException {
+   private static Results generateResultsForRL(LearningModel learningModel, Scenario scenario) throws GRBException {
       Results results = new Results(pm, scenario);
+      results.setVariable(rSP, learningModel.getrSP());
+      results.setVariable(rSPD, learningModel.getrSPD());
+      results.setVariable(pXSV, learningModel.getpXSV());
+      results.setVariable(pXSVD, learningModel.getpXSVD());
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
-      results.prepareVariablesForJsonFile(learningModel.getObjVal(), initialModel);
+      results.prepareVariablesForJsonFile(learningModel.getObjVal(), learningModel.getpXSV());
       return results;
    }
 

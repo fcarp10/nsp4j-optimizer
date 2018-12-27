@@ -6,9 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import gui.elements.LinkJson;
 import gui.elements.ServerJson;
-import gurobi.GRB;
 import gurobi.GRBException;
-import gurobi.GRBVar;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
 import output.Results;
@@ -138,13 +136,13 @@ public class WebClient {
 
    private static Map<Server, String> generateFunctionsPerServerStringMap(Results results) throws GRBException {
       int offset = (int) results.getPm().getAux("offset_results");
-      GRBVar[][][] pXSV = (GRBVar[][][]) results.getRawVariables().get("pXSV");
+      boolean[][][] pXSV = (boolean[][][]) results.getRawVariables().get("pXSV");
       Map<Server, String> functionsStringMap = new HashMap<>();
       for (int x = 0; x < results.getPm().getServers().size(); x++) {
          StringBuilder stringBuilder = new StringBuilder();
          for (int s = 0; s < results.getPm().getServices().size(); s++)
             for (int v = 0; v < results.getPm().getServices().get(s).getFunctions().size(); v++)
-               if (pXSV[x][s][v].get(GRB.DoubleAttr.X) == 1.0)
+               if (pXSV[x][s][v])
                   stringBuilder.append("f(").append(x + offset).append(",").append(s + offset).append(",").append(v + offset).append(")\n");
          functionsStringMap.put(results.getPm().getServers().get(x), stringBuilder.toString());
       }
