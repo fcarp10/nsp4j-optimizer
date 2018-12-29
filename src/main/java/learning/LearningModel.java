@@ -40,6 +40,7 @@ public class LearningModel {
    private boolean[][][][] pXSVD;
    private double[] uL;
    private double[] uX;
+   private double[] dS;
 
    public LearningModel(Parameters pm) {
       this.pm = pm;
@@ -196,6 +197,7 @@ public class LearningModel {
       if (isReasoning) {
          computePaths();
          calculateReroutingTraffic();
+         computeServiceDelay();
       }
    }
 
@@ -313,6 +315,11 @@ public class LearningModel {
       // TODO
    }
 
+   private void computeServiceDelay() {
+      dS = new double[pm.getServices().size()];
+      // TODO
+   }
+
    private void calculateReroutingTraffic() {
       // TODO
    }
@@ -341,6 +348,9 @@ public class LearningModel {
       return rSPD;
    }
 
+   public double[] getdS() {
+      return dS;
+   }
 
    public double getObjVal() {
       return objVal;

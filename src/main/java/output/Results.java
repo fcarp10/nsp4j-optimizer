@@ -71,13 +71,15 @@ public class Results {
       rawVariables.put(key, variable);
    }
 
-   public void prepareVariablesForJsonFile(double objVal, boolean[][][] initialPlacement) {
+   public void initializeResults(double objVal, boolean[][][] initialPlacement, boolean additionalVariables) {
       List<Double> uL = new ArrayList<>(linkUtilizationMap().values());
       List<Double> uX = new ArrayList<>(serverUtilizationMap().values());
       if (initialPlacement != null)
          this.migrationsNum = countNumOfMigrations(initialPlacement);
       this.replicationsNum = countNumOfReplications();
-      prepareVariablesForPrinting();
+      convertElementaryVariablesToStrings();
+      if (additionalVariables)
+         convertAdditionalVariablesToStrings();
       setSummaryResults(luSummary, uL);
       setSummaryResults(xuSummary, uX);
       setSummaryResults(fuSummary, numOfFunctionsPerServer());
@@ -179,20 +181,14 @@ public class Results {
       return trafficOnLinks;
    }
 
-   private void prepareVariablesForPrinting() {
-      // primary variables
+   private void convertElementaryVariablesToStrings() {
+      // elementary variables
       boolean[][] rSPvar = (boolean[][]) rawVariables.get(rSP);
       boolean[][][] rSPDvar = (boolean[][][]) rawVariables.get(rSPD);
       boolean[][][] pXSVvar = (boolean[][][]) rawVariables.get(pXSV);
       boolean[][][][] pXSVDvar = (boolean[][][][]) rawVariables.get(pXSVD);
       double[] uXvar = (double[]) rawVariables.get(uX);
       double[] uLvar = (double[]) rawVariables.get(uL);
-      // secondary variables
-      boolean[] pXvar = (boolean[]) rawVariables.get(pX);
-      boolean[][][][] gSVXYvar = (boolean[][][][]) rawVariables.get(gSVXY);
-      boolean[][][] sSVPvar = (boolean[][][]) rawVariables.get(sSVP);
-      double[] dSvar = (double[]) rawVariables.get(dS);
-      boolean[][][] dSPXvar = (boolean[][][]) rawVariables.get(dSPX);
 
       // prepare rSP
       List<String> strings = new ArrayList<>();
@@ -260,9 +256,18 @@ public class Results {
                  + pm.getLinks().get(l).getId() + "]["
                  + uLvar[l] + "]");
       stringVariables.put(uL, strings);
+   }
+
+   private void convertAdditionalVariablesToStrings() {
+      // additional variables
+      boolean[] pXvar = (boolean[]) rawVariables.get(pX);
+      boolean[][][][] gSVXYvar = (boolean[][][][]) rawVariables.get(gSVXY);
+      boolean[][][] sSVPvar = (boolean[][][]) rawVariables.get(sSVP);
+      double[] dSvar = (double[]) rawVariables.get(dS);
+      boolean[][][] dSPXvar = (boolean[][][]) rawVariables.get(dSPX);
 
       // prepare pX
-      strings = new ArrayList<>();
+      List<String> strings = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pXvar[x])
             strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]");

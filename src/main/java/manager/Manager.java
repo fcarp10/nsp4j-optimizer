@@ -17,6 +17,7 @@ import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import output.Auxiliary;
+import output.Definitions;
 import output.Results;
 import output.ResultsManager;
 import utils.ConfigFiles;
@@ -89,18 +90,24 @@ public class Manager {
          printLog(log, INFO, "initializing model");
          switch (sce.getModel()) {
             case INITIAL_PLACEMENT:
-               initialModel = runLP(INITIAL_PLACEMENT, sce, resultsManager, null, true);
+               initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjectiveFunction(), resultsManager, null, true);
                break;
             default:
-               runLP(sce.getModel(), sce, resultsManager, initialModel, true);
+               runLP(sce.getModel(), sce, sce.getObjectiveFunction(), resultsManager, initialModel, true);
                break;
             case ALL_CASES:
-               runLP(MIGRATION, sce, resultsManager, initialModel, true);
-               runLP(REPLICATION, sce, resultsManager, initialModel, true);
-               runLP(MIGRATION_REPLICATION, sce, resultsManager, initialModel, true);
+               if (initialModel == null)
+                  Auxiliary.printLog(log, ERROR, "run initial placement first");
+               else {
+                  runLP(MIGRATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel, true);
+                  runLP(REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel, true);
+                  runLP(MIGRATION_REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel, true);
+               }
                break;
             case REINFORCEMENT_LEARNING:
-               GRBModel mgrRepModel = runLP(MIGRATION_REPLICATION, sce, resultsManager, initialModel, false);
+               if (initialModel == null)
+                  initialModel = runLP(INITIAL_PLACEMENT, sce, Definitions.NUM_OF_SERVERS_OBJ, resultsManager, null, true);
+               GRBModel mgrRepModel = runLP(MIGRATION_REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel, false);
                runRL(sce, resultsManager, initialModel, mgrRepModel);
                break;
          }
@@ -131,7 +138,7 @@ public class Manager {
          }
    }
 
-   private static GRBModel runLP(String modelName, Scenario scenario, ResultsManager resultsManager, GRBModel initialModel, boolean withResults) throws GRBException {
+   private static GRBModel runLP(String modelName, Scenario scenario, String objectiveFunction, ResultsManager resultsManager, GRBModel initialModel, boolean withResults) throws GRBException {
       GRBLinExpr expr;
       OptimizationModel model = new OptimizationModel(pm);
       printLog(log, INFO, "setting variables");
@@ -139,7 +146,7 @@ public class Manager {
       model.setVariables(variables);
       printLog(log, INFO, "setting constraints");
       new Constraints(pm, model, scenario, initialModel);
-      expr = generateExprForObjectiveFunction(model, scenario);
+      expr = generateExprForObjectiveFunction(model, scenario, objectiveFunction);
       model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running model");
       double objVal = model.run();
@@ -163,15 +170,16 @@ public class Manager {
       Results results = generateResultsForRL(learningModel, scenario);
       resultsManager.exportJsonFile(resultsFileName, results);
       resultsManager.exportTextFile(resultsFileName, results);
+      WebClient.updateResultsToWebApp(results);
    }
 
-   private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, Scenario scenario) throws GRBException {
+   private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, Scenario scenario, String objectiveFunction) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       String[] weights = scenario.getWeights().split("-");
       double weightLinks = Double.valueOf(weights[0]) / pm.getLinks().size();
       double weightServers = Double.valueOf(weights[1]) / pm.getServers().size();
       double weightServiceDelays = Double.valueOf(weights[2]);
-      switch (scenario.getObjectiveFunction()) {
+      switch (objectiveFunction) {
          case NUM_OF_SERVERS_OBJ:
             expr.add(model.usedServersExpr());
             break;
@@ -203,11 +211,11 @@ public class Manager {
       results.setVariable(sSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().sSVP));
       results.setVariable(dS, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dS));
       results.setVariable(dSPX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().dSPX));
-      results.prepareVariablesForJsonFile(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSV));
+      results.initializeResults(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSV), true);
       return results;
    }
 
-   private static Results generateResultsForRL(LearningModel learningModel, Scenario scenario) throws GRBException {
+   private static Results generateResultsForRL(LearningModel learningModel, Scenario scenario) {
       Results results = new Results(pm, scenario);
       results.setVariable(rSP, learningModel.getrSP());
       results.setVariable(rSPD, learningModel.getrSPD());
@@ -215,7 +223,8 @@ public class Manager {
       results.setVariable(pXSVD, learningModel.getpXSVD());
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
-      results.prepareVariablesForJsonFile(learningModel.getObjVal(), learningModel.getpXSV());
+      results.setVariable(dS, learningModel.getdS());
+      results.initializeResults(learningModel.getObjVal(), learningModel.getpXSV(), false);
       return results;
    }
 
