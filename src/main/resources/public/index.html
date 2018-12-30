@@ -79,21 +79,21 @@
                     <div class="form-group">
                         <label for="inputFileName">Weights (lu, xu, sd)</label>
                         <div class="input-group-prepend">
-                            <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="lu" placeholder="0.0" value="1.0">
-                            <input type="number" step="0.1" class="form-control input-number" id="xu" placeholder="0.0" value="0.0">
-                            <input type="number" step="0.1" class="form-control input-number" id="sd" placeholder="0.0" value="0.0">
+                            <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="lu" placeholder="0.0" value="0.0">
+                            <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="xu" placeholder="0.0" value="1.0">
+                            <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="sd" placeholder="0.0" value="0.0">
                         </div>
 
                     </div>
                     <div class="form-group">
                         <label class="my-1 mr-2" for="model">Model</label>
                         <select class="form-control custom-select my-1 mr-sm-2" id="model" onChange="check(this);">
-                            <option value="initial_placement">initial placement</option>
-                            <option value="migration">migration</option>
-                            <option value="replication">replication</option>
-                            <option value="migration_replication">migration and replication</option>
-                            <option value="all_optimization_models">run all models</option>
-                            <option value="migration_replication_rl">learning</option>
+                            <option value="init">initial placement</option>
+                            <option value="mgr">migration</option>
+                            <option value="rep">replication</option>
+                            <option value="mgrep">migration and replication</option>
+                            <option value="all">all cases</option>
+                            <option value="mgrep_rl">migration and replication (RL)</option>
                         </select>
                     </div>
                     <div class="btn-group">

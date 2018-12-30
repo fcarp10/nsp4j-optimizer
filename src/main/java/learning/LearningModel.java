@@ -25,12 +25,14 @@ import output.Definitions;
 
 import java.util.*;
 
+import static output.Auxiliary.printLog;
+import static output.Definitions.INFO;
+
 public class LearningModel {
 
    private static final Logger log = LoggerFactory.getLogger(LearningModel.class);
    private Parameters pm;
    private DeepQ deepQ;
-   private final double THRESHOLD = 1.0;
    private double objVal;
 
    // Elementary variables
@@ -44,24 +46,24 @@ public class LearningModel {
 
    public LearningModel(Parameters pm) {
       this.pm = pm;
-      int inputLength = pm.getServers().size() * pm.getServices().size() * pm.getServiceLength() + 1;
-      int outputLength = pm.getServers().size() * pm.getServices().size() * pm.getServiceLength();
-      int hiddenLayerOut = 150;
+   }
+
+   private void initializeModel(int inputLength, int outputLength) {
       MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
               .seed(123)
               .iterations(1)
               .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-              .learningRate(0.0025)
+              .learningRate(0.1)
               .updater(Updater.NESTEROVS)
               .list()
               .layer(0, new DenseLayer.Builder()
                       .nIn(inputLength)
-                      .nOut(hiddenLayerOut)
+                      .nOut((int) pm.getAux("rl_num_hidden_layers"))
                       .weightInit(WeightInit.XAVIER)
                       .activation(Activation.RELU)
                       .build())
               .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
-                      .nIn(hiddenLayerOut)
+                      .nIn((int) pm.getAux("rl_num_hidden_layers"))
                       .nOut(outputLength)
                       .weightInit(WeightInit.XAVIER)
                       .activation(Activation.IDENTITY)
@@ -72,12 +74,14 @@ public class LearningModel {
       deepQ = new DeepQ(conf, 100000, .99f, 1024, 100, 1024, inputLength);
    }
 
-   public void run(GRBModel initialPlacement, double minCost) throws GRBException {
+   public void run(GRBModel initialPlacement, double objValTarget) throws GRBException {
       float[] input = generateInput(initialPlacement);
       int[] environment = generateEnvironment(initialPlacement);
-      for (int i = 0; i < (int) pm.getAux("iterations"); i++)
-         learn(input, environment, minCost, i);
-      this.objVal = reason(input, environment, minCost, 0);
+      initializeModel(input.length, environment.length);
+      for (int i = 0; i < (int) pm.getAux("rl_training_iterations"); i++)
+         learn(input, environment, objValTarget, i, (double) pm.getAux("epsilon"));
+      this.objVal = reason(input, environment, objValTarget, 0);
+      printLog(log, INFO, "finished [" + Auxiliary.roundDouble(objVal, 2) + "]");
    }
 
    private float[] generateInput(GRBModel initialPlacement) throws GRBException {
@@ -117,29 +121,32 @@ public class LearningModel {
       return environment;
    }
 
-   private void learn(float[] input, int[] environment, double minCost, int iteration) {
+   private void learn(float[] input, int[] environment, double objValTarget, int iteration, double epsilon) {
       int[] localEnvironment = environment.clone();
       int timeStep = 0;
       int action = -1;
       while (true) {
          INDArray inputIndArray = Nd4j.create(input);
          int[] actionMask = generateActionMask(localEnvironment, action);
-         action = deepQ.getAction(inputIndArray, actionMask, 1);
+         action = deepQ.getAction(inputIndArray, actionMask, epsilon);
          modifyEnvironment(false, localEnvironment, action);
          int[] nextActionMask = generateActionMask(localEnvironment, action);
          double reward = computeReward();
          timeStep++;
          input[input.length - 1] = timeStep;
-         if (reward >= (1 - minCost) * THRESHOLD) {
+         if (reward >= (1 - objValTarget) * (double) pm.getAux("threshold")) {
             deepQ.observeReward(inputIndArray, null, reward, nextActionMask);
             break;
-         } else
+         } else {
             deepQ.observeReward(inputIndArray, Nd4j.create(input), reward, nextActionMask);
+            if (timeStep == (int) pm.getAux("rl_learning_steps"))
+               break;
+         }
       }
       log.info("iteration " + iteration + " -> " + timeStep + " steps");
    }
 
-   private double reason(float[] input, int[] environment, double minCost, double epsilon) {
+   private double reason(float[] input, int[] environment, double objValTarget, double epsilon) {
       int[] localEnvironment = environment.clone();
       int timeStep = 0;
       double reward;
@@ -153,11 +160,11 @@ public class LearningModel {
          reward = computeReward();
          timeStep++;
          input[input.length - 1] = timeStep;
-         if (reward >= (1 - minCost) * THRESHOLD)
+         if (reward >= (1 - objValTarget) * (double) pm.getAux("threshold"))
             break;
          else {
             deepQ.observeReward(inputIndArray, Nd4j.create(input), reward, nextActionMask);
-            if (timeStep > 15)
+            if (timeStep == (int) pm.getAux("rl_learning_steps"))
                break;
          }
       }

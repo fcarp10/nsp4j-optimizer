@@ -87,27 +87,27 @@ public class Manager {
          if (initialModel == null && importedModel != null)
             initialModel = importedModel;
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
-         printLog(log, INFO, "initializing model");
+         printLog(log, INFO, "initializing " + sce.getModel());
          switch (sce.getModel()) {
             case INITIAL_PLACEMENT:
-               initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjectiveFunction(), resultsManager, null, true);
+               initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjectiveFunction(), resultsManager, null);
                break;
             default:
-               runLP(sce.getModel(), sce, sce.getObjectiveFunction(), resultsManager, initialModel, true);
+               runLP(sce.getModel(), sce, sce.getObjectiveFunction(), resultsManager, initialModel);
                break;
             case ALL_CASES:
                if (initialModel == null)
                   Auxiliary.printLog(log, ERROR, "run initial placement first");
                else {
-                  runLP(MIGRATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel, true);
-                  runLP(REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel, true);
-                  runLP(MIGRATION_REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel, true);
+                  runLP(MIGRATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel);
+                  runLP(REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel);
+                  runLP(MIGRATION_REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel);
                }
                break;
             case REINFORCEMENT_LEARNING:
                if (initialModel == null)
-                  initialModel = runLP(INITIAL_PLACEMENT, sce, Definitions.NUM_OF_SERVERS_OBJ, resultsManager, null, true);
-               GRBModel mgrRepModel = runLP(MIGRATION_REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel, false);
+                  initialModel = runLP(INITIAL_PLACEMENT, sce, Definitions.NUM_OF_SERVERS_OBJ, resultsManager, null);
+               GRBModel mgrRepModel = runLP(MIGRATION_REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel);
                runRL(sce, resultsManager, initialModel, mgrRepModel);
                break;
          }
@@ -138,7 +138,7 @@ public class Manager {
          }
    }
 
-   private static GRBModel runLP(String modelName, Scenario scenario, String objectiveFunction, ResultsManager resultsManager, GRBModel initialModel, boolean withResults) throws GRBException {
+   private static GRBModel runLP(String modelName, Scenario scenario, String objectiveFunction, ResultsManager resultsManager, GRBModel initialModel) throws GRBException {
       GRBLinExpr expr;
       OptimizationModel model = new OptimizationModel(pm);
       printLog(log, INFO, "setting variables");
@@ -148,10 +148,10 @@ public class Manager {
       new Constraints(pm, model, scenario, initialModel);
       expr = generateExprForObjectiveFunction(model, scenario, objectiveFunction);
       model.setObjectiveFunction(expr, scenario.isMaximization());
-      printLog(log, INFO, "running model");
+      printLog(log, INFO, "running LP model");
       double objVal = model.run();
       Results results;
-      if (objVal != -1 && withResults) {
+      if (objVal != -1) {
          String resultsFileName = pm.getScenario() + "_" + modelName;
          results = generateResultsForLP(model, scenario);
          resultsManager.exportJsonFile(resultsFileName, results);
@@ -164,8 +164,9 @@ public class Manager {
    }
 
    private static void runRL(Scenario scenario, ResultsManager resultsManager, GRBModel initialModel, GRBModel mgrRepModel) throws GRBException {
-      String resultsFileName = pm.getScenario();
+      String resultsFileName = pm.getScenario() + "_" + scenario.getModel();
       LearningModel learningModel = new LearningModel(pm);
+      printLog(log, INFO, "running RL model");
       learningModel.run(initialModel, mgrRepModel.get(GRB.DoubleAttr.ObjVal));
       Results results = generateResultsForRL(learningModel, scenario);
       resultsManager.exportJsonFile(resultsFileName, results);

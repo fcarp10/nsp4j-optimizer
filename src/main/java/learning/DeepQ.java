@@ -56,7 +56,7 @@ class DeepQ {
       return this.lastAction;
    }
 
-   private int findMaxAction(INDArray outputs, int actionMask[]) {
+   private int findMaxAction(INDArray outputs, int[] actionMask) {
       float maxValue = Float.NEGATIVE_INFINITY;
       int actionMax = -1;
       for (int i = 0; i < outputs.size(1); i++) {
@@ -69,7 +69,7 @@ class DeepQ {
       return actionMax;
    }
 
-   private float findMaxValue(INDArray outputs, int actionMask[]) {
+   private float findMaxValue(INDArray outputs, int[] actionMask) {
       float maxValue = Float.NEGATIVE_INFINITY;
       for (int i = 0; i < outputs.size(1); i++) {
          if (actionMask[i] != 1) continue;
@@ -94,7 +94,7 @@ class DeepQ {
    }
 
    private void trainNetwork() {
-      Experience experiences[] = getBatch();
+      Experience[] experiences = getBatch();
       INDArray combinedLastInputs = combineInputs(experiences);
       INDArray combinedNextInputs = combineNextInputs(experiences);
       INDArray currentOutput = multiLayerNetwork.output(combinedLastInputs);
@@ -104,7 +104,7 @@ class DeepQ {
          if (experiences[i].getNextInputIndArray() != null)
             futureReward = findMaxValue(targetOutput.getRow(i), experiences[i].getNextActionMask());
          float targetReward = experiences[i].getReward() + discount * futureReward;
-         int actionScalar[] = {i, experiences[i].getAction()};
+         int[] actionScalar = {i, experiences[i].getAction()};
          currentOutput.putScalar(actionScalar, targetReward);
       }
       multiLayerNetwork.fit(combinedLastInputs, currentOutput);
@@ -118,14 +118,14 @@ class DeepQ {
       return batch;
    }
 
-   private INDArray combineInputs(Experience actionArray[]) {
+   private INDArray combineInputs(Experience[] actionArray) {
       INDArray combinedLastInputs = Nd4j.create(actionArray.length, inputLength);
       for (int i = 0; i < actionArray.length; i++)
          combinedLastInputs.putRow(i, actionArray[i].getInputIndArray());
       return combinedLastInputs;
    }
 
-   private INDArray combineNextInputs(Experience actionArray[]) {
+   private INDArray combineNextInputs(Experience[] actionArray) {
       INDArray combinedNextInputs = Nd4j.create(actionArray.length, inputLength);
       for (int i = 0; i < actionArray.length; i++)
          if (actionArray[i].getNextInputIndArray() != null)
