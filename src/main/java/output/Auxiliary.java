@@ -38,6 +38,8 @@ public class Auxiliary {
    public static final String uL = "uL";
    public static final String uX = "uX";
    public static final String pX = "pX";
+   public static final String pXS = "pXS";
+   public static final String nXSV = "nXSV";
    public static final String gSVXY = "gSVXY";
    public static final String sSVP = "sSVP";
    public static final String dSP = "dSP";
