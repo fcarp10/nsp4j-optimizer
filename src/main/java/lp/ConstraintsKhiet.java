@@ -38,6 +38,7 @@ public class ConstraintsKhiet {
         if (scenario.getConstraints().get("VSC2")) constraintVSC2();
         if (scenario.getConstraints().get("VSC3")) constraintVSC3();
         if (scenario.getConstraints().get("DIC1")) constraintDIC1();
+        if (scenario.getConstraints().get("DVC2")) constraintDVC2();
         if (scenario.getConstraints().get("RPC3")) noParallelPaths();
         if (scenario.getConstraints().get("IPC1"))
             initialPlacementAsConstraints(initialModel);
@@ -433,6 +434,21 @@ public class ConstraintsKhiet {
                             int maxInt = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
                             model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxLoad * maxInt, "constraintDIC1");
                         }
+                }
+    }
+
+    private void constraintDVC2() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                for (int x = 0; x < pm.getServers().size(); x++) {
+                    GRBLinExpr expr = new GRBLinExpr();
+                    GRBLinExpr expr2 = new GRBLinExpr();
+                    expr.addTerm(1.0, vars.pXSV[x][s][v]);
+                    expr2.addTerm(1.0, vars.nXSV[x][s][v]);
+                    String strexpr = expr.toString();
+                    int maxInst = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
+                    model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC2");
+                    model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, Integer.parseInt(strexpr, 2) * maxInst, "constraintDVC");
                 }
     }
 
