@@ -76,12 +76,11 @@ public class LearningModel {
    }
 
    public void run(GRBModel initialPlacement, double objValTarget) throws GRBException {
-//      float[] input = generateInput(initialPlacement);
       float[] environment = generateEnvironment(initialPlacement);
       initializeModel(environment.length, environment.length - 1);
       for (int i = 0; i < (int) pm.getAux("rl_training_iterations"); i++)
-         learn(environment, objValTarget, i, (double) pm.getAux("epsilon"));
-      reason(environment, objValTarget, 0);
+         run(environment, objValTarget, i, (double) pm.getAux("epsilon"), false);
+      run(environment, objValTarget, -1, 0, true);
       this.objVal = computeCost();
       printLog(log, INFO, "finished [" + Auxiliary.roundDouble(objVal, 2) + "]");
    }
@@ -100,8 +99,7 @@ public class LearningModel {
       return environment;
    }
 
-
-   private void learn(float[] environment, double objValTarget, int iteration, double epsilon) {
+   private void run(float[] environment, double objValTarget, int iteration, double epsilon, boolean isReasoning) {
       float[] localEnvironment = environment.clone();
       int timeStep = 0;
       int action = -1;
@@ -110,9 +108,9 @@ public class LearningModel {
          int[] actionMask = generateActionMask(localEnvironment, action);
          action = deepQ.getAction(inputIndArray, actionMask, epsilon);
          modifyEnvironment(localEnvironment, action);
-         computeEnvironment(false, localEnvironment);
-         int[] nextActionMask = generateActionMask(localEnvironment, action);
+         computeEnvironment(isReasoning, localEnvironment);
          double cost = computeCost();
+         int[] nextActionMask = generateActionMask(localEnvironment, action);
          double reward = computeReward(cost, objValTarget);
          timeStep++;
          localEnvironment[localEnvironment.length - 1] = timeStep;
@@ -125,53 +123,35 @@ public class LearningModel {
                break;
          }
       }
-      log.info("iteration " + iteration + " -> " + timeStep + " steps");
-   }
-
-   private void reason(float[] environment, double objValTarget, double epsilon) {
-      float[] localEnvironment = environment.clone();
-      int timeStep = 0;
-      int action = -1;
-      while (true) {
-         INDArray inputIndArray = Nd4j.create(localEnvironment);
-         int[] actionMask = generateActionMask(localEnvironment, action);
-         action = deepQ.getAction(inputIndArray, actionMask, epsilon);
-         modifyEnvironment(localEnvironment, action);
-         computeEnvironment(true, localEnvironment);
-         int[] nextActionMask = generateActionMask(localEnvironment, action);
-         double cost = computeCost();
-         double reward = computeReward(cost, objValTarget);
-         timeStep++;
-         localEnvironment[localEnvironment.length - 1] = timeStep;
-         if (cost <= objValTarget * (double) pm.getAux("threshold"))
-            break;
-         else {
-            deepQ.observeReward(inputIndArray, Nd4j.create(localEnvironment), reward, nextActionMask);
-            if (timeStep == (int) pm.getAux("rl_learning_steps"))
-               break;
-         }
+      if (iteration > -1)
+         log.info("iteration " + iteration + " -> " + timeStep + " steps");
+      else {
+         computeFunctionsServers();
+         log.info("reasoning in -> " + timeStep + " steps");
       }
-      computeFunctionsServers();
-      log.info("reasoning in -> " + timeStep + " steps");
    }
 
    private int[] generateActionMask(float[] environment, int pastAction) {
       int[] actionMask = new int[environment.length - 1];
-      for (int v = 0; v < pm.getServiceLength(); v++) {
-         int activations = 0;
-         for (int x = 0; x < pm.getServers().size(); x++)
-            if (environment[x * pm.getServiceLength() + v] == 1)
-               activations++;
-         for (int x = 0; x < pm.getServers().size(); x++) {
-            if (activations == pm.getServices().size())
-               if (environment[x * pm.getServiceLength() + v] == 0)
-                  actionMask[x * pm.getServiceLength() + v] = 1;
-            if (activations > pm.getServices().size())
-               actionMask[x * pm.getServiceLength() + v] = 1;
-         }
-      }
+      // to avoid doing the same action twice
       if (pastAction != -1)
          actionMask[pastAction] = 0;
+      // calculate the admissible paths for all services
+      Map<Integer, List<Path>> servicesAdmissiblePaths = getServicesAdmissiblePaths(environment);
+      // check which servers could be activated based on the admissible paths
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServiceLength(); v++) {
+               outerloop:
+               if (environment[x * pm.getServiceLength() + v] == 0)
+                  // check if it is possible to activate the server
+                  for (int p = 0; p < servicesAdmissiblePaths.get(s).size(); p++)
+                     for (int n = 0; n < servicesAdmissiblePaths.get(s).get(p).getNodePath().size(); n++)
+                        if (pm.getServers().get(x).getParent().equals(servicesAdmissiblePaths.get(s).get(p).getNodePath().get(n))) {
+                           actionMask[x * pm.getServiceLength() + v] = 1;
+                           break outerloop;
+                        }
+            }
       return actionMask;
    }
 
@@ -196,7 +176,7 @@ public class LearningModel {
 
    private void computeEnvironment(boolean isReasoning, float[] environment) {
       Map<Integer, List<Path>> servicesAdmissiblePaths = getServicesAdmissiblePaths(environment);
-      chooseServersPerDemand(servicesAdmissiblePaths, environment);
+      activateServersPerDemand(servicesAdmissiblePaths, environment);
       calculateServerUtilization(environment);
       calculateLinkUtilization(environment);
       if (isReasoning) {
@@ -236,12 +216,12 @@ public class LearningModel {
                }
             }
             if (allFunctionsExist)
-               admissiblePaths.add(pm.getPaths().get(p));
+               admissiblePaths.add(pm.getServices().get(s).getTrafficFlow().getPaths().get(p));
          }
       return admissiblePaths;
    }
 
-   private void chooseServersPerDemand(Map<Integer, List<Path>> tSP, float[] environment) {
+   private void activateServersPerDemand(Map<Integer, List<Path>> tSP, float[] environment) {
       Random rnd = new Random();
       pXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm.getDemandsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)

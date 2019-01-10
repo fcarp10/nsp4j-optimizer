@@ -4,8 +4,8 @@ aux: {
   "offset_results": 0,
   "scaling_x": 1.0,
   "scaling_y": 1.0,
-  "rl_training_iterations": 500,
-  "rl_learning_steps": 20,
+  "rl_training_iterations": 10,
+  "rl_learning_steps": 10,
   "rl_num_hidden_layers": 150,
   "threshold": 1.0,
   "epsilon": 1.0
