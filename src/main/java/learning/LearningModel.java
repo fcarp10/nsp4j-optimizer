@@ -114,7 +114,7 @@ public class LearningModel {
          double reward = computeReward(cost, objValTarget);
          timeStep++;
          localEnvironment[localEnvironment.length - 1] = timeStep;
-         if (cost <= objValTarget * (double) pm.getAux("threshold")) {
+         if (cost >= objValTarget * (double) pm.getAux("threshold")) {
             deepQ.observeReward(inputIndArray, null, reward, nextActionMask);
             break;
          } else {
@@ -138,9 +138,9 @@ public class LearningModel {
          actionMask[pastAction] = 0;
       // calculate the admissible paths for all services
       Map<Integer, List<Path>> servicesAdmissiblePaths = getServicesAdmissiblePaths(environment);
-      // check which servers could be activated based on the admissible paths
+      // check which servers can be used based on the admissible paths
       for (int x = 0; x < pm.getServers().size(); x++)
-         for (int s = 0; s < pm.getServices().size(); s++)
+         for (int s = 0; s < pm.getServices().size(); s++) {
             for (int v = 0; v < pm.getServiceLength(); v++) {
                outerloop:
                if (environment[x * pm.getServiceLength() + v] == 0)
@@ -152,6 +152,35 @@ public class LearningModel {
                            break outerloop;
                         }
             }
+         }
+      // find the maximum demand for the function with highest load
+      double maxDemandLoad = 0;
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServiceLength(); v++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+               double demandLoad = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                       * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+               if (demandLoad > maxDemandLoad)
+                  maxDemandLoad = demandLoad;
+            }
+      // check which servers can be used based on server capacity
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         double totalTraffic = 0;
+         for (int s = 0; s < pm.getServices().size(); s++) {
+            int traffic = 0;
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+               traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
+            for (int v = 0; v < pm.getServiceLength(); v++) {
+               if (environment[x * pm.getServiceLength() + v] == 1)
+                  totalTraffic += (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load") * traffic;
+            }
+         }
+         if (totalTraffic + maxDemandLoad >= pm.getServers().get(x).getCapacity())
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServiceLength(); v++)
+                  actionMask[x * pm.getServiceLength() + v] = 0;
+
+      }
       return actionMask;
    }
 
@@ -181,7 +210,6 @@ public class LearningModel {
       calculateLinkUtilization(environment);
       if (isReasoning) {
          computePaths();
-         calculateReroutingTraffic();
          computeServiceDelay();
       }
    }
@@ -204,11 +232,14 @@ public class LearningModel {
                for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size(); n++) {
                   Node node = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n);
                   for (int x = 0; x < pm.getServers().size(); x++)
-                     if (pm.getServers().get(x).getParent().equals(node))
-                        if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
+                     if (pm.getServers().get(x).getParent().equals(node)) {
+                        /// BUG HERE
+                        int pointer = x * pm.getServices().get(s).getFunctions().size() + s * pm.getServices().get(s).getFunctions().size() + v;
+                        if (environment[pointer] == 1) {
                            activatedInPath = true;
                            break outerLoop;
                         }
+                     }
                }
                if (!activatedInPath) {
                   allFunctionsExist = false;
@@ -278,12 +309,12 @@ public class LearningModel {
          }
          totalCost += cost;
       }
-      return totalCost / pm.getServers().size();
+      return Auxiliary.roundDouble(totalCost / pm.getServers().size(), 4);
    }
 
    private double computeReward(double cost, double objValTarget) {
       double reward;
-      if (cost == objValTarget)
+      if (cost >= objValTarget)
          reward = 100;
       else reward = -1;
       return reward;
@@ -307,10 +338,6 @@ public class LearningModel {
 
    private void computeServiceDelay() {
       dS = new double[pm.getServices().size()];
-      // TODO
-   }
-
-   private void calculateReroutingTraffic() {
       // TODO
    }
 

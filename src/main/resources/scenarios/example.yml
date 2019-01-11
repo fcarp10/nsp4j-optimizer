@@ -4,7 +4,7 @@ aux: {
   "offset_results": 0,
   "scaling_x": 1.0,
   "scaling_y": 1.0,
-  "rl_training_iterations": 50,
+  "rl_training_iterations": 250,
   "rl_learning_steps": 30,
   "rl_num_hidden_layers": 150,
   "threshold": 1.0,
@@ -13,7 +13,7 @@ aux: {
 # service definitions
 serviceChains:
   - id: 0
-    chain: [0, 0]
+    chain: [0, 0, 0]
     attributes: {
       "minPaths": 3,
       "maxPaths": 3,
@@ -61,12 +61,12 @@ trafficFlows:
     dst: "n9"
     minDem: 1
     maxDem: 1
-    minBw: 500
-    maxBw: 500
-#- serviceId: 1
-#  src: "n1"
-#  dst: "n8"
-#  minDem: 3
-#  maxDem: 3
-#  minBw: 300
-#  maxBw: 300
+    minBw: 300
+    maxBw: 300
+  - serviceId: 0
+    src: "n1"
+    dst: "n8"
+    minDem: 1
+    maxDem: 1
+    minBw: 300
+    maxBw: 300

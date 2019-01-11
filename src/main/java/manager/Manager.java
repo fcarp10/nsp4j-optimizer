@@ -167,7 +167,7 @@ public class Manager {
       String resultsFileName = pm.getScenario() + "_" + scenario.getModel();
       LearningModel learningModel = new LearningModel(pm);
       printLog(log, INFO, "running RL model");
-      learningModel.run(initialModel, mgrRepModel.get(GRB.DoubleAttr.ObjVal));
+      learningModel.run(initialModel, Auxiliary.roundDouble(mgrRepModel.get(GRB.DoubleAttr.ObjVal), 4));
       Results results = generateResultsForRL(learningModel, scenario);
       resultsManager.exportJsonFile(resultsFileName, results);
       resultsManager.exportTextFile(resultsFileName, results);
