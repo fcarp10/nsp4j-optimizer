@@ -233,8 +233,8 @@ public class LearningModel {
                   Node node = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n);
                   for (int x = 0; x < pm.getServers().size(); x++)
                      if (pm.getServers().get(x).getParent().equals(node)) {
-                        /// BUG HERE
-                        int pointer = x * pm.getServices().get(s).getFunctions().size() + s * pm.getServices().get(s).getFunctions().size() + v;
+                        int pointer = pm.getServices().size() * pm.getServices().get(s).getFunctions().size()
+                                * x + s * pm.getServices().get(s).getFunctions().size() + v;
                         if (environment[pointer] == 1) {
                            activatedInPath = true;
                            break outerLoop;
