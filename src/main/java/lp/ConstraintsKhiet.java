@@ -443,12 +443,16 @@ public class ConstraintsKhiet {
                 for (int x = 0; x < pm.getServers().size(); x++) {
                     GRBLinExpr expr = new GRBLinExpr();
                     GRBLinExpr expr2 = new GRBLinExpr();
+                    GRBLinExpr expr3 = new GRBLinExpr();
+                    int maxInst = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
                     expr.addTerm(1.0, vars.pXSV[x][s][v]);
                     expr2.addTerm(1.0, vars.nXSV[x][s][v]);
-                    String strExpr = Integer.toString(expr);
-                    int maxInst = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
+                    expr3.addTerm(maxInst, vars.pXSV[x][s][v]);
+                    //String strExpr = Integer.toString(expr);
+                    //model.getGrbModel().addConstr(Integer.parseInt(strExpr, 2), GRB.LESS_EQUAL, expr2, "constraintDVC2");
+                    //model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, Integer.parseInt(strExpr, 2) * maxInst, "constraintDVC");
                     model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC2");
-                    model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, Integer.parseInt(strExpr, 2) * maxInst, "constraintDVC");
+                    model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr3, "constraintDVC");
                 }
     }
 
