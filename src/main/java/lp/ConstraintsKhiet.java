@@ -91,7 +91,8 @@ public class ConstraintsKhiet {
                         GRBLinExpr variableOverheadExpr = new GRBLinExpr();
                         if (initialModel != null)
                             if (initialModel.getVarByName(Auxiliary.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
-                                variableOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead"), vars.nXSV[x][s][v]);
+                                variableOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead") / pm.getServers().get(x).getCapacity()
+                                        , vars.nXSV[x][s][v]);
                                 serverUtilizationExpr.add(variableOverheadExpr);
                             }
                     } else {

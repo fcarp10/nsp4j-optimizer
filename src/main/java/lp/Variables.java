@@ -81,7 +81,7 @@ public class Variables {
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  nXSV[x][s][v] = model.addVar(0.0, 1.0, 0.0, GRB.INTEGER
+                  nXSV[x][s][v] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER
                           , Auxiliary.nXSV + "[" + x + "][" + s + "][" + v + "]");
          gSVXY = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm.getServers().size()];
          for (int s = 0; s < pm.getServices().size(); s++)
