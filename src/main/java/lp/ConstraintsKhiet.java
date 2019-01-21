@@ -20,7 +20,10 @@ public class ConstraintsKhiet {
         this.model = optimizationModel;
         this.vars = optimizationModel.getVariables();
         linkUtilization();
-        serverUtilization();
+        if (scenario.getConstraints().get("DVC1"))
+            serverUtilization(true, initialModel);
+        else
+            serverUtilization(false, null);
         serviceDelay(initialModel);
         if (scenario.getConstraints().get("VAI3")) countNumberOfUsedServers();
         if (scenario.getConstraints().get("RPC1")) onePathPerDemand();
@@ -38,6 +41,7 @@ public class ConstraintsKhiet {
         if (scenario.getConstraints().get("VSC2")) constraintVSC2();
         if (scenario.getConstraints().get("VSC3")) constraintVSC3();
         if (scenario.getConstraints().get("DIC1")) constraintDIC1();
+        if (scenario.getConstraints().get("DVC1")) constraintDVC1();
         if (scenario.getConstraints().get("DVC2")) constraintDVC2();
         if (scenario.getConstraints().get("RPC3")) noParallelPaths();
         if (scenario.getConstraints().get("IPC1"))
@@ -72,24 +76,35 @@ public class ConstraintsKhiet {
         }
     }
 
-    private void serverUtilization() throws GRBException {
+    private void serverUtilization(boolean isOverheadVariable, GRBModel initialModel) throws GRBException {
         for (int x = 0; x < pm.getServers().size(); x++) {
-            GRBLinExpr expr = new GRBLinExpr();
+            GRBLinExpr serverUtilizationExpr = new GRBLinExpr();
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-                        expr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                        serverUtilizationExpr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
                                         * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load"))
                                         / pm.getServers().get(x).getCapacity()
                                 , vars.pXSVD[x][s][v][d]);
                     }
-                    expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
-                                    * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances")
-                                    / pm.getServers().get(x).getCapacity()
-                            , vars.pXSV[x][s][v]);
+                    if (isOverheadVariable) {
+                        GRBLinExpr variableOverheadExpr = new GRBLinExpr();
+                        if (initialModel != null)
+                            if (initialModel.getVarByName(Auxiliary.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
+                                variableOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead"), vars.nXSV[x][s][v]);
+                                serverUtilizationExpr.add(variableOverheadExpr);
+                            }
+                    } else {
+                        GRBLinExpr fixOverheadExpr = new GRBLinExpr();
+                        fixOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
+                                        * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances")
+                                        / pm.getServers().get(x).getCapacity()
+                                , vars.pXSV[x][s][v]);
+                        serverUtilizationExpr.add(fixOverheadExpr);
+                    }
                 }
-            model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uX[x], "serverUtilization");
-            linearCostFunctions(expr, vars.kX[x]);
+            model.getGrbModel().addConstr(serverUtilizationExpr, GRB.EQUAL, vars.uX[x], "serverUtilization");
+            linearCostFunctions(serverUtilizationExpr, vars.kX[x]);
         }
     }
 
@@ -433,6 +448,26 @@ public class ConstraintsKhiet {
                             int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
                             int maxInt = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
                             model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxLoad * maxInt, "constraintDIC1");
+                        }
+                }
+    }
+
+    private void constraintDVC1() throws GRBException {
+        for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                    List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+                    for (int i = 0; i < sharedNF.size(); i++)
+                        if (sharedNF.get(i) == 0) {
+                            double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                            GRBLinExpr expr = new GRBLinExpr();
+                            GRBLinExpr expr2 = new GRBLinExpr();
+                            int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+                                expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                            }
+                            expr2.addTerm(maxLoad, vars.nXSV[x][s][v]);
+                            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2 , "constraintDVC1");
                         }
                 }
     }

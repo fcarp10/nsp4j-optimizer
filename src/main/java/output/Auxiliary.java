@@ -19,6 +19,7 @@ public class Auxiliary {
    public static final String NUM_OF_SERVERS_OBJ = "num_of_servers";
    public static final String COSTS_OBJ = "costs";
    public static final String UTILIZATION_OBJ = "utilization";
+   public static final String NUM_DEDICATED_FUNCTIONS_OBJ = "num_dedicated_functions";
    public static final String INITIAL_PLACEMENT_MODEL = "initial_placement";
    public static final String MIGRATION_MODEL = "migration";
    public static final String REPLICATION_MODEL = "replication";
