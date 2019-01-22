@@ -108,9 +108,9 @@ public class LearningModel {
          int[] actionMask = generateActionMask(localEnvironment, action);
          action = deepQ.getAction(inputIndArray, actionMask, epsilon);
          modifyEnvironment(localEnvironment, action);
+         int[] nextActionMask = generateActionMask(localEnvironment, action);
          computeEnvironment(isReasoning, localEnvironment);
          double cost = computeCost();
-         int[] nextActionMask = generateActionMask(localEnvironment, action);
          double reward = computeReward(cost, objValTarget);
          timeStep++;
          localEnvironment[localEnvironment.length - 1] = timeStep;
