@@ -221,6 +221,7 @@ function generateScenario() {
     var DIC1 = $("#constraintDIC1").is(":checked");
     var DVC1 = $("#constraintDVC1").is(":checked");
     var DVC2 = $("#constraintDVC2").is(":checked");
+    var DVC3 = $("#constraintDVC3").is(":checked");
 
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
@@ -247,6 +248,7 @@ function generateScenario() {
             DIC1: DIC1,
             DVC1: DVC1,
             DVC2: DVC2,
+            DVC3: DVC3,
             IPC1: IPC1,
             synchronizationTraffic: synchronizationTraffic
         }

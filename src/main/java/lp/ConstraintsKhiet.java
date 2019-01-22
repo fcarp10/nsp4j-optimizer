@@ -43,6 +43,7 @@ public class ConstraintsKhiet {
         if (scenario.getConstraints().get("DIC1")) constraintDIC1();
         if (scenario.getConstraints().get("DVC1")) constraintDVC1();
         if (scenario.getConstraints().get("DVC2")) constraintDVC2();
+        if (scenario.getConstraints().get("DVC3")) constraintDVC3();
         if (scenario.getConstraints().get("RPC3")) noParallelPaths();
         if (scenario.getConstraints().get("IPC1"))
             initialPlacementAsConstraints(initialModel);
@@ -468,7 +469,7 @@ public class ConstraintsKhiet {
                                 expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
                             }
                             expr2.addTerm(maxLoad, vars.nXSV[x][s][v]);
-                            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2 , "constraintDVC1");
+                            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC1");
                         }
                 }
     }
@@ -489,6 +490,27 @@ public class ConstraintsKhiet {
                     //model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, Integer.parseInt(strExpr, 2) * maxInst, "constraintDVC");
                     model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC2");
                     model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr3, "constraintDVC");
+                }
+    }
+
+    private void constraintDVC3() throws GRBException {
+        for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                    List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+                    for (int i = 0; i < sharedNF.size(); i++)
+                        if (sharedNF.get(i) == 0) {
+                            GRBLinExpr expr = new GRBLinExpr();
+                            GRBLinExpr expr2 = new GRBLinExpr();
+                            double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                            int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                                expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                            expr2.addTerm(maxLoad, vars.nXSV[x][s][v]);
+                            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC3");
+                            expr.addConstant(maxLoad);
+                            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "constraintDVC3");
+                        }
                 }
     }
 
