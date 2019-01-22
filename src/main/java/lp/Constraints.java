@@ -3,10 +3,11 @@ package lp;
 import gui.elements.Scenario;
 import gurobi.*;
 import manager.Parameters;
-import manager.elements.Service;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import output.Auxiliary;
+
+import java.util.List;
 
 public class Constraints {
 
@@ -14,28 +15,38 @@ public class Constraints {
    private Variables vars;
    private Parameters pm;
 
-   public Constraints(Parameters pm, OptimizationModel model, Scenario scenario, GRBModel initialModel) {
-      try {
-         this.pm = pm;
-         this.model = model;
-         this.vars = model.getVariables();
-         linkUtilization();
-         serverUtilization();
-         serviceDelay(initialModel);
-         if (scenario.getConstraints().get("countNumberOfUsedServers")) countNumberOfUsedServers();
-         if (scenario.getConstraints().get("onePathPerDemand")) onePathPerDemand();
-         if (scenario.getConstraints().get("activatePathForService")) activatePathForService();
-         if (scenario.getConstraints().get("pathsConstrainedByFunctions")) pathsConstrainedByFunctions();
-         if (scenario.getConstraints().get("functionPlacement")) functionPlacement();
-         if (scenario.getConstraints().get("oneFunctionPerDemand")) oneFunctionPerDemand();
-         if (scenario.getConstraints().get("mappingFunctionsWithDemands")) mappingFunctionsWithDemands();
-         if (scenario.getConstraints().get("functionSequenceOrder")) functionSequenceOrder();
-         if (scenario.getConstraints().get("noParallelPaths")) noParallelPaths();
-         if (scenario.getConstraints().get("initialPlacementAsConstraints"))
-            initialPlacementAsConstraints(initialModel);
-         if (scenario.getConstraints().get("synchronizationTraffic")) synchronizationTraffic();
-      } catch (Exception e) {
-      }
+   public Constraints(Parameters pm, OptimizationModel optimizationModel, Scenario scenario, GRBModel initialModel) throws GRBException {
+      this.pm = pm;
+      this.model = optimizationModel;
+      this.vars = optimizationModel.getVariables();
+      linkUtilization();
+      if (scenario.getConstraints().get("DVC1"))
+         serverUtilization(true, initialModel);
+      else
+         serverUtilization(false, null);
+      if (scenario.getConstraints().get("VAI3")) countNumberOfUsedServers();
+      if (scenario.getConstraints().get("RPC1")) onePathPerDemand();
+      if (scenario.getConstraints().get("RPI1")) activatePathForService();
+      if (scenario.getConstraints().get("VRC2")) pathsConstrainedByFunctions();
+      if (scenario.getConstraints().get("VAC1")) functionPlacement();
+      if (scenario.getConstraints().get("VAC2")) oneFunctionPerDemand();
+      if (scenario.getConstraints().get("VAI1")) mappingFunctionsWithDemands();
+      if (scenario.getConstraints().get("VAC3")) functionSequenceOrder();
+      if (scenario.getConstraints().get("VRC1")) pathsConstrainedByFunctionsVRC1();
+      if (scenario.getConstraints().get("RPC2")) numberOfActivePathsBoundByService();
+      if (scenario.getConstraints().get("VRC3")) constraintVRC3();
+      if (scenario.getConstraints().get("VAI2")) constraintVAI2();
+      if (scenario.getConstraints().get("VSC1")) constraintVSC1();
+      if (scenario.getConstraints().get("VSC2")) constraintVSC2();
+      if (scenario.getConstraints().get("VSC3")) constraintVSC3();
+      if (scenario.getConstraints().get("DIC1")) constraintDIC1();
+      if (scenario.getConstraints().get("DVC1")) constraintDVC1();
+      if (scenario.getConstraints().get("DVC2")) constraintDVC2();
+      if (scenario.getConstraints().get("DVC3")) constraintDVC3();
+      if (scenario.getConstraints().get("RPC3")) noParallelPaths();
+      if (scenario.getConstraints().get("IPC1"))
+         initialPlacementAsConstraints(initialModel);
+      if (scenario.getConstraints().get("PDC1")) serviceDelay(initialModel);
    }
 
    private void linkUtilization() throws GRBException {
@@ -54,33 +65,47 @@ public class Constraints {
                for (int p = 0; p < pm.getPaths().size(); p++) {
                   if (!pm.getPaths().get(p).contains(pm.getLinks().get(l)))
                      continue;
-                  double traf = 0;
+                  double traffic = 0;
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                     traf += pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                     traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
                              * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
-                  expr.addTerm(traf / (int) pm.getLinks().get(l).getAttribute("capacity"), vars.sSVP[s][v][p]);
+                  expr.addTerm(traffic / (int) pm.getLinks().get(l).getAttribute("capacity"), vars.sSVP[s][v][p]);
                }
          model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uL[l], "linkUtilization");
          linearCostFunctions(expr, vars.kL[l]);
       }
    }
 
-   private void serverUtilization() throws GRBException {
+   private void serverUtilization(boolean isOverheadVariable, GRBModel initialModel) throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++) {
-         GRBLinExpr expr = new GRBLinExpr();
+         GRBLinExpr serverUtilizationExpr = new GRBLinExpr();
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-                  expr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                          * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load"))
-                          / pm.getServers().get(x).getCapacity(), vars.pXSVD[x][s][v][d]);
+                  serverUtilizationExpr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                                  * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load"))
+                                  / pm.getServers().get(x).getCapacity()
+                          , vars.pXSVD[x][s][v][d]);
                }
-               expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
-                               * (int) pm.getAux("overhead") / pm.getServers().get(x).getCapacity()
-                       , vars.pXSV[x][s][v]);
+               if (isOverheadVariable) {
+                  GRBLinExpr variableOverheadExpr = new GRBLinExpr();
+                  if (initialModel != null)
+                     if (initialModel.getVarByName(Auxiliary.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
+                        variableOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead") / pm.getServers().get(x).getCapacity()
+                                , vars.nXSV[x][s][v]);
+                        serverUtilizationExpr.add(variableOverheadExpr);
+                     }
+               } else {
+                  GRBLinExpr fixOverheadExpr = new GRBLinExpr();
+                  fixOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
+                                  * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances")
+                                  / pm.getServers().get(x).getCapacity()
+                          , vars.pXSV[x][s][v]);
+                  serverUtilizationExpr.add(fixOverheadExpr);
+               }
             }
-         model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uX[x], "serverUtilization");
-         linearCostFunctions(expr, vars.kX[x]);
+         model.getGrbModel().addConstr(serverUtilizationExpr, GRB.EQUAL, vars.uX[x], "serverUtilization");
+         linearCostFunctions(serverUtilizationExpr, vars.kX[x]);
       }
    }
 
@@ -157,7 +182,7 @@ public class Constraints {
       }
    }
 
-   private void countNumberOfUsedServers() throws GRBException {
+   private void countNumberOfUsedServers() throws GRBException {            //VAI 3
       for (int x = 0; x < pm.getServers().size(); x++) {
          GRBLinExpr expr = new GRBLinExpr();
          GRBLinExpr expr2 = new GRBLinExpr();
@@ -171,7 +196,7 @@ public class Constraints {
       }
    }
 
-   private void onePathPerDemand() throws GRBException {
+   private void onePathPerDemand() throws GRBException {            //RPC 1
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
             GRBLinExpr expr = new GRBLinExpr();
@@ -181,22 +206,36 @@ public class Constraints {
          }
    }
 
-   private void activatePathForService() throws GRBException {
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               model.getGrbModel().addConstr(vars.rSPD[s][p][d], GRB.LESS_EQUAL, vars.rSP[s][p], "activatePathForService");
-
+   private void activatePathForService() throws GRBException {            //RPI 1
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
             GRBLinExpr expr = new GRBLinExpr();
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+            GRBLinExpr expr2 = new GRBLinExpr();
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                expr.addTerm(1.0, vars.rSPD[s][p][d]);
+               expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() / 10, vars.rSPD[s][p][d]);
+            }
             model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.rSP[s][p], "activatePathForService");
+            model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.rSP[s][p], "activatePathForService");
          }
    }
 
-   private void pathsConstrainedByFunctions() throws GRBException {
+    /*private void activatePathForService() throws GRBException {
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
+                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                    model.getGrbModel().addConstr(variables.rSPD[s][p][d], GRB.LESS_EQUAL, variables.rSP[s][p], "activatePathForService");
+
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
+                GRBLinExpr expr = new GRBLinExpr();
+                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                    expr.addTerm(1.0, variables.rSPD[s][p][d]);
+                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.rSP[s][p], "activatePathForService");
+            }
+    }*/
+
+   private void pathsConstrainedByFunctions() throws GRBException {            //VRC 2
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
             GRBLinExpr expr = new GRBLinExpr();
@@ -212,24 +251,21 @@ public class Constraints {
          }
    }
 
-   private void functionPlacement() throws GRBException {
-      for (int s = 0; s < pm.getServices().size(); s++) {
-         Service se = pm.getServices().get(s);
-         for (int p = 0; p < se.getTrafficFlow().getPaths().size(); p++)
-            for (int d = 0; d < se.getTrafficFlow().getDemands().size(); d++)
-               for (int v = 0; v < se.getFunctions().size(); v++) {
+   private void functionPlacement() throws GRBException {              //VAC 1
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                   GRBLinExpr expr = new GRBLinExpr();
-                  for (int n = 0; n < se.getTrafficFlow().getPaths().get(p).getNodePath().size(); n++)
+                  for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size(); n++)
                      for (int x = 0; x < pm.getServers().size(); x++)
-                        if (pm.getServers().get(x).getParent().equals(
-                                pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n)))
+                        if (pm.getServers().get(x).getParent().equals(pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n)))
                            expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
                   model.getGrbModel().addConstr(vars.rSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
                }
-      }
    }
 
-   private void oneFunctionPerDemand() throws GRBException {
+   private void oneFunctionPerDemand() throws GRBException {            //VAC 2
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
@@ -240,36 +276,53 @@ public class Constraints {
             }
    }
 
-   private void mappingFunctionsWithDemands() throws GRBException {
-
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-            for (int x = 0; x < pm.getServers().size(); x++)
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  model.getGrbModel().addConstr(vars.pXSVD[x][s][v][d], GRB.LESS_EQUAL, vars.pXSV[x][s][v], "mappingFunctionsWithDemands");
+   private void mappingFunctionsWithDemands() throws GRBException {            //VAI 1
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++) {
                GRBLinExpr expr = new GRBLinExpr();
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+               GRBLinExpr expr2 = new GRBLinExpr();
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                   expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
+                  expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() / 10, vars.pXSVD[x][s][v][d]);
+               }
                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.pXSV[x][s][v], "mappingFunctionsWithDemands");
+               model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXSV[x][s][v], "mappingfunctionsWithDemands");
             }
+
+
    }
 
-   private void functionSequenceOrder() throws GRBException {
-      for (int s = 0; s < pm.getServices().size(); s++) {
-         Service se = pm.getServices().get(s);
-         for (int d = 0; d < se.getTrafficFlow().getDemands().size(); d++) {
-            for (int p = 0; p < se.getTrafficFlow().getPaths().size(); p++)
-               for (int v = 1; v < se.getFunctions().size(); v++) {
-                  for (int n = 0; n < se.getTrafficFlow().getPaths().get(p).getNodePath().size(); n++) {
+    /*private void mappingFunctionsWithDemands() throws GRBException {
+
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                for (int x = 0; x < pm.getServers().size(); x++)
+                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                        model.getGrbModel().addConstr(variables.pXSVD[x][s][v][d], GRB.LESS_EQUAL, variables.pXSV[x][s][v], "mappingFunctionsWithDemands");
+
+        for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                for (int x = 0; x < pm.getServers().size(); x++) {
+                    GRBLinExpr expr = new GRBLinExpr();
+                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
+                        expr.addTerm(1.0, variables.pXSVD[x][s][v][d]);
+                    model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, variables.pXSV[x][s][v], "mappingFunctionsWithDemands");
+                }
+    }*/
+
+   private void functionSequenceOrder() throws GRBException {            //VAC 3
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int v = 1; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                  for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size(); n++) {
                      GRBLinExpr expr = new GRBLinExpr();
                      GRBLinExpr expr2 = new GRBLinExpr();
-                     Node nodeN = se.getTrafficFlow().getPaths().get(p).getNodePath().get(n);
+                     Node nodeN = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n);
                      for (int m = 0; m <= n; m++) {
-                        Node nodeM = se.getTrafficFlow().getPaths().get(p).getNodePath().get(m);
+                        Node nodeM = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(m);
                         for (int x = 0; x < pm.getServers().size(); x++)
                            if (pm.getServers().get(x).getParent().equals(nodeM))
                               expr.addTerm(1.0, vars.pXSVD[x][s][v - 1][d]);
@@ -284,10 +337,209 @@ public class Constraints {
                   }
                }
          }
+   }
+
+   //additional constraints
+   private void pathsConstrainedByFunctionsVRC1() throws GRBException {            //VRC 1
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int x = 0; x < pm.getServers().size(); x++)
+               expr.addTerm(1.0, vars.pXSV[x][s][v]);
+            if ((boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable")) {
+               GRBLinExpr expr2 = new GRBLinExpr();
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                  expr2.addTerm(1.0, vars.rSP[s][p]);
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "pathsConstrainedByFunctions");
+            } else
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, "pathsConstrainedByFunctions");
+         }
+   }
+
+   private void numberOfActivePathsBoundByService() throws GRBException {            //RPC 2
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         int rmin = (int) pm.getServices().get(s).getAttribute("minPaths");
+         int rmax = (int) pm.getServices().get(s).getAttribute("maxPaths");
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+            expr.addTerm(1.0, vars.rSP[s][p]);
+         }
+         model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, rmax, "numberOfActivePathsBoundByService");
+         model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, rmin, "numberOfActivePathsBoundByService");
       }
    }
 
-   private void noParallelPaths() throws GRBException {
+   private void constraintVRC3() throws GRBException {             //VRC 3
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int x = 0; x < pm.getServers().size(); x++)
+               expr.addTerm(1.0, vars.pXSV[x][s][v]);
+            boolean replicable = (boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable");
+            if (replicable) {
+               int minRep = (int) pm.getServices().get(s).getAttribute("minReplica") + 1;
+               int maxRep = (int) pm.getServices().get(s).getAttribute("maxReplica") + 1;
+               model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, minRep, "constraintVRC3");
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxRep, "constraintVRC3");
+            } else {
+               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1, "constraintVRC3");
+            }
+         }
+      }
+   }
+
+   private void constraintVAI2() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int x = 0; x < pm.getServers().size(); x++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            GRBLinExpr expr2 = new GRBLinExpr();
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               expr.addTerm(1.0, vars.pXSV[x][s][v]);
+               expr2.addTerm(1.0 / pm.getServices().get(s).getFunctions().size(), vars.pXSV[x][s][v]);
+            }
+            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.pXS[x][s], "constraintVAI2");
+            model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXS[x][s], "constraintVAI2");
+         }
+   }
+
+   private void constraintVSC1() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int x = 0; x < pm.getServers().size(); x++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               expr.addTerm(1.0, vars.pXSV[x][s][v]);
+            int maxVNF = (int) pm.getServices().get(s).getAttribute("maxVNFserver");
+            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxVNF, "constraintVSC1");
+         }
+   }
+
+   private void constraintVSC2() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            expr.addTerm(1.0, vars.pXS[x][s]);
+         int maxSFC = pm.getServers().get(x).getParent().getAttribute("MaxSFC");
+         model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxSFC, "constraintVSC2");
+      }
+   }
+
+   private void constraintVSC3() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+            for (int x = 0; x < pm.getServers().size(); x++) {
+               GRBLinExpr expr = new GRBLinExpr();
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
+               int maxSubflow = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxsubflows");
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxSubflow, "constraintVSC3");
+            }
+   }
+
+   private void constraintDIC1() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+               for (int i = 0; i < sharedNF.size(); i++)
+                  if (sharedNF.get(i) == 0) {
+                     double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                     GRBLinExpr expr = new GRBLinExpr();
+                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                        expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                     int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                     int maxInt = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
+                     model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxLoad * maxInt, "constraintDIC1");
+                  }
+            }
+   }
+
+   private void constraintDVC1() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+               for (int i = 0; i < sharedNF.size(); i++)
+                  if (sharedNF.get(i) == 0) {
+                     double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                     GRBLinExpr expr = new GRBLinExpr();
+                     GRBLinExpr expr2 = new GRBLinExpr();
+                     int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+                        expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                     }
+                     expr2.addTerm(maxLoad, vars.nXSV[x][s][v]);
+                     model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC1");
+                  }
+            }
+   }
+
+   private void constraintDVC2() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+            for (int x = 0; x < pm.getServers().size(); x++) {
+               GRBLinExpr expr = new GRBLinExpr();
+               GRBLinExpr expr2 = new GRBLinExpr();
+               GRBLinExpr expr3 = new GRBLinExpr();
+               int maxInst = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
+               expr.addTerm(1.0, vars.pXSV[x][s][v]);
+               expr2.addTerm(1.0, vars.nXSV[x][s][v]);
+               expr3.addTerm(maxInst, vars.pXSV[x][s][v]);
+               //String strExpr = Integer.toString(expr);
+               //model.getGrbModel().addConstr(Integer.parseInt(strExpr, 2), GRB.LESS_EQUAL, expr2, "constraintDVC2");
+               //model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, Integer.parseInt(strExpr, 2) * maxInst, "constraintDVC");
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC2");
+               model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr3, "constraintDVC");
+            }
+   }
+
+   private void constraintDVC3() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+               for (int i = 0; i < sharedNF.size(); i++)
+                  if (sharedNF.get(i) == 0) {
+                     GRBLinExpr expr = new GRBLinExpr();
+                     GRBLinExpr expr2 = new GRBLinExpr();
+                     double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                     int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                        expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                     expr2.addTerm(maxLoad, vars.nXSV[x][s][v]);
+                     model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC3");
+                     expr.addConstant(maxLoad);
+                     model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "constraintDVC3");
+                  }
+            }
+   }
+
+   //check parameters used
+   private void test() {
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            int minPaths = (int) pm.getServices().get(s).getAttribute("minPaths");
+            boolean replicable = (boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable");
+            double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+            int overhead = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead");
+            List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+            for (int i = 0; i < sharedNF.size(); i++) {
+               System.out.println(sharedNF.get(i));
+            }
+            System.out.println(load);
+            System.out.println(replicable);
+            System.out.println(minPaths);
+            System.out.println(overhead);
+         }
+      }
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         int maxSFC = (int) pm.getServers().get(x).getParent().getAttribute("MaxSFC");
+         System.out.println(maxSFC);
+      }
+
+   }
+
+   //Use Case Constraints
+   private void noParallelPaths() throws GRBException {            //RPC 3
       for (int s = 0; s < pm.getServices().size(); s++) {
          GRBLinExpr expr = new GRBLinExpr();
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
@@ -296,7 +548,7 @@ public class Constraints {
       }
    }
 
-   private void initialPlacementAsConstraints(GRBModel initialModel) throws GRBException {
+   private void initialPlacementAsConstraints(GRBModel initialModel) throws GRBException {            //IPC 1
       if (initialModel != null) {
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
@@ -306,28 +558,15 @@ public class Constraints {
       }
    }
 
-   private void synchronizationTraffic() throws GRBException {
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-            for (int x = 0; x < pm.getServers().size(); x++)
-               for (int y = 0; y < pm.getServers().size(); y++) {
-                  if (x == y) continue;
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.pXSV[x][s][v], "synchronizationTraffic");
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.pXSV[y][s][v], "synchronizationTraffic");
-                  GRBLinExpr expr = new GRBLinExpr();
-                  expr.addTerm(1.0, vars.pXSV[x][s][v]);
-                  expr.addTerm(1.0, vars.pXSV[y][s][v]);
-                  expr.addConstant(-1.0);
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, "synchronizationTraffic");
-                  expr = new GRBLinExpr();
-                  for (int p = 0; p < pm.getPaths().size(); p++) {
-                     Path pa = pm.getPaths().get(p);
-                     if (pa.getNodePath().get(0).equals(pm.getServers().get(x).getParent())
-                             & pa.getNodePath().get(pa.getNodePath().size() - 1)
-                             .equals(pm.getServers().get(y).getParent()))
-                        expr.addTerm(1.0, vars.sSVP[s][v][p]);
-                  }
-                  model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.gSVXY[s][v][x][y], "synchronizationTraffic");
-               }
+   private void constraintReplications() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            expr.addTerm(1.0, vars.rSP[s][p]);
+         int minPaths = (int) pm.getServices().get(s).getAttribute("minPaths");
+         int maxPaths = (int) pm.getServices().get(s).getAttribute("maxPaths");
+         model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, minPaths, "");
+         model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxPaths, "");
+      }
    }
 }

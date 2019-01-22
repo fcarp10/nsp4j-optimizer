@@ -170,7 +170,6 @@ function check(elem) {
     document.getElementById("functionSequenceOrder").checked = true;
     document.getElementById("noParallelPaths").checked = true;
     document.getElementById("initialPlacementAsConstraints").checked = true;
-    document.getElementById("synchronizationTraffic").checked = true;
 
     var model = document.getElementById("model").value;
     if(model === "initial_placement"){
@@ -210,7 +209,7 @@ function generateScenario() {
     var VAC3 = $("#functionSequenceOrder").is(":checked");
     var RPC3 = $("#noParallelPaths").is(":checked");
     var IPC1 = $("#initialPlacementAsConstraints").is(":checked");
-    var synchronizationTraffic = $("#synchronizationTraffic").is(":checked");
+    var PDC1 = $("#PDC1").is(":checked");
     var VRC1 = $("#pathsConstrainedByFunctionsVRC1").is(":checked");
     var RPC2 = $("#numberOfActivePathsBoundByService").is(":checked");
     var VRC3 = $("#constraintVRC3").is(":checked");
@@ -250,7 +249,7 @@ function generateScenario() {
             DVC2: DVC2,
             DVC3: DVC3,
             IPC1: IPC1,
-            synchronizationTraffic: synchronizationTraffic
+            PDC1: PDC1
         }
     });
 
