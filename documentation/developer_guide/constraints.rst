@@ -874,14 +874,252 @@ Constrain VSC3
 
 
 
+
+Constrain DIC1
+^^^^^^^^^^^^^^
+
+.. math::
+    :nowrap:
+
+            \begin{multline} \label{VNFproc-dedicated}   \qquad
+        \forall x \in \mathbb{X}, \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s},  \forall (v,s)|  F_M^{v,s} =0:   \\
+            L_T^{F_{NF}(v,s)}   \sum_{k=1 }^{|\Lambda_s|}    \lambda^s_k  \cdot f_{x,k}^{v,s}   \  \leq   \hat{ \Theta}^{F_{NF}(v,s)}_x  \cdot C^{F_{NF}(v,s)}_{P}  \text{  , }
+        \end{multline}
+
+
+
+.. code-block:: java
+
+     private void constraintDIC1() throws GRBException {
+        for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                    List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+                    for (int i = 0; i < sharedNF.size(); i++)
+                        if (sharedNF.get(i) == 0) {
+                            double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                            GRBLinExpr expr = new GRBLinExpr();
+                            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                                expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                            int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                            int maxInt = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
+                            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxLoad * maxInt, "constraintDIC1");
+                        }
+                }
+    }
+
+
+
+
+Constrain PDC1
+^^^^^^^^^^^^^^
+
+.. code-block:: java
+
+    private void serviceDelay(GRBModel initialModel) throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+            Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
+            GRBLinExpr linkDelayExpr = new GRBLinExpr();
+            double pathDelay = 0.0;
+            for (int l = 0; l < path.getEdgePath().size(); l++)
+               pathDelay += (double) path.getEdgePath().get(l).getAttribute("delay");
+            linkDelayExpr.addTerm(pathDelay, vars.rSP[s][p]);
+            GRBLinExpr procDelayExpr = new GRBLinExpr();
+            for (int n = 0; n < path.getNodePath().size(); n++)
+               for (int x = 0; x < pm.getServers().size(); x++) {
+                  if (!pm.getServers().get(x).getParent().equals(path.getNodePath().get(n))) continue;
+                  for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+                        double load = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                                * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
+                                / pm.getServers().get(x).getCapacity();
+                        procDelayExpr.addTerm(load * pm.getServers().get(x).getProcessDelay(), vars.dSPX[s][p][x]);
+                     }
+               }
+            for (int x = 0; x < pm.getServers().size(); x++) {
+               GRBLinExpr expr = new GRBLinExpr();
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  expr.addTerm(1.0, vars.pXSV[x][s][v]);
+               model.getGrbModel().addConstr(vars.dSPX[s][p][x], GRB.LESS_EQUAL, expr, "Delay");
+               model.getGrbModel().addConstr(vars.dSPX[s][p][x], GRB.LESS_EQUAL, vars.rSP[s][p], "Delay");
+               GRBLinExpr varProcDelayExpr = new GRBLinExpr();
+               varProcDelayExpr.addTerm(1.0, vars.rSP[s][p]);
+               GRBLinExpr expr2 = new GRBLinExpr();
+               expr2.multAdd(1.0 / pm.getServices().get(s).getFunctions().size(), expr);
+               varProcDelayExpr.add(expr2);
+               varProcDelayExpr.addConstant(-1.0);
+               model.getGrbModel().addConstr(vars.dSPX[s][p][x], GRB.GREATER_EQUAL, varProcDelayExpr, "Delay");
+            }
+            GRBLinExpr migrationDelayExpr = new GRBLinExpr();
+            if (initialModel != null) {
+               for (int n = 0; n < path.getNodePath().size(); n++)
+                  for (int x = 0; x < pm.getServers().size(); x++) {
+                     if (!pm.getServers().get(x).getParent().equals(path.getNodePath().get(n))) continue;
+                     for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+                           double load = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                                   * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load")
+                                   / pm.getServers().get(x).getCapacity();
+                           double initialFunctionPlacement = 0;
+                           if (initialModel.getVarByName(Auxiliary.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
+                              initialFunctionPlacement = 1;
+                           double delay = load * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("delay");
+                           migrationDelayExpr.addTerm(delay, vars.dSPX[s][p][x]);
+                           migrationDelayExpr.addTerm(-delay * initialFunctionPlacement, vars.dSPX[s][p][x]);
+                        }
+                     }
+                  }
+            }
+            GRBLinExpr serviceDelayExpr = new GRBLinExpr();
+            serviceDelayExpr.add(linkDelayExpr);
+            serviceDelayExpr.add(procDelayExpr);
+            serviceDelayExpr.add(migrationDelayExpr);
+            model.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, vars.dSP[s][p], "serviceDelay");
+         }
+      }
+    }
+
+
+
+
+
+
+
+Variable number of VNF instances
+--------------------------------
+
+
+Constrain DVC1
+^^^^^^^^^^^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+            \forall x \in \mathbb{X}, \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}: cp_{x}^{v,s}  =   L_T^{F_{NF}(v,s)}  \sum_{k}   \lambda^s_k  \cdot f_{x,k}^{v,s}  \leq   \hat{ \eta}^{v,s}_x  \cdot C^{F_{NF}(v,s)}_{P}
+        \end{equation}
+
+
+.. code-block:: java
+
+
+     private void constraintDVC1() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+               for (int i = 0; i < sharedNF.size(); i++)
+                  if (sharedNF.get(i) == 0) {
+                     double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                     GRBLinExpr expr = new GRBLinExpr();
+                     GRBLinExpr expr2 = new GRBLinExpr();
+                     int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+                        expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                     }
+                     expr2.addTerm(maxLoad, vars.nXSV[x][s][v]);
+                     model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC1");
+                  }
+            }
+    }
+
+
+Constrain DVC2
+^^^^^^^^^^^^^^
+
+.. math::
+    :nowrap:
+
+          \begin{equation}
+            f_{x}^{v,s}  \leq \hat{  \eta}^{v,s}_x  \leq  f_{x}^{v,s} \cdot \hat{  \Theta}^{F_{NF}(v,s)}_x
+        \end{equation}
+
+
+
+.. code-block:: java
+
+
+    private void constraintDVC2() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+            for (int x = 0; x < pm.getServers().size(); x++) {
+               GRBLinExpr expr = new GRBLinExpr();
+               GRBLinExpr expr2 = new GRBLinExpr();
+               GRBLinExpr expr3 = new GRBLinExpr();
+               int maxInst = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
+               expr.addTerm(1.0, vars.pXSV[x][s][v]);
+               expr2.addTerm(1.0, vars.nXSV[x][s][v]);
+               expr3.addTerm(maxInst, vars.pXSV[x][s][v]);
+               //String strExpr = Integer.toString(expr);
+               //model.getGrbModel().addConstr(Integer.parseInt(strExpr, 2), GRB.LESS_EQUAL, expr2, "constraintDVC2");
+               //model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, Integer.parseInt(strExpr, 2) * maxInst, "constraintDVC");
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC2");
+               model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr3, "constraintDVC");
+            }
+   }
+
+
+
+Constrain DVC3
+^^^^^^^^^^^^^^
+
+.. math::
+    :nowrap:
+
+        \begin{equation}
+         \forall x \in \mathbb{X}, \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}: L_T^{F_{NF}(v,s)}  \sum_{k }  \lambda^s_k  \cdot f_{x,k}^{v,s}    \leq   \hat{ \eta}^{v,s}_x  \cdot  C^{F_{NF}(v,s)}_{P} <     C^{F_{NF}(v,s)}_{P}  +   L_T^{F_{NF}(v,s)} \sum_{k}   \lambda^s_k  \cdot f_{x,k}^{v,s}
+     \end{equation}
+
+.. code-block:: java
+
+     private void constraintDVC3() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
+               for (int i = 0; i < sharedNF.size(); i++)
+                  if (sharedNF.get(i) == 0) {
+                     GRBLinExpr expr = new GRBLinExpr();
+                     GRBLinExpr expr2 = new GRBLinExpr();
+                     double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                     int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
+                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                        expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
+                     expr2.addTerm(maxLoad, vars.nXSV[x][s][v]);
+                     model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC3");
+                     expr.addConstant(maxLoad);
+                     model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "constraintDVC3");
+                  }
+            }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Network / server utilization and capacity constraints
 -----------------------------------------------------
 
 
-Constrains LTC1 and OFC1
+Constraint LTC1 and OFC1
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Korregieren von Text und Code**
+
 
 .. math::
     :nowrap:
@@ -921,6 +1159,7 @@ The first constraint we look at in the code is *setLinkUtilizationExpr()*, which
             linearCostFunctions(expr, vars.kL[l]);
         }
     }
+
 
 
 The method itself is performed as followed:
@@ -991,21 +1230,35 @@ send the link utilization to the method *setLinearCostFunctions* for further com
 
 
 
-Constrain DNSC1 and OFC2
-^^^^^^^^^^^^^^^^^^^^^^^^
+Constrain DNSC1 / OFC2 or DVSC1
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Korregieren von Text und Code, Konstante einfügen**
 
 COMMENT: overhead is missing in the code
 
+The number of used instances per NF have only an impact on the processing overhead created by each of them on the server. For a fixed and given number of VNF instances per NF this overhead follows to be given as
+
+.. math::
+    :nowrap:
+
+            \begin{equation}
+	    \forall s \in  S, \forall v \in V_s, \forall x \in X:  \frac{co_{x}^{v,s}}{C_x} =  \frac{  f_{x}^{v,s} \cdot   \hat{  \Theta}^{F_{NF}(v,s)}_x \cdot L_O^{F_{NF}(v,s)}    }{C_x}
+	    \end{equation}
+
+
+For a variable number of VNF instances per NF this overhead follows to be given as
+
+
 .. math::
     :nowrap:
 
         \begin{equation}
-         \forall x \in X: u_{x}  = \sum_{s \in S} \sum_{v \in V_s} \frac{  cp_{x}^{v,s} + co_{x}^{v,s}
-          }{C_x}  \leq 1
+	    \forall s \in  S, \forall v \in V_s, \forall x \in X:  \frac{co_{x}^{v,s}}{C_x} =  \frac{  f_{x}^{v,s} \cdot   \hat{  \eta}^{v,s}_x \cdot L_O^{F_{NF}(v,s)}    }{C_x}
 	    \end{equation}
 
+
+In both cases the VNF related processing load is given by
 
 .. math::
     :nowrap:
@@ -1015,35 +1268,51 @@ COMMENT: overhead is missing in the code
 	    \end{equation}
 
 
+
+Finally, the utilization of the server follows to be constraint by
+
+
 .. math::
     :nowrap:
 
         \begin{equation}
-	    \forall s \in  S, \forall v \in V_s, \forall x \in X:  \frac{co_{x}^{v,s}}{C_x} =  \frac{  f_{x}^{v,s} \cdot L_O^{F_{NF}(v,s)}    }{C_x}
+	      \forall x \in X:  u_x = \sum_{s \in S}  \sum_{v \in V}  \frac{cp_{x}^{v,s} +  co_{x}^{v,s}  }{C_x}   \leq  1
 	    \end{equation}
+
+
+
 
 .. code-block:: java
 
-    private void serverUtilization() throws GRBException {
-        for (int x = 0; x < pm.getServers().size(); x++) {
-            GRBLinExpr expr = new GRBLinExpr();
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-                        expr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                                        * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load"))
-                                        / pm.getServers().get(x).getCapacity()
-                                , vars.pXSVD[x][s][v][d]);
-                    }
-                    expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
-                                    * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances")
-                                    / pm.getServers().get(x).getCapacity()
-                            , vars.pXSV[x][s][v]);
-                }
-            model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uX[x], "serverUtilization");
-            linearCostFunctions(expr, vars.kX[x]);
-        }
-    }
+    private void serverUtilization(boolean isOverheadVariable, GRBModel initialModel) throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         GRBLinExpr serverUtilizationExpr = new GRBLinExpr();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+                  serverUtilizationExpr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                                  * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load"))
+                                  / pm.getServers().get(x).getCapacity()
+                          , vars.pXSVD[x][s][v][d]);
+               }
+               if (isOverheadVariable) {
+                 GRBLinExpr variableOverheadExpr = new GRBLinExpr();
+                  variableOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead") / pm.getServers().get(x).getCapacity()
+                                , vars.nXSV[x][s][v]);
+                        serverUtilizationExpr.add(variableOverheadExpr);
+               } else {
+                  GRBLinExpr fixOverheadExpr = new GRBLinExpr();
+                  fixOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
+                                  * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances")
+                                  / pm.getServers().get(x).getCapacity()
+                          , vars.pXSV[x][s][v]);
+                  serverUtilizationExpr.add(fixOverheadExpr);
+               }
+            }
+         model.getGrbModel().addConstr(serverUtilizationExpr, GRB.EQUAL, vars.uX[x], "serverUtilization");
+         linearCostFunctions(serverUtilizationExpr, vars.kX[x]);
+      }
+     }
 
 
 
@@ -1118,40 +1387,6 @@ sends the server utilization to the method *setLinearCostFunctions* for further 
 	    \end{equation}
 
 
-
-
-Constrain DIC1
-^^^^^^^^^^^^^^
-
-.. math::
-    :nowrap:
-
-        \begin{multline} \label{VNFproc-dedicated}   \qquad
-        \forall x \in \mathbb{X}, \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s},  \forall (v,s)|  F_M^{v,s} =0:   \\
-            L_T^{F_{NF}(v,s)}   \sum_{k=1 }^{|\Lambda_s|}    \lambda^s_k  \cdot f_{x,k}^{v,s}   \  \leq   \hat{ \Theta}^{F_{NF}(v,s)}_x  \cdot C^{F_{NF}(v,s)}_{P}  \text{  , }
-        \end{multline}
-
-
-
-.. code-block:: java
-
-     private void constraintDIC1() throws GRBException {
-        for (int x = 0; x < pm.getServers().size(); x++)
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                    List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
-                    for (int i = 0; i < sharedNF.size(); i++)
-                        if (sharedNF.get(i) == 0) {
-                            double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
-                            GRBLinExpr expr = new GRBLinExpr();
-                            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                                expr.addTerm(load * pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.pXSVD[x][s][v][d]);
-                            int maxLoad = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxLoad");
-                            int maxInt = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances");
-                            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxLoad * maxInt, "constraintDIC1");
-                        }
-                }
-    }
 
 
 
@@ -1420,17 +1655,35 @@ serverCostsExpr(), again taking the weight  :math:`W_2` in consideration, firsts
 Objective OF6
 ^^^^^^^^^^^^^
 
+.. code-block:: java
+
+     public GRBLinExpr numDedicatedFunctionsExpr() {
+        GRBLinExpr expr = new GRBLinExpr();
+        for (int x = 0; x < parameters.getServers().size(); x++)
+            for (int s = 0; s < parameters.getServices().size(); s++)
+                for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
+                    expr.addTerm(1.0, variables.nXSV[x][s][v]);
+        return expr;
+     }
+
+
+
+
+Objective OF7
+^^^^^^^^^^^^^
+
 Delay function
 
 .. code-block:: java
 
-    public GRBLinExpr serviceDelayExpr(double weight) {
+     public GRBLinExpr serviceDelayExpr(double weight) {
         GRBLinExpr expr = new GRBLinExpr();
         for (int s = 0; s < parameters.getServices().size(); s++)
             for (int p = 0; p < parameters.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                 expr.addTerm(weight, variables.dSP[s][p]);
         return expr;
     }
+
 
 
 Objective Function for Optimization Models

@@ -21,9 +21,9 @@ public class Constraints {
       this.vars = optimizationModel.getVariables();
       linkUtilization();
       if (scenario.getConstraints().get("DVC1"))
-         serverUtilization(true, initialModel);
+         serverUtilization(true);
       else
-         serverUtilization(false, null);
+         serverUtilization(false);
       if (scenario.getConstraints().get("VAI3")) countNumberOfUsedServers();
       if (scenario.getConstraints().get("RPC1")) onePathPerDemand();
       if (scenario.getConstraints().get("RPI1")) activatePathForService();
@@ -76,7 +76,7 @@ public class Constraints {
       }
    }
 
-   private void serverUtilization(boolean isOverheadVariable, GRBModel initialModel) throws GRBException {
+   private void serverUtilization(boolean isOverheadVariable) throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++) {
          GRBLinExpr serverUtilizationExpr = new GRBLinExpr();
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -89,12 +89,10 @@ public class Constraints {
                }
                if (isOverheadVariable) {
                   GRBLinExpr variableOverheadExpr = new GRBLinExpr();
-                  if (initialModel != null)
-                     if (initialModel.getVarByName(Auxiliary.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
-                        variableOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead") / pm.getServers().get(x).getCapacity()
+                  variableOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead") / pm.getServers().get(x).getCapacity()
                                 , vars.nXSV[x][s][v]);
                         serverUtilizationExpr.add(variableOverheadExpr);
-                     }
+
                } else {
                   GRBLinExpr fixOverheadExpr = new GRBLinExpr();
                   fixOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
