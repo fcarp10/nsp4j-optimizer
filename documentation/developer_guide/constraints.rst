@@ -123,19 +123,19 @@ The method *activePathForService* is meant to ensure that when a traffic demand 
 
 .. code-block:: java
 
-	private void activatePathForService() throws GRBException {
+	private void activatePathForService() throws GRBException {            //RPI 1
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
                 GRBLinExpr expr = new GRBLinExpr();
                 GRBLinExpr expr2 = new GRBLinExpr();
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                     expr.addTerm(1.0, vars.rSPD[s][p][d]);
-                    expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() /10, vars.rSPD[s][p][d]);
+                    expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() / 10, vars.rSPD[s][p][d]);
                 }
                 model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.rSP[s][p], "activatePathForService");
                 model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.rSP[s][p], "activatePathForService");
             }
-    }
+   }
 
 The first block ensures that for all service chains :math:`s` , an element of a set of service chains :math:`S` , for all paths :math:`p` , element of a set of admissable paths :math:`P_s`  for a service :math:`s` , and for all demands :math:`\lambda^s_k`, element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` , a variable :math:`z_{p}^{k, s}` is less equal to a variable :math:`z_{p}^{s}`.
 
