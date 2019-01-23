@@ -172,22 +172,22 @@ function check(elem) {
 
     // Model specific constraints
     var model = document.getElementById("model").value;
-    if(model === "initial_placement"){
+    if(model === "init"){
         document.getElementById("ipc").checked = true;
         document.getElementById("ipmgrc").checked = true;
         document.getElementById("repc").checked = false;
     }
-    if(model === "migration"){
+    if(model === "mgr"){
         document.getElementById("ipc").checked = false;
         document.getElementById("ipmgrc").checked = true;
         document.getElementById("repc").checked = false;
     }
-    if(model === "replication"){
+    if(model === "rep"){
         document.getElementById("ipc").checked = false;
         document.getElementById("ipmgrc").checked = false;
         document.getElementById("repc").checked = true;
     }
-    if(model === "migration_replication"){
+    if(model === "mgrep"){
         document.getElementById("ipc").checked = false;
         document.getElementById("ipmgrc").checked = false;
         document.getElementById("repc").checked = false;

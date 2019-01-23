@@ -96,7 +96,11 @@ public class Auxiliary {
    }
 
    public static boolean[][] convertVariablesToBooleans(GRBVar[][] var) throws GRBException {
-      boolean[][] convertedVar = new boolean[var.length][var[0].length];
+      boolean[][] convertedVar;
+      if (var.length > 0)
+         convertedVar = new boolean[var.length][var[0].length];
+      else
+         convertedVar = new boolean[0][0];
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++) {
             if (var[i][j] == null) continue;
@@ -107,7 +111,11 @@ public class Auxiliary {
    }
 
    public static boolean[][][] convertVariablesToBooleans(GRBVar[][][] var) throws GRBException {
-      boolean[][][] convertedVar = new boolean[var.length][var[0].length][var[0][0].length];
+      boolean[][][] convertedVar;
+      if (var.length > 0)
+         convertedVar = new boolean[var.length][var[0].length][var[0][0].length];
+      else
+         convertedVar = new boolean[0][0][0];
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++)
             for (int k = 0; k < var[i][j].length; k++) {
@@ -119,7 +127,11 @@ public class Auxiliary {
    }
 
    public static boolean[][][][] convertVariablesToBooleans(GRBVar[][][][] var) throws GRBException {
-      boolean[][][][] convertedVar = new boolean[var.length][var[0].length][var[0][0].length][var[0][0][0].length];
+      boolean[][][][] convertedVar;
+      if (var.length > 0)
+         convertedVar = new boolean[var.length][var[0].length][var[0][0].length][var[0][0][0].length];
+      else
+         convertedVar = new boolean[0][0][0][0];
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++)
             for (int k = 0; k < var[i][j].length; k++)

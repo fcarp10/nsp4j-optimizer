@@ -13,7 +13,7 @@ aux: {
 # service definitions
 serviceChains:
   - id: 0
-    chain: [0, 0, 0]
+    chain: [0, 1, 0]
     attributes: {
       "minPaths": 3,
       "maxPaths": 3,
@@ -46,27 +46,12 @@ functions:
       "sync_load": 0.0,
       "process_delay": 0
     }
-  - type: 2
-    attributes: {
-      "replicable": false,
-      "load": 1.0,
-      "overhead": 0,
-      "sync_load": 0.0,
-      "process_delay": 0
-    }
 # traffic flow definitions
 trafficFlows:
   - serviceId: 0
     src: "n1"
     dst: "n9"
-    minDem: 1
-    maxDem: 1
-    minBw: 300
-    maxBw: 300
-  - serviceId: 0
-    src: "n1"
-    dst: "n8"
-    minDem: 1
-    maxDem: 1
-    minBw: 300
-    maxBw: 300
+    minDem: 2
+    maxDem: 2
+    minBw: 500
+    maxBw: 500
