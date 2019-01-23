@@ -17,15 +17,14 @@ Constrain RPC1
 .. code-block:: java
 
 	private void onePathPerDemand() throws GRBException {
-	    for (int s = 0; s < pm.getServices().size(); s++)
-	        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-	            GRBLinExpr expr = new GRBLinExpr();
-
-	            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                expr.addTerm(1.0, variables.rSPD[s][p][d]);
-	            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
-	        }
-    	}
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               expr.addTerm(1.0, vars.rSPD[s][p][d]);
+            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
+         }
+   }
 
 
 This constraint we look at will limit the number of paths used for each traffic demand to 1 and is executed by the method onePathPerDemand. It runs as follows:
