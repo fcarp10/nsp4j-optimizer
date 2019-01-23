@@ -35,11 +35,9 @@ The first two *for loops* ensure that for all service chains :math:`s` , element
 
 .. code-block:: java
 
-                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                expr.addTerm(1.0, variables.rSPD[s][p][d]);
-	            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
-	        }
-    	}
+                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                    expr.addTerm(1.0, vars.rSPD[s][p][d]);
+                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
 
 
 Constrain RPC2
