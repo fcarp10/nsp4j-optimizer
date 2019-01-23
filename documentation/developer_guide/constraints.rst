@@ -92,14 +92,14 @@ The summatory function is then set to be equal one and returned to *noParallelPa
 
 .. code-block:: java
 
-    private void noParallelPaths() throws GRBException {
+    private void noParallelPaths() throws GRBException {            //RPC 3
         for (int s = 0; s < pm.getServices().size(); s++) {
             GRBLinExpr expr = new GRBLinExpr();
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                expr.addTerm(1.0, variables.rSP[s][p]);
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                expr.addTerm(1.0, vars.rSP[s][p]);
             model.getGrbModel().addConstr(expr, GRB.EQUAL, 1, "noParallelPaths");
         }
-    }
+   }
 
 
 
