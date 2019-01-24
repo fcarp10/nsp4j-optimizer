@@ -29,7 +29,7 @@ public class Definitions {
    public static final String pX = "pX";
    public static final String gSVXY = "gSVXY";
    public static final String sSVP = "sSVP";
-   public static final String dS = "dS";
+   public static final String dSP = "dSP";
    public static final String dSPX = "dSPX";
    // parameters
    public static final String LOAD_FUNCTION = "load";

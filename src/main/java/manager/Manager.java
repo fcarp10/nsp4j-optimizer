@@ -179,7 +179,6 @@ public class Manager {
       String[] weights = scenario.getWeights().split("-");
       double weightLinks = Double.valueOf(weights[0]) / pm.getLinks().size();
       double weightServers = Double.valueOf(weights[1]) / pm.getServers().size();
-      double weightServiceDelays = Double.valueOf(weights[2]);
       switch (objectiveFunction) {
          case NUM_OF_SERVERS_OBJ:
             expr.add(model.usedServersExpr());
@@ -187,7 +186,6 @@ public class Manager {
          case COSTS_OBJ:
             expr.add(model.linkCostsExpr(weightLinks));
             expr.add(model.serverCostsExpr(weightServers));
-            expr.add(model.serviceDelayExpr(weightServiceDelays));
             break;
          case UTILIZATION_OBJ:
             expr.add(model.linkUtilizationExpr(weightLinks));
@@ -210,7 +208,7 @@ public class Manager {
       results.setVariable(pX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pX));
       results.setVariable(gSVXY, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().gSVXY));
       results.setVariable(sSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().sSVP));
-      results.setVariable(dS, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dS));
+      results.setVariable(dSP, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSP));
       results.setVariable(dSPX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().dSPX));
       results.initializeResults(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSV), true);
       return results;
@@ -224,7 +222,7 @@ public class Manager {
       results.setVariable(pXSVD, learningModel.getpXSVD());
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
-      results.setVariable(dS, learningModel.getdS());
+      results.setVariable(dSP, learningModel.getdS());
       results.initializeResults(learningModel.getObjVal(), learningModel.getpXSV(), false);
       return results;
    }

@@ -117,7 +117,9 @@ public class Constraints {
             serviceDelayExpr.add(processingDelayExpr(s, p));
             if (initialModel != null)
                serviceDelayExpr.add(migrationDelayExpr(s, p, initialModel));
-            model.getGrbModel().addConstr(vars.dS[s], GRB.GREATER_EQUAL, serviceDelayExpr, "");
+            model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL
+                    , (int) pm.getServices().get(s).getAttribute("max_delay"), "");
+            model.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, vars.dSP[s][p], "");
             constraintVariableForServiceDelay(s, p);
          }
       }

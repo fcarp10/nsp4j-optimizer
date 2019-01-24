@@ -75,13 +75,6 @@ public class OptimizationModel {
       return expr;
    }
 
-   public GRBLinExpr serviceDelayExpr(double weight) {
-      GRBLinExpr expr = new GRBLinExpr();
-      for (int s = 0; s < parameters.getServices().size(); s++)
-         expr.addTerm(weight / (int) parameters.getServices().get(s).getAttribute("max_delay"), variables.dS[s]);
-      return expr;
-   }
-
    public double run() throws GRBException {
       grbModel.optimize();
       if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {

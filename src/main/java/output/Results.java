@@ -150,11 +150,12 @@ public class Results {
    }
 
    List<Double> serviceDelayList() {
-      double[] dSvar = (double[]) rawVariables.get(dS);
+      double[][] dSPvar = (double[][]) rawVariables.get(dSP);
       List<Double> serviceDelayList = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
-         if (dSvar[s] > 0)
-            serviceDelayList.add(Auxiliary.roundDouble(dSvar[s], 2));
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            if (dSPvar[s][p] > 0)
+               serviceDelayList.add(Auxiliary.roundDouble(dSPvar[s][p], 2));
       return serviceDelayList;
    }
 
@@ -263,7 +264,7 @@ public class Results {
       boolean[] pXvar = (boolean[]) rawVariables.get(pX);
       boolean[][][][] gSVXYvar = (boolean[][][][]) rawVariables.get(gSVXY);
       boolean[][][] sSVPvar = (boolean[][][]) rawVariables.get(sSVP);
-      double[] dSvar = (double[]) rawVariables.get(dS);
+      double[][] dSPvar = (double[][]) rawVariables.get(dSP);
       boolean[][][] dSPXvar = (boolean[][][]) rawVariables.get(dSPX);
 
       // prepare pX
@@ -296,13 +297,15 @@ public class Results {
                           + pm.getPaths().get(p).getNodePath());
       stringVariables.put(sSVP, strings);
 
-      // prepare dS
+      // prepare dSP
       strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
-         if (dSvar[s] > 0)
-            strings.add("(" + (s + this.offset) + "): "
-                    + "[" + Auxiliary.roundDouble(dSvar[s], 2) + "]");
-      stringVariables.put(dS, strings);
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            if (dSPvar[s][p] > 0)
+               strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): "
+                       + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                       + "[" + Auxiliary.roundDouble(dSPvar[s][p], 2) + "]");
+      stringVariables.put(dSP, strings);
 
       // prepare dSPX
       strings = new ArrayList<>();

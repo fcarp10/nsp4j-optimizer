@@ -149,4 +149,12 @@ public class Auxiliary {
          convertedVar[i] = var[i].get(GRB.DoubleAttr.X);
       return convertedVar;
    }
+
+   public static double[][] convertVariablesToDoubles(GRBVar[][] var) throws GRBException {
+      double[][] convertedVar = new double[var.length][var[0].length];
+      for (int i = 0; i < var.length; i++)
+         for (int j = 0; j < var[i].length; j++)
+            convertedVar[i][j] = var[i][j].get(GRB.DoubleAttr.X);
+      return convertedVar;
+   }
 }

@@ -51,8 +51,10 @@
 }
 
 .input-number{
- max-width: 33%;
- text-align: center;
+ /*max-width: 40%;*/
+ width: 70px;
+ margin-right: 15px;
+ text-align: left;
 }
 
 /* The check */
