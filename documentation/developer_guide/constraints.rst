@@ -31,7 +31,7 @@ This constraint we look at will limit the number of paths used for each traffic 
 
 The first two *for loops* ensure that for all service chains :math:`s` , element of a set of service chains :math:`S` , and for all traffic demands out of a set of demands :math:`\Lambda_s`, the following operations will be valid.
 
-                The following code forces to 1 the summatory of all the traffic demands :math:`\lambda^s_k` of service *s* using the path *p* in order to ensure that each traffic demand only uses one path.
+The following code forces to 1 the summatory of all the traffic demands :math:`\lambda^s_k` of service *s* using the path *p* in order to ensure that each traffic demand only uses one path.
 
 .. code-block:: java
 
@@ -145,9 +145,9 @@ This correlation can be portrayed in a formula as such
 .. math::
     :nowrap:
 
-        \begin{equation}
-	    \frac{ \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s} } {M} \leq z_{p}^{s}
-	    \end{equation}
+      \begin{equation}
+        z_{p}^{s} \leq \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s}
+        \end{equation}
 
 
 The second expression *expr2* on the other hand is defined as a summatory over all demands :math:`\lambda^s_k`, that are an element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` , for a variable :math:`z_{p}^{k, s}` that is also divided by a big number *M*. In this case this *M* is the total number of demands multiplied by 10.
@@ -158,9 +158,9 @@ Similar to *expr* this relation can be displayed as
 .. math::
     :nowrap:
 
-        \begin{equation}
-	     z_{p}^{s} \leq \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s}
-	    \end{equation}
+      \begin{equation}
+        \frac{ \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s} } {M} \leq z_{p}^{s}
+        \end{equation}
 
 
 To summarize both blocks of commands into one formula, we can simply interpret them as an inequation, with :math:`z_{p}^{s}` acting like the connecting link, resulting on the shown manager formula stated above.
@@ -212,8 +212,8 @@ The results are then returned as *mappingFunctionsWithDemands* and  can be inter
     :nowrap:
 
         \begin{equation}
-	      \frac{ \sum_{k=1 }^{\|\Lambda_s \|}      f_{x,k}^{v,s} }  {\|\Lambda_s \|} \leq f_x^{v,s}
-	    \end{equation}
+          \quad f_x^{v,s} \leq   \sum_{k=1 }^{\|\Lambda_s \|}   f_{x,k}^{v,s}
+          \end{equation}
 
 
 The second expression *expr2* is then defined as a summatory function over all demands :math:`\lambda^s_k` , that are an element of a set of traffic demands :math:`\Lambda_s` for a service :math:`s` , for a variable :math:`f_{x,k}^{v,s}` that is divided by a big number *M*. In this case *M* is defined as the total number of demands multiplied by 10.
@@ -224,8 +224,11 @@ A possible mathematical translation for this block could be
     :nowrap:
 
         \begin{equation}
-        \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}, \forall x \in \mathbb{X} :  \quad f_x^{v,s} \leq   \sum_{k=1 }^{\|\Lambda_s \|}   f_{x,k}^{v,s}
-        \end{equation}
+	      \frac{ \sum_{k=1 }^{\|\Lambda_s \|}
+          f_{x,k}^{v,s} }  {\|\Lambda_s \|} \leq f_x^{v,s}
+	      \end{equation}
+
+
 
 Combining both inequations from the first and the second half of the method will result in the initial shown equation.
 
