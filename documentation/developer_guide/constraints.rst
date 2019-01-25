@@ -137,9 +137,9 @@ The method *activePathForService* is meant to ensure that when a traffic demand 
             }
    }
 
-The first block ensures that for all service chains :math:`s` , an element of a set of service chains :math:`S` , for all paths :math:`p` , element of a set of admissable paths :math:`P_s`  for a service :math:`s` , and for all demands :math:`\lambda^s_k`, element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` , a variable :math:`z_{p}^{k, s}` is less equal to a variable :math:`z_{p}^{s}`.
+The first two loops ensure that for all service chains :math:`s` , an element of a set of service chains :math:`S` and for all paths :math:`p` , element of a set of admissable paths :math:`P_s`  for a service :math:`s` all the following operations are to be executed.
 
-The results are then returned to activePathForService.
+Following up the first expression *expr* is defined to be a summatory of the variable :math:`z_{p}^{k, s}` over all demands :math:`\lambda^s_k`, element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`. *expr* is then set to nbe lesser equal to a variable :math:`z_{p}^{s}` and the results are then returned to *activePathForService*.
 
 This correlation can be portrayed in a formula as such
 
@@ -151,24 +151,12 @@ This correlation can be portrayed in a formula as such
 	    \end{equation}
 
 
-The second block
-
-.. code-block:: java
-
-        !1
-
+The second expression *expr2* on the other hand
 
 starts ensuring that for all services :math:`s` , element of a set of service chains :math:`S` , and for all paths :math:`p` , element of a set of admissible paths :math:`P_s`  for a service :math:`s` , the following operations are valid.
 
                 Then it express a summatory function over all demands :math:`\lambda^s_k` , that are an element of a set of traffic demands :math:`\Lambda_s` for a certain service :math:`s` , for a function :math:`z_{p}^{k, s}`. This summatory function is then defined as greater equal than a variable :math:`z_{p}^{s}`, also defined as mentioned earlier, and then likewise returned to *activePathForService*.
 
-.. code-block:: java
-
-	!!
-
-
-
-This block can also be expressed as
 
 
 .. math::
