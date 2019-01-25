@@ -108,7 +108,6 @@ The summatory function is then set to be equal one and returned to *noParallelPa
 Constrain RPI1
 ^^^^^^^^^^^^^^
 
-**Korregieren von Text und Code**
 
 .. math::
     :nowrap:
@@ -130,7 +129,7 @@ The method *activePathForService* is meant to ensure that when a traffic demand 
                 GRBLinExpr expr2 = new GRBLinExpr();
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                     expr.addTerm(1.0, vars.rSPD[s][p][d]);
-                    expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() / 10, vars.rSPD[s][p][d]);
+                    expr2.addTerm(1.0 / (pm.getServices().get(s).getTrafficFlow().getDemands().size() * 10), vars.rSPD[s][p][d]);
                 }
                 model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.rSP[s][p], "activatePathForService");
                 model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.rSP[s][p], "activatePathForService");
@@ -139,7 +138,7 @@ The method *activePathForService* is meant to ensure that when a traffic demand 
 
 The first two loops ensure that for all service chains :math:`s` , an element of a set of service chains :math:`S` and for all paths :math:`p` , element of a set of admissable paths :math:`P_s`  for a service :math:`s` all the following operations are to be executed.
 
-Following up the first expression *expr* is defined to be a summatory of the variable :math:`z_{p}^{k, s}` over all demands :math:`\lambda^s_k`, element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`. *expr* is then set to nbe lesser equal to a variable :math:`z_{p}^{s}` and the results are then returned to *activePathForService*.
+Following up the first expression *expr* is defined to be a summatory of the variable :math:`z_{p}^{k, s}` over all demands :math:`\lambda^s_k`, element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` . *expr* is then set to be lesser equal to a variable :math:`z_{p}^{s}` and the results are then returned to *activePathForService*.
 
 This correlation can be portrayed in a formula as such
 
@@ -151,13 +150,10 @@ This correlation can be portrayed in a formula as such
 	    \end{equation}
 
 
-The second expression *expr2* on the other hand
+The second expression *expr2* on the other hand is defined as a summatory over all demands :math:`\lambda^s_k`, that are an element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` , for a variable :math:`z_{p}^{k, s}` that is also divided by a big number *M*. In this case this *M* is the total number of demands multiplied by 10.
+*expr2* is then declared as greater equal to a variable :math:`z_{p}^{s}` and the results are then returned to *activePathForService*.
 
-starts ensuring that for all services :math:`s` , element of a set of service chains :math:`S` , and for all paths :math:`p` , element of a set of admissible paths :math:`P_s`  for a service :math:`s` , the following operations are valid.
-
-                Then it express a summatory function over all demands :math:`\lambda^s_k` , that are an element of a set of traffic demands :math:`\Lambda_s` for a certain service :math:`s` , for a function :math:`z_{p}^{k, s}`. This summatory function is then defined as greater equal than a variable :math:`z_{p}^{s}`, also defined as mentioned earlier, and then likewise returned to *activePathForService*.
-
-
+Similar to *expr* this relation can be displayed as
 
 .. math::
     :nowrap:
@@ -174,7 +170,6 @@ To summarize both blocks of commands into one formula, we can simply interpret t
 Constrain VAI1
 ^^^^^^^^^^^^^^
 
-**Korregieren von Text und Code**
 
 .. math::
     :nowrap:
@@ -187,7 +182,7 @@ Constrain VAI1
 
 .. code-block:: java
 
-	private void mappingFunctionsWithDemands() throws GRBException {
+    private void mappingFunctionsWithDemands() throws GRBException {            //VAI 1
 
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -196,27 +191,22 @@ Constrain VAI1
                     GRBLinExpr expr2 = new GRBLinExpr();
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                         expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
-                        expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() / 10, vars.pXSVD[x][s][v][d]);
+                        expr2.addTerm(1.0 / (pm.getServices().get(s).getTrafficFlow().getDemands().size() * 10), vars.pXSVD[x][s][v][d]);
                     }
                     model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.pXSV[x][s][v], "mappingFunctionsWithDemands");
-                    model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXSV[x][s][v], "mappingfunctionsWithDemands");
+                    model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXSV[x][s][v], "mappingFunctionsWithDemands");
                 }
-    }
 
+
+   }
 
 
 This next constraint expressed by the method mappingFunctionsWithDemands, ensures that a function :math:`v` is only placed in a server :math:`x` if said server is used by at least one traffic demand. This method is executed as follows:
 
-                The first block of code
+Similar to the other constraints the first three loops ensure that for all servers :math:`s` , an element of a set of service chains :math:`S` , for all functions :math:`v` , an element of an ordered set of functions :math:`V_s`  for a service :math:`s` and for all servers :math:`x` , that are element of a set of servers :math:`X` the following inequations are valid.
 
-.. code-block:: java
-
-        ??
-
-
-ensures that for all servers :math:`s` , an element of a set of service chains :math:`S` , for all functions :math:`v` , an element of an ordered set of functions :math:`V_s`  for a service :math:`s` , for all servers :math:`x` , that are element of a set of servers :math:`X` , and for all demands :math:`\lambda^s_k` , that are manager.elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` , the following inequation is valid. Said inequation is defined as a *variable0* :math:`f_{x,k}^{v,s}` , which is set to be lesser equal to :math:`f_x^{v,s}` , and returned to *mappingFunctionsWithDemands*.
-
-This first half can be interpreted as follows:
+The first expression *expr* is then set to be a summatory of a variable :math:`f_{x,k}^{v,s}` over all demands :math:`\lambda^s_k` , that are manager.elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` and is then defined to be greater equal than a variable :math:`f_x^{v,s}`.
+The results are then returned as *mappingFunctionsWithDemands* and  can be interpreted as follows:
 
 .. math::
     :nowrap:
@@ -226,21 +216,7 @@ This first half can be interpreted as follows:
 	    \end{equation}
 
 
-The second block
-
-.. code-block:: java
-
-        ??
-
-first makes sure that for all servers :math:`s` , that are element of a set of service chains :math:`S` , for all functions :math:`v` , that are element of an ordered set of functions :math:`V_s`  for a service :math:`s` , and for all server :math:`x` , that are element of a set of servers :math:`X` , the following operations are realized.
-
-Following up
-
-.. code-block:: java
-
-                    ??
-
-Express a summatory function over all demands :math:`\lambda^s_k` , that are an element of a set of traffic demands :math:`\Lambda_s` for a service :math:`s` , for a variable :math:`f_{x,k}^{v,s}` that is then set to be greater equal than a variable :math:`f_x^{v,s}`  and the results are also sent back to *mappingFunctionsWithDemands*.
+The second expression *expr2* is then defined as a summatory function over all demands :math:`\lambda^s_k` , that are an element of a set of traffic demands :math:`\Lambda_s` for a service :math:`s` , for a variable :math:`f_{x,k}^{v,s}` that is divided by a big number *M*. In this case *M* is defined as the total number of demands multiplied by 10.
 
 A possible mathematical translation for this block could be
 

@@ -283,10 +283,10 @@ public class Constraints {
                GRBLinExpr expr2 = new GRBLinExpr();
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                   expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
-                  expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() / 10, vars.pXSVD[x][s][v][d]);
+                  expr2.addTerm(1.0 / (pm.getServices().get(s).getTrafficFlow().getDemands().size() * 10), vars.pXSVD[x][s][v][d]);
                }
                model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.pXSV[x][s][v], "mappingFunctionsWithDemands");
-               model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXSV[x][s][v], "mappingfunctionsWithDemands");
+               model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXSV[x][s][v], "mappingFunctionsWithDemands");
             }
 
 
