@@ -2,14 +2,14 @@ DGS004
 test 0 0
 
 an n1 x:100 y:150 num_servers:1 server_capacity:1000
-an n2 x:150 y:100
-an n3 x:200 y:100
-an n4 x:175 y:200
-an n5 x:250 y:150
-an n6 x:300 y:150
-an n7 x:350 y:100
-an n8 x:350 y:200
-an n9 x:400 y:150
+an n2 x:150 y:100 num_servers:1 server_capacity:1000
+an n3 x:200 y:100 num_servers:1 server_capacity:1
+an n4 x:175 y:200 num_servers:1 server_capacity:1
+an n5 x:250 y:150 num_servers:1 server_capacity:2000
+an n6 x:300 y:150 num_servers:1 server_capacity:1
+an n7 x:350 y:100 num_servers:1 server_capacity:1
+an n8 x:350 y:200 num_servers:1 server_capacity:1
+an n9 x:400 y:150 num_servers:1 server_capacity:1
 
 ae n1n2 n1 > n2 capacity:1000
 ae n1n4 n1 > n4

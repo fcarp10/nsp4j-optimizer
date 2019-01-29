@@ -177,19 +177,24 @@ public class Manager {
    private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, Scenario scenario, String objectiveFunction) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       String[] weights = scenario.getWeights().split("-");
-      double weightLinks = Double.valueOf(weights[0]) / pm.getLinks().size();
-      double weightServers = Double.valueOf(weights[1]) / pm.getServers().size();
+      double linksWeight = Double.valueOf(weights[0]) / pm.getLinks().size();
+      double serversWeight = Double.valueOf(weights[1]) / pm.getServers().size();
       switch (objectiveFunction) {
          case NUM_OF_SERVERS_OBJ:
             expr.add(model.usedServersExpr());
             break;
          case COSTS_OBJ:
-            expr.add(model.linkCostsExpr(weightLinks));
-            expr.add(model.serverCostsExpr(weightServers));
+            expr.add(model.linkCostsExpr(linksWeight));
+            expr.add(model.serverCostsExpr(serversWeight));
             break;
          case UTILIZATION_OBJ:
-            expr.add(model.linkUtilizationExpr(weightLinks));
-            expr.add(model.serverUtilizationExpr(weightServers));
+            expr.add(model.linkUtilizationExpr(linksWeight));
+            expr.add(model.serverUtilizationExpr(serversWeight));
+            break;
+         case MAX_UTILIZATION_OBJ:
+            expr.add(model.linkUtilizationExpr(linksWeight));
+            expr.add(model.serverUtilizationExpr(serversWeight));
+            expr.add(model.maxUtilizationExpr(Double.valueOf(weights[2])));
             break;
       }
       return expr;
@@ -208,7 +213,7 @@ public class Manager {
       results.setVariable(pX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pX));
       results.setVariable(gSVXY, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().gSVXY));
       results.setVariable(sSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().sSVP));
-      results.setVariable(dSP, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSP));
+      results.setVariable(dSPD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSPD));
       results.setVariable(dSPX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().dSPX));
       results.initializeResults(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSV), true);
       return results;
@@ -222,7 +227,7 @@ public class Manager {
       results.setVariable(pXSVD, learningModel.getpXSVD());
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
-      results.setVariable(dSP, learningModel.getdS());
+      results.setVariable(dSPD, learningModel.getdS());
       results.initializeResults(learningModel.getObjVal(), learningModel.getpXSV(), false);
       return results;
    }

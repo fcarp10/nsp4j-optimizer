@@ -75,6 +75,12 @@ public class OptimizationModel {
       return expr;
    }
 
+   public GRBLinExpr maxUtilizationExpr(double weight) {
+      GRBLinExpr expr = new GRBLinExpr();
+      expr.addTerm(weight, variables.uMax);
+      return expr;
+   }
+
    public double run() throws GRBException {
       grbModel.optimize();
       if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
