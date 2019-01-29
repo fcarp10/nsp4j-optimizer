@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import output.Auxiliary;
 
 import static output.Auxiliary.*;
+import static output.Definitions.*;
 
 public class OptimizationModel {
 

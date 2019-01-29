@@ -18,7 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static output.Auxiliary.INFO;
+import static output.Definitions.INFO;
 
 public class ResultsManager {
 

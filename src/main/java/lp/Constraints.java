@@ -3,11 +3,14 @@ package lp;
 import gui.elements.Scenario;
 import gurobi.*;
 import manager.Parameters;
+import manager.elements.Service;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import output.Auxiliary;
 
 import java.util.List;
+
+import static output.Definitions.*;
 
 public class Constraints {
 
@@ -24,6 +27,8 @@ public class Constraints {
          serverUtilization(true);
       else
          serverUtilization(false);
+      maxUtilization();
+      serviceDelay(initialModel);
       if (scenario.getConstraints().get("VAI3")) countNumberOfUsedServers();
       if (scenario.getConstraints().get("RPC1")) onePathPerDemand();
       if (scenario.getConstraints().get("RPI1")) activatePathForService();
@@ -113,6 +118,49 @@ public class Constraints {
          expr2.addConstant(Auxiliary.costFunctions.getValues().get(l)[1]);
          model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar, "costFunctions");
       }
+   }
+
+   private void maxUtilization() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         model.getGrbModel().addConstr(vars.uX[x], GRB.LESS_EQUAL, vars.uMax, "");
+      for (int l = 0; l < pm.getLinks().size(); l++)
+         model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, "");
+   }
+
+   private void serviceDelay(GRBModel initialModel) throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+               GRBLinExpr serviceDelayExpr = new GRBLinExpr();
+               serviceDelayExpr.add(linkDelayExpr(s, p));
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  serviceDelayExpr.add(processingDelayExpr(s, p, v, d));
+               model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL
+                       , (int) pm.getServices().get(s).getAttribute("max_delay"), "");
+//               model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL, vars.dSPD[s][p][d], "");
+            }
+   }
+
+   private GRBLinExpr linkDelayExpr(int s, int p) {
+      Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
+      GRBLinExpr linkDelayExpr = new GRBLinExpr();
+      double pathDelay = 0.0;
+      for (int l = 0; l < path.getEdgePath().size(); l++)
+         pathDelay += (double) path.getEdgePath().get(l).getAttribute(LINK_DELAY);
+      linkDelayExpr.addTerm(pathDelay, vars.rSP[s][p]);
+      return linkDelayExpr;
+   }
+
+   private GRBLinExpr processingDelayExpr(int s, int p, int v, int d) {
+      Service service = pm.getServices().get(s);
+      Path path = service.getTrafficFlow().getPaths().get(p);
+      GRBLinExpr processDelayExpr = new GRBLinExpr();
+      for (int n = 0; n < path.getNodePath().size(); n++)
+         for (int x = 0; x < pm.getServers().size(); x++)
+            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
+               processDelayExpr.addTerm((int) service.getFunctions().get(v).getAttribute(PROCESS_DELAY)
+                       , vars.pXSVD[x][s][v][d]);
+      return processDelayExpr;
    }
 
    private void countNumberOfUsedServers() throws GRBException {            //VAI 3
@@ -486,7 +534,7 @@ public class Constraints {
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (initialModel.getVarByName(Auxiliary.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
+                  if (initialModel.getVarByName(pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
                      model.getGrbModel().addConstr(vars.pXSV[x][s][v], GRB.EQUAL, 1, "initialPlacementAsConstraints");
       }
    }

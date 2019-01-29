@@ -15,17 +15,14 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import output.Auxiliary;
 import output.Results;
 import output.ResultsManager;
 import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
 import static output.Auxiliary.*;
+import static output.Definitions.*;
 
 public class Manager {
 
@@ -85,8 +82,8 @@ public class Manager {
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
          printLog(log, INFO, "initializing model");
          switch (sce.getModel()) {
-            case INITIAL_PLACEMENT_MODEL:
-               initialModel = runLP(INITIAL_PLACEMENT_MODEL, sce, sce.getObjectiveFunction(), resultsManager, null);
+            case INITIAL_PLACEMENT:
+               initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjectiveFunction(), resultsManager, null);
                break;
             default:
                runLP(sce.getModel(), sce, sce.getObjectiveFunction(), resultsManager, initialModel);
@@ -130,7 +127,7 @@ public class Manager {
       if (objVal != -1) {
          results = generateResults(model, scenario, initialModel);
          resultsManager.exportJsonFile(pm.getScenario() + "_" + modelName, results);
-         if (modelName.equals(INITIAL_PLACEMENT_MODEL))
+         if (modelName.equals(INITIAL_PLACEMENT))
             resultsManager.exportModel(model.getGrbModel(), scenario.getInputFileName());
          WebClient.updateResultsToWebApp(results);
       }
@@ -178,16 +175,16 @@ public class Manager {
 
    private static Results generateResults(OptimizationModel model, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
-      results.setVariable(Auxiliary.rSP, model.getVariables().rSP);
-      results.setVariable(Auxiliary.rSPD, model.getVariables().rSPD);
-      results.setVariable(Auxiliary.pXSV, model.getVariables().pXSV);
-      results.setVariable(Auxiliary.pXSVD, model.getVariables().pXSVD);
-      results.setVariable(Auxiliary.uL, model.getVariables().uL);
-      results.setVariable(Auxiliary.uX, model.getVariables().uX);
-      results.setVariable(Auxiliary.pX, model.getVariables().pX);
-      results.setVariable(Auxiliary.sSVP, model.getVariables().sSVP);
-      results.setVariable(Auxiliary.dSP, model.getVariables().dSP);
-      results.setVariable(Auxiliary.nXSV, model.getVariables().nXSV);
+      results.setVariable(rSP, model.getVariables().rSP);
+      results.setVariable(rSPD, model.getVariables().rSPD);
+      results.setVariable(pXSV, model.getVariables().pXSV);
+      results.setVariable(pXSVD, model.getVariables().pXSVD);
+      results.setVariable(uL, model.getVariables().uL);
+      results.setVariable(uX, model.getVariables().uX);
+      results.setVariable(pX, model.getVariables().pX);
+      results.setVariable(sSVP, model.getVariables().sSVP);
+      results.setVariable(dSP, model.getVariables().dSP);
+      results.setVariable(nXSV, model.getVariables().nXSV);
       results.prepareVariablesForJsonFile(model.getObjVal(), initialModel);
       return results;
    }
