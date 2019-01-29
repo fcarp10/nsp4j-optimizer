@@ -64,6 +64,7 @@ public class ResultsManager {
          model.optimize();
          Auxiliary.printLog(log, INFO, "initial placement loaded");
       } catch (Exception e) {
+         model = null;
          Auxiliary.printLog(log, INFO, "no initial placement found");
       }
       return model;

@@ -20,7 +20,7 @@ public class Constraints {
       this.model = optimizationModel;
       this.vars = optimizationModel.getVariables();
       linkUtilization();
-      if (scenario.getConstraints().get("DVC1"))
+      if (scenario.getConstraints().get("DVC1") || scenario.getConstraints().get("DVC2") || scenario.getConstraints().get("DVC3"))
          serverUtilization(true);
       else
          serverUtilization(false);
@@ -438,8 +438,8 @@ public class Constraints {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
-               for (int i = 0; i < sharedNF.size(); i++)
-                  if (sharedNF.get(i) == 0) {
+ //              for (int i = 0; i < sharedNF.size(); i++)
+                  if (sharedNF.get(v) == 0) {
                      double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
                      GRBLinExpr expr = new GRBLinExpr();
                      for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
@@ -456,8 +456,8 @@ public class Constraints {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
-               for (int i = 0; i < sharedNF.size(); i++)
-                  if (sharedNF.get(i) == 0) {
+  //             for (int i = 0; i < sharedNF.size(); i++)
+                  if (sharedNF.get(v) == 0) {
                      double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
                      GRBLinExpr expr = new GRBLinExpr();
                      GRBLinExpr expr2 = new GRBLinExpr();
