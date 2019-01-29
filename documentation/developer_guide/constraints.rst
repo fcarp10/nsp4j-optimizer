@@ -92,7 +92,7 @@ The summatory function is then set to be equal one and returned to *noParallelPa
 
 .. code-block:: java
 
-    private void noParallelPaths() throws GRBException {            //RPC 3
+    private void noParallelPaths() throws GRBException {
         for (int s = 0; s < pm.getServices().size(); s++) {
             GRBLinExpr expr = new GRBLinExpr();
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
@@ -122,7 +122,7 @@ The method *activePathForService* is meant to ensure that when a traffic demand 
 
 .. code-block:: java
 
-	private void activatePathForService() throws GRBException {            //RPI 1
+	private void activatePathForService() throws GRBException {
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
                 GRBLinExpr expr = new GRBLinExpr();
@@ -182,7 +182,7 @@ Constrain VAI1
 
 .. code-block:: java
 
-    private void mappingFunctionsWithDemands() throws GRBException {            //VAI 1
+    private void mappingFunctionsWithDemands() throws GRBException {
 
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -302,32 +302,36 @@ The for-loop
 
         for (int x = 0; x < pm.getServers().size(); x++) {
 
-makes sure, that for all servers :math:`x` , element of the the set of servers :math:`X` in the network will be regarded in the following operation.
-
-All subsequent loops
+makes sure, that for all servers :math:`x` , element of the the set of servers :math:`X` in the network will be regarded in the following operation and all subsequent loops
 
 .. code-block:: java
 
-            GRBLinExpr expr2 = new GRBLinExpr();
             for (int s = 0; s < pm.getServices().size(); s++)
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
 
-are to be translated as summatories over all service chains :math:`s` , element of the set of service chains :math:`S` and over all functions :math:`v` , element of a ordered set of functions :math:`V_s`  for the service chain :math:`s`, for the following expression
+are to be translated as summatories over all service chains :math:`s` , element of the set of service chains :math:`S` and over all functions :math:`v` , element of a ordered set of functions :math:`V_s`  for the service chain :math:`s`, for the following expressions
 
 .. code-block:: java
 
                     expr.addTerm(1.0 / pm.getTotalNumberOfFunctionsAux(), variables.pXSV[x][s][v]);
 
-which describes a division of :math:`1` by the total number of functions, multiplied with the variable :math:`f_{x}^{v,s}`.
+which describes a division of :math:`1` by the total number of functions, multiplied with the variable :math:`f_{x}^{v,s}`; and
+
+.. code-block:: java
+
+             expr2.addTerm(1.0, variables.pXSV[x][s][v]);
+
+which is simply the summatory over the variable :math:`f_{x}^{v,s}`.
 
 Following up
 
 .. code-block:: java
 
             model.getGrbModel().addConstr(variables.pX[x], GRB.GREATER_EQUAL, expr, "countNumberOfUsedServers");
+            model.getGrbModel().addConstr(variables.pX[x], GRB.LESS_EQUAL, expr2, "countNumberOfUsedServers");
 
-sets a new variable :math:`f_x` as greater equal to the term defined in the previous expression.
-This result will then be returned again as *countNumberOfUsedServers*.
+sets a new variable :math:`f_x` as greater equal to the term defined in the previous expression expr and as lesser equal to expr2.
+The results will then be returned again as *countNumberOfUsedServers*.
 
 
 
@@ -350,20 +354,19 @@ Constrain VAC1
 
 .. code-block:: java
 
-	private void functionPlacement() throws GRBException {
-
-	    for (int s = 0; s < pm.getServices().size(); s++)
-	        for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-	                    GRBLinExpr expr = new GRBLinExpr();
-	                    for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
-	                        for (int x = 0; x < pm.getServers().size(); x++)
-	                            if (pm.getServers().get(x).getNodeParent().equals(pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
-	                                expr.addTerm(1.0, variables.pXSVD[x][s][v][d]);
-	                    model.getGrbModel().addConstr(variables.rSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
-	                }
-	}
+   private void functionPlacement() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                  GRBLinExpr expr = new GRBLinExpr();
+                  for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size(); n++)
+                     for (int x = 0; x < pm.getServers().size(); x++)
+                        if (pm.getServers().get(x).getParent().equals(pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n)))
+                           expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
+                  model.getGrbModel().addConstr(vars.rSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
+               }
+   }
 
 
 
@@ -373,10 +376,10 @@ The function allocation is controlled by this next constrained defined in *funct
 
 .. code-block:: java
 
-        for (int s = 0; s < pm.getServices().size(); s++)
-	        for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++)
-	                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
 
 ensure that for all services :math:`s` , that are an element of a set of service chains :math:`S` , for all paths :math:`p` , an element of a set of  admissible paths :math:`P_s`  for a service :math:`s` , for all demands out of a set of traffic demands :math:`\Lambda_s` , and for all functions :math:`v` , that are an element of a set of ordered functions :math:`V_s` , the following operations are valid and executed.
 
@@ -384,12 +387,12 @@ ensure that for all services :math:`s` , that are an element of a set of service
 
 .. code-block:: java
 
-                        GRBLinExpr expr = new GRBLinExpr();
-	                    for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++)
-	                        for (int x = 0; x < pm.getServers().size(); x++)
-	                            if (pm.getServers().get(x).getNodeParent().equals(pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n)))
-	                                expr.addTerm(1.0, variables.pXSVD[x][s][v][d]);
-	                    model.getGrbModel().addConstr(variables.rSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
+                  GRBLinExpr expr = new GRBLinExpr();
+                  for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size(); n++)
+                     for (int x = 0; x < pm.getServers().size(); x++)
+                        if (pm.getServers().get(x).getParent().equals(pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n)))
+                           expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
+                  model.getGrbModel().addConstr(vars.rSPD[s][p][d], GRB.LESS_EQUAL, expr, "functionPlacement");
 
 then introduces a summatory function over all nodes :math:`n` , that are element of the set of nodes :math:`\Pi_p^s` that are traversed by the path :math:`p` for a service :math:`s` , and over all the servers :math:`x` , that are element of a set of servers :math:`X_{n}` that are also traversed by :math:`p` , for a function :math:`f_{x,k}^{v,s}`, if the current node equals the parent node.
 
@@ -430,7 +433,7 @@ Constrain VAC2
 
 This method oneFunctionPerDemand is ensuring that each traffic demand :math:`\lambda^s_k` has to traverse a specific function :math:`v` in only one server. All of this is realized as followed:
 
-                First of all the block
+First of all the block
 
 .. code-block:: java
 
@@ -441,7 +444,7 @@ This method oneFunctionPerDemand is ensuring that each traffic demand :math:`\la
 
 makes sure that the following operations are executed for all services :math:`s` , an element of a set of service chains :math:`S` , for all functions :math:`v` , element of a set of ordered functions :math:`V_s`  for a service :math:`s` , and for all demands :math:`\lambda^s_k`, that are an element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s`.
 
-                Thereafter
+Thereafter
 
 .. code-block:: java
 
@@ -459,7 +462,6 @@ This function :math:`f_{x,k}^{v,s}`  is then set to be equal 1 and the results a
 Constrain VAC3
 ^^^^^^^^^^^^^^
 
-**Korregieren von Text und Code**
 
 .. math::
     :nowrap:
@@ -472,33 +474,32 @@ Constrain VAC3
 
 .. code-block:: java
 
-	private void functionSequenceOrder() throws GRBException {
+   private void functionSequenceOrder() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int v = 1; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                  for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size(); n++) {
+                     GRBLinExpr expr = new GRBLinExpr();
+                     GRBLinExpr expr2 = new GRBLinExpr();
+                     Node nodeN = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n);
+                     for (int m = 0; m <= n; m++) {
+                        Node nodeM = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(m);
+                        for (int x = 0; x < pm.getServers().size(); x++)
+                           if (pm.getServers().get(x).getParent().equals(nodeM))
+                              expr.addTerm(1.0, vars.pXSVD[x][s][v - 1][d]);
+                     }
+                     for (int x = 0; x < pm.getServers().size(); x++)
+                        if (pm.getServers().get(x).getParent().equals(nodeN))
+                           expr.addTerm(-1.0, vars.pXSVD[x][s][v][d]);
 
-	    for (int s = 0; s < pm.getServices().size(); s++)
-	        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-	            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                for (int v = 1; v < pm.getServices().get(s).getFunctions().size(); v++) {
-	                    for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++) {
-	                        GRBLinExpr expr = new GRBLinExpr();
-	                        GRBLinExpr expr2 = new GRBLinExpr();
-	                        Node nodeN = pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n);
-	                        for (int m = 0; m <= n; m++) {
-	                            Node nodeM = pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(m);
-	                            for (int x = 0; x < pm.getServers().size(); x++)
-	                                if (pm.getServers().get(x).getNodeParent().equals(nodeM))
-	                                    expr.addTerm(1.0, variables.pXSVD[x][s][v - 1][d]);
-	                        }
-	                        for (int x = 0; x < pm.getServers().size(); x++)
-	                            if (pm.getServers().get(x).getNodeParent().equals(nodeN))
-	                                expr.addTerm(-1.0, variables.pXSVD[x][s][v][d]);
-
-	                        expr2.addConstant(-1);
-	                        expr2.addTerm(1.0, variables.rSPD[s][p][d]);
-	                        model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "functionSequenceOrder");
-	                    }
-	                }
-	        }
-	}
+                     expr2.addConstant(-1);
+                     expr2.addTerm(1.0, vars.rSPD[s][p][d]);
+                     model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "functionSequenceOrder");
+                  }
+               }
+         }
+   }
 
 
 Arguably the most complex constraint, the method functionSequenceOrder ensures that a traffic demand :math:`\lambda^s_k` is only to traverse functions in a set order. This constraint is implemented in the code as follows:
@@ -507,35 +508,37 @@ The first few loops
 
 .. code-block:: java
 
-        for (int s = 0; s < pm.getServices().size(); s++)
-	        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-	            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                for (int v = 1; v < pm.getServices().get(s).getFunctions().size(); v++) {
-	                    for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().size(); n++) {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int v = 1; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                  for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size(); n++) {
 
 make sure that all following operations are valid and executed for all services :math:`s` , that are element of a set of service chains :math:`S` , for all demands :math:`\lambda`, that are element of a set of traffic demands :math:`\Lambda_s` , for all paths :math:`p` , that are element of a set of admissible paths :math:`P_s` , for all functions :math:`v` , that are element of an ordered set of functions :math:`V_s` , starting with a function :math:`v_1` , excluding the start function :math:`v_0` ,  and for all nodes :math:`n` , that are element of an ordered set of nodes :math:`\Pi^s_p`  that are traversed by a path :math:`p` for a service :math:`s`.
 
-                Following up
+Following up
 
 .. code-block:: java
 
-                            GRBLinExpr expr = new GRBLinExpr();
-	                        GRBLinExpr expr2 = new GRBLinExpr();
-	                        Node nodeN = pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(n);
+                     GRBLinExpr expr = new GRBLinExpr();
+                     GRBLinExpr expr2 = new GRBLinExpr();
+                     Node nodeN = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n);
 
-define two new expressions and a node named nodeN that is set to be the currently regarded node :math:`n`, traversed by a path :math:`p` for a service :math:`s`.
+define two new expressions and a node named nodeN that is set to be the currently regarded node :math:`n` , traversed by a path :math:`p` for a service :math:`s`.
 
 .. code-block:: java
 
-                                Node nodeM = pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).getNodePath().get(m);
-	                            for (int x = 0; x < pm.getServers().size(); x++)
-	                                if (pm.getServers().get(x).getNodeParent().equals(nodeM))
-	                                    expr.addTerm(1.0, variables.pXSVD[x][s][v - 1][d]);
+                     for (int m = 0; m <= n; m++) {
+                        Node nodeM = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(m);
+                        for (int x = 0; x < pm.getServers().size(); x++)
+                           if (pm.getServers().get(x).getParent().equals(nodeM))
+                              expr.addTerm(1.0, vars.pXSVD[x][s][v - 1][d]);
+                     }
 
 then instigates a summatory function over all nodes :math:`m` , that are part of the set :math:`\Pi^s_p`  and lesser in value than the node :math:`n` , and over all servers :math:`x` , that are element of a set of servers :math:`X_m` , consisting of the servers allocated in node :math:`m` , for a function :math:`f_{x',k}^{(v-1),s}`, if the current node/node parent is equal to the nodeM. nodeM is defined herby as a current node :math:`m`, that is traversed by a path :math:`p` for a service :math:`s`.
 
 
-                    The lines
+The lines
 
 .. code-block:: java
 
@@ -566,8 +569,6 @@ Continuing in the code
 expression *expr2* will be added the constant (-1) and the variable :math:`z_{p}^{k,s}`.
 This expression is then set as greater equal to the previous expression expr and the results will be returned to *functionSequenceOrder*.
 
-Resulting on the first equation.
-
 
 
 
@@ -597,22 +598,21 @@ Constrain VRC2
 
 .. code-block:: java
 
-	private void pathsConstrainedByFunctions() throws GRBException {
-
-	    for (int s = 0; s < pm.getServices().size(); s++)
-	        for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-	            GRBLinExpr expr = new GRBLinExpr();
-	            for (int x = 0; x < pm.getServers().size(); x++)
-	                expr.addTerm(1.0, variables.pXSV[x][s][v]);
-	            if (pm.getServices().get(s).getFunctions().get(v).isReplicable()) {
-	                GRBLinExpr expr2 = new GRBLinExpr();
-	                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                    expr2.addTerm(1.0, variables.rSP[s][p]);
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
-	            } else
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
-	        }
-	}
+   private void pathsConstrainedByFunctions() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int x = 0; x < pm.getServers().size(); x++)
+               expr.addTerm(1.0, vars.pXSV[x][s][v]);
+            if ((boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable")) {
+               GRBLinExpr expr2 = new GRBLinExpr();
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                  expr2.addTerm(1.0, vars.rSP[s][p]);
+               model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
+            } else
+               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
+         }
+   }
 
 
 This next constraint pathConstrainedByFunctions is defined to check the replicability of a function, determined by a parameter :math:`F_R^{v,s}`. It is set to run as follows:
@@ -649,13 +649,13 @@ In the next lines of code this if-loop is initiated
 
 .. code-block:: java
 
-                if (pm.getServices().get(s).getFunctions().get(v).isReplicable()) {
-	                GRBLinExpr expr2 = new GRBLinExpr();
-	                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                    expr2.addTerm(1.0, variables.rSP[s][p]);
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
-	            } else
-	                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
+            if ((boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable")) {
+               GRBLinExpr expr2 = new GRBLinExpr();
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                  expr2.addTerm(1.0, vars.rSP[s][p]);
+               model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pathsConstrainedByFunctions");
+            } else
+               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pathsConstrainedByFunctions");
 
 For all replicable functions :math:`v` of the service :math:`s` a new expression is defined as a summatory function over all paths :math:`p`, that are element of a set of admissible paths :math:`P_s`  for the service :math:`s`, for a variable :math:`z_{p}^s`.
 
@@ -668,7 +668,7 @@ This new expression is then set as equal to the first expression, mentioned abov
 	\forall s \in S, \forall v \in V_s:  \sum_{x \in X} f_x^{v,s} = \sum_{p \in P_s} z_{p}^s
 	\end{equation}
 
-If the loop is false however, meaning that the function is not replicable, the first expression will just be equal to :math:`1` , which would translate to:
+If the loop is false however, meaning if the function is not replicable, the first expression will just be equal to :math:`1` , which would translate to:
 
 .. math::
     :nowrap:
@@ -696,21 +696,21 @@ Constrain VRC1
 
 .. code-block:: java
 
-    private void pathsConstrainedByFunctionsVRC1() throws GRBException {
-        for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                GRBLinExpr expr = new GRBLinExpr();
-                for (int x = 0; x < pm.getServers().size(); x++)
-                    expr.addTerm(1.0, vars.pXSV[x][s][v]);
-                if ((boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable")) {
-                    GRBLinExpr expr2 = new GRBLinExpr();
-                    for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                        expr2.addTerm(1.0, vars.rSP[s][p]);
-                    model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "pathsConstrainedByFunctions");
-                } else
-                    model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, "pathsConstrainedByFunctions");
-            }
-    }
+   private void pathsConstrainedByFunctionsVRC1() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int x = 0; x < pm.getServers().size(); x++)
+               expr.addTerm(1.0, vars.pXSV[x][s][v]);
+            if ((boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute("replicable")) {
+               GRBLinExpr expr2 = new GRBLinExpr();
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                  expr2.addTerm(1.0, vars.rSP[s][p]);
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "pathsConstrainedByFunctions");
+            } else
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, "pathsConstrainedByFunctions");
+         }
+   }
 
 
 
@@ -733,7 +733,7 @@ Constrain VRC3
 
 .. code-block:: java
 
-   private void constraintVRC3() throws GRBException {             //VRC 3
+   private void constraintVRC3() throws GRBException {
         for (int s = 0; s < pm.getServices().size(); s++) {
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                 GRBLinExpr expr = new GRBLinExpr();
@@ -1015,9 +1015,6 @@ Constrain DVC2
                expr.addTerm(1.0, vars.pXSV[x][s][v]);
                expr2.addTerm(1.0, vars.nXSV[x][s][v]);
                expr3.addTerm(maxInst, vars.pXSV[x][s][v]);
-               //String strExpr = Integer.toString(expr);
-               //model.getGrbModel().addConstr(Integer.parseInt(strExpr, 2), GRB.LESS_EQUAL, expr2, "constraintDVC2");
-               //model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, Integer.parseInt(strExpr, 2) * maxInst, "constraintDVC");
                model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, "constraintDVC2");
                model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr3, "constraintDVC");
             }
@@ -1092,37 +1089,37 @@ Constraint LTC1 and OFC1
     \forall e \in  \mathbb{E} :   \quad   \gamma_{e}   = \sum_{s \in  \mathbb{S}}  \sum_{p \in \mathbb{P}_s}   \sum_{k=1 }^{|\Lambda_s|}     \lambda^s_k \cdot  z_{p}^{k,s}  \cdot \delta_{e}(p)   \leq C_{e} \text{ ,}
     \end{equation}
 
-The first constraint we look at in the code is *setLinkUtilizationExpr()*, which meant to check if a link is utilized in consideration of the paths that might traverse the link, the bandwidth of the traffic demand :math:`\lambda^s_k` and the maximum capacity of the link :math:`C_e`.
+The constraint *setLinkUtilizationExpr()* is meant to check if a link is utilized in consideration of the paths that might traverse the link, the bandwidth of the traffic demand :math:`\lambda^s_k` and the maximum capacity of the link :math:`C_e`.
 
 
 .. code-block:: java
 
-    private void linkUtilization() throws GRBException {
-        for (int l = 0; l < pm.getLinks().size(); l++) {
-            GRBLinExpr expr = new GRBLinExpr();
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
-                    if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
-                        continue;
-                    for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                        expr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                                / (int) pm.getLinks().get(l).getAttribute("capacity"), vars.rSPD[s][p][d]);
-                }
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                    for (int p = 0; p < pm.getPaths().size(); p++) {
-                        if (!pm.getPaths().get(p).contains(pm.getLinks().get(l)))
-                            continue;
-                        double traffic = 0;
-                        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                            traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                                    * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
-                        expr.addTerm(traffic / (int) pm.getLinks().get(l).getAttribute("capacity"), vars.sSVP[s][v][p]);
-                    }
-            model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uL[l], "linkUtilization");
-            linearCostFunctions(expr, vars.kL[l]);
-        }
-    }
+   private void linkUtilization() throws GRBException {
+      for (int l = 0; l < pm.getLinks().size(); l++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+               if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
+                  continue;
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  expr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                          / (int) pm.getLinks().get(l).getAttribute("capacity"), vars.rSPD[s][p][d]);
+            }
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               for (int p = 0; p < pm.getPaths().size(); p++) {
+                  if (!pm.getPaths().get(p).contains(pm.getLinks().get(l)))
+                     continue;
+                  double traffic = 0;
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                             * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                  expr.addTerm(traffic / (int) pm.getLinks().get(l).getAttribute("capacity"), vars.sSVP[s][v][p]);
+               }
+         model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uL[l], "linkUtilization");
+         linearCostFunctions(expr, vars.kL[l]);
+      }
+   }
 
 
 
@@ -1136,21 +1133,21 @@ The first loop
 
 makes sure that all links :math:`e` (index variable l), element of the set of links, are to be considered when executing the following operations.
 
-            Starting a new expression with
+Starting a new expression with
 
 .. code-block:: java
 
-            GRBLinExpr expr = new GRBLinExpr();
-            for (int s = 0; s < pm.getServices().size(); s++)
-                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
 
 the loops then express the summatories over all service chains :math:`s` , element of the set of service chains :math:`S` and all paths :math:`p` , element of the set of admissible paths :math:`P_s` for the service chain :math:`s`.
 
-            The subsequent operation
+The subsequent operation
 
 .. code-block:: java
 
-                    if (!pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().get(p).contains(pm.getLinks().get(l)))
+                    if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
                         continue;
 
 makes sure that the operation will only continue if the current service chain s and the currently used path p contain the link :math:`e` we are looking at. If that is not the case the operation will end here. In the mathematical model this is portrayed by the parameter :math:`\delta_e(p)` , that will enter the equation as multiplier by :math:`1` , if the link :math:`e` is used by path p and service chain :math:`s` , or by :math:`0` , if it is not. In case of a multiplication with :math:`0` , the whole equation will equal :math:`0` and the observed link will not be utilized.
@@ -1181,7 +1178,7 @@ The last line of code
 
             setLinearCostFunctions(expr, variables.kL[l]);
 
-send the link utilization to the method *setLinearCostFunctions* for further computing the penalty cost function, which defines the constrain
+sends the link utilization to the method *setLinearCostFunctions* for further computing the penalty cost function, which defines the constrain
 
 .. math::
     :nowrap:
@@ -1197,9 +1194,6 @@ send the link utilization to the method *setLinearCostFunctions* for further com
 Constrain DNSC1 / OFC2 or DVSC1
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Korregieren von Text und Code, Konstante einfügen**
-
-COMMENT: overhead is missing in the code
 
 The number of used instances per NF have only an impact on the processing overhead created by each of them on the server. For a fixed and given number of VNF instances per NF this overhead follows to be given as
 
@@ -1304,41 +1298,63 @@ Following loops
 
 all translate to summatories over all service chains :math:`s` , element of the set of service chains :math:`S` , over all functions :math:`v` , element of the ordered set of functions :math:`V_s` in service chain :math:`s` , and over all traffic demands :math:`\lambda^s_k` , that are element of the set of demands :math:`\Lambda_s`.
 
-            The subsequent commands
+The subsequent commands
 
 .. code-block:: java
 
-                        expr.addTerm((pm.getServices().get(s).getTrafficFlow().getTrafficDemands().get(d)
-	                                    * pm.getServices().get(s).getFunctions().get(v).getLoad())
-	                                    / pm.getServers().get(x).getCapacity()
-	                            , variables.pXSVD[x][s][v][d]);
+                    serverUtilizationExpr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                                  * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load"))
+                                  / pm.getServers().get(x).getCapacity()
+                          , vars.pXSVD[x][s][v][d]);
 
-are to be interpreted as a demand :math:`\lambda^s_k` , determined by the previous loop, will be multiplied with a load ratio :math:`L_T^{F_{NF}(v,s)}` , influenced by the current function :math:`v` .  The resulting product will be divided by the maximum server capacity :math:`C_x` and multiplied with the parameter :math:`f_{x,k}^{v,s}`.
+are to be interpreted as a demand :math:`\lambda^s_k` , determined by the previous loop, multiplied with a load ratio :math:`L_T^{F_{NF}(v,s)}` , influenced by the current function :math:`v` .  The resulting product will be divided by the maximum server capacity :math:`C_x` and multiplied with the parameter :math:`f_{x,k}^{v,s}`.
 
-A possible way to summarize this operation would be 
+A possible way to summarize this operation would be
 
 .. math::
-  :nowrap:
+:nowrap:
 
-    \begin{equation}
+        \begin{equation}
     \forall x \in X: u_{x}  = \sum_{s \in S} \sum_{v \in V_s} \sum_{\lambda \in \Lambda_s} \frac{\lambda \cdot f_{x,\lambda}^{v,s} \cdot L_v}{C_x}
     \end{equation}
 
-With the following lines
+The following if-loop determines alternative commands that are to be executed depending on the need.
 
 .. code-block:: java
 
-            model.getGrbModel().addConstr(expr, GRB.EQUAL, variables.uX[x], "setServerUtilizationExpr");
+               if (isOverheadVariable) {
+                 GRBLinExpr variableOverheadExpr = new GRBLinExpr();
+                  variableOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead") / pm.getServers().get(x).getCapacity()
+                                , vars.nXSV[x][s][v]);
+                        serverUtilizationExpr.add(variableOverheadExpr);
+               } else {
+                  GRBLinExpr fixOverheadExpr = new GRBLinExpr();
+                  fixOverheadExpr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute("overhead")
+                                  * (int) pm.getServices().get(s).getFunctions().get(v).getAttribute("maxInstances")
+                                  / pm.getServers().get(x).getCapacity()
+                          , vars.pXSV[x][s][v]);
+                  serverUtilizationExpr.add(fixOverheadExpr);
+               }
+
+If the boolean *isOverheadVariable* is true the expression *variableOverheadExpr* will be defined as the given overhead divided by the server capacity and multiplied by the variable :math:`n_{x}^{v,s}`, with *variableOverheadExpr* being added to *serverUtilizationExpr*.
+
+If the boolean is false however, the expression *fixOverheadExpr* will be defined as the overhead multiplied with a fixed maximum number of instances that will then be divided by the capacity and multiplied with a variable :math:`f_{x}^{v,s}`. This time *fixOverheadExpr* will be added to *serverUtilizationExpr*.
+
+With the following line
+
+.. code-block:: java
+
+         model.getGrbModel().addConstr(serverUtilizationExpr, GRB.EQUAL, vars.uX[x], "serverUtilization");
 
 
-the previous equation is set equal to the server utilization :math:`u_x`, and is then returning the results to *setServerUtilizationExpr()*, which defines the constrain DNSC1.
+*serverUtilizationExpr*, no matter how it is defined, will be set equal to the server utilization :math:`u_x`, and is then returning the results to *setServerUtilizationExpr()*, which defines the constrain DNSC1.
 
 The last line
 
 
 .. code-block:: java
 
-	        linearCostFunctions(expr, variables.kX[x]);
+         linearCostFunctions(serverUtilizationExpr, vars.kX[x]);
 
 sends the server utilization to the method *setLinearCostFunctions* for further computing the penalty cost function, which defines the constrain
 
@@ -1363,9 +1379,6 @@ Objective functions constraints
 
 Constraints OFC
 ^^^^^^^^^^^^^^^^
-
-**Korregieren von Text und Code, Konstante einfügen**
-
 
 
 .. math::
@@ -1396,7 +1409,7 @@ The method is executed as follows. The loop
 
 ensures that the following operations will be valid for all variables here defined as :math:`l`, :math:`l` being an element of a set of the considered variables :math:`L`.
 
-            The code lines
+The code lines
 
 .. code-block:: java
 
