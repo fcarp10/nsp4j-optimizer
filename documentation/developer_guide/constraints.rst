@@ -17,30 +17,27 @@ Constrain RPC1
 .. code-block:: java
 
 	private void onePathPerDemand() throws GRBException {
-	    for (int s = 0; s < pm.getServices().size(); s++)
-	        for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getTrafficDemands().size(); d++) {
-	            GRBLinExpr expr = new GRBLinExpr();
-
-	            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                expr.addTerm(1.0, variables.rSPD[s][p][d]);
-	            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
-	        }
-    	}
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               expr.addTerm(1.0, vars.rSPD[s][p][d]);
+            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
+         }
+   }
 
 
 This constraint we look at will limit the number of paths used for each traffic demand to 1 and is executed by the method onePathPerDemand. It runs as follows:
 
 The first two *for loops* ensure that for all service chains :math:`s` , element of a set of service chains :math:`S` , and for all traffic demands out of a set of demands :math:`\Lambda_s`, the following operations will be valid.
 
-                The following code forces to 1 the summatory of all the traffic demands :math:`\lambda^s_k` of service *s* using the path *p* in order to ensure that each traffic demand only uses one path.
+The following code forces to 1 the summatory of all the traffic demands :math:`\lambda^s_k` of service *s* using the path *p* in order to ensure that each traffic demand only uses one path.
 
 .. code-block:: java
 
-                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-	                expr.addTerm(1.0, variables.rSPD[s][p][d]);
-	            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
-	        }
-    	}
+                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                    expr.addTerm(1.0, vars.rSPD[s][p][d]);
+                model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "onePathPerDemand");
 
 
 Constrain RPC2
@@ -95,14 +92,14 @@ The summatory function is then set to be equal one and returned to *noParallelPa
 
 .. code-block:: java
 
-    private void noParallelPaths() throws GRBException {
+    private void noParallelPaths() throws GRBException {            //RPC 3
         for (int s = 0; s < pm.getServices().size(); s++) {
             GRBLinExpr expr = new GRBLinExpr();
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getAdmissiblePaths().size(); p++)
-                expr.addTerm(1.0, variables.rSP[s][p]);
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                expr.addTerm(1.0, vars.rSP[s][p]);
             model.getGrbModel().addConstr(expr, GRB.EQUAL, 1, "noParallelPaths");
         }
-    }
+   }
 
 
 
@@ -111,7 +108,6 @@ The summatory function is then set to be equal one and returned to *noParallelPa
 Constrain RPI1
 ^^^^^^^^^^^^^^
 
-**Korregieren von Text und Code**
 
 .. math::
     :nowrap:
@@ -126,60 +122,45 @@ The method *activePathForService* is meant to ensure that when a traffic demand 
 
 .. code-block:: java
 
-	private void activatePathForService() throws GRBException {
+	private void activatePathForService() throws GRBException {            //RPI 1
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
                 GRBLinExpr expr = new GRBLinExpr();
                 GRBLinExpr expr2 = new GRBLinExpr();
                 for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                     expr.addTerm(1.0, vars.rSPD[s][p][d]);
-                    expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() /10, vars.rSPD[s][p][d]);
+                    expr2.addTerm(1.0 / (pm.getServices().get(s).getTrafficFlow().getDemands().size() * 10), vars.rSPD[s][p][d]);
                 }
                 model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.rSP[s][p], "activatePathForService");
                 model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.rSP[s][p], "activatePathForService");
             }
-    }
+   }
 
-The first block ensures that for all service chains :math:`s` , an element of a set of service chains :math:`S` , for all paths :math:`p` , element of a set of admissable paths :math:`P_s`  for a service :math:`s` , and for all demands :math:`\lambda^s_k`, element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` , a variable :math:`z_{p}^{k, s}` is less equal to a variable :math:`z_{p}^{s}`.
+The first two loops ensure that for all service chains :math:`s` , an element of a set of service chains :math:`S` and for all paths :math:`p` , element of a set of admissable paths :math:`P_s`  for a service :math:`s` all the following operations are to be executed.
 
-The results are then returned to activePathForService.
+Following up the first expression *expr* is defined to be a summatory of the variable :math:`z_{p}^{k, s}` over all demands :math:`\lambda^s_k`, element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` . *expr* is then set to be lesser equal to a variable :math:`z_{p}^{s}` and the results are then returned to *activePathForService*.
 
 This correlation can be portrayed in a formula as such
 
 .. math::
     :nowrap:
 
-        \begin{equation}
-	    \frac{ \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s} } {M} \leq z_{p}^{s}
-	    \end{equation}
+      \begin{equation}
+        z_{p}^{s} \leq \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s}
+        \end{equation}
 
 
-The second block
+The second expression *expr2* on the other hand is defined as a summatory over all demands :math:`\lambda^s_k`, that are an element of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` , for a variable :math:`z_{p}^{k, s}` that is also divided by a big number *M*. In this case this *M* is the total number of demands multiplied by 10.
+*expr2* is then declared as greater equal to a variable :math:`z_{p}^{s}` and the results are then returned to *activePathForService*.
 
-.. code-block:: java
-
-        !1
-
-
-starts ensuring that for all services :math:`s` , element of a set of service chains :math:`S` , and for all paths :math:`p` , element of a set of admissible paths :math:`P_s`  for a service :math:`s` , the following operations are valid.
-
-                Then it express a summatory function over all demands :math:`\lambda^s_k` , that are an element of a set of traffic demands :math:`\Lambda_s` for a certain service :math:`s` , for a function :math:`z_{p}^{k, s}`. This summatory function is then defined as greater equal than a variable :math:`z_{p}^{s}`, also defined as mentioned earlier, and then likewise returned to *activePathForService*.
-
-.. code-block:: java
-
-	!!
-
-
-
-This block can also be expressed as
-
+Similar to *expr* this relation can be displayed as
 
 .. math::
     :nowrap:
 
-        \begin{equation}
-	     z_{p}^{s} \leq \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s}
-	    \end{equation}
+      \begin{equation}
+        \frac{ \sum_{k=1 }^{\|\Lambda_s \|}  z_{p}^{k, s} } {M} \leq z_{p}^{s}
+        \end{equation}
 
 
 To summarize both blocks of commands into one formula, we can simply interpret them as an inequation, with :math:`z_{p}^{s}` acting like the connecting link, resulting on the shown manager formula stated above.
@@ -189,7 +170,6 @@ To summarize both blocks of commands into one formula, we can simply interpret t
 Constrain VAI1
 ^^^^^^^^^^^^^^
 
-**Korregieren von Text und Code**
 
 .. math::
     :nowrap:
@@ -202,7 +182,7 @@ Constrain VAI1
 
 .. code-block:: java
 
-	private void mappingFunctionsWithDemands() throws GRBException {
+    private void mappingFunctionsWithDemands() throws GRBException {            //VAI 1
 
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -211,51 +191,32 @@ Constrain VAI1
                     GRBLinExpr expr2 = new GRBLinExpr();
                     for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                         expr.addTerm(1.0, vars.pXSVD[x][s][v][d]);
-                        expr2.addTerm(1.0 / pm.getServices().get(s).getTrafficFlow().getDemands().size() / 10, vars.pXSVD[x][s][v][d]);
+                        expr2.addTerm(1.0 / (pm.getServices().get(s).getTrafficFlow().getDemands().size() * 10), vars.pXSVD[x][s][v][d]);
                     }
                     model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.pXSV[x][s][v], "mappingFunctionsWithDemands");
-                    model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXSV[x][s][v], "mappingfunctionsWithDemands");
+                    model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.pXSV[x][s][v], "mappingFunctionsWithDemands");
                 }
-    }
 
+
+   }
 
 
 This next constraint expressed by the method mappingFunctionsWithDemands, ensures that a function :math:`v` is only placed in a server :math:`x` if said server is used by at least one traffic demand. This method is executed as follows:
 
-                The first block of code
+Similar to the other constraints the first three loops ensure that for all servers :math:`s` , an element of a set of service chains :math:`S` , for all functions :math:`v` , an element of an ordered set of functions :math:`V_s`  for a service :math:`s` and for all servers :math:`x` , that are element of a set of servers :math:`X` the following inequations are valid.
 
-.. code-block:: java
-
-        ??
-
-
-ensures that for all servers :math:`s` , an element of a set of service chains :math:`S` , for all functions :math:`v` , an element of an ordered set of functions :math:`V_s`  for a service :math:`s` , for all servers :math:`x` , that are element of a set of servers :math:`X` , and for all demands :math:`\lambda^s_k` , that are manager.elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` , the following inequation is valid. Said inequation is defined as a *variable0* :math:`f_{x,k}^{v,s}` , which is set to be lesser equal to :math:`f_x^{v,s}` , and returned to *mappingFunctionsWithDemands*.
-
-This first half can be interpreted as follows:
+The first expression *expr* is then set to be a summatory of a variable :math:`f_{x,k}^{v,s}` over all demands :math:`\lambda^s_k` , that are manager.elements of a set of traffic demands :math:`\Lambda_s`  for a service :math:`s` and is then defined to be greater equal than a variable :math:`f_x^{v,s}`.
+The results are then returned as *mappingFunctionsWithDemands* and  can be interpreted as follows:
 
 .. math::
     :nowrap:
 
         \begin{equation}
-	      \frac{ \sum_{k=1 }^{\|\Lambda_s \|}      f_{x,k}^{v,s} }  {\|\Lambda_s \|} \leq f_x^{v,s}
-	    \end{equation}
+          \quad f_x^{v,s} \leq   \sum_{k=1 }^{\|\Lambda_s \|}   f_{x,k}^{v,s}
+          \end{equation}
 
 
-The second block
-
-.. code-block:: java
-
-        ??
-
-first makes sure that for all servers :math:`s` , that are element of a set of service chains :math:`S` , for all functions :math:`v` , that are element of an ordered set of functions :math:`V_s`  for a service :math:`s` , and for all server :math:`x` , that are element of a set of servers :math:`X` , the following operations are realized.
-
-Following up
-
-.. code-block:: java
-
-                    ??
-
-Express a summatory function over all demands :math:`\lambda^s_k` , that are an element of a set of traffic demands :math:`\Lambda_s` for a service :math:`s` , for a variable :math:`f_{x,k}^{v,s}` that is then set to be greater equal than a variable :math:`f_x^{v,s}`  and the results are also sent back to *mappingFunctionsWithDemands*.
+The second expression *expr2* is then defined as a summatory function over all demands :math:`\lambda^s_k` , that are an element of a set of traffic demands :math:`\Lambda_s` for a service :math:`s` , for a variable :math:`f_{x,k}^{v,s}` that is divided by a big number *M*. In this case *M* is defined as the total number of demands multiplied by 10.
 
 A possible mathematical translation for this block could be
 
@@ -263,8 +224,11 @@ A possible mathematical translation for this block could be
     :nowrap:
 
         \begin{equation}
-        \forall s \in \mathbb{S}, \forall v \in {\mathbb{V}_s}, \forall x \in \mathbb{X} :  \quad f_x^{v,s} \leq   \sum_{k=1 }^{\|\Lambda_s \|}   f_{x,k}^{v,s}
-        \end{equation}
+	      \frac{ \sum_{k=1 }^{\|\Lambda_s \|}
+          f_{x,k}^{v,s} }  {\|\Lambda_s \|} \leq f_x^{v,s}
+	      \end{equation}
+
+
 
 Combining both inequations from the first and the second half of the method will result in the initial shown equation.
 
