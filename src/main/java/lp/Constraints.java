@@ -25,7 +25,7 @@ public class Constraints {
          linkUtilization();
          serverUtilization();
          maxUtilization();
-//         serviceDelay(initialModel);
+         serviceDelay(initialModel);
 
          // Common constraints
          if (scenario.getConstraints().get("rpc1")) rpc1();
@@ -116,24 +116,19 @@ public class Constraints {
          model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, "");
    }
 
-//   private void serviceDelay(GRBModel initialModel) throws GRBException {
-//      for (int s = 0; s < pm.getServices().size(); s++)
-//         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-//            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-//               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-//                  GRBLinExpr serviceDelayExpr = new GRBLinExpr();
-//                  serviceDelayExpr.add(linkDelayExpr(s, p));
-//                  serviceDelayExpr.add(processingDelayExpr(s, p, v, d));
-//                  model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL
-//                          , (int) pm.getServices().get(s).getAttribute("max_delay"), "");
-////                  model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL, vars.dSPD[s][p][d], "");
-//
-//               }
-////                if (initialModel != null)
-////                   serviceDelayExpr.add(migrationDelayExpr(s, p, initialModel));
-////                constraintVariableForServiceDelay(s, p);
-//         }
-//   }
+   private void serviceDelay(GRBModel initialModel) throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+               GRBLinExpr serviceDelayExpr = new GRBLinExpr();
+               serviceDelayExpr.add(linkDelayExpr(s, p));
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  serviceDelayExpr.add(processingDelayExpr(s, p, v, d));
+               model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL
+                       , (int) pm.getServices().get(s).getAttribute("max_delay"), "");
+               model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL, vars.dSPD[s][p][d], "");
+            }
+   }
 
    private GRBLinExpr linkDelayExpr(int s, int p) {
       Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
