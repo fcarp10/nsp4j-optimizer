@@ -198,7 +198,10 @@ function generateScenario() {
     var inputFileName = document.getElementById("inputFileName").value;
     var objectiveFunction = document.getElementById("objectiveFunction").value;
     var maximization = $("#max").is(":checked");
+    var weights = parseFloat(document.getElementById("lu").value).toFixed(1) + "-" + parseFloat(document.getElementById("xu").value).toFixed(1) + "-" + parseFloat(document.getElementById("maxU").value).toFixed(1);
+
     var model = document.getElementById("model").value;
+
     var VAI3 = $("#countNumberOfUsedServers").is(":checked");
     var RPC1 = $("#onePathPerDemand").is(":checked");
     var RPI1 = $("#onePathPerDemand").is(":checked");
@@ -226,6 +229,7 @@ function generateScenario() {
         inputFileName: inputFileName,
         objectiveFunction: objectiveFunction,
         maximization: maximization,
+        weights: weights,
         model: model,
         constraints :{
             RPC1: RPC1,

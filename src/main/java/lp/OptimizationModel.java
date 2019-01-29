@@ -25,7 +25,7 @@ public class OptimizationModel {
             grbModel = new GRBModel(grbEnv);
             Callback cb = new Callback();
             grbModel.setCallback(cb);
-            grbModel.getEnv().set(GRB.DoubleParam.MIPGap, parameters.getGap());
+            grbModel.getEnv().set(GRB.DoubleParam.MIPGap, (double) parameters.getAux().get("gap"));
         } catch (GRBException e) {
             e.printStackTrace();
         }
@@ -87,6 +87,12 @@ public class OptimizationModel {
             for (int s = 0; s < parameters.getServices().size(); s++)
                 for (int v = 0; v < parameters.getServices().get(s).getFunctions().size(); v++)
                     expr.addTerm(1.0, variables.nXSV[x][s][v]);
+        return expr;
+    }
+
+    public GRBLinExpr maxUtilizationExpr(double weight) {
+        GRBLinExpr expr = new GRBLinExpr();
+        expr.addTerm(weight, variables.uMax);
         return expr;
     }
 

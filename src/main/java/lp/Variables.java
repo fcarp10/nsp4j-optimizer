@@ -17,6 +17,7 @@ public class Variables {
    public GRBVar[] kX;
    public GRBVar[] uL;
    public GRBVar[] uX;
+   public GRBVar uMax;
    // Additional
    public GRBVar[] pX;
    public GRBVar[][] pXS;
@@ -28,6 +29,26 @@ public class Variables {
 
    public Variables(Parameters pm, GRBModel model) {
       try {
+         // Objective
+         uL = new GRBVar[pm.getLinks().size()];
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            uL[l] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
+                    , Auxiliary.uL + "[" + l + "]");
+         uX = new GRBVar[pm.getServers().size()];
+         for (int x = 0; x < pm.getServers().size(); x++)
+            uX[x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
+                    , Auxiliary.uX + "[" + x + "]");
+         kL = new GRBVar[pm.getLinks().size()];
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                    , Auxiliary.kL + "[" + l + "]");
+         kX = new GRBVar[pm.getServers().size()];
+         for (int x = 0; x < pm.getServers().size(); x++)
+            kX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                    , Auxiliary.kX + "[" + x + "]");
+         uMax = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
+                 , Auxiliary.uMax);
+         // Elementary
          rSP = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
@@ -52,22 +73,7 @@ public class Variables {
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                      pXSVD[x][s][v][d] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
                              , Auxiliary.pXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "]");
-         uL = new GRBVar[pm.getLinks().size()];
-         for (int l = 0; l < pm.getLinks().size(); l++)
-            uL[l] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
-                    , Auxiliary.uL + "[" + l + "]");
-         uX = new GRBVar[pm.getServers().size()];
-         for (int x = 0; x < pm.getServers().size(); x++)
-            uX[x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
-                    , Auxiliary.uX + "[" + x + "]");
-         kL = new GRBVar[pm.getLinks().size()];
-         for (int l = 0; l < pm.getLinks().size(); l++)
-            kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                    , Auxiliary.kL + "[" + l + "]");
-         kX = new GRBVar[pm.getServers().size()];
-         for (int x = 0; x < pm.getServers().size(); x++)
-            kX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                    , Auxiliary.kX + "[" + x + "]");
+         // Additional
          pX = new GRBVar[pm.getServers().size()];
          for (int x = 0; x < pm.getServers().size(); x++)
             this.pX[x] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY

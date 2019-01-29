@@ -1,5 +1,5 @@
 #cy {
-    height: 520px;
+    height: 600px;
     width: 100%;
     background: #E9ECEF;
 }
@@ -14,7 +14,7 @@
 }
 
 .row-container{
-  margin-top: 25px;
+  margin-top: 15px;
 }
 
 .container-fluid {
@@ -50,20 +50,11 @@
     color: #ffffff;
 }
 
-.select-style, option {
-    width: 120px ;
-}
-
-.radio-margin {
-    margin: 5px 0 0px 0;
-}
-
-.title-margin {
-    margin-top: 15px;
-}
-
-.input-style {
-    width: 140px ;
+.input-number{
+ /*max-width: 40%;*/
+ width: 70px;
+ margin-right: 15px;
+ text-align: left;
 }
 
 /* The check */
@@ -72,9 +63,10 @@
     position: relative;
     padding-left: 25px;
     margin-bottom: 6px;
+    margin-left: 10px;
     padding-right: 15px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 15px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;

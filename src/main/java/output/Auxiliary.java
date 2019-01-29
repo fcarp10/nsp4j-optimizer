@@ -20,6 +20,7 @@ public class Auxiliary {
    public static final String COSTS_OBJ = "costs";
    public static final String UTILIZATION_OBJ = "utilization";
    public static final String NUM_DEDICATED_FUNCTIONS_OBJ = "num_dedicated_functions";
+   public static final String MAX_UTILIZATION_OBJ = "max_utilization";
    public static final String INITIAL_PLACEMENT_MODEL = "initial_placement";
    public static final String MIGRATION_MODEL = "migration";
    public static final String REPLICATION_MODEL = "replication";
@@ -38,6 +39,7 @@ public class Auxiliary {
    public static final String kX = "kX";
    public static final String uL = "uL";
    public static final String uX = "uX";
+   public static final String uMax = "uMax";
    public static final String pX = "pX";
    public static final String pXS = "pXS";
    public static final String nXSV = "nXSV";

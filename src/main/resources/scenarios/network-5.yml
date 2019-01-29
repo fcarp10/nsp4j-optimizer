@@ -1,8 +1,6 @@
-# optimization parameters
-gap: 0
-weights: [1, 0, 0]
 # auxiliary parameters
 aux: {
+  "gap": 0.0,
   "overhead": 0,
   "minPathsDefault": 3,
   "maxPathsDefault": 3,

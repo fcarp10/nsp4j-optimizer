@@ -42,8 +42,7 @@
             <hr>
             <div class="form-group">
                 <label for="inputFileName">Input files name</label>
-                <input type="text" class="form-control" id="inputFileName" placeholder="file name" value="example">
-                <small class="form-text text-muted">The input files must have the same name.</small>
+                <input type="text" class="form-control" id="inputFileName" placeholder="file name" value="network-5">
                 <div class="btn-group">
                     <button type="button" class="btn btn-dark button-width button-margin"
                             onClick="loadTopology()">
@@ -61,6 +60,7 @@
                     <option value="costs">utilization costs</option>
                     <option value="utilization">utilization</option>
                     <option value="num_dedicated_functions">num dedicated functions</option>
+                    <option value="max_utilization">max utilization</option>
                 </select>
             </div>
             <div class="radio-margin">
@@ -74,6 +74,14 @@
                         <span class="checkround"></span>
                     </label>
                 </form>
+            </div>
+            <div class="form-group">
+                <label for="inputFileName">Weights [links, servers, max]</label>
+                <div class="input-group-prepend">
+                    <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="lu" placeholder="0.0" value="0.0">
+                    <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="xu" placeholder="0.0" value="1.0">
+                    <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="maxU" placeholder="0.0" value="0.0">
+                </div>
             </div>
             <div class="form-group">
                 <label class="my-1 mr-2" for="model">Model</label>
