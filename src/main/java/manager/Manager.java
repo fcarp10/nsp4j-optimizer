@@ -203,19 +203,19 @@ public class Manager {
    private static Results generateResultsForLP(OptimizationModel optimizationModel, Scenario scenario) throws GRBException {
       Results results = new Results(pm, scenario);
       // primary variables
-      results.setVariable(rSP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().rSP));
-      results.setVariable(rSPD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().rSPD));
-      results.setVariable(pXSV, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSV));
-      results.setVariable(pXSVD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSVD));
+      results.setVariable(rSP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().zSP));
+      results.setVariable(rSPD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().zSPD));
+      results.setVariable(pXSV, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSV));
+      results.setVariable(pXSVD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSVD));
       results.setVariable(uL, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().uL));
       results.setVariable(uX, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().uX));
       // secondary variables
-      results.setVariable(pX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pX));
+      results.setVariable(pX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fX));
       results.setVariable(gSVXY, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().gSVXY));
-      results.setVariable(sSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().sSVP));
-      results.setVariable(dSPD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSPD));
-      results.setVariable(dSPX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().dSPX));
-      results.initializeResults(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().pXSV), true);
+      results.setVariable(sSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().hSVP));
+      results.setVariable(dSP, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSP));
+      results.setVariable(qSVXP, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().qSVXP));
+      results.initializeResults(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSV), true);
       return results;
    }
 
@@ -227,7 +227,7 @@ public class Manager {
       results.setVariable(pXSVD, learningModel.getpXSVD());
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
-      results.setVariable(dSPD, learningModel.getdS());
+      results.setVariable(dSP, learningModel.getdS());
       results.initializeResults(learningModel.getObjVal(), learningModel.getpXSV(), false);
       return results;
    }

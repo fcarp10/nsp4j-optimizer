@@ -43,7 +43,7 @@ public class OptimizationModel {
    public GRBLinExpr usedServersExpr() {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < parameters.getServers().size(); x++)
-         expr.addTerm(1.0, variables.pX[x]);
+         expr.addTerm(1.0, variables.fX[x]);
       return expr;
    }
 

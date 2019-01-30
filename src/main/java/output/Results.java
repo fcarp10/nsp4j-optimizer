@@ -150,14 +150,11 @@ public class Results {
    }
 
    List<Double> serviceDelayList() {
-      double[][][] dSPDvar = (double[][][]) rawVariables.get(dSPD);
-      boolean[][][] rSPDvar = (boolean[][][]) rawVariables.get(rSPD);
+      double[][] dSPvar = (double[][]) rawVariables.get(dSP);
       List<Double> serviceDelayList = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               if (rSPDvar[s][p][d])
-                  serviceDelayList.add(dSPDvar[s][p][d]);
+            serviceDelayList.add(dSPvar[s][p]);
       return serviceDelayList;
    }
 
@@ -193,7 +190,7 @@ public class Results {
       double[] uXvar = (double[]) rawVariables.get(uX);
       double[] uLvar = (double[]) rawVariables.get(uL);
 
-      // prepare rSP
+      // prepare zSP
       List<String> strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
@@ -203,7 +200,7 @@ public class Results {
                        + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
       stringVariables.put(rSP, strings);
 
-      // prepare rSPD
+      // prepare zSPD
       strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
@@ -216,7 +213,7 @@ public class Results {
                           + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
       stringVariables.put(rSPD, strings);
 
-      // prepare pXSV
+      // prepare fXSV
       strings = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -229,7 +226,7 @@ public class Results {
                           + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
       stringVariables.put(pXSV, strings);
 
-      // prepare pXSVD
+      // prepare fXSVD
       strings = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -266,10 +263,10 @@ public class Results {
       boolean[] pXvar = (boolean[]) rawVariables.get(pX);
       boolean[][][][] gSVXYvar = (boolean[][][][]) rawVariables.get(gSVXY);
       boolean[][][] sSVPvar = (boolean[][][]) rawVariables.get(sSVP);
-      double[][][] dSPDvar = (double[][][]) rawVariables.get(dSPD);
-      boolean[][][] dSPXvar = (boolean[][][]) rawVariables.get(dSPX);
+      double[][] dSPvar = (double[][]) rawVariables.get(dSP);
+      double[][][][] qSVXPvar = (double[][][][]) rawVariables.get(qSVXP);
 
-      // prepare pX
+      // prepare fX
       List<String> strings = new ArrayList<>();
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pXvar[x])
@@ -289,7 +286,7 @@ public class Results {
                                 + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
       stringVariables.put(gSVXY, strings);
 
-      // prepare sSVP
+      // prepare hSVP
       strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -299,27 +296,27 @@ public class Results {
                           + pm.getPaths().get(p).getNodePath());
       stringVariables.put(sSVP, strings);
 
-      // prepare dSPD
+      // prepare dSP
       strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+            strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): "
+                    + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                    + "[" + Auxiliary.roundDouble(dSPvar[s][p], 2) + "]");
+      stringVariables.put(dSP, strings);
 
-               strings.add("(" + (s + this.offset) + "," + (p + this.offset) + ")," + (d + this.offset) + "): "
-                       + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                       + "[" + Auxiliary.roundDouble(dSPDvar[s][p][d], 2) + "]");
-      stringVariables.put(dSPD, strings);
-
-      // prepare dSPX
+      // prepare qSVXP
       strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
-               if (dSPXvar[s][p][x])
-                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (x + this.offset) + "): "
-                          + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                          + "[" + pm.getServers().get(x).getId() + "]");
-      stringVariables.put(dSPX, strings);
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                  if (qSVXPvar[s][v][x][p] > 0)
+                     strings.add("(" + (s + this.offset) + "," + (v + this.offset)
+                             + "," + (x + this.offset) + "," + (p + this.offset) + "): "
+                             + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                             + "[" + qSVXPvar[s][v][x][p] + "]");
+      stringVariables.put(qSVXP, strings);
    }
 
    private void setSummaryResults(double[] array, List var) {

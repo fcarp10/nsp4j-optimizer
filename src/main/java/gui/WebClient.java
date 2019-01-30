@@ -136,7 +136,7 @@ public class WebClient {
 
    private static Map<Server, String> generateFunctionsPerServerStringMap(Results results) throws GRBException {
       int offset = (int) results.getPm().getAux("offset_results");
-      boolean[][][] pXSV = (boolean[][][]) results.getRawVariables().get("pXSV");
+      boolean[][][] pXSV = (boolean[][][]) results.getRawVariables().get("fXSV");
       Map<Server, String> functionsStringMap = new HashMap<>();
       for (int x = 0; x < results.getPm().getServers().size(); x++) {
          StringBuilder stringBuilder = new StringBuilder();

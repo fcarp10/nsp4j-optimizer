@@ -24,16 +24,16 @@ public class Definitions {
    public static final String uX = "uX";
    public static final String uMax = "uMax";
    // elementary variables
-   public static final String rSP = "rSP";
-   public static final String rSPD = "rSPD";
-   public static final String pXSV = "pXSV";
-   public static final String pXSVD = "pXSVD";
+   public static final String rSP = "zSP";
+   public static final String rSPD = "zSPD";
+   public static final String pXSV = "fXSV";
+   public static final String pXSVD = "fXSVD";
    // additional variables
-   public static final String pX = "pX";
+   public static final String pX = "fX";
    public static final String gSVXY = "gSVXY";
-   public static final String sSVP = "sSVP";
-   public static final String dSPD = "dSPD";
-   public static final String dSPX = "dSPX";
+   public static final String sSVP = "hSVP";
+   public static final String dSP = "dSP";
+   public static final String qSVXP = "qSVXP";
    // parameters
    public static final String LOAD_FUNCTION = "load";
    public static final String OVERHEAD_FUNCTION = "overhead";
