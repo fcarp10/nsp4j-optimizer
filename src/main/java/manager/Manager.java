@@ -15,6 +15,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import output.Definitions;
 import output.Results;
 import output.ResultsManager;
 import utils.ConfigFiles;
@@ -183,7 +184,7 @@ public class Manager {
       results.setVariable(uX, model.getVariables().uX);
       results.setVariable(pX, model.getVariables().pX);
       results.setVariable(sSVP, model.getVariables().sSVP);
-      results.setVariable(dSP, model.getVariables().dSP);
+      results.setVariable(Definitions.dSPD, model.getVariables().dSPD);
       results.setVariable(nXSV, model.getVariables().nXSV);
       results.prepareVariablesForJsonFile(model.getObjVal(), initialModel);
       return results;

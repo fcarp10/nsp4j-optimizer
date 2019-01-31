@@ -35,7 +35,6 @@ public class Definitions {
    public static final String sSVP = "sSVP";
    public static final String dSPD = "dSPD";
    public static final String dSPX = "dSPX";
-   public static final String dSP = "dSP";
    public static final String nXSV = "nXSV";
    public static final String pXS = "pXS";
    // parameters
