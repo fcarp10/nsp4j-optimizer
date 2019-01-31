@@ -86,7 +86,6 @@ public class Results {
       setpXSVD();
       setUX();
       setUL();
-      setsSVP();
       setdSPD();
       setnXSV();
       setLinkResults(uL);
@@ -272,18 +271,6 @@ public class Results {
       stringVariables.put("uL", strings);
    }
 
-   private void setsSVP() throws GRBException {
-      GRBVar[][][] sSVP = (GRBVar[][][]) rawVariables.get(Definitions.sSVP);
-      List<String> strings = new ArrayList<>();
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               if (sSVP[s][v][p].get(GRB.DoubleAttr.X) == 1.0)
-                  strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
-                          + pm.getPaths().get(p).getNodePath());
-      stringVariables.put("sSVP", strings);
-   }
-
    private void setdSPD() throws GRBException {
       GRBVar[][][] dSPD = (GRBVar[][][]) rawVariables.get(Definitions.dSPD);
       List<String> strings = new ArrayList<>();
@@ -291,7 +278,7 @@ public class Results {
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (dSPD[s][p][d].get(GRB.DoubleAttr.X) > 0)
-                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): "
+                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): "
                           + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
                           + "[" + Auxiliary.roundDouble(dSPD[s][p][d].get(GRB.DoubleAttr.X), 2) + "]");
       stringVariables.put("dSPD", strings);

@@ -183,7 +183,6 @@ public class Manager {
       results.setVariable(uL, model.getVariables().uL);
       results.setVariable(uX, model.getVariables().uX);
       results.setVariable(pX, model.getVariables().pX);
-      results.setVariable(sSVP, model.getVariables().sSVP);
       results.setVariable(Definitions.dSPD, model.getVariables().dSPD);
       results.setVariable(nXSV, model.getVariables().nXSV);
       results.prepareVariablesForJsonFile(model.getObjVal(), initialModel);

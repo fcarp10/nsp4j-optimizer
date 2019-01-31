@@ -28,7 +28,6 @@ public class Constraints {
       else
          serverUtilization(false);
       maxUtilization();
-      serviceDelay();
       if (scenario.getConstraints().get("VAI3")) countNumberOfUsedServers();
       if (scenario.getConstraints().get("RPC1")) onePathPerDemand();
       if (scenario.getConstraints().get("RPI1")) activatePathForService();
@@ -51,6 +50,7 @@ public class Constraints {
       if (scenario.getConstraints().get("RPC3")) noParallelPaths();
       if (scenario.getConstraints().get("IPC1"))
          initialPlacementAsConstraints(initialModel);
+      if (scenario.getConstraints().get("PDC1")) serviceDelay();
    }
 
    private void linkUtilization() throws GRBException {
@@ -64,17 +64,6 @@ public class Constraints {
                   expr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
                           / (int) pm.getLinks().get(l).getAttribute("capacity"), vars.rSPD[s][p][d]);
             }
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               for (int p = 0; p < pm.getPaths().size(); p++) {
-                  if (!pm.getPaths().get(p).contains(pm.getLinks().get(l)))
-                     continue;
-                  double traffic = 0;
-                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                     traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                             * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
-                  expr.addTerm(traffic / (int) pm.getLinks().get(l).getAttribute("capacity"), vars.sSVP[s][v][p]);
-               }
          model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uL[l], "linkUtilization");
          linearCostFunctions(expr, vars.kL[l]);
       }
