@@ -68,14 +68,85 @@ The file name  *example* will identify 3 different input files with names The fr
 Objective function:
 ^^^^^^^^^^^^^^^^^^^
 
-There are 3 different combination of weighted functions that can be used as optimization target. The objective functions are defined in section *Optimization models*.
+There are  different objective functions that can be used as optimization target. The objective functions are defined in section *Optimization models*.
+
+
+Weights:
+^^^^^^^^
+Some of the objective functions can be combination using the weighting parameters. They have the following meaning:
+
+Cost objectives: W1 * Link utilization costs + W2 * Server utilization costs
+
+Utilization objectives: W1 * Link utilization + W2 * Server utilization
+
+Maximal utilization objective: W1 * Link utilization + W2 * Server utilization + W3 * maximum utilization
 
 Model:
 ^^^^^^
 
-The objective functions defined above can be used to build different optimization models, where each of the objective functions can be chosen as an alternative. The optimization mmodels are i) Initial placement; ii) Migration; iii) Replication; and iv) Replication and mMigration. For each model, one of the objective functions can be freely chosen, where in principle all general constraints can be applied.
+The objective functions defined above can be used to build different optimization models, where each of the objective functions can be chosen as an alternative. The optimization models are:
+
+i) Initial placement
+
+ii) Migration
+
+iii) Replication
+
+iv) Replication and Migration
+
+The Initial Placement is not required for the models ii) - iv) and is restricted to service function chains (SFCs) only using a single path and no replications.  For each model, one of the objective functions can be freely chosen, where in principle all general constraints can be applied.
 
 Constraints:
 ^^^^^^^^^^^^
 
-Depending on the selected optimization model, some of the constraints are automatically preselected. Further constraints can be added depending on the special topology, VNF architecture and design assumptions. All constraints are documented in section *Constraints*.  It should be noted that although it is possible to select arbitrary constraints, the validity is not checked by the program.
+Depending on the selected optimization model, some of the constraints are automatically preselected. Further constraints can be added depending on the special topology, VNF architecture and design assumptions. All constraints are documented in section *Constraints*.  It should be noted that although it is possible to select arbitrary constraints, the validity is not checked by the program. A rough overview of the meaning is given below
+
+
++-----------+---------------------------------------------------+
+| Short     | meaning                                           |
++===========+===================================================+
+| RPC1      | only one path per traffic demand                  |
++-----------+---------------------------------------------------+
+| RPC2      | bounds for the number of active paths per SFC     |
++-----------+---------------------------------------------------+
+| RPC3      | only one path per SFC                             |
++-----------+---------------------------------------------------+
+| RPI1      | variable, indicate activate path for SFC          |
++-----------+---------------------------------------------------+
+| VAI1      | variable, indicate usage of server by VNF of a SFC|
++-----------+---------------------------------------------------+
+| VAI2      | variable, indicate usage of server by a SFC       |
++-----------+---------------------------------------------------+
+| VAI3      |variable, indicate usage of server                 |
++-----------+---------------------------------------------------+
+| VAC1      | allocates all VNFs on active path                 |
++-----------+---------------------------------------------------+
+| VAC2      | per demand one VNF per server                     |
++-----------+---------------------------------------------------+
+| VAC3      | VNF sequence order                                |
++-----------+---------------------------------------------------+
+| VRC1      | number of replica bounded by active paths         |
++-----------+---------------------------------------------------+
+| VRC2      | number of replica equal to active paths           |
++-----------+---------------------------------------------------+
+| VRC3      | bound for the number of replica                   |
++-----------+---------------------------------------------------+
+| VSC1      | bound number of VNFS per SFCs and server          |
++-----------+---------------------------------------------------+
+| VSC2      | bound number of SFCs per server                   |
++-----------+---------------------------------------------------+
+| VSC3      |  bound number of demands per VNF, SFCs and server |
++-----------+---------------------------------------------------+
+| IPC1      | initial placement as constraints                  |
++-----------+---------------------------------------------------+
+| DIC1      | VNF processing load constraint                    |
++-----------+---------------------------------------------------+
+| DVC1      | VNF processing load constrain for variable # of VM|
++-----------+---------------------------------------------------+
+| DVC2      | variable # of VM instances usage                  |
++-----------+---------------------------------------------------+
+| DVC3      | variable # of VMs dimensioning rule               |
++-----------+---------------------------------------------------+
+| PDC1      | end-to-end SFC delay constraint                   |
++-----------+---------------------------------------------------+
+

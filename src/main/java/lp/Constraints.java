@@ -462,8 +462,8 @@ public class Constraints {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                List<Integer> sharedNF = (List<Integer>) pm.getServices().get(s).getAttribute("sharedNF");
-               for (int i = 0; i < sharedNF.size(); i++)
-                  if (sharedNF.get(i) == 0) {
+//                       for (int i = 0; i < sharedNF.size(); i++)
+                  if (sharedNF.get(v) == 0) {
                      GRBLinExpr expr = new GRBLinExpr();
                      GRBLinExpr expr2 = new GRBLinExpr();
                      double load = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");

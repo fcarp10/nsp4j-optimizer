@@ -63,11 +63,13 @@ The next table describes every parameter for the topology file:
 +======================+===============================================+
 | Definition of node parameters                                        |
 +----------------------+-----------------------------------------------+
+| ``x:250 y:150``      | relative coordinates of the network node in km|
++----------------------+-----------------------------------------------+
 | ``num_servers``      | number of servers per network node            |
 +----------------------+-----------------------------------------------+
 | ``server_capacity``  | processing capacity of a server               |
 +----------------------+-----------------------------------------------+
-| ``processing_delay`` | processing delay of a server                  |
+| ``processing_delay`` | additional processing delay at a server       |
 +----------------------+-----------------------------------------------+
 | ``type``             | type of the node (experimental)               |
 +----------------------+-----------------------------------------------+
@@ -107,40 +109,40 @@ This file describes the default parameters for the optimization model. The name 
 
 .. code-block:: yaml
 
-    # optimization parameters
-    gap: 0
-    weights: [0.5, 0.5, 0]
     # auxiliary parameters
     aux: {
+     "gap": 0.0,
      "overhead": 0,
      "minPathsDefault": 3,
      "maxPathsDefault": 3,
      "iterations": 1000,
      "offset_results": 1,
      "scaling_x": 1.0,
-    "scaling_y": 1.0
+     "scaling_y": 1.0
     }
     # service definitions
     serviceChains:
     - id: 1
      chain: [1, 2, 4, 3]
      attributes: {
-        "sharedNF": [1, 0, 0, 1],
+        "sharedNF": [0, 0, 0, 0],
         "minPaths": 3,
         "maxPaths": 3,
         "minReplica": 1,
         "maxReplica": 3,
-        "maxVNFserver": 10
+        "maxVNFserver": 10,
+        "max_delay": 250
     }
     - id: 2
     chain: [1, 3, 2]
     attributes: {
-        "sharedNF": [1, 1, 0],
+        "sharedNF": [0, 0, 0],
         "minPaths": 2,
         "maxPaths": 2,
         "minReplica": 1,
         "maxReplica": 3,
-        "maxVNFserver": 5
+        "maxVNFserver": 5,
+        "max_delay": 200
     }
     # function definitions
     functions:
@@ -154,7 +156,7 @@ This file describes the default parameters for the optimization model. The name 
         "maxSharedSFC": 5,
         "maxSharedVNF": 10,
         "maxInstances": 1,
-        "delay": 10
+        "process_delay": 10
     }
     - type: 2
     attributes: {
@@ -166,7 +168,7 @@ This file describes the default parameters for the optimization model. The name 
         "maxSharedSFC": 5,
         "maxSharedVNF": 3,
         "maxInstances": 1,
-        "delay": 10
+        "process_delay": 10
     }
     - type: 3
     attributes: {
@@ -178,7 +180,7 @@ This file describes the default parameters for the optimization model. The name 
         "maxSharedSFC": 1,
         "maxSharedVNF": 1,
         "maxInstances": 1,
-        "delay": 10
+        "process_delay": 10
     }
     - type: 4
     attributes: {
@@ -190,7 +192,7 @@ This file describes the default parameters for the optimization model. The name 
         "maxSharedSFC": 1,
         "maxSharedVNF": 1,
         "maxInstances": 1,
-        "delay": 10
+        "process_delay": 10
     }
     - type: 5
     attributes: {
@@ -202,7 +204,7 @@ This file describes the default parameters for the optimization model. The name 
         "maxSharedSFC": 1,
         "maxSharedVNF": 1,
         "maxInstances": 1,
-        "delay": 10
+        "process_delay": 10
     }
     # traffic flow definitions
     trafficFlows:
@@ -229,29 +231,27 @@ The next table describes every parameter for the model:
 +----------------------------------------------------------------------+
 | Variables of *example.yml*                                           |
 +====================+=================================================+
-| Definition of optimization parameters                                |
+| auxiliary parameters                                                 |
 +--------------------+-------------------------------------------------+
 | ``gap``            | gap optimization value                          |
 +--------------------+-------------------------------------------------+
-| ``weights``        | cost weights: link (W1), server (W2), delay (W3)|
-+--------------------+-------------------------------------------------+
-| auxiliary parameters                                                 |
-+--------------------+-------------------------------------------------+
 |``aux``             | global and default parameter                    |
 +--------------------+-------------------------------------------------+
-| ``overhead``       |                                                 |
+| ``gap``            | gap optimization value                          |
++--------------------+-------------------------------------------------+
+| ``overhead``       | default value for processing overhead of a NF   |
 +--------------------+-------------------------------------------------+
 | ``minPathsDefault``| minimum number of used paths                    |
 +--------------------+-------------------------------------------------+
 | ``maxPathsDefault``| maximum number of used paths                    |
 +--------------------+-------------------------------------------------+
-| ``iterations``     |                                                 |
+| ``iterations``     | number of iterations for the optimization       |
 +--------------------+-------------------------------------------------+
 | ``offset_results`` | if 0, numbering starts with 0; else with 1      |
 +--------------------+-------------------------------------------------+
-| ``scaling_x``      |                                                 |
+| ``scaling_x``      |  scaling factor for network size                |
 +--------------------+-------------------------------------------------+
-| ``scaling_y``      |                                                 |
+| ``scaling_y``      |  scaling factor for network size                |
 +--------------------+-------------------------------------------------+
 | Definition of network functions                                      |
 +--------------------+-------------------------------------------------+
@@ -271,13 +271,13 @@ The next table describes every parameter for the model:
 +--------------------+-------------------------------------------------+
 | ``maxsubflows``    | maximum number of traffic flows for the NF      |
 +--------------------+-------------------------------------------------+
-| ``maxSharedSFC``   | maximum # of SFC that can share the NF          |
+| ``maxSharedSFC``   | experimental                                    |
 +--------------------+-------------------------------------------------+
-| ``maxSharedVNF``   | maximum # of VNFs per SFC that can share the NF |
+| ``maxSharedVNF``   | experimental                                    |
 +--------------------+-------------------------------------------------+
 | ``maxinstances``   | maximum # of instances of this NF at a server   |
 +--------------------+-------------------------------------------------+
-| ``delay``          |                                                 |
+| ``process_delay``  | fixed processing delay of an instance of the NF |
 +--------------------+-------------------------------------------------+
 | Definition of service chains                                         |
 +--------------------+-------------------------------------------------+
@@ -289,7 +289,7 @@ The next table describes every parameter for the model:
 +--------------------+-------------------------------------------------+
 | ``attributes``     | parameters of the SFC                           |
 +--------------------+-------------------------------------------------+
-| ``sharedNF``       | indicates if a VNF can be shared by other SFC   |
+| ``sharedNF``       | indicates if some constraints are applied to NF |
 +--------------------+-------------------------------------------------+
 | ``minPaths``       | minimum # of active paths usable by the SFC     |
 +--------------------+-------------------------------------------------+
@@ -300,6 +300,8 @@ The next table describes every parameter for the model:
 | ``maxReplica``     | maximum number of allowed replicas              |
 +--------------------+-------------------------------------------------+
 | ``maxVNFserver``   | maximum # of VNFs the SFC can place on server   |
++--------------------+-------------------------------------------------+
+| ``max_delay``      | maximum end-to-end delay for a SFC              |
 +--------------------+-------------------------------------------------+
 | Definition of traffic flows on the network                           |
 +--------------------+-------------------------------------------------+
@@ -329,7 +331,42 @@ Output Results
 
 The framework stores all optimization results in one output file with filename *example_optimization-model.json*, which is located at directory /target/results/date/, where *optimization-model* is identical to the chosen optimization model in the interface. All results are displayed with the option *offset_results = 1*.
 
-The first blocks shows the used *input files, objective function* and *optimization model*. The block *constrains* gives an overview of the chosen constrains with the following abbrevations;
+The first blocks shows the used *input files, objective function*,  *optimization mode* and *optimization model*. The block *constrains* gives an overview of the chosen constrains with the abbrevations shown below.
+
+.. code-block:: java
+
+  "scenario" : {
+    "inputFileName" : "network-7a",
+    "objectiveFunction" : "num_of_servers",
+    "maximization" : false,
+    "model" : "initial_placement",
+    "constraints" : {
+      "RPC1" : true,
+      "RPI1" : true,
+      "VAI1" : true,
+      "VAI2" : true,
+      "VAI3" : true,
+      "VAC1" : true,
+      "VAC2" : true,
+      "VAC3" : true,
+      "RPC2" : false,
+      "RPC3" : true,
+      "VRC1" : false,
+      "VRC2" : true,
+      "VRC3" : false,
+      "VSC1" : false,
+      "VSC2" : false,
+      "VSC3" : false,
+      "DIC1" : false,
+      "DVC1" : false,
+      "DVC2" : false,
+      "DVC3" : false,
+      "IPC1" : false,
+      "PDC1" : false
+    }
+
+
+
 
 +-----------+----------------------------------+
 | Short     | Function name                    |
@@ -368,33 +405,19 @@ The first blocks shows the used *input files, objective function* and *optimizat
 +-----------+----------------------------------+
 | IPC1      | initialPlacementAsConstraints    |
 +-----------+----------------------------------+
-| EXP       |  synchronizationTraffic          |
+| DIC1      | constraintDIC1                   |
++-----------+----------------------------------+
+| DVC1      | constraintDVC1                   |
++-----------+----------------------------------+
+| DVC2      | constraintDVC2                   |
++-----------+----------------------------------+
+| DVC3      | constraintDVC3                   |
++-----------+----------------------------------+
+| PDC1      | serviceDelay                     |
 +-----------+----------------------------------+
 
 
 
-
-.. code-block:: java
-
-  "scenario" : {
-    "inputFileName" : "network-6",
-    "objectiveFunction" : "costs",
-    "maximization" : false,
-    "model" : "migration_replication",
-    "constraints" : {
-      "countNumberOfUsedServers" : true,
-      "onePathPerDemand" : true,
-      "activatePathForService" : true,
-      "pathsConstrainedByFunctions" : true,
-      "functionPlacement" : true,
-      "oneFunctionPerDemand" : true,
-      "mappingFunctionsWithDemands" : true,
-      "functionSequenceOrder" : true,
-      "noParallelPaths" : false,
-      "initialPlacementAsConstraints" : false,
-      "synchronizationTraffic" : true
-    }
-  },
 
 
 The next block shows results for the binary variable :math:`z^{k,s}_{p}` with the following meaning:
@@ -410,17 +433,6 @@ The next block shows results for the binary variable :math:`z^{k,s}_{p}` with th
       "(1,2,1): [1][n4, n2, n1, n7, n8][75]",
       "(1,2,2): [1][n4, n2, n1, n7, n8][75]",
       "(2,1,1): [2][n5, n3, n1, n6][150]",
-    ],
-
-
-The next block is experimentally:
-
-
-.. code-block:: java
-
-    "dSP" : [
-      "(1,2): [n4, n2, n1, n7, n8][162.85]",
-      "(2,1): [n5, n3, n1, n6][58.76]"
     ],
 
 
@@ -465,6 +477,25 @@ The next block shows results for the binary variable :math:`f^{v,s}_{x,k}` with 
     ],
 
 
+The next block shows results for the end-to-end service delay :math:`\hat{D}^{k,s}_{p}` with the following meaning:
+
+(s,p,k): [ n4, n2, n1, n6, n8] *"list of node of the path"*   [ :math:`\hat{D}^{k,s}_{p}` ]
+
+.. code-block:: java
+
+    "dSPD" : [
+      "(1,1,1): [n4, n2, n1, n6, n8][72.1]",
+      "(1,1,2): [n4, n2, n1, n6, n8][72.1]",
+      "(1,1,3): [n4, n2, n1, n6, n8][72.1]",
+      "(2,1,1): [n5, n3, n1, n6][37.76]",
+      "(2,1,2): [n5, n3, n1, n6][7.76]",
+      "(2,3,1): [n5, n3, n7, n8, n6][11.39]",
+      "(2,3,2): [n5, n3, n7, n8, n6][41.39]"
+    ],
+
+
+
+
 The next block shows results for the binary variable :math:`z^{s}_{p}` with the following meaning:
 
 
@@ -477,6 +508,21 @@ The next block shows results for the binary variable :math:`z^{s}_{p}` with the 
     "rSP" : [
       "(1,2): [1][n4, n2, n1, n7, n8]",
       "(2,1): [2][n5, n3, n1, n6]"
+    ],
+
+
+The next block shows results for the integer variable :math:`\eta^{v,s}_{x}` with the following meaning:
+
+(x,s,v): [m] *"variable number of instances"* of the v-st VNF of SFC s
+
+.. code-block:: java
+
+    "nXSV" : [
+      "(1,1,1): [1.0]",
+      "(1,1,2): [3.0]",
+      "(1,1,3): [2.0]",
+      "(13,2,2): [3.0]",
+      "(14,2,1): [1.0]",
     ],
 
 
@@ -496,19 +542,19 @@ The next block shows results for the binary variable :math:`f^{v,s}_{x}` with th
     ],
 
 
-The next block is experimentally:
 
-.. code-block:: java
+The next blocks show averaged results for network wide performance measures. Each result block shows the following details:
 
-    "sSVP" : [ ]
-  },
+network wide average value
+
+minimum value
+
+maximum value
+
+variance
 
 
-The next blocks show averaged results for network wide performance measures, these are the  *luSummary*:  the network wide link utilization; *xuSummary*:  the network wide server utilization; *fuSummary*:  the network wide number of VNF allocations per server; *sdSummary*:  experimentally;
-
-Each result block shows the following details: the network wide average value; the minimum value; the maximum value, the variance
-
-
+Network wide link utilization:
 
 .. code-block:: java
 
@@ -519,6 +565,8 @@ Each result block shows the following details: the network wide average value; t
     0.02
   ],
 
+Network wide server utilization
+
 .. code-block:: java
 
   "xuSummary" : [
@@ -528,6 +576,8 @@ Each result block shows the following details: the network wide average value; t
     0.02
   ],
 
+Network wide number of VNF allocations per server
+
 .. code-block:: java
 
   "fuSummary" : [
@@ -536,6 +586,8 @@ Each result block shows the following details: the network wide average value; t
     9.0,
     19.93
   ],
+
+Network wide end-to-end service delay of a SFC
 
 .. code-block:: java
 
@@ -547,7 +599,19 @@ Each result block shows the following details: the network wide average value; t
   ],
 
 
-The next block shows average results for network wide performance measures. These are *avgPathLength*: average path length in hop; *totalTraffic*: total traffic offered to the network; *trafficLinks*: total traffic on all links of the network; *migrationsNum*: number of migrations; *replicationsNum*: total number of replications; *objVal*: objective value of the chosen objective function.
+The next block shows average results for network wide performance measures. These are:
+
+*avgPathLength*: average path length in hop
+
+*totalTraffic*: total traffic offered to the network
+
+*trafficLinks*: total traffic on all links of the network
+
+*migrationsNum*: number of migrations
+
+*replicationsNum*: total number of replications
+
+*objVal*: objective value of the chosen objective function.
 
 
 .. code-block:: java

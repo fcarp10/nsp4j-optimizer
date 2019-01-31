@@ -158,6 +158,10 @@
                         <input type="checkbox" id="noParallelPaths" checked>
                         <span class="checkmark"></span>
                     </label>
+                    <label class="check ">PDC1: Path delay
+                        <input type="checkbox" id="PDC1">
+                        <span class="checkmark"></span>
+                    </label>
                 </div>
                 <div class="col-6">
                     <div>
@@ -186,35 +190,30 @@
                         <input type="checkbox" id="constraintVSC2">
                         <span class="checkmark"></span>
                     </label>
-                    <label class="check ">VSC3: # Subflows per VNF
+                    <label class="check ">VSC3: # Subflows per VM
                         <input type="checkbox" id="constraintVSC3">
                         <span class="checkmark"></span>
                     </label>
-                    <label class="check ">DIC1: Processing load per VNF
+                    <label class="check ">DIC1: Processing load per VM
                         <input type="checkbox" id="constraintDIC1">
                         <span class="checkmark"></span>
                     </label>
-                    <div class="title-margin">
-                        <h6>Additional Constraints</h6>
-                    </div>
-                    <!--<form id="use-case-constraints">-->
                     <label class="check ">IPC1: Initial placement
                         <input type="checkbox" id="initialPlacementAsConstraints">
                         <span class="checkmark"></span>
                     </label>
-                    <label class="check ">PDC1: Path delay
-                        <input type="checkbox" id="PDC1">
-                        <span class="checkmark"></span>
-                    </label>
-                    <label class="check ">DVC1 (//)
+                    <div class="title-margin">
+                        <h6>Variable # of VNF instances</h6>
+                    </div>
+                    <label class="check ">DVC1: Processing load per VM
                         <input type="checkbox" id="constraintDVC1">
                         <span class="checkmark"></span>
                     </label>
-                    <label class="check ">DVC2 (//)
+                    <label class="check ">DVC2: Variable for # VMs
                         <input type="checkbox" id="constraintDVC2">
                         <span class="checkmark"></span>
                     </label>
-                    <label class="check ">DVC3 (//)
+                    <label class="check ">DVC3: Dimensioning of # VMs
                         <input type="checkbox" id="constraintDVC3">
                         <span class="checkmark"></span>
                     </label>

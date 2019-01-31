@@ -20,7 +20,7 @@ serviceChains:
     "minReplica": 1,
     "maxReplica": 3,
     "maxVNFserver": 2,
-    "max_delay": 200
+    "max_delay": 100
   }
 - id: 1
   chain: [1, 3, 7]

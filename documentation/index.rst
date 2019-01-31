@@ -1,7 +1,5 @@
-Network and Service management Planning framework for Java (nsp4j) documentation
-================================================================================
-
-The nsp4j framework allows the user to simply model the optimization of service placement.
+Network and Service Management Optimization Framework for Java
+==============================================================
 
 .. toctree::
    :maxdepth: 1
