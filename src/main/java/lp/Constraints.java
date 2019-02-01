@@ -121,17 +121,16 @@ public class Constraints {
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
             GRBLinExpr serviceDelayExpr = new GRBLinExpr();
             // add path link delay
-//            serviceDelayExpr.add(linkDelayExpr(s, p));
+            serviceDelayExpr.add(linkDelayExpr(s, p));
             // add processing delay
-            serviceDelayExpr.add(processingDelayExpr(s, p));
+//            serviceDelayExpr.add(processingDelayExpr(s, p));
             // constraint service delay
             model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL
                     , (int) pm.getServices().get(s).getAttribute("max_delay"), "");
             // save delay on auxiliary variable
             model.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, vars.dSP[s][p], "");
             // constraint auxiliary variable
-            constraintVariableForServiceDelay(s, p);
-
+//            constraintVariableForServiceDelay(s, p);
          }
    }
 

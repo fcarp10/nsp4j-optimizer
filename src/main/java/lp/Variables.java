@@ -22,7 +22,7 @@ public class Variables {
    public GRBVar[] fX; // binary, true if server is used
    public GRBVar[][][][] gSVXY; //binary, auxiliary variable
    public GRBVar[][][] hSVP; // binary, traffic synchronization variable
-   public GRBVar[][][][] qSVXP; // integer, traffic variable
+   public GRBVar[][][][] qSVXP; // continuous, traffic variable
    public GRBVar[][] dSP; // binary, service delay (auxiliary)
 
 
@@ -104,7 +104,7 @@ public class Variables {
                for (int x = 0; x < pm.getServers().size(); x++)
                   for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                      qSVXP[s][v][x][p] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                             , Definitions.qSVXP + "[" + s + "][" + p + "][" + x + "]");
+                             , Definitions.qSVXP + "[" + s + "][" + v + "][" + x + "][" + p + "]");
          model.update();
       } catch (Exception ignored) {
       }

@@ -13,24 +13,21 @@ serviceChains:
     attributes: {
       "minPaths": 1,
       "maxPaths": 5,
-      "functionsServer": 1,
-      "max_delay": 200
+      "max_delay": 100000
     }
   - id: 1
     chain: [0, 1, 1, 2]
     attributes: {
       "minPaths": 1,
       "maxPaths": 5,
-      "functionsServer": 1,
-      "max_delay": 200
+      "max_delay": 100000
     }
   - id: 2
     chain: [0, 1, 1, 1, 2]
     attributes: {
       "minPaths": 1,
       "maxPaths": 5,
-      "functionsServer": 1,
-      "max_delay": 200
+      "max_delay": 100000
     }
 # function definitions
 functions:

@@ -1,4 +1,4 @@
-var shortPeriod = 200;
+var shortPeriod = 300;
 var longPeriod = 3000;
 var intervalMessages = setInterval(getMessage, longPeriod);
 var connected = false;

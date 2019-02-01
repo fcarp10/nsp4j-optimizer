@@ -146,7 +146,8 @@ public class Auxiliary {
    public static double[] convertVariablesToDoubles(GRBVar[] var) throws GRBException {
       double[] convertedVar = new double[var.length];
       for (int i = 0; i < var.length; i++)
-         convertedVar[i] = var[i].get(GRB.DoubleAttr.X);
+         if (var[i] != null)
+            convertedVar[i] = var[i].get(GRB.DoubleAttr.X);
       return convertedVar;
    }
 
@@ -154,7 +155,8 @@ public class Auxiliary {
       double[][] convertedVar = new double[var.length][var[0].length];
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++)
-            convertedVar[i][j] = var[i][j].get(GRB.DoubleAttr.X);
+            if (var[i][j] != null)
+               convertedVar[i][j] = var[i][j].get(GRB.DoubleAttr.X);
       return convertedVar;
    }
 
@@ -163,7 +165,8 @@ public class Auxiliary {
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++)
             for (int k = 0; k < var[i][j].length; k++)
-               convertedVar[i][j][k] = var[i][j][k].get(GRB.DoubleAttr.X);
+               if (var[i][j][k] != null)
+                  convertedVar[i][j][k] = var[i][j][k].get(GRB.DoubleAttr.X);
       return convertedVar;
    }
 
@@ -173,7 +176,8 @@ public class Auxiliary {
          for (int j = 0; j < var[i].length; j++)
             for (int k = 0; k < var[i][j].length; k++)
                for (int l = 0; l < var[i][j][k].length; l++)
-                  convertedVar[i][j][k][l] = var[i][j][k][l].get(GRB.DoubleAttr.X);
+                  if (var[i][j][k][l] != null)
+                     convertedVar[i][j][k][l] = var[i][j][k][l].get(GRB.DoubleAttr.X);
       return convertedVar;
    }
 }
