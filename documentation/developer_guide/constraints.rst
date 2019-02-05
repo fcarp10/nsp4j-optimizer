@@ -1,7 +1,6 @@
 Constraints
 ===========
 
-All constraints are defined in the file *../src/main/java/lp/Constraints*
 
 Routing and VNF constraints
 ---------------------------
