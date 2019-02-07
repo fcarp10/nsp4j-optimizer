@@ -1,6 +1,6 @@
-************
-Installation
-************
+********************
+Installation and GUI
+********************
 
 This is the installation guide for the nsp4j-optimizer tool.
 
@@ -12,8 +12,8 @@ Prerequisites
 - Git
 - Gurobi solver 8.0.0 or higher
 
-Installing and running the nsp4j-optimizer tool
-===============================================
+Downloading and packaging
+=========================
 
 1. Install Gurobi in your local maven repository. Change `` $PATH_TO_GUROBI_LIB$`` for the specific path where Gurobi is installed:
 
@@ -25,7 +25,7 @@ Installing and running the nsp4j-optimizer tool
 
 .. code-block:: bash
 
-	git clone https://carpio@bitbucket.org/carpio/nsp4j-optimizer.git
+	git clone https://github.com/fcarp10/nsp4j-optimizer
 
 3. Package the sources:
 
@@ -49,8 +49,8 @@ NOTE: in Linux or Mac OS distributions you might need to specify the Java librar
 NOTE: in Ubuntu, add a file named ``randomLibs.conf`` to the directory ``/etc/ld.so.conf.d/``. Add the next line to this file: ``/opt/gurobi810/linux64/lib/`` (according to your Gurobi version). Finally, run the following command in the terminal: ``sudo ldconfig``.
 
 
-Running the nsp4j-optimizer tool
-================================
+Graphical user interface
+========================
 
 Open your browser and access to ``localhost:8080``, you will access to the GUI:
 
@@ -59,20 +59,21 @@ Open your browser and access to ``localhost:8080``, you will access to the GUI:
 
 
 
-Input files name:
-^^^^^^^^^^^^^^^^^
+Input files name
+----------------
 
-The file name  *example* will identify 3 different input files with names The framework requires three different input files:  example.dgs, example.yml and example.txt. The description can be found in section *Input Parameters*.
+The file name *example* will identify 3 different input files with names The framework requires three different input files:  example.dgs, example.yml and example.txt. The description can be found in section *Input Parameters*.
 
 
-Objective function:
-^^^^^^^^^^^^^^^^^^^
+Objective function
+------------------
 
 There are  different objective functions that can be used as optimization target. The objective functions are defined in section *Optimization models*.
 
 
-Weights:
-^^^^^^^^
+Weights
+-------
+
 Some of the objective functions can be combination using the weighting parameters. They have the following meaning:
 
 Cost objectives: W1 * Link utilization costs + W2 * Server utilization costs
@@ -81,8 +82,8 @@ Utilization objectives: W1 * Link utilization + W2 * Server utilization
 
 Maximal utilization objective: W1 * Link utilization + W2 * Server utilization + W3 * maximum utilization
 
-Model:
-^^^^^^
+Model
+-----
 
 The objective functions defined above can be used to build different optimization models, where each of the objective functions can be chosen as an alternative. The optimization models are:
 
@@ -96,8 +97,8 @@ iv) Replication and Migration
 
 The Initial Placement is not required for the models ii) - iv) and is restricted to service function chains (SFCs) only using a single path and no replications.  For each model, one of the objective functions can be freely chosen, where in principle all general constraints can be applied.
 
-Constraints:
-^^^^^^^^^^^^
+Constraints
+-----------
 
 Depending on the selected optimization model, some of the constraints are automatically preselected. Further constraints can be added depending on the special topology, VNF architecture and design assumptions. All constraints are documented in section *Constraints*.  It should be noted that although it is possible to select arbitrary constraints, the validity is not checked by the program. A rough overview of the meaning is given below
 

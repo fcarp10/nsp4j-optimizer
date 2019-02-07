@@ -5,5 +5,5 @@ Network and Service Management Optimization Framework for Java
    :maxdepth: 1
    :hidden:
 
-   user_guide/index.rst
-   developer_guide/index.rst
+   1_user_guide/index.rst
+   2_developer_guide/index.rst
