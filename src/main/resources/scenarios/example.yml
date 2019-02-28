@@ -15,18 +15,10 @@ serviceChains:
   - id: 0
     chain: [0, 1, 0]
     attributes: {
-      "minPaths": 3,
-      "maxPaths": 3,
-      "functionsServer": 1,
-      "max_delay": 150
-    }
-  - id: 1
-    chain: [0, 1, 1, 1, 2]
-    attributes: {
-      "minPaths": 3,
-      "maxPaths": 3,
-      "functionsServer": 1,
-      "max_delay": 100
+      "min_paths": 2,
+      "max_paths": 2,
+      "functions_server": 1,
+      "max_delay": 10000
     }
 # function definitions
 functions:
@@ -50,7 +42,7 @@ functions:
 trafficFlows:
   - serviceId: 0
     src: "n1"
-    dst: "n9"
+    dst: "n6"
     minDem: 2
     maxDem: 2
     minBw: 500

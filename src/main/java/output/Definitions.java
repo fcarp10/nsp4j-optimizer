@@ -24,16 +24,16 @@ public class Definitions {
    public static final String uX = "uX";
    public static final String uMax = "uMax";
    // elementary variables
-   public static final String rSP = "zSP";
-   public static final String rSPD = "zSPD";
-   public static final String pXSV = "fXSV";
-   public static final String pXSVD = "fXSVD";
+   public static final String zSP = "zSP";
+   public static final String zSPD = "zSPD";
+   public static final String fXSV = "fXSV";
+   public static final String fXSVD = "fXSVD";
    // additional variables
-   public static final String pX = "fX";
+   public static final String fX = "fX";
    public static final String gSVXY = "gSVXY";
    public static final String sSVP = "hSVP";
-   public static final String dSP = "dSP";
-   public static final String qSVXP = "qSVXP";
+   public static final String dSPD = "dSPD";
+   public static final String ySVXD = "ySVXD";
    // parameters
    public static final String LOAD_FUNCTION = "load";
    public static final String OVERHEAD_FUNCTION = "overhead";
@@ -42,4 +42,8 @@ public class Definitions {
    public static final String PROCESS_DELAY = "process_delay";
    public static final String LINK_CAPACITY = "capacity";
    public static final String LINK_DELAY = "delay";
+   public static final String MIN_PATHS = "min_paths";
+   public static final String MAX_PATHS = "max_paths";
+   public static final String FUNCTION_SERVER = "function_server";
+   public static final String MAX_DELAY = "max_delay";
 }

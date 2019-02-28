@@ -203,31 +203,31 @@ public class Manager {
    private static Results generateResultsForLP(OptimizationModel optimizationModel, Scenario scenario) throws GRBException {
       Results results = new Results(pm, scenario);
       // primary variables
-      results.setVariable(rSP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().zSP));
-      results.setVariable(rSPD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().zSPD));
-      results.setVariable(pXSV, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSV));
-      results.setVariable(pXSVD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSVD));
+      results.setVariable(zSP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().zSP));
+      results.setVariable(zSPD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().zSPD));
+      results.setVariable(fXSV, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSV));
+      results.setVariable(fXSVD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSVD));
       results.setVariable(uL, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().uL));
       results.setVariable(uX, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().uX));
       // secondary variables
-      results.setVariable(pX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fX));
+      results.setVariable(fX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fX));
       results.setVariable(gSVXY, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().gSVXY));
       results.setVariable(sSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().hSVP));
-      results.setVariable(dSP, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSP));
-      results.setVariable(qSVXP, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().qSVXP));
+      results.setVariable(dSPD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSPD));
+      results.setVariable(ySVXD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().ySVXD));
       results.initializeResults(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSV), true);
       return results;
    }
 
    private static Results generateResultsForRL(LearningModel learningModel, Scenario scenario) {
       Results results = new Results(pm, scenario);
-      results.setVariable(rSP, learningModel.getrSP());
-      results.setVariable(rSPD, learningModel.getrSPD());
-      results.setVariable(pXSV, learningModel.getpXSV());
-      results.setVariable(pXSVD, learningModel.getpXSVD());
+      results.setVariable(zSP, learningModel.getrSP());
+      results.setVariable(zSPD, learningModel.getrSPD());
+      results.setVariable(fXSV, learningModel.getpXSV());
+      results.setVariable(fXSVD, learningModel.getpXSVD());
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
-      results.setVariable(dSP, learningModel.getdS());
+      results.setVariable(dSPD, learningModel.getdS());
       results.initializeResults(learningModel.getObjVal(), learningModel.getpXSV(), false);
       return results;
    }

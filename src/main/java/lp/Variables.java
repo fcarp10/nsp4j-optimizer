@@ -22,13 +22,12 @@ public class Variables {
    public GRBVar[] fX; // binary, true if server is used
    public GRBVar[][][][] gSVXY; //binary, auxiliary variable
    public GRBVar[][][] hSVP; // binary, traffic synchronization variable
-   public GRBVar[][][][] qSVXP; // continuous, traffic variable
-   public GRBVar[][] dSP; // binary, service delay (auxiliary)
+   public GRBVar[][][] dSPD; // binary, service delay
+   public GRBVar[][][][] ySVXD; // continuous, traffic variable (aux)
 
 
    public Variables(Parameters pm, GRBModel model) {
       try {
-         // Objective
          uL = new GRBVar[pm.getLinks().size()];
          for (int l = 0; l < pm.getLinks().size(); l++)
             uL[l] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
@@ -47,24 +46,23 @@ public class Variables {
                     , Definitions.kX + "[" + x + "]");
          uMax = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
                  , Definitions.uMax);
-         // Elementary
          zSP = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                zSP[s][p] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                       , Definitions.rSP + "[" + s + "][" + p + "]");
+                       , Definitions.zSP + "[" + s + "][" + p + "]");
          zSPD = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   zSPD[s][p][d] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                          , Definitions.rSPD + "[" + s + "][" + p + "][" + d + "]");
+                          , Definitions.zSPD + "[" + s + "][" + p + "][" + d + "]");
          fXSV = new GRBVar[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   fXSV[x][s][v] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                          , Definitions.pXSV + "[" + x + "][" + s + "][" + v + "]");
+                          , Definitions.fXSV + "[" + x + "][" + s + "][" + v + "]");
          fXSVD = new GRBVar[pm.getServers().size()][pm.getServices().size()]
                  [pm.getServiceLength()][pm.getDemandsTrafficFlow()];
          for (int x = 0; x < pm.getServers().size(); x++)
@@ -72,12 +70,11 @@ public class Variables {
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                      fXSVD[x][s][v][d] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                             , Definitions.pXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "]");
-         // Additional
+                             , Definitions.fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "]");
          fX = new GRBVar[pm.getServers().size()];
          for (int x = 0; x < pm.getServers().size(); x++)
             this.fX[x] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                    , Definitions.pX + "[" + x + "]");
+                    , Definitions.fX + "[" + x + "]");
          gSVXY = new GRBVar[pm.getServices().size()][pm.getServiceLength()]
                  [pm.getServers().size()][pm.getServers().size()];
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -93,18 +90,19 @@ public class Variables {
                for (int p = 0; p < pm.getPaths().size(); p++)
                   hSVP[s][v][p] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
                           , Definitions.sSVP + "[" + s + "][" + v + "][" + p + "]");
-         dSP = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()];
+         dSPD = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               dSP[s][p] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                       , Definitions.dSP + "[" + s + "][" + p + "]");
-         qSVXP = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm.getPathsTrafficFlow()];
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  dSPD[s][p][d] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                          , Definitions.dSPD + "[" + s + "][" + p + "][" + d + "]");
+         ySVXD = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm.getDemandsTrafficFlow()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int x = 0; x < pm.getServers().size(); x++)
-                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                     qSVXP[s][v][x][p] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                             , Definitions.qSVXP + "[" + s + "][" + v + "][" + x + "][" + p + "]");
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     ySVXD[s][v][x][d] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                             , Definitions.ySVXD + "[" + s + "][" + v + "][" + x + "][" + d + "]");
          model.update();
       } catch (Exception ignored) {
       }

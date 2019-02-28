@@ -76,7 +76,7 @@ public class Constraints {
                   expr.addTerm(traf / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY)
                           , vars.hSVP[s][v][p]);
                }
-         model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uL[l], "");
+         model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uL[l], "link utilization");
          linearCostFunctions(expr, vars.kL[l]);
       }
    }
@@ -95,7 +95,7 @@ public class Constraints {
                                * (int) function.getAttribute(OVERHEAD_FUNCTION) / pm.getServers().get(x).getCapacity()
                        , vars.fXSV[x][s][v]);
             }
-         model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uX[x], "");
+         model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uX[x], "server utilization");
          linearCostFunctions(expr, vars.kX[x]);
       }
    }
@@ -105,33 +105,28 @@ public class Constraints {
          GRBLinExpr expr2 = new GRBLinExpr();
          expr2.multAdd(Auxiliary.costFunctions.getValues().get(l)[0], expr);
          expr2.addConstant(Auxiliary.costFunctions.getValues().get(l)[1]);
-         model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar, "");
+         model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar, "lcf - " + l);
       }
    }
 
    private void maxUtilization() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
-         model.getGrbModel().addConstr(vars.uX[x], GRB.LESS_EQUAL, vars.uMax, "");
+         model.getGrbModel().addConstr(vars.uX[x], GRB.LESS_EQUAL, vars.uMax, "maxU");
       for (int l = 0; l < pm.getLinks().size(); l++)
-         model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, "");
+         model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, "maxU");
    }
 
    private void serviceDelay(GRBModel initialModel) throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
-            GRBLinExpr serviceDelayExpr = new GRBLinExpr();
-            // add path link delay
-            serviceDelayExpr.add(linkDelayExpr(s, p));
-            // add processing delay
-//            serviceDelayExpr.add(processingDelayExpr(s, p));
-            // constraint service delay
-            model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL
-                    , (int) pm.getServices().get(s).getAttribute("max_delay"), "");
-            // save delay on auxiliary variable
-            model.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, vars.dSP[s][p], "");
-            // constraint auxiliary variable
-//            constraintVariableForServiceDelay(s, p);
-         }
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+               GRBLinExpr serviceDelayExpr = new GRBLinExpr();
+               serviceDelayExpr.add(linkDelayExpr(s, p)); // add path link delay
+//               serviceDelayExpr.add(processingDelayExpr(s, p)); // add processing delay
+               model.getGrbModel().addConstr(serviceDelayExpr, GRB.LESS_EQUAL
+                       , (int) pm.getServices().get(s).getAttribute(MAX_DELAY), "delay");
+               model.getGrbModel().addConstr(serviceDelayExpr, GRB.EQUAL, vars.dSPD[s][p][d], "");
+            }
    }
 
    private GRBLinExpr linkDelayExpr(int s, int p) {
@@ -155,7 +150,7 @@ public class Constraints {
                   double delay = (double) service.getFunctions().get(v).getAttribute(LOAD_FUNCTION)
                           * (int) path.getNodePath().get(n).getAttribute(PROCESS_DELAY)
                           / pm.getServers().get(x).getCapacity();
-                  processDelayExpr.addTerm(delay, vars.qSVXP[s][v][x][p]);
+                  processDelayExpr.addTerm(delay, vars.ySVXD[s][v][x][p]);
                }
       return processDelayExpr;
    }
@@ -173,7 +168,7 @@ public class Constraints {
 //                          * (double) function.getAttribute(LOAD_FUNCTION)
 //                          / pm.getServers().get(x).getCapacity();
 //                  double initialFunctionPlacement = 0;
-//                  if (initialModel.getVarByName(pXSV + "[" + x + "][" + s + "][" + v + "]")
+//                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]")
 //                          .get(GRB.DoubleAttr.X) == 1.0)
 //                     initialFunctionPlacement = 1;
 //                  double delay = load * (int) function.getAttribute(PROCESS_DELAY);
@@ -191,41 +186,41 @@ public class Constraints {
 //            GRBLinExpr trafficExpr = new GRBLinExpr();
 //            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
 //               trafficExpr.addTerm(pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.fXSVD[x][s][v][d]);
-//            model.getGrbModel().addConstr(vars.qSVXP[s][v][x][p], GRB.LESS_EQUAL, trafficExpr, "");
+//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.LESS_EQUAL, trafficExpr, "");
 //            double totalTraffic = 0;
 //            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
 //               totalTraffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
 //            GRBLinExpr pathExpr = new GRBLinExpr();
 //            pathExpr.addTerm(totalTraffic, vars.zSP[s][p]);
-//            model.getGrbModel().addConstr(vars.qSVXP[s][v][x][p], GRB.LESS_EQUAL, pathExpr, "");
+//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.LESS_EQUAL, pathExpr, "");
 //            GRBLinExpr jointExpr = new GRBLinExpr();
 //            jointExpr.add(pathExpr);
 //            jointExpr.addConstant(-totalTraffic);
 //            jointExpr.add(trafficExpr);
-//            model.getGrbModel().addConstr(vars.qSVXP[s][v][x][p], GRB.GREATER_EQUAL, jointExpr, "");
+//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.GREATER_EQUAL, jointExpr, "");
 //         }
 //   }
-   private void constraintVariableForServiceDelay(int s, int p) throws GRBException {
-      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-         for (int x = 0; x < pm.getServers().size(); x++) {
-            GRBLinExpr trafficExpr = new GRBLinExpr();
-            double totalTraffic = 0;
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-               trafficExpr.addTerm(pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.fXSVD[x][s][v][d]);
-               totalTraffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
-            }
-            model.getGrbModel().addConstr(vars.qSVXP[s][v][x][p], GRB.LESS_EQUAL, trafficExpr, "");
-            GRBLinExpr pathExpr = new GRBLinExpr();
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               pathExpr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d) / totalTraffic, vars.zSPD[s][p][d]);
-            model.getGrbModel().addConstr(vars.qSVXP[s][v][x][p], GRB.LESS_EQUAL, pathExpr, "");
-            GRBLinExpr jointExpr = new GRBLinExpr();
-            jointExpr.add(trafficExpr);
-            jointExpr.add(pathExpr);
-            jointExpr.addConstant(-1);
-            model.getGrbModel().addConstr(vars.qSVXP[s][v][x][p], GRB.GREATER_EQUAL, jointExpr, "");
-         }
-   }
+//   private void constraintVariableForServiceDelay(int s, int p) throws GRBException {
+//      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+//         for (int x = 0; x < pm.getServers().size(); x++) {
+//            GRBLinExpr trafficExpr = new GRBLinExpr();
+//            double totalTraffic = 0;
+//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+//               trafficExpr.addTerm(pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.fXSVD[x][s][v][d]);
+//               totalTraffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
+//            }
+//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.LESS_EQUAL, trafficExpr, "");
+//            GRBLinExpr pathExpr = new GRBLinExpr();
+//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+//               pathExpr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d) / totalTraffic, vars.zSPD[s][p][d]);
+//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.LESS_EQUAL, pathExpr, "");
+//            GRBLinExpr jointExpr = new GRBLinExpr();
+//            jointExpr.add(trafficExpr);
+//            jointExpr.add(pathExpr);
+//            jointExpr.addConstant(-1);
+//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.GREATER_EQUAL, jointExpr, "");
+//         }
+//   }
    ////////////////////////////////////////////////////////////////////////////////////////////
 
    ///////////////////////////////// Common constraints ///////////////////////////////////////
@@ -236,7 +231,7 @@ public class Constraints {
             GRBLinExpr expr = new GRBLinExpr();
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                expr.addTerm(1.0, vars.zSPD[s][p][d]);
-            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "");
+            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "rpc1");
          }
    }
 
@@ -251,7 +246,7 @@ public class Constraints {
             GRBLinExpr expr = new GRBLinExpr();
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                expr.addTerm(1.0, vars.zSPD[s][p][d]);
-            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.zSP[s][p], "");
+            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.zSP[s][p], "rpc2");
          }
    }
 
@@ -266,9 +261,9 @@ public class Constraints {
                GRBLinExpr expr2 = new GRBLinExpr();
                for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                   expr2.addTerm(1.0, vars.zSP[s][p]);
-               model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "");
+               model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, "pfc1");
             } else
-               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "");
+               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "pfc1");
          }
    }
 
@@ -285,7 +280,7 @@ public class Constraints {
                         if (pm.getServers().get(x).getParent()
                                 .equals(service.getTrafficFlow().getPaths().get(p).getNodePath().get(n)))
                            middleExpr.addTerm(1.0, vars.fXSVD[x][s][v][d]);
-                  model.getGrbModel().addConstr(vars.zSPD[s][p][d], GRB.LESS_EQUAL, middleExpr, "");
+                  model.getGrbModel().addConstr(vars.zSPD[s][p][d], GRB.LESS_EQUAL, middleExpr, "pfc2");
                }
       }
    }
@@ -298,7 +293,7 @@ public class Constraints {
                GRBLinExpr expr = new GRBLinExpr();
                for (int x = 0; x < pm.getServers().size(); x++)
                   expr.addTerm(1.0, vars.fXSVD[x][s][v][d]);
-               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "");
+               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, "fdc1");
             }
    }
 
@@ -308,14 +303,14 @@ public class Constraints {
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  model.getGrbModel().addConstr(vars.fXSVD[x][s][v][d], GRB.LESS_EQUAL, vars.fXSV[x][s][v], "");
+                  model.getGrbModel().addConstr(vars.fXSVD[x][s][v][d], GRB.LESS_EQUAL, vars.fXSV[x][s][v], "fdc2");
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++) {
                GRBLinExpr expr = new GRBLinExpr();
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   expr.addTerm(1.0, vars.fXSVD[x][s][v][d]);
-               model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.fXSV[x][s][v], "");
+               model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.fXSV[x][s][v], "fdc2");
             }
    }
 
@@ -342,7 +337,7 @@ public class Constraints {
 
                      expr2.addConstant(-1);
                      expr2.addTerm(1.0, vars.zSPD[s][p][d]);
-                     model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "");
+                     model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, "fdc3");
                   }
                }
          }
@@ -357,13 +352,13 @@ public class Constraints {
                for (int y = 0; y < pm.getServers().size(); y++) {
                   if (x == y) continue;
                   if (pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent())) continue;
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[x][s][v], "");
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[y][s][v], "");
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[x][s][v], "fdc4");
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[y][s][v], "fdc4");
                   GRBLinExpr expr = new GRBLinExpr();
                   expr.addTerm(1.0, vars.fXSV[x][s][v]);
                   expr.addTerm(1.0, vars.fXSV[y][s][v]);
                   expr.addConstant(-1.0);
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, "");
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, "fdc4");
                   expr = new GRBLinExpr();
                   for (int p = 0; p < pm.getPaths().size(); p++) {
                      Path pa = pm.getPaths().get(p);
@@ -372,7 +367,7 @@ public class Constraints {
                              .equals(pm.getServers().get(y).getParent()))
                         expr.addTerm(1.0, vars.hSVP[s][v][p]);
                   }
-                  model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.gSVXY[s][v][x][y], "");
+                  model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.gSVXY[s][v][x][y], "fdc4");
                }
    }
    ///////////////////////////////////////////////////////////////////////////////////////////
@@ -391,8 +386,8 @@ public class Constraints {
                expr.addTerm(1.0 / pm.getTotalNumFunctions(), vars.fXSV[x][s][v]);
                expr2.addTerm(1.0, vars.fXSV[x][s][v]);
             }
-         model.getGrbModel().addConstr(vars.fX[x], GRB.GREATER_EQUAL, expr, "");
-         model.getGrbModel().addConstr(vars.fX[x], GRB.LESS_EQUAL, expr2, "");
+         model.getGrbModel().addConstr(vars.fX[x], GRB.GREATER_EQUAL, expr, "ipc");
+         model.getGrbModel().addConstr(vars.fX[x], GRB.LESS_EQUAL, expr2, "ipc");
       }
    }
    /*****************************************************************************************/
@@ -404,7 +399,7 @@ public class Constraints {
          GRBLinExpr expr = new GRBLinExpr();
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             expr.addTerm(1.0, vars.zSP[s][p]);
-         model.getGrbModel().addConstr(expr, GRB.EQUAL, 1, "");
+         model.getGrbModel().addConstr(expr, GRB.EQUAL, 1, "ipmgrc");
       }
    }
    /*****************************************************************************************/
@@ -416,9 +411,9 @@ public class Constraints {
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (initialModel.getVarByName(pXSV + "[" + x + "][" + s + "][" + v + "]")
+                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]")
                           .get(GRB.DoubleAttr.X) == 1.0)
-                     model.getGrbModel().addConstr(vars.fXSV[x][s][v], GRB.EQUAL, 1, "");
+                     model.getGrbModel().addConstr(vars.fXSV[x][s][v], GRB.EQUAL, 1, "repc");
       }
    }
 
@@ -433,10 +428,10 @@ public class Constraints {
          GRBLinExpr expr = new GRBLinExpr();
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             expr.addTerm(1.0, vars.zSP[s][p]);
-         int minPaths = (int) pm.getServices().get(s).getAttribute("minPaths");
-         int maxPaths = (int) pm.getServices().get(s).getAttribute("maxPaths");
-         model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, minPaths, "");
-         model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxPaths, "");
+         int minPaths = (int) pm.getServices().get(s).getAttribute(MIN_PATHS);
+         int maxPaths = (int) pm.getServices().get(s).getAttribute(MAX_PATHS);
+         model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, minPaths, "rc");
+         model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxPaths, "rc");
       }
    }
 
@@ -447,8 +442,8 @@ public class Constraints {
             GRBLinExpr expr = new GRBLinExpr();
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                expr.addTerm(1.0, vars.fXSV[x][s][v]);
-            int functionsServer = (int) pm.getServices().get(s).getAttribute("functionsServer");
-            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, functionsServer, "");
+            int functionsServer = (int) pm.getServices().get(s).getAttribute(FUNCTION_SERVER);
+            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, functionsServer, "fxc");
          }
    }
 
@@ -466,8 +461,8 @@ public class Constraints {
             if (pm.getServers().get(x).getParent().getId().equals(dstNode.getId()))
                exprDst.addTerm(1.0, vars.fXSV[x][s][pm.getServices().get(s).getFunctions().size() - 1]);
          }
-         model.getGrbModel().addConstr(exprSrc, GRB.EQUAL, 1.0, "");
-         model.getGrbModel().addConstr(exprDst, GRB.EQUAL, 1.0, "");
+         model.getGrbModel().addConstr(exprSrc, GRB.EQUAL, 1.0, "sdc");
+         model.getGrbModel().addConstr(exprDst, GRB.EQUAL, 1.0, "sdc");
       }
    }
 }

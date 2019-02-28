@@ -88,6 +88,8 @@ public class OptimizationModel {
          printLog(log, INFO, "finished [" + objVal + "]");
          return objVal;
       } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
+         grbModel.computeIIS();
+         printISS();
          printLog(log, ERROR, "model is infeasible");
       } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INF_OR_UNBD)
          printLog(log, ERROR, "solution is inf. or unbd.");
@@ -96,6 +98,17 @@ public class OptimizationModel {
       else
          printLog(log, ERROR, "no solution [" + grbModel.get(GRB.IntAttr.Status) + "]");
       return -1;
+   }
+
+   private void printISS() throws GRBException {
+      printLog(log, INFO, "constraints in IIS: ");
+      for (GRBConstr constr : grbModel.getConstrs())
+         if (constr.get(GRB.IntAttr.IISConstr) > 0)
+            printLog(log, INFO, constr.get(GRB.StringAttr.ConstrName));
+      printLog(log, INFO, "variables in IIS: ");
+      for (GRBVar var : grbModel.getVars())
+         if (var.get(GRB.IntAttr.IISLB) > 0 || var.get(GRB.IntAttr.IISUB) > 0)
+            printLog(log, INFO, var.get(GRB.StringAttr.VarName));
    }
 
    public GRBModel getGrbModel() {

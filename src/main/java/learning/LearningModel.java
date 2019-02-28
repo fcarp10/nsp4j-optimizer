@@ -91,7 +91,7 @@ public class LearningModel {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                int pointer = x * pm.getTotalNumFunctions() + s * pm.getServices().get(s).getFunctions().size() + v;
-               if (initialPlacement.getVarByName(Definitions.pXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
+               if (initialPlacement.getVarByName(Definitions.fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
                   environment[pointer] = 1;
                else
                   environment[pointer] = 0;

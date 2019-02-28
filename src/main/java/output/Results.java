@@ -77,9 +77,7 @@ public class Results {
       if (initialPlacement != null)
          this.migrationsNum = countNumOfMigrations(initialPlacement);
       this.replicationsNum = countNumOfReplications();
-      convertElementaryVariablesToStrings();
-      if (additionalVariables)
-         convertAdditionalVariablesToStrings();
+      convertVariables(additionalVariables);
       setSummaryResults(luSummary, uL);
       setSummaryResults(xuSummary, uX);
       setSummaryResults(fuSummary, numOfFunctionsPerServer());
@@ -95,228 +93,306 @@ public class Results {
    }
 
    private int countNumOfMigrations(boolean[][][] initialPlacement) {
-      boolean[][][] pXSVvar = (boolean[][][]) rawVariables.get(pXSV);
       int totalMigrations = 0;
-      for (int x = 0; x < pm.getServers().size(); x++)
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (initialPlacement[x][s][v] && !pXSVvar[x][s][v])
-                  totalMigrations++;
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (initialPlacement[x][s][v] && !var[x][s][v])
+                     totalMigrations++;
+      } catch (Exception ignored) {
+      }
       return totalMigrations;
    }
 
    private int countNumOfReplications() {
-      boolean[][][] pXSVvar = (boolean[][][]) rawVariables.get(pXSV);
       int totalReplicas = 0;
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-            int replicasPerFunction = -1;
-            for (int x = 0; x < pm.getServers().size(); x++)
-               if (pXSVvar[x][s][v])
-                  replicasPerFunction++;
-            totalReplicas += replicasPerFunction;
-         }
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               int replicasPerFunction = -1;
+               for (int x = 0; x < pm.getServers().size(); x++)
+                  if (var[x][s][v])
+                     replicasPerFunction++;
+               totalReplicas += replicasPerFunction;
+            }
+      } catch (Exception ignored) {
+      }
       return totalReplicas;
    }
 
    public Map<Edge, Double> linkUtilizationMap() {
-      double[] uLvar = (double[]) rawVariables.get(uL);
       Map<Edge, Double> linkMapResults = new HashMap<>();
-      for (int l = 0; l < pm.getLinks().size(); l++)
-         linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(uLvar[l], 2));
+      try {
+         double[] var = (double[]) rawVariables.get(uL);
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(var[l], 2));
+      } catch (Exception ignored) {
+      }
       return linkMapResults;
    }
 
    public Map<Server, Double> serverUtilizationMap() {
-      double[] uXvar = (double[]) rawVariables.get(uX);
       Map<Server, Double> serverMapResults = new HashMap<>();
-      for (int x = 0; x < pm.getServers().size(); x++)
-         serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(uXvar[x], 2));
+      try {
+         double[] var = (double[]) rawVariables.get(uX);
+         for (int x = 0; x < pm.getServers().size(); x++)
+            serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(var[x], 2));
+      } catch (Exception ignored) {
+      }
       return serverMapResults;
    }
 
    List<Integer> numOfFunctionsPerServer() {
-      boolean[][][] pXSVvar = (boolean[][][]) rawVariables.get(pXSV);
       List<Integer> numOfFunctionsPerServer = new ArrayList<>();
-      for (int x = 0; x < pm.getServers().size(); x++) {
-         int numOfFunctions = 0;
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (pXSVvar[x][s][v])
-                  numOfFunctions++;
-         numOfFunctionsPerServer.add(numOfFunctions);
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
+         for (int x = 0; x < pm.getServers().size(); x++) {
+            int numOfFunctions = 0;
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (var[x][s][v])
+                     numOfFunctions++;
+            numOfFunctionsPerServer.add(numOfFunctions);
+         }
+      } catch (Exception ignored) {
       }
       return numOfFunctionsPerServer;
    }
 
    List<Double> serviceDelayList() {
-      double[][] dSPvar = (double[][]) rawVariables.get(dSP);
       List<Double> serviceDelayList = new ArrayList<>();
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            serviceDelayList.add(dSPvar[s][p]);
+      try {
+         double[][][] var = (double[][][]) rawVariables.get(dSPD);
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  serviceDelayList.add(var[s][p][d]);
+      } catch (Exception ignored) {
+      }
       return serviceDelayList;
    }
 
    private double avgPathLength() {
-      boolean[][] rSPvar = (boolean[][]) rawVariables.get(rSP);
       double avgPathLength = 0;
-      int usedPaths = 0;
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            if (rSPvar[s][p]) {
-               avgPathLength += pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getEdgePath().size();
-               usedPaths++;
-            }
-      if (usedPaths != 0)
-         avgPathLength = avgPathLength / usedPaths;
+      try {
+         boolean[][] var = (boolean[][]) rawVariables.get(zSP);
+         int usedPaths = 0;
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               if (var[s][p]) {
+                  avgPathLength += pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getEdgePath().size();
+                  usedPaths++;
+               }
+         if (usedPaths != 0)
+            avgPathLength = avgPathLength / usedPaths;
+      } catch (Exception ignored) {
+      }
       return avgPathLength;
    }
 
    private double trafficOnLinks() {
-      double[] uLvar = (double[]) rawVariables.get(uL);
       double trafficOnLinks = 0;
-      for (int l = 0; l < pm.getLinks().size(); l++)
-         trafficOnLinks += uLvar[l] * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
+      try {
+         double[] var = (double[]) rawVariables.get(uL);
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            trafficOnLinks += var[l] * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
+      } catch (Exception ignored) {
+      }
       return trafficOnLinks;
    }
 
-   private void convertElementaryVariablesToStrings() {
-      // elementary variables
-      boolean[][] rSPvar = (boolean[][]) rawVariables.get(rSP);
-      boolean[][][] rSPDvar = (boolean[][][]) rawVariables.get(rSPD);
-      boolean[][][] pXSVvar = (boolean[][][]) rawVariables.get(pXSV);
-      boolean[][][][] pXSVDvar = (boolean[][][][]) rawVariables.get(pXSVD);
-      double[] uXvar = (double[]) rawVariables.get(uX);
-      double[] uLvar = (double[]) rawVariables.get(uL);
-
-      // prepare zSP
-      List<String> strings = new ArrayList<>();
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            if (rSPvar[s][p])
-               strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): ["
-                       + pm.getServices().get(s).getId() + "]"
-                       + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
-      stringVariables.put(rSP, strings);
-
-      // prepare zSPD
-      strings = new ArrayList<>();
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               if (rSPDvar[s][p][d])
-                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + ","
-                          + (d + this.offset) + "): ["
-                          + pm.getServices().get(s).getId() + "]"
-                          + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
-                          + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
-      stringVariables.put(rSPD, strings);
-
-      // prepare fXSV
-      strings = new ArrayList<>();
-      for (int x = 0; x < pm.getServers().size(); x++)
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (pXSVvar[x][s][v])
-                  strings.add("(" + (x + this.offset) + "," + (s + this.offset) + ","
-                          + (v + this.offset) + "): ["
-                          + pm.getServers().get(x).getId() + "]["
-                          + pm.getServices().get(s).getId() + "]["
-                          + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
-      stringVariables.put(pXSV, strings);
-
-      // prepare fXSVD
-      strings = new ArrayList<>();
-      for (int x = 0; x < pm.getServers().size(); x++)
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (pXSVDvar[x][s][v][d])
-                     strings.add("(" + (x + this.offset) + "," + (s + this.offset)
-                             + "," + (v + this.offset) + "," + (d + this.offset) + "): ["
-                             + pm.getServers().get(x).getId() + "]["
-                             + pm.getServices().get(s).getId() + "]["
-                             + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
-                             + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
-      stringVariables.put(pXSVD, strings);
-
-      // prepare uX
-      strings = new ArrayList<>();
-      for (int x = 0; x < pm.getServers().size(); x++)
-         strings.add("(" + (x + this.offset) + "): ["
-                 + pm.getServers().get(x).getId() + "]["
-                 + uXvar[x] + "]");
-      stringVariables.put(uX, strings);
-
-      // prepare uL
-      strings = new ArrayList<>();
-      for (int l = 0; l < pm.getLinks().size(); l++)
-         strings.add("(" + (l + this.offset) + "): ["
-                 + pm.getLinks().get(l).getId() + "]["
-                 + uLvar[l] + "]");
-      stringVariables.put(uL, strings);
+   private void convertVariables(boolean additional) {
+      convertzSP();
+      convertzSPD();
+      convertfXSV();
+      convertfXSVD();
+      convertuX();
+      convertuL();
+      if (additional) {
+         convertfX();
+         convertgSVXY();
+         convertsSVP();
+         convertdSP();
+         convertqSVXP();
+      }
    }
 
-   private void convertAdditionalVariablesToStrings() {
-      // additional variables
-      boolean[] pXvar = (boolean[]) rawVariables.get(pX);
-      boolean[][][][] gSVXYvar = (boolean[][][][]) rawVariables.get(gSVXY);
-      boolean[][][] sSVPvar = (boolean[][][]) rawVariables.get(sSVP);
-      double[][] dSPvar = (double[][]) rawVariables.get(dSP);
-      double[][][][] qSVXPvar = (double[][][][]) rawVariables.get(qSVXP);
+   private void convertzSP() {
+      try {
+         boolean[][] var = (boolean[][]) rawVariables.get(zSP);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               if (var[s][p])
+                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): ["
+                          + pm.getServices().get(s).getId() + "]"
+                          + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
+         stringVariables.put(zSP, strings);
+      } catch (Exception ignored) {
+      }
+   }
 
-      // prepare fX
-      List<String> strings = new ArrayList<>();
-      for (int x = 0; x < pm.getServers().size(); x++)
-         if (pXvar[x])
-            strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]");
-      stringVariables.put(pX, strings);
+   private void convertzSPD() {
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(zSPD);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (var[s][p][d])
+                     strings.add("(" + (s + this.offset) + "," + (p + this.offset) + ","
+                             + (d + this.offset) + "): ["
+                             + pm.getServices().get(s).getId() + "]"
+                             + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
+                             + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
+         stringVariables.put(zSPD, strings);
+      } catch (Exception ignored) {
+      }
+   }
 
-      // prepare gSVXY
-      strings = new ArrayList<>();
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-            for (int x = 0; x < pm.getServers().size(); x++)
-               for (int y = 0; y < pm.getServers().size(); y++)
-                  if (x != y)
-                     if (gSVXYvar[s][v][x][y])
+   private void convertfXSV() {
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
+         List<String> strings = new ArrayList<>();
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (var[x][s][v])
+                     strings.add("(" + (x + this.offset) + "," + (s + this.offset) + ","
+                             + (v + this.offset) + "): ["
+                             + pm.getServers().get(x).getId() + "]["
+                             + pm.getServices().get(s).getId() + "]["
+                             + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
+         stringVariables.put(fXSV, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertfXSVD() {
+      try {
+         boolean[][][][] var = (boolean[][][][]) rawVariables.get(fXSVD);
+         List<String> strings = new ArrayList<>();
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     if (var[x][s][v][d])
+                        strings.add("(" + (x + this.offset) + "," + (s + this.offset)
+                                + "," + (v + this.offset) + "," + (d + this.offset) + "): ["
+                                + pm.getServers().get(x).getId() + "]["
+                                + pm.getServices().get(s).getId() + "]["
+                                + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
+                                + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
+         stringVariables.put(fXSVD, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertuX() {
+      try {
+         double[] var = (double[]) rawVariables.get(uX);
+         List<String> strings = new ArrayList<>();
+         for (int x = 0; x < pm.getServers().size(); x++)
+            strings.add("(" + (x + this.offset) + "): ["
+                    + pm.getServers().get(x).getId() + "]["
+                    + var[x] + "]");
+         stringVariables.put(uX, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertuL() {
+      try {
+         double[] var = (double[]) rawVariables.get(uL);
+         List<String> strings = new ArrayList<>();
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            strings.add("(" + (l + this.offset) + "): ["
+                    + pm.getLinks().get(l).getId() + "]["
+                    + var[l] + "]");
+         stringVariables.put(uL, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertfX() {
+      try {
+         boolean[] var = (boolean[]) rawVariables.get(fX);
+         List<String> strings = new ArrayList<>();
+         for (int x = 0; x < pm.getServers().size(); x++)
+            if (var[x])
+               strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]");
+         stringVariables.put(fX, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertgSVXY() {
+      try {
+         boolean[][][][] var = (boolean[][][][]) rawVariables.get(gSVXY);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               for (int x = 0; x < pm.getServers().size(); x++)
+                  for (int y = 0; y < pm.getServers().size(); y++)
+                     if (x != y)
+                        if (var[s][v][x][y])
+                           strings.add("(" + (s + this.offset) + "," + (v + this.offset)
+                                   + "," + (x + this.offset) + "," + (y + this.offset) + "): ["
+                                   + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
+         stringVariables.put(gSVXY, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertsSVP() {
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(sSVP);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               for (int p = 0; p < pm.getPaths().size(); p++)
+                  if (var[s][v][p])
+                     strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
+                             + pm.getPaths().get(p).getNodePath());
+         stringVariables.put(sSVP, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertdSP() {
+      try {
+         double[][][] var = (double[][][]) rawVariables.get(dSPD);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): "
+                          + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                          + "[" + Auxiliary.roundDouble(var[s][p][d], 2) + "]");
+         stringVariables.put(dSPD, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertqSVXP() {
+      try {
+         double[][][][] var = (double[][][][]) rawVariables.get(ySVXD);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               for (int x = 0; x < pm.getServers().size(); x++)
+                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                     if (var[s][v][x][p] > 0)
                         strings.add("(" + (s + this.offset) + "," + (v + this.offset)
-                                + "," + (x + this.offset) + "," + (y + this.offset) + "): ["
-                                + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
-      stringVariables.put(gSVXY, strings);
-
-      // prepare hSVP
-      strings = new ArrayList<>();
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-            for (int p = 0; p < pm.getPaths().size(); p++)
-               if (sSVPvar[s][v][p])
-                  strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
-                          + pm.getPaths().get(p).getNodePath());
-      stringVariables.put(sSVP, strings);
-
-      // prepare dSP
-      strings = new ArrayList<>();
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): "
-                    + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                    + "[" + Auxiliary.roundDouble(dSPvar[s][p], 2) + "]");
-      stringVariables.put(dSP, strings);
-
-      // prepare qSVXP
-      strings = new ArrayList<>();
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-            for (int x = 0; x < pm.getServers().size(); x++)
-               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                  if (qSVXPvar[s][v][x][p] > 0)
-                     strings.add("(" + (s + this.offset) + "," + (v + this.offset)
-                             + "," + (x + this.offset) + "," + (p + this.offset) + "): "
-                             + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                             + "[" + qSVXPvar[s][v][x][p] + "]");
-      stringVariables.put(qSVXP, strings);
+                                + "," + (x + this.offset) + "," + (p + this.offset) + "): "
+                                + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                                + "[" + var[s][v][x][p] + "]");
+         stringVariables.put(ySVXD, strings);
+      } catch (Exception ignored) {
+      }
    }
 
    private void setSummaryResults(double[] array, List var) {
