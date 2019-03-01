@@ -166,10 +166,12 @@ public class Results {
       List<Double> serviceDelayList = new ArrayList<>();
       try {
          double[][][] var = (double[][][]) rawVariables.get(dSPD);
+         boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  serviceDelayList.add(var[s][p][d]);
+                  if (var2[s][p][d])
+                     serviceDelayList.add(var[s][p][d]);
       } catch (Exception ignored) {
       }
       return serviceDelayList;
@@ -365,13 +367,15 @@ public class Results {
    private void convertdSP() {
       try {
          double[][][] var = (double[][][]) rawVariables.get(dSPD);
+         boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
          List<String> strings = new ArrayList<>();
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): "
-                          + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                          + "[" + Auxiliary.roundDouble(var[s][p][d], 2) + "]");
+                  if (var2[s][p][d])
+                     strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): "
+                             + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                             + "[" + Auxiliary.roundDouble(var[s][p][d], 2) + "]");
          stringVariables.put(dSPD, strings);
       } catch (Exception ignored) {
       }
