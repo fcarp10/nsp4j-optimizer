@@ -24,6 +24,7 @@ public class Variables {
    public GRBVar[][][] hSVP; // binary, traffic synchronization variable
    public GRBVar[][][] dSPD; // binary, service delay
    public GRBVar[][][][] ySVXD; // continuous, traffic variable (aux)
+   public GRBVar[][][] nXSV; // VM dimensioning
 
 
    public Variables(Parameters pm, GRBModel model) {
@@ -103,6 +104,12 @@ public class Variables {
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                      ySVXD[s][v][x][d] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                              , Definitions.ySVXD + "[" + s + "][" + v + "][" + x + "][" + d + "]");
+         nXSV = new GRBVar[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  nXSV[x][s][v] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER
+                          , Definitions.nXSV + "[" + x + "][" + s + "][" + v + "]");
          model.update();
       } catch (Exception ignored) {
       }

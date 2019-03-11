@@ -34,6 +34,7 @@ public class Definitions {
    public static final String sSVP = "hSVP";
    public static final String dSPD = "dSPD";
    public static final String ySVXD = "ySVXD";
+   public static final String nXSV = "nXSV";
    // parameters
    public static final String LOAD_FUNCTION = "load";
    public static final String OVERHEAD_FUNCTION = "overhead";
@@ -46,4 +47,21 @@ public class Definitions {
    public static final String MAX_PATHS = "max_paths";
    public static final String FUNCTION_SERVER = "function_server";
    public static final String MAX_DELAY = "max_delay";
+   // general constraints
+   public static final String RPC1 = "RPC1";
+   public static final String RPC2 = "RPC2";
+   public static final String PFC1 = "PFC1";
+   public static final String PFC2 = "PFC2";
+   public static final String FDC1 = "FDC1";
+   public static final String FDC2 = "FDC2";
+   public static final String FDC3 = "FDC3";
+   public static final String FDC4 = "FDC4";
+   // model specific constraints
+   public static final String IPC = "IPC";
+   public static final String IPMGRC = "IPMGRC";
+   public static final String REPC = "REPC";
+   // extra constraints
+   public static final String RC = "RC";
+   public static final String FXC = "FXC";
+   public static final String SDC = "SDC";
 }
