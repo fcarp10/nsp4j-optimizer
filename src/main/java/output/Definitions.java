@@ -31,22 +31,10 @@ public class Definitions {
    // additional variables
    public static final String fX = "fX";
    public static final String gSVXY = "gSVXY";
-   public static final String sSVP = "hSVP";
+   public static final String hSVP = "hSVP";
    public static final String dSPD = "dSPD";
    public static final String ySVXD = "ySVXD";
    public static final String nXSV = "nXSV";
-   // parameters
-   public static final String LOAD_FUNCTION = "load";
-   public static final String OVERHEAD_FUNCTION = "overhead";
-   public static final String SYNC_LOAD = "sync_load";
-   public static final String REPLICABLE_FUNCTION = "replicable";
-   public static final String PROCESS_DELAY = "process_delay";
-   public static final String LINK_CAPACITY = "capacity";
-   public static final String LINK_DELAY = "delay";
-   public static final String MIN_PATHS = "min_paths";
-   public static final String MAX_PATHS = "max_paths";
-   public static final String FUNCTION_SERVER = "function_server";
-   public static final String MAX_DELAY = "max_delay";
    // general constraints
    public static final String RPC1 = "RPC1";
    public static final String RPC2 = "RPC2";
@@ -64,4 +52,25 @@ public class Definitions {
    public static final String RC = "RC";
    public static final String FXC = "FXC";
    public static final String SDC = "SDC";
+   public static final String DIC1 = "DIC1";
+   public static final String DVC1 = "DVC1";
+   public static final String DVC2 = "DVC2";
+   public static final String DVC3 = "DVC3";
+   // service parameters
+   public static final String SERVICE_MIN_PATHS = "min_paths";
+   public static final String SERVICE_MAX_PATHS = "max_paths";
+   public static final String SERVICE_FUNCTIONS_PER_SERVER = "functions_per_server";
+   public static final String SERVICE_MAX_DELAY = "max_delay";
+   // function parameters
+   public static final String FUNCTION_REPLICABLE = "replicable";
+   public static final String FUNCTION_LOAD_RATIO = "load_ratio";
+   public static final String FUNCTION_OVERHEAD = "overhead";
+   public static final String FUNCTION_SYNC_LOAD_RATIO = "sync_load";
+   public static final String FUNCTION_PROCESS_DELAY = "process_delay";
+   public static final String FUNCTION_MAX_DELAY = "max_delay";
+   public static final String FUNCTION_MAX_INSTANCES = "max_instances";
+   public static final String FUNCTION_MAX_LOAD = "max_load";
+   // link parameters
+   public static final String LINK_CAPACITY = "capacity";
+   public static final String LINK_DELAY = "delay";
 }

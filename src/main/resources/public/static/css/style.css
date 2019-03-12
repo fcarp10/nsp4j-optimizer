@@ -13,7 +13,7 @@
     margin:20px 0 0 0;
 }
 
-.row{
+h4 {
   margin-top: 15px;
 }
 
@@ -129,7 +129,6 @@
     /*display: block;*/
     position: relative;
     padding-left: 25px;
-    margin-bottom: 15px;
     cursor: pointer;
     font-size: 16px;
     -webkit-user-select: none;

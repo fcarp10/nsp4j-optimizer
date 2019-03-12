@@ -1,9 +1,9 @@
-var shortPeriod = 300;
+var shortPeriod = 100;
 var longPeriod = 3000;
 var intervalMessages = setInterval(getMessage, longPeriod);
 var connected = false;
 var messages = [];
-var numMessages = 3;
+var numMessages = 13;
 
 function getMessage() {
     try {
@@ -203,32 +203,33 @@ function setDecimals(value) {
 }
 
 function generateScenario() {
-    //model
+    // model
     var inputFileName = document.getElementById("inputFileName").value;
     var objectiveFunction = document.getElementById("objectiveFunction").value;
     var maximization = $("#max").is(":checked");
     var weights = parseFloat(document.getElementById("lu").value).toFixed(1) + "-" + parseFloat(document.getElementById("xu").value).toFixed(1) + "-" + parseFloat(document.getElementById("maxU").value).toFixed(1);
     var model = document.getElementById("model").value;
-
-    // Common constraints
-    var rpc1 = $("#rpc1").is(":checked");
-    var rpc2 = $("#rpc2").is(":checked");
-    var pfc1 = $("#pfc1").is(":checked");
-    var pfc2 = $("#pfc2").is(":checked");
-    var fdc1 = $("#fdc1").is(":checked");
-    var fdc2 = $("#fdc2").is(":checked");
-    var fdc3 = $("#fdc3").is(":checked");
-    var fdc4 = $("#fdc4").is(":checked");
-
-    // Model specific constraints
-    var ipc = $("#ipc").is(":checked");
-    var ipmgrc = $("#ipmgrc").is(":checked");
-    var repc = $("#repc").is(":checked");
-
-    // Extra constraints
-    var rc = $("#rc").is(":checked");
-    var fxc = $("#fxc").is(":checked");
-    var sdc = $("#sdc").is(":checked");
+    // general constraints
+    var RPC1 = $("#RPC1").is(":checked");
+    var RPC2 = $("#RPC2").is(":checked");
+    var PFC1 = $("#PFC1").is(":checked");
+    var PFC2 = $("#PFC2").is(":checked");
+    var FDC1 = $("#FDC1").is(":checked");
+    var FDC2 = $("#FDC2").is(":checked");
+    var FDC3 = $("#FDC3").is(":checked");
+    var FDC4 = $("#FDC4").is(":checked");
+    // specific constraints
+    var IPC = $("#IPC").is(":checked");
+    var IPMGRC = $("#IPMGRC").is(":checked");
+    var REPC = $("#REPC").is(":checked");
+    // extra constraints
+    var RC = $("#RC").is(":checked");
+    var FXC = $("#FXC").is(":checked");
+    var SDC = $("#SDC").is(":checked");
+    var DIC1 = $("#DIC1").is(":checked");
+    var DVC1 = $("#DVC1").is(":checked");
+    var DVC2 = $("#DVC2").is(":checked");
+    var DVC3 = $("#DVC3").is(":checked");
 
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
@@ -237,23 +238,27 @@ function generateScenario() {
         weights: weights,
         model: model,
         constraints :{
-            // Common constraints
-            rpc1: rpc1,
-            rpc2: rpc2,
-            pfc1: pfc1,
-            pfc2: pfc2,
-            fdc1: fdc1,
-            fdc2: fdc2,
-            fdc3: fdc3,
-            fdc4: fdc4,
-            // Model specific constraints
-            ipc: ipc,
-            ipmgrc: ipmgrc,
-            repc: repc,
-            // Extra constraints
-            rc: rc,
-            fxc: fxc,
-            sdc: sdc
+            // general constraints
+            RPC1: RPC1,
+            RPC2: RPC2,
+            PFC1: PFC1,
+            PFC2: PFC2,
+            FDC1: FDC1,
+            FDC2: FDC2,
+            FDC3: FDC3,
+            FDC4: FDC4,
+            // specific constraints
+            IPC: IPC,
+            IPMGRC: IPMGRC,
+            REPC: REPC,
+            // extra constraints
+            RC: RC,
+            FXC: FXC,
+            SDC: SDC,
+            DIC1: DIC1,
+            DVC1: DVC1,
+            DVC2: DVC2,
+            DVC3: DVC3
         }
     });
 

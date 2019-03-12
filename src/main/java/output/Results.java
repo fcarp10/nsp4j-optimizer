@@ -7,10 +7,7 @@ import manager.Parameters;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static output.Definitions.*;
 
@@ -24,29 +21,31 @@ public class Results {
    @JsonIgnore
    private transient int offset;
    @JsonIgnore
-   private transient Map<String, Object> rawVariables;
-   // for printing
+   private transient LinkedHashMap<String, Object> rawVariables;
+   //////////////////
+   // for printing //
+   //////////////////
    private transient Scenario scenario;
+   // variables
+   private LinkedHashMap<String, List<String>> stringVariables;
    // summary
-   private double[] luSummary;
-   private double[] xuSummary;
-   private double[] fuSummary;
-   private double[] sdSummary;
    private double avgPathLength;
    private double totalTraffic;
    private double trafficLinks;
    private int migrationsNum;
    private int replicationsNum;
    private double objVal;
-   // variables
-   private Map<String, List<String>> stringVariables;
+   private double[] luSummary;
+   private double[] xuSummary;
+   private double[] fuSummary;
+   private double[] sdSummary;
    // graphs
    private List<GraphData> luGraph;
    private List<GraphData> xuGraph;
    private List<GraphData> sdGraph;
 
    public Results() {
-      stringVariables = new HashMap<>();
+      stringVariables = new LinkedHashMap<>();
       luGraph = new ArrayList<>();
       xuGraph = new ArrayList<>();
       sdGraph = new ArrayList<>();
@@ -63,8 +62,8 @@ public class Results {
       luGraph = new ArrayList<>();
       xuGraph = new ArrayList<>();
       sdGraph = new ArrayList<>();
-      rawVariables = new HashMap();
-      stringVariables = new HashMap<>();
+      rawVariables = new LinkedHashMap();
+      stringVariables = new LinkedHashMap<>();
    }
 
    public void setVariable(String key, Object variable) {
@@ -219,6 +218,7 @@ public class Results {
          convertsSVP();
          convertdSP();
          convertqSVXP();
+         convertnXSV();
       }
    }
 
@@ -351,7 +351,7 @@ public class Results {
 
    private void convertsSVP() {
       try {
-         boolean[][][] var = (boolean[][][]) rawVariables.get(sSVP);
+         boolean[][][] var = (boolean[][][]) rawVariables.get(hSVP);
          List<String> strings = new ArrayList<>();
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -359,7 +359,7 @@ public class Results {
                   if (var[s][v][p])
                      strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
                              + pm.getPaths().get(p).getNodePath());
-         stringVariables.put(sSVP, strings);
+         stringVariables.put(hSVP, strings);
       } catch (Exception ignored) {
       }
    }
@@ -395,6 +395,21 @@ public class Results {
                                 + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
                                 + "[" + var[s][v][x][p] + "]");
          stringVariables.put(ySVXD, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertnXSV() {
+      try {
+         double[][][] var = (double[][][]) rawVariables.get(nXSV);
+         List<String> strings = new ArrayList<>();
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (var[x][s][v] > 0)
+                     strings.add("(" + (x + this.offset) + "," + (s + this.offset) + "," + (v + this.offset) + "): "
+                             + "[" + var[x][s][v] + "]");
+         stringVariables.put(nXSV, strings);
       } catch (Exception ignored) {
       }
    }

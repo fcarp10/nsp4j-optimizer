@@ -32,32 +32,18 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-9">
+        <div class="col-8">
             <h4>Topology</h4>
             <hr>
             <div id="cy"></div>
         </div>
-        <div class="col-3">
-            <h4>Parameters</h4>
+        <div class="col-2">
+            <h4>Model</h4>
             <hr>
             <div class="row">
-                <div class="col-8">
+                <div class="col-12">
                     <div class="form-group">
-                        <label for="inputFileName">Input files name</label>
-                        <input type="text" class="form-control" id="inputFileName" placeholder="file name"
-                               value="example">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-dark button-width button-margin"
-                                    onClick="loadTopology()">
-                                Load
-                            </button>
-                            <button type="button" class="btn btn-light button-width button-margin"
-                                    onClick="generatePaths()">Paths
-                            </button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="my-1 mr-2" for="objectiveFunction">Objective function</label>
+                        <label>Objective function</label>
                         <select class="form-control custom-select my-1 mr-sm-2" id="objectiveFunction">
                             <option value="num_of_servers">num of servers</option>
                             <option value="costs">linear cost functions</option>
@@ -65,119 +51,157 @@
                             <option value="max_utilization">max utilization</option>
                         </select>
                     </div>
-                    <div>
-                        <form>
-                            <label class="radio">Min
-                                <input type="radio" name="min-max" id="min" checked>
-                                <span class="checkround"></span>
-                            </label>
-                            <label class="radio">Max
-                                <input type="radio" name="min-max" id="max">
-                                <span class="checkround"></span>
-                            </label>
-                        </form>
+                    <div class="form-group">
+                        <label class="radio">Min
+                            <input type="radio" name="min-max" id="min" checked>
+                            <span class="checkround"></span>
+                        </label>
+                        <label class="radio">Max
+                            <input type="radio" name="min-max" id="max">
+                            <span class="checkround"></span>
+                        </label>
                     </div>
                     <div class="form-group">
-                        <label for="inputFileName">Weights [links, servers, max]</label>
-                        <div class="input-group-prepend">
-                            <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="lu" placeholder="0.0" value="0.0">
-                            <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="xu" placeholder="0.0" value="1.0">
-                            <input type="number" step="0.1" onchange="setDecimals(this.value)" class="form-control input-number" id="maxU" placeholder="0.0" value="0.0">
+                        <label>Weights [links, servers, max]</label>
+                        <div class="input-group-prepend my-1 mr-sm-2">
+                            <input type="number" step="0.1" onchange="setDecimals(this.value)"
+                                   class="form-control input-number"
+                                   id="lu" placeholder="0.0" value="0.0">
+                            <input type="number" step="0.1" onchange="setDecimals(this.value)"
+                                   class="form-control input-number"
+                                   id="xu" placeholder="0.0" value="1.0">
+                            <input type="number" step="0.1" onchange="setDecimals(this.value)"
+                                   class="form-control input-number"
+                                   id="maxU" placeholder="0.0" value="0.0">
                         </div>
-
                     </div>
-                    <div class="form-group">
-                        <label class="my-1 mr-2" for="model">Model</label>
-                        <select class="form-control custom-select my-1 mr-sm-2" id="model" onChange="check(this);">
-                            <option value="init">initial placement</option>
-                            <option value="mgr">migration</option>
-                            <option value="rep">replication</option>
-                            <option value="mgrep">migration and replication</option>
-                            <option value="all">all cases</option>
-                            <option value="mgrep_rl">migration and replication (RL)</option>
-                        </select>
-                    </div>
-                    <div class="btn-group">
-                        <button type="button" id="run_button" class="btn btn-success button-width" onClick="runOpt()"
-                                disabled>Run
-                        </button>
-                        <button type="button" id="stop_button" class="btn btn-danger button-width" onClick="stopOpt()"
-                                disabled>Stop
-                        </button>
-                    </div>
-                    <div class="div div-output-emphasis" id="message"></div>
                 </div>
-                <div class="col-4">
-                    <h5>Constraints</h5>
+            </div>
+            <div class="row">
+                <div class="col-6">
                     <div class="form-group">
-                        <label class="my-1 mr-2" for="objectiveFunction">Common</label>
+                        <label>General</label>
                         <label class="check ">RPC1
-                            <input type="checkbox" id="rpc1" checked>
+                            <input type="checkbox" id="RPC1" checked>
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">RPC2
-                            <input type="checkbox" id="rpc2" checked>
+                            <input type="checkbox" id="RPC2" checked>
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">PFC1
-                            <input type="checkbox" id="pfc1" checked>
+                            <input type="checkbox" id="PFC1" checked>
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">PFC2
-                            <input type="checkbox" id="pfc2" checked>
+                            <input type="checkbox" id="PFC2" checked>
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">FDC1
-                            <input type="checkbox" id="fdc1" checked>
+                            <input type="checkbox" id="FDC1" checked>
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">FDC2
-                            <input type="checkbox" id="fdc2" checked>
+                            <input type="checkbox" id="FDC2" checked>
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">FDC3
-                            <input type="checkbox" id="fdc3" checked>
+                            <input type="checkbox" id="FDC3" checked>
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">FDC4
-                            <input type="checkbox" id="fdc4" checked>
+                            <input type="checkbox" id="FDC4" checked>
                             <span class="checkmark"></span>
                         </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="my-1 mr-2" for="objectiveFunction">Specific</label>
+                        <label>Specific</label>
                         <label class="check ">IPC
-                            <input type="checkbox" id="ipc" checked>
+                            <input type="checkbox" id="IPC" checked>
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">IPMGRC
-                            <input type="checkbox" id="ipmgrc" checked>
+                            <input type="checkbox" id="IPMGRC" checked>
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">REPC
-                            <input type="checkbox" id="repc">
+                            <input type="checkbox" id="REPC">
                             <span class="checkmark"></span>
                         </label>
-
                     </div>
+                </div>
+                <div class="col-6">
                     <div class="form-group">
-                        <label class="my-1 mr-2" for="objectiveFunction">Extra</label>
+                        <label>Extra</label>
                         <label class="check ">RC
-                            <input type="checkbox" id="rc">
+                            <input type="checkbox" id="RC">
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">FXC
-                            <input type="checkbox" id="fxc">
+                            <input type="checkbox" id="FXC">
                             <span class="checkmark"></span>
                         </label>
                         <label class="check ">SDC
-                            <input type="checkbox" id="sdc">
+                            <input type="checkbox" id="SDC">
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">DIC1
+                            <input type="checkbox" id="DIC1">
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">DVC1
+                            <input type="checkbox" id="DVC1">
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">DVC2
+                            <input type="checkbox" id="DVC2">
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">DVC3
+                            <input type="checkbox" id="DVC3">
                             <span class="checkmark"></span>
                         </label>
                     </div>
                 </div>
             </div>
+
         </div>
+        <div class="col-2">
+            <h4>Parameters</h4>
+            <hr>
+            <div class="form-group">
+                <label>Parameters file</label>
+                <input type="text" class="form-control my-1 mr-sm-2" id="inputFileName" placeholder="file name"
+                       value="example">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-dark button-width button-margin" onClick="loadTopology()">
+                        Load
+                    </button>
+                    <button type="button" class="btn btn-light button-width button-margin"
+                            onClick="generatePaths()">Paths
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Scenario</label>
+                <select class="form-control custom-select my-1 mr-sm-2" id="model" onChange="check(this);">
+                    <option value="init">initial placement</option>
+                    <option value="mgr">migration</option>
+                    <option value="rep">replication</option>
+                    <option value="mgrep">migration and replication</option>
+                    <option value="all">all cases</option>
+                    <option value="mgrep_rl">migration and replication (RL)</option>
+                </select>
+            </div>
+            <div class="btn-group">
+                <button type="button" id="run_button" class="btn btn-success button-width" onClick="runOpt()"
+                        disabled>Run
+                </button>
+                <button type="button" id="stop_button" class="btn btn-danger button-width" onClick="stopOpt()"
+                        disabled>Stop
+                </button>
+            </div>
+            <div class="div div-output-emphasis" id="message"></div>
+        </div>
+
     </div>
 
     <div id="results" class="row">

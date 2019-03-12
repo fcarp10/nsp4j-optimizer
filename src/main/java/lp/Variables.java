@@ -90,7 +90,7 @@ public class Variables {
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int p = 0; p < pm.getPaths().size(); p++)
                   hSVP[s][v][p] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                          , Definitions.sSVP + "[" + s + "][" + v + "][" + p + "]");
+                          , Definitions.hSVP + "[" + s + "][" + v + "][" + p + "]");
          dSPD = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)

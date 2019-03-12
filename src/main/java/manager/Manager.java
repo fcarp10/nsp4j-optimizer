@@ -212,9 +212,10 @@ public class Manager {
       // secondary variables
       results.setVariable(fX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fX));
       results.setVariable(gSVXY, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().gSVXY));
-      results.setVariable(sSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().hSVP));
+      results.setVariable(hSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().hSVP));
       results.setVariable(dSPD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSPD));
       results.setVariable(ySVXD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().ySVXD));
+      results.setVariable(nXSV, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().nXSV));
       results.initializeResults(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSV), true);
       return results;
    }
