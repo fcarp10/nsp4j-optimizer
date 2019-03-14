@@ -144,8 +144,10 @@ public class Constraints {
                pathExpr.addConstant(Integer.MAX_VALUE);
                pathExpr.addTerm(-Integer.MAX_VALUE, vars.zSPD[s][p][d]);
                GRBLinExpr totalDelayExpr = new GRBLinExpr();
-               totalDelayExpr.add(processDelayExpr);
-               totalDelayExpr.add(linkDelayExpr(s, p)); // add propagation delay
+               totalDelayExpr.add(processDelayExpr); // adds processing delay
+               totalDelayExpr.add(linkDelayExpr(s, p)); // adds propagation delay
+               if (initialModel != null)
+                  totalDelayExpr.add(migrationDelayExpr(initialModel, s, d, p)); // adds migration delay
                model.getGrbModel().addConstr(totalDelayExpr, GRB.LESS_EQUAL, pathExpr, "delay");
                model.getGrbModel().addConstr(totalDelayExpr, GRB.EQUAL, vars.dSPD[s][p][d], "delay");
             }
@@ -171,72 +173,18 @@ public class Constraints {
       return linExpr;
    }
 
-//   private GRBLinExpr migrationDelayExpr(int s, int p, GRBModel initialModel) throws GRBException {
-//      Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
-//      GRBLinExpr migrationDelayExpr = new GRBLinExpr();
-//      for (int n = 0; n < path.getNodePath().size(); n++)
-//         for (int x = 0; x < pm.getServers().size(); x++) {
-//            if (!pm.getServers().get(x).getParent().equals(path.getNodePath().get(n))) continue;
-//            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-//               Function function = pm.getServices().get(s).getFunctions().get(v);
-//               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-//                  double load = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-//                          * (double) function.getAttribute(FUNCTION_LOAD_RATIO)
-//                          / pm.getServers().get(x).getCapacity();
-//                  double initialFunctionPlacement = 0;
-//                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]")
-//                          .get(GRB.DoubleAttr.X) == 1.0)
-//                     initialFunctionPlacement = 1;
-//                  double delay = load * (int) function.getAttribute(FUNCTION_PROCESS_DELAY);
-//                  migrationDelayExpr.addTerm(delay, vars.qSPX[s][p][x]);
-//                  migrationDelayExpr.addTerm(-delay * initialFunctionPlacement, vars.qSPX[s][p][x]);
-//               }
-//            }
-//         }
-//      return migrationDelayExpr;
-//   }
-
-   //   private void constraintVariableForServiceDelay(int s, int p) throws GRBException {
-//      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-//         for (int x = 0; x < pm.getServers().size(); x++) {
-//            GRBLinExpr trafficExpr = new GRBLinExpr();
-//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-//               trafficExpr.addTerm(pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.fXSVD[x][s][v][d]);
-//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.LESS_EQUAL, trafficExpr, "");
-//            double totalTraffic = 0;
-//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-//               totalTraffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
-//            GRBLinExpr pathExpr = new GRBLinExpr();
-//            pathExpr.addTerm(totalTraffic, vars.zSP[s][p]);
-//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.LESS_EQUAL, pathExpr, "");
-//            GRBLinExpr jointExpr = new GRBLinExpr();
-//            jointExpr.add(pathExpr);
-//            jointExpr.addConstant(-totalTraffic);
-//            jointExpr.add(trafficExpr);
-//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.GREATER_EQUAL, jointExpr, "");
-//         }
-//   }
-//   private void constraintVariableForServiceDelay(int s, int p) throws GRBException {
-//      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-//         for (int x = 0; x < pm.getServers().size(); x++) {
-//            GRBLinExpr trafficExpr = new GRBLinExpr();
-//            double totalTraffic = 0;
-//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-//               trafficExpr.addTerm(pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.fXSVD[x][s][v][d]);
-//               totalTraffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
-//            }
-//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.LESS_EQUAL, trafficExpr, "");
-//            GRBLinExpr pathExpr = new GRBLinExpr();
-//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-//               pathExpr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d) / totalTraffic, vars.zSPD[s][p][d]);
-//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.LESS_EQUAL, pathExpr, "");
-//            GRBLinExpr jointExpr = new GRBLinExpr();
-//            jointExpr.add(trafficExpr);
-//            jointExpr.add(pathExpr);
-//            jointExpr.addConstant(-1);
-//            model.getGrbModel().addConstr(vars.ySVXD[s][v][x][p], GRB.GREATER_EQUAL, jointExpr, "");
-//         }
-//   }
+   private GRBLinExpr migrationDelayExpr(GRBModel initialModel, int s, int d, int p) throws GRBException {
+      GRBLinExpr linExpr = new GRBLinExpr();
+      Service service = pm.getServices().get(s);
+      Path path = service.getTrafficFlow().getPaths().get(p);
+      for (int n = 0; n < path.getNodePath().size(); n++)
+         for (int x = 0; x < pm.getServers().size(); x++)
+            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
+               for (int v = 0; v < service.getFunctions().size(); v++)
+                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 0.0)
+                     linExpr.addTerm(1.0, vars.ySVXD[s][v][x][d]);
+      return linExpr;
+   }
    ////////////////////////////////////////////////////////////////////////////////////////////
 
    ///////////////////////////////// Common constraints ///////////////////////////////////////

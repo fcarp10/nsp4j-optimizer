@@ -21,7 +21,7 @@ serviceChains:
       "max_delay": 50
     }
 # function definitions
-functions:
+functionTypes:
   - type: 0
     attributes: {
       "replicable": false,
@@ -51,5 +51,5 @@ trafficFlows:
     dst: "n6"
     minDem: 2
     maxDem: 2
-    minBw: 500
-    maxBw: 500
+    minBw: 250
+    maxBw: 250
