@@ -3,10 +3,7 @@ package manager;
 import gui.WebClient;
 import gui.WebServer;
 import gui.elements.Scenario;
-import gurobi.GRB;
-import gurobi.GRBException;
-import gurobi.GRBLinExpr;
-import gurobi.GRBModel;
+import gurobi.*;
 import learning.LearningModel;
 import lp.Constraints;
 import lp.OptimizationModel;
@@ -23,6 +20,8 @@ import output.ResultsManager;
 import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
+
+import java.util.ArrayList;
 
 import static output.Auxiliary.*;
 import static output.Definitions.*;
@@ -153,7 +152,7 @@ public class Manager {
       Results results;
       if (objVal != -1) {
          String resultsFileName = pm.getScenario() + "_" + modelName;
-         results = generateResultsForLP(model, scenario);
+         results = generateResultsForLP(model, scenario, initialModel);
          resultsManager.exportJsonFile(resultsFileName, results);
          resultsManager.exportTextFile(resultsFileName, results);
          if (modelName.equals(INITIAL_PLACEMENT))
@@ -168,7 +167,7 @@ public class Manager {
       LearningModel learningModel = new LearningModel(pm);
       printLog(log, INFO, "running RL model");
       learningModel.run(initialModel, Auxiliary.roundDouble(mgrRepModel.get(GRB.DoubleAttr.ObjVal), 4));
-      Results results = generateResultsForRL(learningModel, scenario);
+      Results results = generateResultsForRL(learningModel, scenario, initialModel);
       resultsManager.exportJsonFile(resultsFileName, results);
       resultsManager.exportTextFile(resultsFileName, results);
       WebClient.updateResultsToWebApp(results);
@@ -200,7 +199,7 @@ public class Manager {
       return expr;
    }
 
-   private static Results generateResultsForLP(OptimizationModel optimizationModel, Scenario scenario) throws GRBException {
+   private static Results generateResultsForLP(OptimizationModel optimizationModel, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
       // primary variables
       results.setVariable(zSP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().zSP));
@@ -216,11 +215,11 @@ public class Manager {
       results.setVariable(dSPD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSPD));
       results.setVariable(ySVXD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().ySVXD));
       results.setVariable(nXSV, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().nXSV));
-      results.initializeResults(optimizationModel.getObjVal(), Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSV), true);
+      results.initializeResults(optimizationModel.getObjVal(), convertInitialPlacement(initialModel), true);
       return results;
    }
 
-   private static Results generateResultsForRL(LearningModel learningModel, Scenario scenario) {
+   private static Results generateResultsForRL(LearningModel learningModel, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
       results.setVariable(zSP, learningModel.getrSP());
       results.setVariable(zSPD, learningModel.getrSPD());
@@ -229,8 +228,21 @@ public class Manager {
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
       results.setVariable(dSPD, learningModel.getdS());
-      results.initializeResults(learningModel.getObjVal(), learningModel.getpXSV(), false);
+      results.initializeResults(learningModel.getObjVal(), convertInitialPlacement(initialModel), false);
       return results;
+   }
+
+   private static boolean[][][] convertInitialPlacement(GRBModel initialModel) throws GRBException {
+      boolean[][][] initialPlacement = null;
+      if (initialModel != null) {
+         initialPlacement = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
+                     initialPlacement[x][s][v] = true;
+      }
+      return initialPlacement;
    }
 
    public static boolean isInterrupted() {
