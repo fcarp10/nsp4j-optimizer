@@ -1,8 +1,6 @@
-var refreshPeriod = 1000;
 var cy;
 var servers;
 var links;
-setInterval(updateGraph, refreshPeriod);
 initializeGraph();
 
 function initializeGraph() {
@@ -48,7 +46,6 @@ function initializeGraph() {
                 'control-point-step-size': 10
             })
     });
-
     servers = getServers();
     links = getLinks();
     cy.add(getNodes());
@@ -57,7 +54,6 @@ function initializeGraph() {
     cy.layout({
         name: 'preset'
     }).run();
-
 }
 
 function areEqual(obj1, obj2) {

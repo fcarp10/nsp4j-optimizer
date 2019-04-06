@@ -9,6 +9,7 @@ import lp.Constraints;
 import lp.OptimizationModel;
 import lp.Variables;
 import org.apache.commons.io.FilenameUtils;
+import org.bytedeco.javacpp.presets.opencv_core;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
@@ -151,10 +152,8 @@ public class Manager {
       double objVal = model.run();
       Results results;
       if (objVal != -1) {
-         String resultsFileName = pm.getScenario() + "_" + modelName;
          results = generateResultsForLP(model, scenario, initialModel);
-         resultsManager.exportJsonFile(resultsFileName, results);
-         resultsManager.exportTextFile(resultsFileName, results);
+         resultsManager.exportJsonFile(generateFileName(scenario, modelName), results);
          if (modelName.equals(INITIAL_PLACEMENT))
             resultsManager.exportModel(model.getGrbModel(), scenario.getInputFileName());
          WebClient.updateResultsToWebApp(results);
@@ -169,7 +168,6 @@ public class Manager {
       learningModel.run(initialModel, Auxiliary.roundDouble(mgrRepModel.get(GRB.DoubleAttr.ObjVal), 4));
       Results results = generateResultsForRL(learningModel, scenario, initialModel);
       resultsManager.exportJsonFile(resultsFileName, results);
-      resultsManager.exportTextFile(resultsFileName, results);
       WebClient.updateResultsToWebApp(results);
    }
 
@@ -243,6 +241,17 @@ public class Manager {
                      initialPlacement[x][s][v] = true;
       }
       return initialPlacement;
+   }
+
+   private static String generateFileName(Scenario scenario, String modelString) {
+      String fileName = pm.getScenario() + "_" + modelString + "_";
+      if (String.valueOf(scenario.getWeights()).equals("1.0-0.0-0.0"))
+         fileName += "LLB";
+      if (String.valueOf(scenario.getWeights()).equals("0.0-1.0-0.0"))
+         fileName += "XLB";
+      if (String.valueOf(scenario.getWeights()).equals("0.0-0.0-1.0"))
+         fileName += "SD";
+      return fileName;
    }
 
    public static boolean isInterrupted() {

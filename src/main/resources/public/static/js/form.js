@@ -1,63 +1,60 @@
 var shortPeriod = 100;
 var longPeriod = 3000;
 var intervalMessages = setInterval(getMessage, longPeriod);
-var connected = false;
 var messages = [];
 var numMessages = 13;
 
 function getMessage() {
     try {
         var message = null;
+        var error = false;
         $.ajax
-        ({
-            url: "message",
-            type: "GET",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
-        if (message != null && message != "") {
-            messages.push(message);
-            document.getElementById("message").innerText = "";
-            for (var i = 0; i < messages.length; i++)
-                document.getElementById("message").innerText += messages[i] +"\n";
-            if(messages.length >= numMessages)
-               messages.shift();
-            if(message == "Info: ready"){
-                document.getElementById("run_button").removeAttribute("disabled");
-                document.getElementById("stop_button").setAttribute("disabled", "true");
-                longRefresh();
-            }
-            if(message == "Info: topology loaded"){
-                document.getElementById("run_button").removeAttribute("disabled");
-                document.getElementById("stop_button").setAttribute("disabled", "true");
-                longRefresh();
-            }
-            if(!connected){
-                shortRefresh();
-                connected = true;
-            }
-        }
-        if(message  == null) {
-            document.getElementById("message").innerText = "Info: framework not running";
-            document.getElementById("run_button").setAttribute("disabled", "true");
-            document.getElementById("stop_button").setAttribute("disabled", "true");
-            clearInterval(intervalMessages);
-            if(connected) {
-                longRefresh();
-                connected = false;
-            }
-        }
+            ({
+                url: "message",
+                type: "GET",
+                async: false,
+                success: function (ans) { successConnection(ans); },
+                error: function () { errorConnection(); }
+            });
     }
     catch (e) {
         return 0;
     }
 }
 
+function errorConnection() {
+    if (document.getElementById("message").innerText != "Info: framework not running") {
+        document.getElementById("message").innerText = "Info: framework not running";
+        document.getElementById("run_button").setAttribute("disabled", "true");
+        document.getElementById("stop_button").setAttribute("disabled", "true");
+        clearInterval(intervalMessages);
+        longRefresh();
+    }
+}
+
+function successConnection(message) {
+    if (message != "") {
+        messages.push(message + "\n");
+        document.getElementById("message").innerText = messages.join("");
+        if (messages.length >= numMessages)
+            messages.shift();
+        if (message == "Info: ready" || message == "Info: topology loaded") {
+            document.getElementById("run_button").removeAttribute("disabled");
+            document.getElementById("stop_button").setAttribute("disabled", "true");
+            longRefresh();
+        }
+        if (message == "Info: ready"){
+            getResults();
+        }
+        else {
+            shortRefresh();
+        }
+    }
+}
+
 function shortRefresh() {
-   clearInterval(intervalMessages);
-   intervalMessages = setInterval(getMessage, shortPeriod);
+    clearInterval(intervalMessages);
+    intervalMessages = setInterval(getMessage, shortPeriod);
 }
 
 function longRefresh() {
@@ -65,23 +62,24 @@ function longRefresh() {
     intervalMessages = setInterval(getMessage, longPeriod);
 }
 
-function loadTopology(){
-shortRefresh();
-var scenario = generateScenario();
+function loadTopology() {
+    shortRefresh();
+    var scenario = generateScenario();
     try {
         var message = null;
         $.ajax
-        ({
-            data: scenario,
-            url: "load",
-            type: "POST",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
+            ({
+                data: scenario,
+                url: "load",
+                type: "POST",
+                async: false,
+                success: function (ans) {
+                    message = ans;
+                }
+            });
         if (message != null) {
             initializeGraph();
+            cleanResults();
         }
         return message;
     }
@@ -90,44 +88,44 @@ var scenario = generateScenario();
     }
 }
 
-function runOpt(){
-shortRefresh();
-var scenario = generateScenario();
-document.getElementById("run_button").setAttribute("disabled", "true");
-document.getElementById("stop_button").removeAttribute("disabled");
+function runOpt() {
+    shortRefresh();
+    var scenario = generateScenario();
+    document.getElementById("run_button").setAttribute("disabled", "true");
+    document.getElementById("stop_button").removeAttribute("disabled");
     try {
         var message = null;
         $.ajax
-        ({
-            data: scenario,
-            url: "run",
-            type: "POST",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
+            ({
+                data: scenario,
+                url: "run",
+                type: "POST",
+                async: false,
+                success: function (ans) {
+                    message = ans;
+                }
+            });
     }
     catch (e) {
         return 0;
     }
 }
 
-function stopOpt(){
-longRefresh();
-document.getElementById("stop_button").setAttribute("disabled", "true");
-document.getElementById("run_button").removeAttribute("disabled");
+function stopOpt() {
+    longRefresh();
+    document.getElementById("stop_button").setAttribute("disabled", "true");
+    document.getElementById("run_button").removeAttribute("disabled");
     try {
         var message = null;
         $.ajax
-        ({
-            url: "stop",
-            type: "GET",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
+            ({
+                url: "stop",
+                type: "GET",
+                async: false,
+                success: function (ans) {
+                    message = ans;
+                }
+            });
     }
     catch (e) {
         return 0;
@@ -135,11 +133,11 @@ document.getElementById("run_button").removeAttribute("disabled");
 }
 
 function generatePaths() {
-shortRefresh();
-var scenario = generateScenario();
+    shortRefresh();
+    var scenario = generateScenario();
     try {
-            var message = null;
-            $.ajax
+        var message = null;
+        $.ajax
             ({
                 data: scenario,
                 url: "paths",
@@ -149,53 +147,37 @@ var scenario = generateScenario();
                     message = ans;
                 }
             });
-            if (message != null) {
-               document.getElementById("message").innerText = message;
-            }
+        if (message != null) {
+            document.getElementById("message").innerText = message;
         }
-        catch (e) {
-            return 0;
-        }
+    }
+    catch (e) {
+        return 0;
+    }
 }
 
 function check(elem) {
-
-    // Common constraints
-    document.getElementById("rpc1").checked = true;
-    document.getElementById("rpc2").checked = true;
-    document.getElementById("pfc1").checked = true;
-    document.getElementById("pfc2").checked = true;
-    document.getElementById("fdc1").checked = true;
-    document.getElementById("fdc2").checked = true;
-    document.getElementById("fdc3").checked = true;
-    document.getElementById("fdc4").checked = true;
-
-    // Model specific constraints
     var model = document.getElementById("model").value;
-    if(model === "init"){
-        document.getElementById("ipc").checked = true;
-        document.getElementById("ipmgrc").checked = true;
-        document.getElementById("repc").checked = false;
+    if (model === "init") {
+        document.getElementById("IPC").checked = true;
+        document.getElementById("IPMGRC").checked = true;
+        document.getElementById("REPC").checked = false;
     }
-    if(model === "mgr"){
-        document.getElementById("ipc").checked = false;
-        document.getElementById("ipmgrc").checked = true;
-        document.getElementById("repc").checked = false;
+    else if (model === "mgr") {
+        document.getElementById("IPC").checked = false;
+        document.getElementById("IPMGRC").checked = true;
+        document.getElementById("REPC").checked = false;
     }
-    if(model === "rep"){
-        document.getElementById("ipc").checked = false;
-        document.getElementById("ipmgrc").checked = false;
-        document.getElementById("repc").checked = true;
+    else if (model === "rep") {
+        document.getElementById("IPC").checked = false;
+        document.getElementById("IPMGRC").checked = false;
+        document.getElementById("REPC").checked = true;
     }
-    if(model === "mgrep"){
-        document.getElementById("ipc").checked = false;
-        document.getElementById("ipmgrc").checked = false;
-        document.getElementById("repc").checked = false;
+    else if (model === "mgrep") {
+        document.getElementById("IPC").checked = false;
+        document.getElementById("IPMGRC").checked = false;
+        document.getElementById("REPC").checked = false;
     }
-
-    document.getElementById("rc").checked = false;
-    document.getElementById("fxc").checked = false;
-    document.getElementById("sdc").checked = false;
 }
 
 function setDecimals(value) {
@@ -230,14 +212,13 @@ function generateScenario() {
     var DVC1 = $("#DVC1").is(":checked");
     var DVC2 = $("#DVC2").is(":checked");
     var DVC3 = $("#DVC3").is(":checked");
-
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
         objectiveFunction: objectiveFunction,
         maximization: maximization,
         weights: weights,
         model: model,
-        constraints :{
+        constraints: {
             // general constraints
             RPC1: RPC1,
             RPC2: RPC2,
@@ -261,6 +242,5 @@ function generateScenario() {
             DVC3: DVC3
         }
     });
-
     return scenario;
 }

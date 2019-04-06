@@ -1,11 +1,15 @@
 package gui.elements;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class Scenario {
 
+   @JsonProperty("input_file_name")
    private String inputFileName;
+   @JsonProperty("objective_function")
    private String objectiveFunction;
    private boolean maximization;
    private String weights;

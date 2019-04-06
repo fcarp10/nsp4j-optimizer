@@ -1,6 +1,7 @@
 package output;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import gui.elements.GraphData;
 import gui.elements.Scenario;
 import manager.Parameters;
@@ -12,40 +13,53 @@ import java.util.*;
 import static output.Definitions.*;
 
 public class Results {
-
    // @JsonIgnore tag -> ignores specific variable for json result file
    // transient modifier -> ignores specific variable for posting results to web UI.
-   // scenario
    @JsonIgnore
    private transient Parameters pm;
    @JsonIgnore
    private transient int offset;
    @JsonIgnore
    private transient LinkedHashMap<String, Object> rawVariables;
-   //////////////////
-   // for printing //
-   //////////////////
    private transient Scenario scenario;
-   // variables
-   private LinkedHashMap<String, List<String>> stringVariables;
-   // summary
+   private LinkedHashMap<String, List<String>> variables;
+   @JsonProperty("avg_path_length")
    private double avgPathLength;
+   @JsonProperty("total_traffic")
    private double totalTraffic;
+   @JsonProperty("traffic_on_links")
    private double trafficLinks;
-   private int migrationsNum;
-   private int replicationsNum;
+   @JsonProperty("migrations")
+   private int migrations;
+   @JsonProperty("replications")
+   private int replications;
+   @JsonProperty("objective_value")
    private double objVal;
+   @JsonProperty("lu_summary")
    private double[] luSummary;
+   @JsonProperty("xu_summary")
    private double[] xuSummary;
-   private double[] fuSummary;
+   @JsonProperty("fp_summary")
+   private double[] fpSummary;
+   @JsonProperty("sd_summary")
    private double[] sdSummary;
-   // graphs
+   @JsonIgnore
    private List<GraphData> luGraph;
+   @JsonIgnore
    private List<GraphData> xuGraph;
+   @JsonIgnore
    private List<GraphData> sdGraph;
+   @JsonProperty("lu")
+   private transient List<Double> lu;
+   @JsonProperty("xu")
+   private transient List<Double> xu;
+   @JsonProperty("fp")
+   private transient List<Integer> fp;
+   @JsonProperty("sd")
+   private transient List<Double> sd;
 
    public Results() {
-      stringVariables = new LinkedHashMap<>();
+      variables = new LinkedHashMap<>();
       luGraph = new ArrayList<>();
       xuGraph = new ArrayList<>();
       sdGraph = new ArrayList<>();
@@ -55,15 +69,19 @@ public class Results {
       this.pm = pm;
       this.scenario = scenario;
       this.offset = (int) pm.getAux("offset_results");
-      luSummary = new double[4];
-      xuSummary = new double[4];
-      fuSummary = new double[4];
-      sdSummary = new double[4];
-      luGraph = new ArrayList<>();
-      xuGraph = new ArrayList<>();
-      sdGraph = new ArrayList<>();
-      rawVariables = new LinkedHashMap();
-      stringVariables = new LinkedHashMap<>();
+      this.luSummary = new double[4];
+      this.xuSummary = new double[4];
+      this.fpSummary = new double[4];
+      this.sdSummary = new double[4];
+      this.luGraph = new ArrayList<>();
+      this.xuGraph = new ArrayList<>();
+      this.sdGraph = new ArrayList<>();
+      this.rawVariables = new LinkedHashMap();
+      this.variables = new LinkedHashMap<>();
+      this.lu = new ArrayList<>();
+      this.xu = new ArrayList<>();
+      this.fp = new ArrayList<>();
+      this.sd = new ArrayList<>();
    }
 
    public void setVariable(String key, Object variable) {
@@ -71,20 +89,21 @@ public class Results {
    }
 
    public void initializeResults(double objVal, boolean[][][] initialPlacement, boolean additionalVariables) {
-      List<Double> uL = new ArrayList<>(linkUtilizationMap().values());
-      List<Double> uX = new ArrayList<>(serverUtilizationMap().values());
+      lu = new ArrayList<>(linkUtilizationMap().values());
+      xu = new ArrayList<>(serverUtilizationMap().values());
+      fp = numOfFunctionsPerServer();
+      sd = serviceDelayList();
       if (initialPlacement != null)
-         this.migrationsNum = countNumOfMigrations(initialPlacement);
-      this.replicationsNum = countNumOfReplications();
+         this.migrations = countNumOfMigrations(initialPlacement);
+      this.replications = countNumOfReplications();
       convertVariables(additionalVariables);
-      setSummaryResults(luSummary, uL);
-      setSummaryResults(xuSummary, uX);
-      setSummaryResults(fuSummary, numOfFunctionsPerServer());
-      List<Double> serviceDelayList = serviceDelayList();
-      setSummaryResults(sdSummary, serviceDelayList);
-      generateLuGraph(uL);
-      generateXuGraph(uX);
-      generateSdGraph(serviceDelayList);
+      setSummaryResults(luSummary, lu);
+      setSummaryResults(xuSummary, xu);
+      setSummaryResults(fpSummary, fp);
+      setSummaryResults(sdSummary, sd);
+      luGraph(lu);
+      xuGraph(xu);
+      sdGraph(sd);
       totalTraffic = pm.getTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
       avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
@@ -232,7 +251,7 @@ public class Results {
                   strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): ["
                           + pm.getServices().get(s).getId() + "]"
                           + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
-         stringVariables.put(zSP, strings);
+         variables.put(zSP, strings);
       } catch (Exception ignored) {
       }
    }
@@ -250,7 +269,7 @@ public class Results {
                              + pm.getServices().get(s).getId() + "]"
                              + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
                              + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
-         stringVariables.put(zSPD, strings);
+         variables.put(zSPD, strings);
       } catch (Exception ignored) {
       }
    }
@@ -268,7 +287,7 @@ public class Results {
                              + pm.getServers().get(x).getId() + "]["
                              + pm.getServices().get(s).getId() + "]["
                              + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
-         stringVariables.put(fXSV, strings);
+         variables.put(fXSV, strings);
       } catch (Exception ignored) {
       }
    }
@@ -288,7 +307,7 @@ public class Results {
                                 + pm.getServices().get(s).getId() + "]["
                                 + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
                                 + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
-         stringVariables.put(fXSVD, strings);
+         variables.put(fXSVD, strings);
       } catch (Exception ignored) {
       }
    }
@@ -301,7 +320,7 @@ public class Results {
             strings.add("(" + (x + this.offset) + "): ["
                     + pm.getServers().get(x).getId() + "]["
                     + var[x] + "]");
-         stringVariables.put(uX, strings);
+         variables.put(uX, strings);
       } catch (Exception ignored) {
       }
    }
@@ -314,7 +333,7 @@ public class Results {
             strings.add("(" + (l + this.offset) + "): ["
                     + pm.getLinks().get(l).getId() + "]["
                     + var[l] + "]");
-         stringVariables.put(uL, strings);
+         variables.put(uL, strings);
       } catch (Exception ignored) {
       }
    }
@@ -326,7 +345,7 @@ public class Results {
          for (int x = 0; x < pm.getServers().size(); x++)
             if (var[x])
                strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]");
-         stringVariables.put(fX, strings);
+         variables.put(fX, strings);
       } catch (Exception ignored) {
       }
    }
@@ -344,7 +363,7 @@ public class Results {
                            strings.add("(" + (s + this.offset) + "," + (v + this.offset)
                                    + "," + (x + this.offset) + "," + (y + this.offset) + "): ["
                                    + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
-         stringVariables.put(gSVXY, strings);
+         variables.put(gSVXY, strings);
       } catch (Exception ignored) {
       }
    }
@@ -359,7 +378,7 @@ public class Results {
                   if (var[s][v][p])
                      strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
                              + pm.getPaths().get(p).getNodePath());
-         stringVariables.put(hSVP, strings);
+         variables.put(hSVP, strings);
       } catch (Exception ignored) {
       }
    }
@@ -376,7 +395,7 @@ public class Results {
                      strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): "
                              + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
                              + "[" + Auxiliary.roundDouble(var[s][p][d], 2) + "]");
-         stringVariables.put(dSPD, strings);
+         variables.put(dSPD, strings);
       } catch (Exception ignored) {
       }
    }
@@ -394,7 +413,7 @@ public class Results {
                                 + "," + (x + this.offset) + "," + (p + this.offset) + "): "
                                 + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
                                 + "[" + var[s][v][x][p] + "]");
-         stringVariables.put(ySVXD, strings);
+         variables.put(ySVXD, strings);
       } catch (Exception ignored) {
       }
    }
@@ -409,7 +428,7 @@ public class Results {
                   if (var[x][s][v] > 0)
                      strings.add("(" + (x + this.offset) + "," + (s + this.offset) + "," + (v + this.offset) + "): "
                              + "[" + var[x][s][v] + "]");
-         stringVariables.put(nXSV, strings);
+         variables.put(nXSV, strings);
       } catch (Exception ignored) {
       }
    }
@@ -421,7 +440,7 @@ public class Results {
       array[3] = Auxiliary.vrc(new ArrayList<>(var), array[0]);
    }
 
-   private void generateLuGraph(List<Double> uL) {
+   private void luGraph(List<Double> uL) {
       int xPoints = 10;
       for (int i = 0; i < xPoints; i++)
          luGraph.add(new GraphData("0." + i, 0));
@@ -433,7 +452,7 @@ public class Results {
             }
    }
 
-   private void generateXuGraph(List<Double> uX) {
+   private void xuGraph(List<Double> uX) {
       int xPoints = 10;
       for (int i = 0; i < xPoints; i++)
          xuGraph.add(new GraphData("0." + i, 0));
@@ -445,7 +464,7 @@ public class Results {
             }
    }
 
-   private void generateSdGraph(List<Double> sd) {
+   private void sdGraph(List<Double> sd) {
       int xPoints = 10;
       double min = Auxiliary.min(new ArrayList<>(sd));
       double max = Auxiliary.max(new ArrayList<>(sd));
@@ -480,8 +499,8 @@ public class Results {
       return rawVariables;
    }
 
-   public Map<String, List<String>> getStringVariables() {
-      return stringVariables;
+   public Map<String, List<String>> getVariables() {
+      return variables;
    }
 
    public double[] getLuSummary() {
@@ -492,8 +511,8 @@ public class Results {
       return xuSummary;
    }
 
-   public double[] getFuSummary() {
-      return fuSummary;
+   public double[] getFpSummary() {
+      return fpSummary;
    }
 
    public double[] getSdSummary() {
@@ -512,12 +531,12 @@ public class Results {
       return trafficLinks;
    }
 
-   public int getMigrationsNum() {
-      return migrationsNum;
+   public int getMigrations() {
+      return migrations;
    }
 
-   public int getReplicationsNum() {
-      return replicationsNum;
+   public int getReplications() {
+      return replications;
    }
 
    public List<GraphData> getLuGraph() {
@@ -530,5 +549,21 @@ public class Results {
 
    public List<GraphData> getSdGraph() {
       return sdGraph;
+   }
+
+   public List<Double> getLu() {
+      return lu;
+   }
+
+   public List<Double> getXu() {
+      return xu;
+   }
+
+   public List<Integer> getFp() {
+      return fp;
+   }
+
+   public List<Double> getSd() {
+      return sd;
    }
 }

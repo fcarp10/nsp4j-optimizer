@@ -1,10 +1,6 @@
-var refreshPeriod = 1000;
 var linkUtilizationGraph;
 var serverUtilizationGraph;
 var serviceDelayGraph;
-
-setInterval(getResults, refreshPeriod);
-
 var initialData= [
     { year: '0.1', value: 0 },
     { year: '0.2', value: 0 },
@@ -27,25 +23,29 @@ function getResults() {
             url: "results",
             type: "GET",
             async: false,
-            success: function (ans) {
-                results = ans;
-            }
+            success: function (ans) { successResults(ans); }
         });
-        if (results != null) {
-            setSummaryResults(results);
-            linkUtilizationGraph.setData(results['luGraph']);
-            serverUtilizationGraph.setData(results['xuGraph']);
-            serviceDelayGraph.setData(results['sdGraph']);
-        } else {
-            cleanSummaryResults();
-            linkUtilizationGraph.setData(initialData);
-            serverUtilizationGraph.setData(initialData);
-            serviceDelayGraph.setData(initialData);
-        }
     }
     catch (e) {
         return 0;
     }
+}
+
+function successResults(results){
+    if(results != null && results != ""){
+        setSummaryResults(results);
+        linkUtilizationGraph.setData(results['luGraph']);
+        serverUtilizationGraph.setData(results['xuGraph']);
+        serviceDelayGraph.setData(results['sdGraph']);
+        updateGraph();
+    }
+}
+
+function cleanResults(){
+    cleanSummaryResults();
+    linkUtilizationGraph.setData(initialData);
+    serverUtilizationGraph.setData(initialData);
+    serviceDelayGraph.setData(initialData);
 }
 
 function setSummaryResults(results){
@@ -57,16 +57,16 @@ function setSummaryResults(results){
       document.getElementById("minXu").innerText = results['xuSummary'][1];
       document.getElementById("maxXu").innerText = results['xuSummary'][2];
       document.getElementById("stdXu").innerText = results['xuSummary'][3];
-      document.getElementById("avgF").innerText = results['fuSummary'][0];
-      document.getElementById("minF").innerText = results['fuSummary'][1];
-      document.getElementById("maxF").innerText = results['fuSummary'][2];
-      document.getElementById("stdF").innerText = results['fuSummary'][3];
+      document.getElementById("avgF").innerText = results['fpSummary'][0];
+      document.getElementById("minF").innerText = results['fpSummary'][1];
+      document.getElementById("maxF").innerText = results['fpSummary'][2];
+      document.getElementById("stdF").innerText = results['fpSummary'][3];
       document.getElementById("avgSd").innerText = results['sdSummary'][0];
       document.getElementById("minSd").innerText = results['sdSummary'][1];
       document.getElementById("maxSd").innerText = results['sdSummary'][2];
       document.getElementById("stdSd").innerText = results['sdSummary'][3];
-      document.getElementById("mgr").innerText = results['migrationsNum'];
-      document.getElementById("rep").innerText = results['replicationsNum'];
+      document.getElementById("mgr").innerText = results['migrations'];
+      document.getElementById("rep").innerText = results['replications'];
 }
 
 function cleanSummaryResults(){
