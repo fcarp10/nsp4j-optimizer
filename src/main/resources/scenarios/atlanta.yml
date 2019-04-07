@@ -13,28 +13,28 @@ aux: {
 # service definitions
 serviceChains:
   - id: 0
-    chain: [0, 1, 2]
+    chain: [0, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
       "functions_per_server": 1,
-      "max_delay": 100000
+      "max_delay": 150
     }
   - id: 1
-    chain: [0, 1, 1, 2]
+    chain: [0, 1, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
       "functions_per_server": 1,
-      "max_delay": 100000
+      "max_delay": 300
     }
   - id: 2
-    chain: [0, 1, 1, 1, 2]
+    chain: [0, 1, 1, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
       "functions_per_server": 1,
-      "max_delay": 100000
+      "max_delay": 600
     }
 # function definitions
 functionTypes:
@@ -42,34 +42,23 @@ functionTypes:
     attributes: {
       "replicable": false,
       "load_ratio": 0.5,
-      "overhead": 0,
+      "overhead": 10,
       "sync_load": 0.0,
       "process_delay": 0,
-      "max_delay": 1000,
-      "max_instances": 5,
-      "max_load": 200
+      "max_delay": 30,
+      "max_instances": 0,
+      "max_load": 0
     }
   - type: 1
     attributes: {
       "replicable": true,
       "load_ratio": 1.0,
-      "overhead": 0,
-      "sync_load": 0.0,
+      "overhead": 10,
+      "sync_load": 0.1,
       "process_delay": 0,
-      "max_delay": 1000,
-      "max_instances": 5,
-      "max_load": 200
-    }
-  - type: 2
-    attributes: {
-      "replicable": false,
-      "load_ratio": 0.5,
-      "overhead": 0,
-      "sync_load": 0.0,
-      "process_delay": 0,
-      "max_delay": 1000,
-      "max_instances": 5,
-      "max_load": 200
+      "max_delay": 50,
+      "max_instances": 0,
+      "max_load": 0
     }
 # traffic flow definitions
 trafficFlows:

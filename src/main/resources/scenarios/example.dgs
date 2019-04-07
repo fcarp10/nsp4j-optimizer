@@ -1,15 +1,15 @@
 DGS004
 test 0 0
 
-an n1 x:100 y:150 num_servers:1 server_capacity:1000 process_delay:10
-an n2 x:150 y:100 num_servers:1 server_capacity:1000 process_delay:10
-an n3 x:200 y:100 num_servers:1 server_capacity:1 process_delay:10
-an n4 x:175 y:200 num_servers:1 server_capacity:1000 process_delay:10
-an n5 x:250 y:150 num_servers:1 server_capacity:1000 process_delay:10
-an n6 x:300 y:150 num_servers:1 server_capacity:1 process_delay:10
-an n7 x:350 y:100 num_servers:1 server_capacity:1 process_delay:10
-an n8 x:350 y:200 num_servers:1 server_capacity:1 process_delay:10
-an n9 x:400 y:150 num_servers:1 server_capacity:1 process_delay:10
+an n1 x:100 y:150 num_servers:1 server_capacity:1000 process_delay:0
+an n2 x:150 y:100 num_servers:1 server_capacity:1000 process_delay:0
+an n3 x:200 y:100 num_servers:1 server_capacity:1000 process_delay:0
+an n4 x:175 y:200 num_servers:1 server_capacity:1000 process_delay:0
+an n5 x:250 y:150 num_servers:1 server_capacity:1000 process_delay:0
+an n6 x:300 y:150 num_servers:1 server_capacity:1000 process_delay:0
+an n7 x:350 y:100 num_servers:1 server_capacity:1000 process_delay:0
+an n8 x:350 y:200 num_servers:1 server_capacity:1000 process_delay:0
+an n9 x:400 y:150 num_servers:1 server_capacity:1000 process_delay:0
 
 ae n1n2 n1 > n2 capacity:1000
 ae n1n4 n1 > n4

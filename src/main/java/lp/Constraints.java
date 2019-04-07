@@ -129,14 +129,15 @@ public class Constraints {
                   for (int x = 0; x < pm.getServers().size(); x++)
                      if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
                         for (int v = 0; v < service.getFunctions().size(); v++) {
-                           GRBLinExpr linExpr3 = processingDelayExpr(s, v, x, path.getNodePath().get(n).getAttribute(FUNCTION_PROCESS_DELAY));
+                           Function function = service.getFunctions().get(v);
+                           GRBLinExpr linExpr3 = processingDelayExpr(s, v, x, (int) function.getAttribute(FUNCTION_PROCESS_DELAY));
                            GRBLinExpr linExpr4 = new GRBLinExpr();
-                           linExpr4.addTerm((int) service.getFunctions().get(v).getAttribute(FUNCTION_MAX_DELAY), vars.fXSVD[x][s][v][d]);
-                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.LESS_EQUAL, linExpr4, "delay");
-                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.LESS_EQUAL, linExpr3, "delay");
-                           linExpr4.addConstant(-(int) service.getFunctions().get(v).getAttribute(FUNCTION_MAX_DELAY));
+                           linExpr4.addTerm((int) function.getAttribute(FUNCTION_MAX_DELAY), vars.fXSVD[x][s][v][d]);
+                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.LESS_EQUAL, linExpr4, FUNCTION_PROCESS_DELAY);
+                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.LESS_EQUAL, linExpr3, FUNCTION_PROCESS_DELAY);
+                           linExpr4.addConstant(-(int) function.getAttribute(FUNCTION_MAX_DELAY));
                            linExpr4.add(linExpr3);
-                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.GREATER_EQUAL, linExpr4, "delay");
+                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.GREATER_EQUAL, linExpr4, FUNCTION_PROCESS_DELAY);
                            processDelayExpr.addTerm(1.0, vars.ySVXD[s][v][x][d]);
                         }
                GRBLinExpr pathExpr = new GRBLinExpr();
@@ -148,8 +149,8 @@ public class Constraints {
                totalDelayExpr.add(linkDelayExpr(s, p)); // adds propagation delay
                if (initialModel != null)
                   totalDelayExpr.add(migrationDelayExpr(initialModel, s, d, p)); // adds migration delay
-               model.getGrbModel().addConstr(totalDelayExpr, GRB.LESS_EQUAL, pathExpr, "delay");
-               model.getGrbModel().addConstr(totalDelayExpr, GRB.EQUAL, vars.dSPD[s][p][d], "delay");
+               model.getGrbModel().addConstr(totalDelayExpr, GRB.LESS_EQUAL, pathExpr, LINK_DELAY);
+               model.getGrbModel().addConstr(totalDelayExpr, GRB.EQUAL, vars.dSPD[s][p][d], LINK_DELAY);
             }
    }
 

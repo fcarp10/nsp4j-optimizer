@@ -23,7 +23,7 @@ public class Variables {
    public GRBVar[][][][] gSVXY; //binary, auxiliary variable
    public GRBVar[][][] hSVP; // binary, traffic synchronization variable
    public GRBVar[][][] dSPD; // binary, service delay
-   public GRBVar[][][][] ySVXD; // continuous, traffic variable (aux)
+   public GRBVar[][][][] ySVXD; // continuous, processing delay of a traffic demand
    public GRBVar[][][] nXSV; // VM dimensioning
 
 

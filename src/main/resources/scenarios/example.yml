@@ -15,41 +15,39 @@ serviceChains:
   - id: 0
     chain: [0, 1, 0]
     attributes: {
-      "min_paths": 2,
-      "max_paths": 2,
+      "min_paths": 1,
+      "max_paths": 5,
       "functions_per_server": 1,
-      "max_delay": 50
+      "max_delay": 150
     }
 # function definitions
 functionTypes:
   - type: 0
     attributes: {
       "replicable": false,
-      "load_ratio": 1.0,
-      "overhead": 0,
+      "load_ratio": 0.1,
+      "overhead": 10,
       "sync_load": 0.0,
-      "process_delay": 0,
-      "max_delay": 1000,
-      "max_instances": 5,
-      "max_load": 200
+      "process_delay": 10,
+      "max_delay": 20,
+      "max_instances": 0,
+      "max_load": 0
     }
   - type: 1
     attributes: {
       "replicable": true,
-      "load_ratio": 1.0,
-      "overhead": 0,
-      "sync_load": 0.0,
-      "process_delay": 100,
-      "max_delay": 1000,
-      "max_instances": 5,
-      "max_load": 200
+      "load_ratio": 0.2,
+      "overhead": 10,
+      "sync_load": 0.1,
+      "process_delay": 10,
+      "max_delay": 20,
+      "max_instances": 0,
+      "max_load": 0
     }
 # traffic flow definitions
 trafficFlows:
   - serviceId: 0
-    src: "n1"
-    dst: "n6"
-    minDem: 2
-    maxDem: 2
-    minBw: 250
-    maxBw: 250
+    minDem: 1
+    maxDem: 5
+    minBw: 10
+    maxBw: 50
