@@ -44,8 +44,8 @@ functionTypes:
       "load_ratio": 0.5,
       "overhead": 10,
       "sync_load": 0.0,
-      "process_delay": 0,
-      "max_delay": 30,
+      "process_delay": 1000,
+      "max_delay": 1500,
       "max_instances": 0,
       "max_load": 0
     }
@@ -55,8 +55,8 @@ functionTypes:
       "load_ratio": 1.0,
       "overhead": 10,
       "sync_load": 0.1,
-      "process_delay": 0,
-      "max_delay": 50,
+      "process_delay": 1500,
+      "max_delay": 2000,
       "max_instances": 0,
       "max_load": 0
     }
@@ -65,4 +65,4 @@ trafficFlows:
   - minDem: 1
     maxDem: 5
     minBw: 1
-    maxBw: 20
+    maxBw: 15

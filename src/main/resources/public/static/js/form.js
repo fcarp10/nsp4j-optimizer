@@ -2,7 +2,7 @@ var shortPeriod = 100;
 var longPeriod = 3000;
 var intervalMessages = setInterval(getMessage, longPeriod);
 var messages = [];
-var numMessages = 13;
+var numMessages = 10;
 
 function getMessage() {
     try {
