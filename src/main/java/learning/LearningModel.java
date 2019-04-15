@@ -3,7 +3,6 @@ package learning;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBModel;
-import manager.Manager;
 import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Service;
@@ -254,9 +253,29 @@ public class LearningModel {
       zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            int pathIndex = rnd.nextInt(tSP.get(s).size());
+            int pathIndex;
+            int trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
+            do {
+               pathIndex = rnd.nextInt(tSP.get(s).size());
+            } while (!routeDemandOverLinks(tSP.get(s).get(pathIndex), trafficDemand));
             zSPD[s][pathIndex][d] = true;
          }
+   }
+
+   private boolean routeDemandOverLinks(Path path, double trafficDemand) {
+      boolean isValid = true;
+      int[] links = new int[path.getEdgePath().size()];
+      for (int k = 0; k < path.getEdgePath().size(); k++)
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            if (pm.getLinks().get(l).equals(path.getEdgePath().get(k))) {
+               double addUtilization = trafficDemand / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
+               if (uL[l] + addUtilization > 1.0) {
+                  isValid = false;
+               } else links[0] = l;
+            }
+      if (isValid)
+         for (int link : links) uL[link] += trafficDemand / (int) pm.getLinks().get(link).getAttribute(LINK_CAPACITY);
+      return true;
    }
 
    private void activateServersPerDemand(float[] environment, Map<Integer, List<Path>> tSP) {
