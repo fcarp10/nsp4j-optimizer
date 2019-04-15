@@ -6,7 +6,7 @@
 
     <groupId>de.tubs</groupId>
     <artifactId>nsp4j-optimizer</artifactId>
-    <version>0.9.8</version>
+    <version>0.9.9</version>
 
     <properties>
         <java.version>11</java.version>

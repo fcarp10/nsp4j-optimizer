@@ -319,7 +319,7 @@ public class Results {
          for (int x = 0; x < pm.getServers().size(); x++)
             strings.add("(" + (x + this.offset) + "): ["
                     + pm.getServers().get(x).getId() + "]["
-                    + var[x] + "]");
+                    + Auxiliary.roundDouble(var[x], 2) + "]");
          variables.put(uX, strings);
       } catch (Exception ignored) {
       }
@@ -332,7 +332,8 @@ public class Results {
          for (int l = 0; l < pm.getLinks().size(); l++)
             strings.add("(" + (l + this.offset) + "): ["
                     + pm.getLinks().get(l).getId() + "]["
-                    + var[l] + "]");
+                    + Auxiliary.roundDouble(var[l], 2) + "]["
+                    + var[l] * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY) + "]");
          variables.put(uL, strings);
       } catch (Exception ignored) {
       }

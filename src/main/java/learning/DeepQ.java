@@ -80,7 +80,6 @@ class DeepQ {
    }
 
    void observeReward(INDArray inputIndArray, INDArray nextInputIndArray, double reward, int[] nextActionMask) {
-      // TO BE CHANGED, SHOULD REMOVE THE ONE WITH LOWEST REWARD
       if (experiences.size() >= memoryCapacity)
          experiences.remove(rnd.nextInt(experiences.size()));
       experiences.add(new Experience(inputIndArray, nextInputIndArray, lastAction, (float) reward, nextActionMask));

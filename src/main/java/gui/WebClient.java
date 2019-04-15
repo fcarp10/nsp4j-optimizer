@@ -106,7 +106,7 @@ public class WebClient {
          Server server = (Server) thisEntry.getKey();
          StringBuilder u = new StringBuilder();
          if (utilization != 0) {
-            u.append(String.valueOf(df.format(utilization)));
+            u.append(df.format(utilization));
             if (functions.get(server).length() < 40)
                u.append("\n").append(functions.get(server));
          }
@@ -117,7 +117,7 @@ public class WebClient {
       return serverJsonList;
    }
 
-   private static List<LinkJson> generateLinkStrings(Results results) throws GRBException {
+   private static List<LinkJson> generateLinkStrings(Results results) {
       List<LinkJson> linkJsonList = new ArrayList<>();
       Iterator entries = results.linkUtilizationMap().entrySet().iterator();
       DecimalFormat df = new DecimalFormat("#.##");
@@ -134,7 +134,7 @@ public class WebClient {
       return linkJsonList;
    }
 
-   private static Map<Server, String> generateFunctionsPerServerStringMap(Results results) throws GRBException {
+   private static Map<Server, String> generateFunctionsPerServerStringMap(Results results) {
       int offset = (int) results.getPm().getAux("offset_results");
       boolean[][][] pXSV = (boolean[][][]) results.getRawVariables().get("fXSV");
       Map<Server, String> functionsStringMap = new HashMap<>();
@@ -143,7 +143,9 @@ public class WebClient {
          for (int s = 0; s < results.getPm().getServices().size(); s++)
             for (int v = 0; v < results.getPm().getServices().get(s).getFunctions().size(); v++)
                if (pXSV[x][s][v])
-                  stringBuilder.append("f(").append(x + offset).append(",").append(s + offset).append(",").append(v + offset).append(")\n");
+                  stringBuilder.append("s").append(results.getPm().getServices().get(s).getId())
+                          .append("v").append(results.getPm().getServices().get(s).getFunctions().get(v).getType())
+                          .append("\n");
          functionsStringMap.put(results.getPm().getServers().get(x), stringBuilder.toString());
       }
       return functionsStringMap;

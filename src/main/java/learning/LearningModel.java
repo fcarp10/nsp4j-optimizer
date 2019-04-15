@@ -3,6 +3,7 @@ package learning;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBModel;
+import manager.Manager;
 import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Service;
@@ -27,7 +28,7 @@ import output.Definitions;
 import java.util.*;
 
 import static output.Auxiliary.printLog;
-import static output.Definitions.INFO;
+import static output.Definitions.*;
 
 public class LearningModel {
 
@@ -36,17 +37,16 @@ public class LearningModel {
    private DeepQ deepQ;
    private double objVal;
 
-   // Elementary variables
-   private boolean[][] rSP;
-   private boolean[][][] rSPD;
-   private boolean[][][] pXSV;
-   private boolean[][][][] pXSVD;
+   private boolean[][][] zSPD;
+   private boolean[][][] fXSV;
+   private boolean[][][][] fXSVD;
    private double[] uL;
    private double[] uX;
-   private double[] dS;
+   private Random rnd;
 
    public LearningModel(Parameters pm) {
       this.pm = pm;
+      rnd = new Random(pm.getSeed());
    }
 
    private void initializeModel(int inputLength, int outputLength) {
@@ -59,12 +59,12 @@ public class LearningModel {
               .list()
               .layer(0, new DenseLayer.Builder()
                       .nIn(inputLength)
-                      .nOut((int) pm.getAux("rl_num_hidden_layers"))
+                      .nOut((int) pm.getAux(NUM_HIDDEN_LAYERS))
                       .weightInit(WeightInit.XAVIER)
                       .activation(Activation.RELU)
                       .build())
               .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
-                      .nIn((int) pm.getAux("rl_num_hidden_layers"))
+                      .nIn((int) pm.getAux(NUM_HIDDEN_LAYERS))
                       .nOut(outputLength)
                       .weightInit(WeightInit.XAVIER)
                       .activation(Activation.IDENTITY)
@@ -78,8 +78,8 @@ public class LearningModel {
    public void run(GRBModel initialPlacement, double objValTarget) throws GRBException {
       float[] environment = generateEnvironment(initialPlacement);
       initializeModel(environment.length, environment.length - 1);
-      for (int i = 0; i < (int) pm.getAux("rl_training_iterations"); i++)
-         run(environment, objValTarget, i, (double) pm.getAux("epsilon"), false);
+      for (int i = 0; i < (int) pm.getAux(TRAINING_ITERATIONS); i++)
+         run(environment, objValTarget, i, (double) pm.getAux(EPSILON), false);
       run(environment, objValTarget, -1, 0, true);
       this.objVal = computeCost();
       printLog(log, INFO, "finished [" + Auxiliary.roundDouble(objVal, 2) + "]");
@@ -114,18 +114,18 @@ public class LearningModel {
          double reward = computeReward(cost, objValTarget);
          timeStep++;
          localEnvironment[localEnvironment.length - 1] = timeStep;
-         if (cost >= objValTarget * (double) pm.getAux("threshold")) {
+         if (cost >= objValTarget * (double) pm.getAux(THRESHOLD)) {
             deepQ.observeReward(inputIndArray, null, reward, nextActionMask);
             break;
          } else {
             deepQ.observeReward(inputIndArray, Nd4j.create(localEnvironment), reward, nextActionMask);
-            if (timeStep == (int) pm.getAux("rl_learning_steps"))
+            if (timeStep == (int) pm.getAux(LEARNING_STEPS))
                break;
          }
       }
-      if (iteration > -1)
-         log.info("iteration " + iteration + " -> " + timeStep + " steps");
-      else {
+//      if (iteration > -1)
+//         log.info("iteration " + iteration + " -> " + timeStep + " steps");
+      if (iteration == -1) {
          computeFunctionsServers();
          log.info("reasoning in -> " + timeStep + " steps");
       }
@@ -159,7 +159,7 @@ public class LearningModel {
          for (int v = 0; v < pm.getServiceLength(); v++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                double demandLoad = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                       * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load");
+                       * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
                if (demandLoad > maxDemandLoad)
                   maxDemandLoad = demandLoad;
             }
@@ -172,7 +172,7 @@ public class LearningModel {
                traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
             for (int v = 0; v < pm.getServiceLength(); v++) {
                if (environment[x * pm.getServiceLength() + v] == 1)
-                  totalTraffic += (double) pm.getServices().get(s).getFunctions().get(v).getAttribute("load") * traffic;
+                  totalTraffic += (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO) * traffic;
             }
          }
          if (totalTraffic + maxDemandLoad >= pm.getServers().get(x).getCapacity())
@@ -192,7 +192,7 @@ public class LearningModel {
             for (int x = 0; x < pm.getServers().size(); x++) {
                if (action != x * pm.getServiceLength() + v) continue;
                if (service.getFunctions().size() <= v) continue;
-               if (!(boolean) service.getFunctions().get(v).getAttribute("replicable"))
+               if (!(boolean) service.getFunctions().get(v).getAttribute(FUNCTION_REPLICABLE))
                   for (int y = 0; y < pm.getServers().size(); y++)
                      environment[y * pm.getServiceLength() + v] = 0;
                if (environment[action] == 1)
@@ -205,12 +205,11 @@ public class LearningModel {
 
    private void computeEnvironment(boolean isReasoning, float[] environment) {
       Map<Integer, List<Path>> servicesAdmissiblePaths = getServicesAdmissiblePaths(environment);
-      activateServersPerDemand(servicesAdmissiblePaths, environment);
+      computePathsPerDemand(servicesAdmissiblePaths);
+      activateServersPerDemand(environment, servicesAdmissiblePaths);
       calculateServerUtilization(environment);
-      calculateLinkUtilization(environment);
       if (isReasoning) {
-         computePaths();
-         computeServiceDelay();
+         calculateLinkUtilization();
       }
    }
 
@@ -223,48 +222,60 @@ public class LearningModel {
 
    private List<Path> computeAdmissiblePaths(int s, float[] environment) {
       List<Path> admissiblePaths = new ArrayList<>();
-      for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
-            boolean allFunctionsExist = true;
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-               boolean activatedInPath = false;
-               outerLoop:
-               for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size(); n++) {
-                  Node node = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n);
-                  for (int x = 0; x < pm.getServers().size(); x++)
-                     if (pm.getServers().get(x).getParent().equals(node)) {
-                        int pointer = pm.getServices().size() * pm.getServices().get(s).getFunctions().size()
-                                * x + s * pm.getServices().get(s).getFunctions().size() + v;
-                        if (environment[pointer] == 1) {
-                           activatedInPath = true;
-                           break outerLoop;
-                        }
+      for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+         boolean allFunctionsExist = true;
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            boolean activatedInPath = false;
+            outerLoop:
+            for (int n = 0; n < pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size(); n++) {
+               Node node = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(n);
+               for (int x = 0; x < pm.getServers().size(); x++)
+                  if (pm.getServers().get(x).getParent().equals(node)) {
+                     int pointer = pm.getServices().size() * pm.getServices().get(s).getFunctions().size()
+                             * x + s * pm.getServices().get(s).getFunctions().size() + v;
+                     if (environment[pointer] == 1) {
+                        activatedInPath = true;
+                        break outerLoop;
                      }
-               }
-               if (!activatedInPath) {
-                  allFunctionsExist = false;
-                  break;
-               }
+                  }
             }
-            if (allFunctionsExist)
-               admissiblePaths.add(pm.getServices().get(s).getTrafficFlow().getPaths().get(p));
+            if (!activatedInPath) {
+               allFunctionsExist = false;
+               break;
+            }
          }
+         if (allFunctionsExist)
+            admissiblePaths.add(pm.getServices().get(s).getTrafficFlow().getPaths().get(p));
+      }
       return admissiblePaths;
    }
 
-   private void activateServersPerDemand(Map<Integer, List<Path>> tSP, float[] environment) {
-      Random rnd = new Random();
-      pXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm.getDemandsTrafficFlow()];
+   private void computePathsPerDemand(Map<Integer, List<Path>> tSP) {
+      zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            Path path = tSP.get(s).get(rnd.nextInt(tSP.get(s).size()));
+            int pathIndex = rnd.nextInt(tSP.get(s).size());
+            zSPD[s][pathIndex][d] = true;
+         }
+   }
+
+   private void activateServersPerDemand(float[] environment, Map<Integer, List<Path>> tSP) {
+      fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm.getDemandsTrafficFlow()];
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+            Path path = null;
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               if (zSPD[s][p][d]) {
+                  path = tSP.get(s).get(p);
+                  break;
+               }
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                outerLoop:
                for (int n = 0; n < path.getNodePath().size(); n++)
                   for (int x = 0; x < pm.getServers().size(); x++)
                      if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
                         if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
-                           pXSVD[x][s][v][d] = true;
+                           fXSVD[x][s][v][d] = true;
                            break outerLoop;
                         }
             }
@@ -278,23 +289,32 @@ public class LearningModel {
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                double demands = 0;
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (pXSVD[x][s][v][d])
+                  if (fXSVD[x][s][v][d])
                      demands += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
                if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
                   Function function = pm.getServices().get(s).getFunctions().get(v);
-                  uX[x] += ((demands * (double) function.getAttribute("load"))
-                          + ((double) function.getAttribute("load")
-                          * (int) function.getAttribute("overhead")))
+                  uX[x] += ((demands * (double) function.getAttribute(FUNCTION_LOAD_RATIO))
+                          + ((double) function.getAttribute(FUNCTION_LOAD_RATIO)
+                          * (int) function.getAttribute(FUNCTION_OVERHEAD)))
                           / pm.getServers().get(x).getCapacity();
                }
-
             }
       }
    }
 
-   private void calculateLinkUtilization(float[] environment) {
+   private void calculateLinkUtilization() {
       uL = new double[pm.getLinks().size()];
-      // TODO
+      for (int l = 0; l < pm.getLinks().size(); l++) {
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+               if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
+                  continue;
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (zSPD[s][p][d])
+                     uL[l] += (double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                             / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
+            }
+      }
    }
 
    private double computeCost() {
@@ -321,24 +341,13 @@ public class LearningModel {
    }
 
    private void computeFunctionsServers() {
-      pXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+      fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (pXSVD[x][s][v][d])
-                     pXSV[x][s][v] = true;
-   }
-
-   private void computePaths() {
-      rSP = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
-      rSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
-      // TODO
-   }
-
-   private void computeServiceDelay() {
-      dS = new double[pm.getServices().size()];
-      // TODO
+                  if (fXSVD[x][s][v][d])
+                     fXSV[x][s][v] = true;
    }
 
    public double[] getuX() {
@@ -349,24 +358,16 @@ public class LearningModel {
       return uL;
    }
 
-   public boolean[][][][] getpXSVD() {
-      return pXSVD;
+   public boolean[][][][] getfXSVD() {
+      return fXSVD;
    }
 
-   public boolean[][][] getpXSV() {
-      return pXSV;
+   public boolean[][][] getfXSV() {
+      return fXSV;
    }
 
-   public boolean[][] getrSP() {
-      return rSP;
-   }
-
-   public boolean[][][] getrSPD() {
-      return rSPD;
-   }
-
-   public double[] getdS() {
-      return dS;
+   public boolean[][][] getzSPD() {
+      return zSPD;
    }
 
    public double getObjVal() {

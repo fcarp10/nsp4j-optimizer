@@ -9,7 +9,6 @@ import lp.Constraints;
 import lp.OptimizationModel;
 import lp.Variables;
 import org.apache.commons.io.FilenameUtils;
-import org.bytedeco.javacpp.presets.opencv_core;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
@@ -21,8 +20,6 @@ import output.ResultsManager;
 import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
-
-import java.util.ArrayList;
 
 import static output.Auxiliary.*;
 import static output.Definitions.*;
@@ -219,13 +216,11 @@ public class Manager {
 
    private static Results generateResultsForRL(LearningModel learningModel, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
-      results.setVariable(zSP, learningModel.getrSP());
-      results.setVariable(zSPD, learningModel.getrSPD());
-      results.setVariable(fXSV, learningModel.getpXSV());
-      results.setVariable(fXSVD, learningModel.getpXSVD());
+      results.setVariable(zSPD, learningModel.getzSPD());
+      results.setVariable(fXSV, learningModel.getfXSV());
+      results.setVariable(fXSVD, learningModel.getfXSVD());
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
-      results.setVariable(dSPD, learningModel.getdS());
       results.initializeResults(learningModel.getObjVal(), convertInitialPlacement(initialModel), false);
       return results;
    }

@@ -16,7 +16,6 @@ public class Definitions {
    // logs and messages
    public static final String ERROR = "Error: ";
    public static final String INFO = "Info: ";
-   public static final String READY = "ready";
    // objective variables
    public static final String kL = "kL";
    public static final String kX = "kX";
@@ -67,10 +66,15 @@ public class Definitions {
    public static final String FUNCTION_OVERHEAD = "overhead";
    public static final String FUNCTION_SYNC_LOAD_RATIO = "sync_load";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
-   public static final String FUNCTION_MAX_DELAY = "max_delay";
    public static final String FUNCTION_MAX_INSTANCES = "max_instances";
    public static final String FUNCTION_MAX_LOAD = "max_load";
    // link parameters
    public static final String LINK_CAPACITY = "capacity";
    public static final String LINK_DELAY = "delay";
+   // DRL parameters
+   public static final String NUM_HIDDEN_LAYERS = "rl_num_hidden_layers";
+   public static final String TRAINING_ITERATIONS = "rl_training_iterations";
+   public static final String EPSILON = "epsilon";
+   public static final String THRESHOLD = "threshold";
+   public static final String LEARNING_STEPS = "rl_learning_steps";
 }
