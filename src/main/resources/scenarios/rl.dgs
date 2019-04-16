@@ -1,7 +1,7 @@
 DGS004
 test 0 0
 
-an n1 x:100 y:100 num_servers:2 server_capacity:700 processing_delay:0
-an n2 x:150 y:100 num_servers:2 server_capacity:1000 processing_delay:0
+an n1 x:100 y:100 num_servers:2 server_capacity:700 process_delay:0
+an n2 x:150 y:100 num_servers:2 server_capacity:1000 process_delay:0
 
 ae n1n2 n1 > n2 capacity:1000

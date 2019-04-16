@@ -75,9 +75,15 @@ public class LearningModel {
    public void run(GRBModel initialPlacement, double objValTarget) throws GRBException {
       float[] environment = generateEnvironment(initialPlacement);
       initializeModel(environment.length, environment.length - 1);
-      for (int i = 0; i < (int) pm.getAux(TRAINING_ITERATIONS); i++)
-         run(environment, objValTarget, i, (double) pm.getAux(EPSILON));
-      run(environment, objValTarget, -1, 0);
+      int timeSteps;
+      for (int i = 0; i < (int) pm.getAux(TRAINING_ITERATIONS); i++) {
+         timeSteps = run(environment, objValTarget, (double) pm.getAux(EPSILON));
+         log.info("iteration " + i + " -> " + timeSteps + " steps");
+      }
+      timeSteps = run(environment, objValTarget, 0);
+      log.info("reasoning in -> " + timeSteps + " steps");
+      this.uL = calculateLinkUtilization(zSPD);
+      this.fXSV = computeFunctionsServers(fXSVD);
       this.objVal = computeCost(uX);
       printLog(log, INFO, "finished [" + Auxiliary.roundDouble(objVal, 2) + "]");
    }
@@ -96,13 +102,14 @@ public class LearningModel {
       return environment;
    }
 
-   private void run(float[] environment, double objValTarget, int iteration, double epsilon) {
+   private int run(float[] environment, double objValTarget, double epsilon) {
       float[] localEnvironment = environment.clone();
       int timeStep = 0;
       int action = -1;
-      boolean[][][] zSPD = null;
-      boolean[][][][] fXSVD = null;
+      boolean[][][] zSPD;
+      boolean[][][][] fXSVD;
       double[] uX;
+      double objectiveValue = objValTarget * (double) pm.getAux(THRESHOLD);
       while (true) {
          INDArray inputIndArray = Nd4j.create(localEnvironment);
          int[] actionMask = generateActionMask(localEnvironment, action);
@@ -123,10 +130,10 @@ public class LearningModel {
             cost = Double.MAX_VALUE;
          else
             cost = computeCost(uX);
-         double reward = computeReward(cost, objValTarget);
+         double reward = computeReward(cost, objectiveValue);
          timeStep++;
          localEnvironment[localEnvironment.length - 1] = timeStep;
-         if (cost >= objValTarget * (double) pm.getAux(THRESHOLD)) {
+         if (cost <= objectiveValue) {
             deepQ.observeReward(inputIndArray, null, reward, nextActionMask);
             this.zSPD = zSPD;
             this.fXSVD = fXSVD;
@@ -138,11 +145,7 @@ public class LearningModel {
                break;
          }
       }
-      if (iteration == -1) {
-         this.uL = calculateLinkUtilization(zSPD);
-         this.fXSV = computeFunctionsServers(fXSVD);
-         log.info("reasoning in -> " + timeStep + " steps");
-      }
+      return timeStep;
    }
 
    private int[] generateActionMask(float[] environment, int pastAction) {
@@ -278,6 +281,17 @@ public class LearningModel {
             zSPD[s][pathIndex][d] = true;
          }
       }
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+            boolean isPath = false;
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               if (zSPD[s][p][d]) {
+                  isPath = true;
+                  break;
+               }
+            if (!isPath)
+               return null;
+         }
       return zSPD;
    }
 
@@ -375,7 +389,7 @@ public class LearningModel {
 
    private double computeReward(double cost, double objValTarget) {
       double reward;
-      if (cost >= objValTarget)
+      if (cost <= objValTarget)
          reward = 100;
       else reward = -1;
       return reward;

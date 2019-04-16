@@ -4,7 +4,7 @@ aux: {
   "offset_results": 0,
   "scaling_x": 1.0,
   "scaling_y": 1.0,
-  "rl_training_iterations": 250,
+  "rl_training_iterations": 200,
   "rl_learning_steps": 30,
   "rl_num_hidden_layers": 150,
   "threshold": 1.0,
@@ -18,7 +18,7 @@ serviceChains:
       "min_paths": 1,
       "max_paths": 5,
       "functions_per_server": 1,
-      "max_delay": 20
+      "max_delay": 100
     }
 # function definitions
 functionTypes:

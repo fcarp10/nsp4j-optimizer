@@ -182,6 +182,9 @@ function check(elem) {
         document.getElementById("REPC").checked = false;
         document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
     }
+    else if (model === "mgrep_rl") {
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
+    }
 }
 
 function setDecimals(value) {
