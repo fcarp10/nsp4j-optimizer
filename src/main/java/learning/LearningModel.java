@@ -35,6 +35,7 @@ public class LearningModel {
    private Parameters pm;
    private DeepQ deepQ;
    private double objVal;
+   private Random rnd;
 
    private boolean[][][] zSPD;
    private boolean[][][] fXSV;
@@ -44,6 +45,7 @@ public class LearningModel {
 
    public LearningModel(Parameters pm) {
       this.pm = pm;
+      this.rnd = new Random(pm.getSeed());
    }
 
    private void initializeModel(int inputLength, int outputLength) {
@@ -270,28 +272,20 @@ public class LearningModel {
       for (int s = 0; s < pm.getServices().size(); s++) {
          if (tSP.get(s).size() == 0) return null;
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            int pathIndex = 0;
             int trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
-            for (int i = 0; i < tSP.get(s).size(); i++) {
-               pathIndex = i;
-               uL = routeDemandOverLinks(tSP.get(s).get(pathIndex), trafficDemand, uL);
-               if (uL != null)
+            Path path = tSP.get(s).get(rnd.nextInt(tSP.get(s).size()));
+            uL = routeDemandOverLinks(path, trafficDemand, uL);
+            if (uL == null)
+               return null;
+            int pathIndex = -1;
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               if (path.equals(pm.getServices().get(s).getTrafficFlow().getPaths().get(p))) {
+                  pathIndex = p;
                   break;
-            }
+               }
             zSPD[s][pathIndex][d] = true;
          }
       }
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            boolean isPath = false;
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               if (zSPD[s][p][d]) {
-                  isPath = true;
-                  break;
-               }
-            if (!isPath)
-               return null;
-         }
       return zSPD;
    }
 
@@ -322,14 +316,18 @@ public class LearningModel {
                   break;
                }
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               boolean isdemand = false;
                outerLoop:
                for (int n = 0; n < path.getNodePath().size(); n++)
                   for (int x = 0; x < pm.getServers().size(); x++)
                      if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
                         if (environment[x * pm.getServices().get(s).getFunctions().size() + v] == 1) {
                            fXSVD[x][s][v][d] = true;
+                           isdemand = true;
                            break outerLoop;
                         }
+               if (!isdemand)
+                  return null;
             }
          }
       return fXSVD;
