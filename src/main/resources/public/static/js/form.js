@@ -162,21 +162,25 @@ function check(elem) {
         document.getElementById("IPC").checked = true;
         document.getElementById("IPMGRC").checked = true;
         document.getElementById("REPC").checked = false;
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[0].selected = "selected";
     }
     else if (model === "mgr") {
         document.getElementById("IPC").checked = false;
         document.getElementById("IPMGRC").checked = true;
         document.getElementById("REPC").checked = false;
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
     }
     else if (model === "rep") {
         document.getElementById("IPC").checked = false;
         document.getElementById("IPMGRC").checked = false;
         document.getElementById("REPC").checked = true;
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";;
     }
     else if (model === "mgrep") {
         document.getElementById("IPC").checked = false;
         document.getElementById("IPMGRC").checked = false;
         document.getElementById("REPC").checked = false;
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
     }
 }
 

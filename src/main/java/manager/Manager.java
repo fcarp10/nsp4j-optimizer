@@ -210,6 +210,7 @@ public class Manager {
       results.setVariable(dSPD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSPD));
       results.setVariable(ySVXD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().ySVXD));
       results.setVariable(nXSV, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().nXSV));
+      results.setVariable(mS, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().mS));
       results.initializeResults(optimizationModel.getObjVal(), convertInitialPlacement(initialModel), true);
       return results;
    }

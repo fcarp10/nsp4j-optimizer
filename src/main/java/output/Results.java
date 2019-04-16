@@ -7,6 +7,7 @@ import gui.elements.Scenario;
 import manager.Parameters;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
+import org.graphstream.graph.Path;
 
 import java.util.*;
 
@@ -96,7 +97,7 @@ public class Results {
       if (initialPlacement != null)
          this.migrations = countNumOfMigrations(initialPlacement);
       this.replications = countNumOfReplications();
-      convertVariables(additionalVariables);
+      convertVariables(additionalVariables, initialPlacement);
       setSummaryResults(luSummary, lu);
       setSummaryResults(xuSummary, xu);
       setSummaryResults(fpSummary, fp);
@@ -224,7 +225,7 @@ public class Results {
       return trafficOnLinks;
    }
 
-   private void convertVariables(boolean additional) {
+   private void convertVariables(boolean additional, boolean[][][] initialPlacement) {
       convertzSP();
       convertzSPD();
       convertfXSV();
@@ -235,9 +236,13 @@ public class Results {
          convertfX();
          convertgSVXY();
          convertsSVP();
-         convertdSP();
+         if (initialPlacement != null)
+            convertdSP(initialPlacement);
+         else
+            convertdSP();
          convertqSVXP();
          convertnXSV();
+         convertmS();
       }
    }
 
@@ -401,6 +406,40 @@ public class Results {
       }
    }
 
+   private void convertdSP(boolean[][][] initialPlacement) {
+      try {
+         double[][][] var = (double[][][]) rawVariables.get(dSPD);
+         boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
+         double[] var3 = (double[]) rawVariables.get(mS);
+         boolean[][][] var4 = (boolean[][][]) rawVariables.get(fXSV);
+         double totalDelay;
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (var2[s][p][d]) {
+                     totalDelay = var[s][p][d] - var3[s];
+                     double maxMigrationDelay = 0;
+                     Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
+                     for (int n = 0; n < path.getNodePath().size(); n++)
+                        for (int x = 0; x < pm.getServers().size(); x++)
+                           if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
+                              for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                                 if (initialPlacement[x][s][v] && !var4[x][s][v]) {
+                                    double migrationDelay = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_PROCESS_DELAY);
+                                    if (migrationDelay >= maxMigrationDelay)
+                                       maxMigrationDelay = migrationDelay;
+                                 }
+                     totalDelay += maxMigrationDelay;
+                     strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): "
+                             + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                             + "[" + Auxiliary.roundDouble(totalDelay, 2) + "]");
+                  }
+         variables.put(dSPD, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
    private void convertqSVXP() {
       try {
          double[][][][] var = (double[][][][]) rawVariables.get(ySVXD);
@@ -430,6 +469,18 @@ public class Results {
                      strings.add("(" + (x + this.offset) + "," + (s + this.offset) + "," + (v + this.offset) + "): "
                              + "[" + var[x][s][v] + "]");
          variables.put(nXSV, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void convertmS() {
+      try {
+         double[] var = (double[]) rawVariables.get(mS);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            if (var[s] > 0)
+               strings.add("(" + (s + this.offset) + "): " + "[" + var[s] + "]");
+         variables.put(mS, strings);
       } catch (Exception ignored) {
       }
    }

@@ -9,8 +9,6 @@ import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import output.Auxiliary;
 
-import java.util.List;
-
 import static output.Definitions.*;
 
 public class Constraints {
@@ -146,8 +144,8 @@ public class Constraints {
                pathExpr.addConstant(Integer.MAX_VALUE);
                pathExpr.addTerm(-Integer.MAX_VALUE, vars.zSPD[s][p][d]);
                GRBLinExpr totalDelayExpr = new GRBLinExpr();
-//               totalDelayExpr.add(processDelayExpr); // adds processing delay
-//               totalDelayExpr.add(linkDelayExpr(s, p)); // adds propagation delay
+               totalDelayExpr.add(processDelayExpr); // adds processing delay
+               totalDelayExpr.add(linkDelayExpr(s, p)); // adds propagation delay
                if (initialModel != null)
                   totalDelayExpr.add(migrationDelayExpr(initialModel, s, d, p)); // adds migration delay
                model.getGrbModel().addConstr(totalDelayExpr, GRB.LESS_EQUAL, pathExpr, LINK_DELAY);
@@ -169,43 +167,13 @@ public class Constraints {
       GRBLinExpr linExpr = new GRBLinExpr();
       Service service = pm.getServices().get(s);
       double ratio = (double) service.getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO)
-              * processDelay / pm.getServers().get(x).getCapacity();
+              * processDelay / (int) service.getFunctions().get(v).getAttribute(FUNCTION_MAX_LOAD);
       for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
          linExpr.addTerm(ratio * service.getTrafficFlow().getDemands().get(d), vars.fXSVD[x][s][v][d]);
       return linExpr;
    }
 
-//   private GRBLinExpr migrationDelayExpr(GRBModel initialModel, int s, int d, int p) throws GRBException {
-//      GRBLinExpr linExpr = new GRBLinExpr();
-//      Service service = pm.getServices().get(s);
-//      Path path = service.getTrafficFlow().getPaths().get(p);
-//      for (int n = 0; n < path.getNodePath().size(); n++)
-//         for (int x = 0; x < pm.getServers().size(); x++)
-//            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-//               for (int v = 0; v < service.getFunctions().size(); v++)
-//                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 0.0)
-//                     linExpr.addTerm(1.0, vars.ySVXD[s][v][x][d]);
-//      return linExpr;
-//   }
-
-//   private GRBLinExpr migrationDelayExpr(GRBModel initialModel, int s, int d, int p) throws GRBException {
-//      GRBLinExpr linExpr = new GRBLinExpr();
-//      Service service = pm.getServices().get(s);
-//      Path path = service.getTrafficFlow().getPaths().get(p);
-//      for (int n = 0; n < path.getNodePath().size(); n++)
-//         for (int x = 0; x < pm.getServers().size(); x++)
-//            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-//               for (int v = 0; v < service.getFunctions().size(); v++)
-//                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
-//                     int delay = (int) service.getFunctions().get(v).getAttribute(FUNCTION_PROCESS_DELAY);
-//                     linExpr.addTerm(-delay, vars.fXSV[x][s][v]);
-//                     linExpr.addConstant(delay);
-//                  }
-//      return linExpr;
-//   }
-
    private GRBLinExpr migrationDelayExpr(GRBModel initialModel, int s, int d, int p) throws GRBException {
-      GRBLinExpr linExpr = new GRBLinExpr();
       Service service = pm.getServices().get(s);
       Path path = service.getTrafficFlow().getPaths().get(p);
       for (int n = 0; n < path.getNodePath().size(); n++)
@@ -213,10 +181,14 @@ public class Constraints {
             if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
                for (int v = 0; v < service.getFunctions().size(); v++)
                   if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
-                     int delay = (int) service.getFunctions().get(v).getAttribute(FUNCTION_PROCESS_DELAY);
+                     GRBLinExpr linExpr = new GRBLinExpr();
+                     int delay = (int) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
                      linExpr.addTerm(-delay, vars.fXSV[x][s][v]);
                      linExpr.addConstant(delay);
+                     model.getGrbModel().addConstr(linExpr, GRB.LESS_EQUAL, vars.mS[s], FUNCTION_MIGRATION_DELAY);
                   }
+      GRBLinExpr linExpr = new GRBLinExpr();
+      linExpr.addTerm(1.0, vars.mS[s]);
       return linExpr;
    }
    ////////////////////////////////////////////////////////////////////////////////////////////

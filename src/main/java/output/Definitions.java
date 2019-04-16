@@ -34,6 +34,8 @@ public class Definitions {
    public static final String dSPD = "dSPD";
    public static final String ySVXD = "ySVXD";
    public static final String nXSV = "nXSV";
+   public static final String mS = "mS";
+   public static final String mSVX = "mSVX";
    // general constraints
    public static final String RPC1 = "RPC1";
    public static final String RPC2 = "RPC2";
@@ -60,6 +62,7 @@ public class Definitions {
    public static final String SERVICE_MAX_PATHS = "max_paths";
    public static final String SERVICE_FUNCTIONS_PER_SERVER = "functions_per_server";
    public static final String SERVICE_MAX_DELAY = "max_delay";
+   public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
    // function parameters
    public static final String FUNCTION_REPLICABLE = "replicable";
    public static final String FUNCTION_LOAD_RATIO = "load_ratio";

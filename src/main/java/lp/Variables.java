@@ -25,7 +25,7 @@ public class Variables {
    public GRBVar[][][] dSPD; // binary, service delay
    public GRBVar[][][][] ySVXD; // continuous, processing delay of a traffic demand
    public GRBVar[][][] nXSV; // VM dimensioning
-
+   public GRBVar[] mS; // integer, maximum migration delay for a service
 
    public Variables(Parameters pm, GRBModel model) {
       try {
@@ -110,6 +110,10 @@ public class Variables {
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   nXSV[x][s][v] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER
                           , Definitions.nXSV + "[" + x + "][" + s + "][" + v + "]");
+         mS = new GRBVar[pm.getServices().size()];
+         for (int s = 0; s < pm.getServices().size(); s++)
+            mS[s] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Definitions.mS + "[" + s + "]");
+
          model.update();
       } catch (Exception ignored) {
       }

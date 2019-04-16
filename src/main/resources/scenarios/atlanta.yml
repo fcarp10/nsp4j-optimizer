@@ -45,9 +45,9 @@ functionTypes:
       "overhead": 10,
       "sync_load": 0.0,
       "process_delay": 1000,
-      "max_delay": 1500,
+      "migration_delay": 5,
       "max_instances": 0,
-      "max_load": 0
+      "max_load": 75
     }
   - type: 1
     attributes: {
@@ -56,9 +56,9 @@ functionTypes:
       "overhead": 10,
       "sync_load": 0.1,
       "process_delay": 1500,
-      "max_delay": 2000,
+      "migration_delay": 5,
       "max_instances": 0,
-      "max_load": 0
+      "max_load": 75
     }
 # traffic flow definitions
 trafficFlows:

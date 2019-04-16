@@ -41,11 +41,9 @@ public class LearningModel {
    private boolean[][][][] fXSVD;
    private double[] uL;
    private double[] uX;
-   private Random rnd;
 
    public LearningModel(Parameters pm) {
       this.pm = pm;
-      rnd = new Random(pm.getSeed());
    }
 
    private void initializeModel(int inputLength, int outputLength) {
@@ -78,9 +76,9 @@ public class LearningModel {
       float[] environment = generateEnvironment(initialPlacement);
       initializeModel(environment.length, environment.length - 1);
       for (int i = 0; i < (int) pm.getAux(TRAINING_ITERATIONS); i++)
-         run(environment, objValTarget, i, (double) pm.getAux(EPSILON), false);
-      run(environment, objValTarget, -1, 0, true);
-      this.objVal = computeCost();
+         run(environment, objValTarget, i, (double) pm.getAux(EPSILON));
+      run(environment, objValTarget, -1, 0);
+      this.objVal = computeCost(uX);
       printLog(log, INFO, "finished [" + Auxiliary.roundDouble(objVal, 2) + "]");
    }
 
@@ -98,23 +96,41 @@ public class LearningModel {
       return environment;
    }
 
-   private void run(float[] environment, double objValTarget, int iteration, double epsilon, boolean isReasoning) {
+   private void run(float[] environment, double objValTarget, int iteration, double epsilon) {
       float[] localEnvironment = environment.clone();
       int timeStep = 0;
       int action = -1;
+      boolean[][][] zSPD = null;
+      boolean[][][][] fXSVD = null;
+      double[] uX;
       while (true) {
          INDArray inputIndArray = Nd4j.create(localEnvironment);
          int[] actionMask = generateActionMask(localEnvironment, action);
+         if (!checkActionMask(actionMask))
+            break;
          action = deepQ.getAction(inputIndArray, actionMask, epsilon);
          modifyEnvironment(localEnvironment, action);
          int[] nextActionMask = generateActionMask(localEnvironment, action);
-         computeEnvironment(isReasoning, localEnvironment);
-         double cost = computeCost();
+         double cost;
+         Map<Integer, List<Path>> servicesAdmissiblePaths = getServicesAdmissiblePaths(localEnvironment);
+         boolean isValid = false;
+         zSPD = computezSPD(servicesAdmissiblePaths);
+         if (zSPD != null)
+            isValid = true;
+         fXSVD = activateServersPerDemand(localEnvironment, zSPD);
+         uX = calculateServerUtilization(localEnvironment, fXSVD);
+         if (!isValid)
+            cost = Double.MAX_VALUE;
+         else
+            cost = computeCost(uX);
          double reward = computeReward(cost, objValTarget);
          timeStep++;
          localEnvironment[localEnvironment.length - 1] = timeStep;
          if (cost >= objValTarget * (double) pm.getAux(THRESHOLD)) {
             deepQ.observeReward(inputIndArray, null, reward, nextActionMask);
+            this.zSPD = zSPD;
+            this.fXSVD = fXSVD;
+            this.uX = uX;
             break;
          } else {
             deepQ.observeReward(inputIndArray, Nd4j.create(localEnvironment), reward, nextActionMask);
@@ -122,10 +138,9 @@ public class LearningModel {
                break;
          }
       }
-//      if (iteration > -1)
-//         log.info("iteration " + iteration + " -> " + timeStep + " steps");
       if (iteration == -1) {
-         computeFunctionsServers();
+         this.uL = calculateLinkUtilization(zSPD);
+         this.fXSV = computeFunctionsServers(fXSVD);
          log.info("reasoning in -> " + timeStep + " steps");
       }
    }
@@ -183,6 +198,13 @@ public class LearningModel {
       return actionMask;
    }
 
+   private boolean checkActionMask(int[] actionMask) {
+      for (int i : actionMask)
+         if (i != 0)
+            return true;
+      return false;
+   }
+
    private void modifyEnvironment(float[] environment, int action) {
       outerloop:
       for (int s = 0; s < pm.getServices().size(); s++) {
@@ -199,16 +221,6 @@ public class LearningModel {
                else environment[action] = 1;
                break outerloop;
             }
-      }
-   }
-
-   private void computeEnvironment(boolean isReasoning, float[] environment) {
-      Map<Integer, List<Path>> servicesAdmissiblePaths = getServicesAdmissiblePaths(environment);
-      computePathsPerDemand(servicesAdmissiblePaths);
-      activateServersPerDemand(environment, servicesAdmissiblePaths);
-      calculateServerUtilization(environment);
-      if (isReasoning) {
-         calculateLinkUtilization();
       }
    }
 
@@ -249,43 +261,50 @@ public class LearningModel {
       return admissiblePaths;
    }
 
-   private void computePathsPerDemand(Map<Integer, List<Path>> tSP) {
-      zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
-      for (int s = 0; s < pm.getServices().size(); s++)
+   private boolean[][][] computezSPD(Map<Integer, List<Path>> tSP) {
+      boolean[][][] zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
+      double[] uL = new double[pm.getLinks().size()];
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         if (tSP.get(s).size() == 0) return null;
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            int pathIndex;
+            int pathIndex = 0;
             int trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
-            do {
-               pathIndex = rnd.nextInt(tSP.get(s).size());
-            } while (!routeDemandOverLinks(tSP.get(s).get(pathIndex), trafficDemand));
+            for (int i = 0; i < tSP.get(s).size(); i++) {
+               pathIndex = i;
+               uL = routeDemandOverLinks(tSP.get(s).get(pathIndex), trafficDemand, uL);
+               if (uL != null)
+                  break;
+            }
             zSPD[s][pathIndex][d] = true;
          }
+      }
+      return zSPD;
    }
 
-   private boolean routeDemandOverLinks(Path path, double trafficDemand) {
-      boolean isValid = true;
-      int[] links = new int[path.getEdgePath().size()];
+   private double[] routeDemandOverLinks(Path path, double trafficDemand, double[] uL) {
+      double[] tempUL = uL.clone();
       for (int k = 0; k < path.getEdgePath().size(); k++)
          for (int l = 0; l < pm.getLinks().size(); l++)
             if (pm.getLinks().get(l).equals(path.getEdgePath().get(k))) {
-               double addUtilization = trafficDemand / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
-               if (uL[l] + addUtilization > 1.0) {
-                  isValid = false;
-               } else links[0] = l;
+               double partialUtilization = trafficDemand / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
+               if (tempUL[l] + partialUtilization > 1.0)
+                  return null;
+               else
+                  tempUL[l] += partialUtilization;
+               break;
             }
-      if (isValid)
-         for (int link : links) uL[link] += trafficDemand / (int) pm.getLinks().get(link).getAttribute(LINK_CAPACITY);
-      return true;
+      return tempUL;
    }
 
-   private void activateServersPerDemand(float[] environment, Map<Integer, List<Path>> tSP) {
-      fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm.getDemandsTrafficFlow()];
+   private boolean[][][][] activateServersPerDemand(float[] environment, boolean[][][] zSPD) {
+      boolean[][][][] fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()]
+              [pm.getServiceLength()][pm.getDemandsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
             Path path = null;
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                if (zSPD[s][p][d]) {
-                  path = tSP.get(s).get(p);
+                  path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
                   break;
                }
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
@@ -299,10 +318,11 @@ public class LearningModel {
                         }
             }
          }
+      return fXSVD;
    }
 
-   private void calculateServerUtilization(float[] environment) {
-      uX = new double[pm.getServers().size()];
+   private double[] calculateServerUtilization(float[] environment, boolean[][][][] fXSVD) {
+      double[] uX = new double[pm.getServers().size()];
       for (int x = 0; x < pm.getServers().size(); x++) {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
@@ -319,10 +339,11 @@ public class LearningModel {
                }
             }
       }
+      return uX;
    }
 
-   private void calculateLinkUtilization() {
-      uL = new double[pm.getLinks().size()];
+   private double[] calculateLinkUtilization(boolean[][][] zSPD) {
+      double[] uL = new double[pm.getLinks().size()];
       for (int l = 0; l < pm.getLinks().size(); l++) {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
@@ -334,15 +355,16 @@ public class LearningModel {
                              / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
             }
       }
+      return uL;
    }
 
-   private double computeCost() {
+   private double computeCost(double[] uX) {
       double cost, totalCost = 0;
       for (Double serverUtilization : uX) {
          cost = 0;
-         for (int f = 0; f < Auxiliary.costFunctions.getValues().size(); f++) {
-            double value = Auxiliary.costFunctions.getValues().get(f)[0] * serverUtilization
-                    + Auxiliary.costFunctions.getValues().get(f)[1];
+         for (int y = 0; y < Auxiliary.costFunctions.getValues().size(); y++) {
+            double value = Auxiliary.costFunctions.getValues().get(y)[0] * serverUtilization
+                    + Auxiliary.costFunctions.getValues().get(y)[1];
             if (value > cost)
                cost = value;
          }
@@ -359,14 +381,15 @@ public class LearningModel {
       return reward;
    }
 
-   private void computeFunctionsServers() {
-      fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+   private boolean[][][] computeFunctionsServers(boolean[][][][] fXSVD) {
+      boolean[][][] fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   if (fXSVD[x][s][v][d])
                      fXSV[x][s][v] = true;
+      return fXSV;
    }
 
    public double[] getuX() {
