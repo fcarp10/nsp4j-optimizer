@@ -17,7 +17,6 @@ serviceChains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "functions_per_server": 1,
       "max_delay": 150
     }
   - id: 1
@@ -25,7 +24,6 @@ serviceChains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "functions_per_server": 1,
       "max_delay": 300
     }
   - id: 2
@@ -33,7 +31,6 @@ serviceChains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "functions_per_server": 1,
       "max_delay": 600
     }
 # function definitions
@@ -45,9 +42,8 @@ functionTypes:
       "overhead": 10,
       "sync_load": 0.0,
       "process_delay": 1000,
-      "migration_delay": 5,
-      "max_instances": 0,
-      "max_load": 75
+      "migration_delay": 50,
+      "max_load": 1000
     }
   - type: 1
     attributes: {
@@ -56,9 +52,8 @@ functionTypes:
       "overhead": 10,
       "sync_load": 0.1,
       "process_delay": 1500,
-      "migration_delay": 5,
-      "max_instances": 0,
-      "max_load": 75
+      "migration_delay": 100,
+      "max_load": 1000
     }
 # traffic flow definitions
 trafficFlows:
