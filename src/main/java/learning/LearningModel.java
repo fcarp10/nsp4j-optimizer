@@ -74,15 +74,26 @@ public class LearningModel {
       deepQ = new DeepQ(conf, 100000, .99f, 1024, 100, 1024, inputLength);
    }
 
-   public void run(GRBModel initialPlacement, double objValTarget) throws GRBException {
+   public void run(GRBModel initialPlacement, double objValTarget, GRBModel mgrRepModel) throws GRBException {
       float[] environment = generateEnvironment(initialPlacement);
       initializeModel(environment.length, environment.length - 1);
-      int timeSteps = learn(environment, objValTarget, (double) pm.getAux(EPSILON));
+//      int timeSteps = learn(environment, objValTarget, (double) pm.getAux(EPSILON));
+      int timeSteps = learn2(environment, objValTarget, (double) pm.getAux(EPSILON), generatezSPD(mgrRepModel));
       log.info("Solution found in -> " + timeSteps + " steps");
       this.uL = calculateLinkUtilization(zSPD);
       this.fXSV = computeFunctionsServers(fXSVD);
       this.objVal = computeCost(uX);
       printLog(log, INFO, "finished [" + Auxiliary.roundDouble(objVal, 2) + "]");
+   }
+
+   private boolean[][][] generatezSPD(GRBModel mgrRepModel) throws GRBException {
+      boolean[][][] zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+               if (mgrRepModel.getVarByName(Definitions.zSPD + "[" + s + "][" + p + "][" + d + "]").get(GRB.DoubleAttr.X) == 1.0)
+                  zSPD[s][p][d] = true;
+      return zSPD;
    }
 
    private float[] generateEnvironment(GRBModel initialPlacement) throws GRBException {
@@ -97,6 +108,43 @@ public class LearningModel {
                   environment[pointer] = 0;
             }
       return environment;
+   }
+
+   private int learn2(float[] environment, double objValTarget, double epsilon, boolean[][][] zSPD) {
+      float[] localEnvironment = environment.clone();
+      int timeStep = 0;
+      int action = -1;
+      boolean[][][][] fXSVD;
+      double[] uX = null;
+      double objectiveValue = objValTarget * (double) pm.getAux(THRESHOLD);
+      while (true) {
+         INDArray inputIndArray = Nd4j.create(localEnvironment);
+         int[] actionMask = generateActionMask2(localEnvironment, action);
+         action = deepQ.getAction(inputIndArray, actionMask, epsilon);
+         modifyEnvironment(localEnvironment, action);
+         int[] nextActionMask = generateActionMask2(localEnvironment, action);
+         double cost = Double.MAX_VALUE;
+         fXSVD = activateServersPerDemand(localEnvironment, zSPD);
+         if (fXSVD != null) {
+            uX = calculateServerUtilization(localEnvironment, fXSVD);
+            cost = computeCost(uX);
+         }
+         double reward = computeReward(cost, objectiveValue);
+         timeStep++;
+         localEnvironment[localEnvironment.length - 1] = timeStep;
+         if (cost <= objectiveValue) {
+            deepQ.observeReward(inputIndArray, null, reward, nextActionMask);
+            this.fXSVD = fXSVD;
+            this.uX = uX;
+            break;
+         } else {
+            deepQ.observeReward(inputIndArray, Nd4j.create(localEnvironment), reward, nextActionMask);
+            log.info("Iteration " + timeStep + " --> " + cost);
+            if (timeStep == (int) pm.getAux(LEARNING_STEPS))
+               break;
+         }
+      }
+      return timeStep;
    }
 
    private int learn(float[] environment, double objValTarget, double epsilon) {
@@ -143,6 +191,15 @@ public class LearningModel {
       return timeStep;
    }
 
+   private int[] generateActionMask2(float[] environment, int pastAction) {
+      int[] actionMask = new int[environment.length - 1];
+      for (int i = 0; i < actionMask.length; i++)
+         actionMask[i] = 1;
+      if (pastAction != -1)
+         actionMask[pastAction] = 0;
+      return actionMask;
+   }
+
    private int[] generateActionMask(float[] environment, int pastAction) {
       int[] actionMask = new int[environment.length - 1];
       // to avoid doing the same action twice
@@ -165,34 +222,33 @@ public class LearningModel {
                         }
             }
          }
-//      // find the maximum demand for the function with highest load
-//      double maxDemandLoad = 0;
-//      for (int s = 0; s < pm.getServices().size(); s++)
-//         for (int v = 0; v < pm.getServiceLength(); v++)
-//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-//               double demandLoad = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-//                       * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
-//               if (demandLoad > maxDemandLoad)
-//                  maxDemandLoad = demandLoad;
-//            }
-//      // check which servers can be used based on server capacity
-//      for (int x = 0; x < pm.getServers().size(); x++) {
-//         double totalTraffic = 0;
-//         for (int s = 0; s < pm.getServices().size(); s++) {
-//            int traffic = 0;
-//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-//               traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
-//            for (int v = 0; v < pm.getServiceLength(); v++) {
-//               if (environment[x * pm.getServiceLength() + v] == 1)
-//                  totalTraffic += (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO) * traffic;
-//            }
-//         }
-//         if (totalTraffic + maxDemandLoad >= pm.getServers().get(x).getCapacity())
-//            for (int s = 0; s < pm.getServices().size(); s++)
-//               for (int v = 0; v < pm.getServiceLength(); v++)
-//                  actionMask[x * pm.getServiceLength() + v] = 0;
-//      }
-
+      // find the maximum demand for the function with highest load
+      double maxDemandLoad = 0;
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServiceLength(); v++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+               double demandLoad = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                       * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
+               if (demandLoad > maxDemandLoad)
+                  maxDemandLoad = demandLoad;
+            }
+      // check which servers can be used based on server capacity
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         double totalTraffic = 0;
+         for (int s = 0; s < pm.getServices().size(); s++) {
+            int traffic = 0;
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+               traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
+            for (int v = 0; v < pm.getServiceLength(); v++) {
+               if (environment[x * pm.getServiceLength() + v] == 1)
+                  totalTraffic += (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO) * traffic;
+            }
+         }
+         if (totalTraffic + maxDemandLoad >= pm.getServers().get(x).getCapacity())
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServiceLength(); v++)
+                  actionMask[x * pm.getServiceLength() + v] = 0;
+      }
       return actionMask;
    }
 

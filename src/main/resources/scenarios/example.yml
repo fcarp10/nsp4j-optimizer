@@ -8,7 +8,7 @@ aux: {
   "rl_learning_steps": 10000,
   "rl_num_hidden_layers": 150,
   "threshold": 1.0,
-  "epsilon": 0.5
+  "epsilon": 0.0
 }
 # service definitions
 serviceChains:

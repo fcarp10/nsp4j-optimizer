@@ -8,7 +8,7 @@ import static spark.Spark.*;
 
 public class Launcher {
 
-   public static final int PORT = 8082;
+   public static final int PORT = 8080;
 
    public static void main(String[] args) {
       port(PORT);
