@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import gui.elements.LinkJson;
 import gui.elements.ServerJson;
 import gurobi.GRBException;
+import manager.Launcher;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
 import output.Results;
@@ -52,7 +53,7 @@ public class WebClient {
       }.getType();
       String stringJsonNodes = new Gson().toJson(serverJsons, listType);
       HttpRequest request = HttpRequest.newBuilder()
-              .uri(new URI("http://localhost:8080/server"))
+              .uri(new URI("http://localhost:" + Launcher.PORT + "/server"))
               .headers("Content-Type", "application/json")
               .POST(HttpRequest.BodyPublishers.ofString(stringJsonNodes))
               .build();
@@ -64,7 +65,7 @@ public class WebClient {
       }.getType();
       String stringJsonLinks = new Gson().toJson(linkJsons, listType);
       HttpRequest request = HttpRequest.newBuilder()
-              .uri(new URI("http://localhost:8080/link"))
+              .uri(new URI("http://localhost:" + Launcher.PORT + "/link"))
               .headers("Content-Type", "application/json")
               .POST(HttpRequest.BodyPublishers.ofString(stringJsonLinks))
               .build();
@@ -76,7 +77,7 @@ public class WebClient {
       Gson gson = gsonBuilder.excludeFieldsWithModifiers(Modifier.TRANSIENT).create();
       String stringResults = gson.toJson(results);
       HttpRequest request = HttpRequest.newBuilder()
-              .uri(new URI("http://localhost:8080/results"))
+              .uri(new URI("http://localhost:" + Launcher.PORT + "/results"))
               .POST(HttpRequest.BodyPublishers.ofString(stringResults))
               .build();
       sendRequest(request);
@@ -86,7 +87,7 @@ public class WebClient {
       HttpRequest request;
       try {
          request = HttpRequest.newBuilder()
-                 .uri(new URI("http://localhost:8080/message"))
+                 .uri(new URI("http://localhost:" + Launcher.PORT + "/message"))
                  .POST(HttpRequest.BodyPublishers.ofString(message))
                  .build();
          sendRequest(request);

@@ -26,7 +26,7 @@ serviceChains:
       "min_paths": 2,
       "max_paths": 5,
       "functions_per_server": 1,
-      "max_delay": 150
+      "max_delay": 300
     }
 # function definitions
 functionTypes:

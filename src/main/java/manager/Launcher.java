@@ -7,8 +7,11 @@ import output.Auxiliary;
 import static spark.Spark.*;
 
 public class Launcher {
+
+   public static final int PORT = 8082;
+
    public static void main(String[] args) {
-      port(8080);
+      port(PORT);
       staticFiles.location("/public");
       init();
       new Auxiliary();

@@ -58,6 +58,7 @@ public class Results {
    private transient List<Integer> fp;
    @JsonProperty("sd")
    private transient List<Double> sd;
+   private transient List<Integer> st;
 
    public Results() {
       variables = new LinkedHashMap<>();
@@ -94,6 +95,7 @@ public class Results {
       xu = new ArrayList<>(serverUtilizationMap().values());
       fp = numOfFunctionsPerServer();
       sd = serviceDelayList();
+      st = serviceTypes();
       if (initialPlacement != null)
          this.migrations = countNumOfMigrations(initialPlacement);
       this.replications = countNumOfReplications();
@@ -194,6 +196,20 @@ public class Results {
       } catch (Exception ignored) {
       }
       return serviceDelayList;
+   }
+
+   List<Integer> serviceTypes() {
+      List<Integer> serviceTypesList = new ArrayList<>();
+      try {
+         boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (var2[s][p][d])
+                     serviceTypesList.add(pm.getServices().get(s).getId());
+      } catch (Exception ignored) {
+      }
+      return serviceTypesList;
    }
 
    private double avgPathLength() {
@@ -617,5 +633,9 @@ public class Results {
 
    public List<Double> getSd() {
       return sd;
+   }
+
+   public List<Integer> getSt() {
+      return st;
    }
 }

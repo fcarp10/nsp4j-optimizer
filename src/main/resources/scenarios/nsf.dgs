@@ -1,0 +1,60 @@
+DGS004
+test 0 0
+
+an n1 x:-122.07 y:37.25
+an n2 x:-117.08 y:32.42
+an n3 x:-105.16 y:40.0
+an n4 x:-77.02 y:38.52
+an n5 x:-84.23 y:33.44
+an n6 x:-88.14 y:40.06
+an n7 x:-83.43 y:42.16
+an n8 x:-96.42 y:40.47
+an n9 x:-74.39 y:40.21
+an n10 x:-76.3 y:42.26
+an n11 x:-79.58 y:40.26
+an n12 x:-95.21 y:29.45
+an n13 x:-111.55 y:40.39
+an n14 x:-122.24 y:47.33
+
+ae n1n2 n1 > n2
+ae n2n1 n2 > n1
+ae n1n13 n1 > n13
+ae n13n1 n13 > n1
+ae n1n14 n1 > n14
+ae n14n1 n14 > n1
+ae n2n12 n2 > n12
+ae n12n2 n12 > n2
+ae n2n14 n2 > n14
+ae n14n2 n14 > n2
+ae n3n8 n3 > n8
+ae n8n3 n8 > n3
+ae n3n12 n3 > n12
+ae n12n3 n12 > n3
+ae n3n13 n3 > n13
+ae n13n3 n13 > n3
+ae n4n9 n4 > n9
+ae n9n4 n9 > n4
+ae n4n10 n4 > n10
+ae n10n4 n10 > n4
+ae n4n12 n4 > n12
+ae n12n4 n12 > n4
+ae n5n11 n5 > n11
+ae n11n5 n11 > n5
+ae n5n12 n5 > n12
+ae n12n5 n12 > n5
+ae n6n8 n6 > n8
+ae n8n6 n8 > n6
+ae n6n11 n6 > n11
+ae n11n6 n11 > n6
+ae n6n14 n6 > n14
+ae n14n6 n14 > n6
+ae n7n9 n7 > n9
+ae n9n7 n9 > n7
+ae n7n10 n7 > n10
+ae n10n7 n10 > n7
+ae n7n13 n7 > n13
+ae n13n7 n13 > n7
+ae n9n11 n9 > n11
+ae n11n9 n11 > n9
+ae n10n11 n10 > n11
+ae n11n10 n11 > n10

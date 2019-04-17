@@ -77,13 +77,8 @@ public class LearningModel {
    public void run(GRBModel initialPlacement, double objValTarget) throws GRBException {
       float[] environment = generateEnvironment(initialPlacement);
       initializeModel(environment.length, environment.length - 1);
-      int timeSteps;
-      for (int i = 0; i < (int) pm.getAux(TRAINING_ITERATIONS); i++) {
-         timeSteps = run(environment, objValTarget, (double) pm.getAux(EPSILON));
-         log.info("iteration " + i + " -> " + timeSteps + " steps");
-      }
-      timeSteps = run(environment, objValTarget, 0);
-      log.info("reasoning in -> " + timeSteps + " steps");
+      int timeSteps = learn(environment, objValTarget, (double) pm.getAux(EPSILON));
+      log.info("Solution found in -> " + timeSteps + " steps");
       this.uL = calculateLinkUtilization(zSPD);
       this.fXSV = computeFunctionsServers(fXSVD);
       this.objVal = computeCost(uX);
@@ -104,13 +99,13 @@ public class LearningModel {
       return environment;
    }
 
-   private int run(float[] environment, double objValTarget, double epsilon) {
+   private int learn(float[] environment, double objValTarget, double epsilon) {
       float[] localEnvironment = environment.clone();
       int timeStep = 0;
       int action = -1;
       boolean[][][] zSPD;
-      boolean[][][][] fXSVD;
-      double[] uX;
+      boolean[][][][] fXSVD = null;
+      double[] uX = null;
       double objectiveValue = objValTarget * (double) pm.getAux(THRESHOLD);
       while (true) {
          INDArray inputIndArray = Nd4j.create(localEnvironment);
@@ -120,18 +115,15 @@ public class LearningModel {
          action = deepQ.getAction(inputIndArray, actionMask, epsilon);
          modifyEnvironment(localEnvironment, action);
          int[] nextActionMask = generateActionMask(localEnvironment, action);
-         double cost;
+         double cost = Double.MAX_VALUE;
          Map<Integer, List<Path>> servicesAdmissiblePaths = getServicesAdmissiblePaths(localEnvironment);
-         boolean isValid = false;
          zSPD = computezSPD(servicesAdmissiblePaths);
          if (zSPD != null)
-            isValid = true;
-         fXSVD = activateServersPerDemand(localEnvironment, zSPD);
-         uX = calculateServerUtilization(localEnvironment, fXSVD);
-         if (!isValid)
-            cost = Double.MAX_VALUE;
-         else
+            fXSVD = activateServersPerDemand(localEnvironment, zSPD);
+         if (fXSVD != null) {
+            uX = calculateServerUtilization(localEnvironment, fXSVD);
             cost = computeCost(uX);
+         }
          double reward = computeReward(cost, objectiveValue);
          timeStep++;
          localEnvironment[localEnvironment.length - 1] = timeStep;
@@ -143,6 +135,7 @@ public class LearningModel {
             break;
          } else {
             deepQ.observeReward(inputIndArray, Nd4j.create(localEnvironment), reward, nextActionMask);
+            log.info("Iteration " + timeStep + " --> " + cost);
             if (timeStep == (int) pm.getAux(LEARNING_STEPS))
                break;
          }
@@ -172,34 +165,34 @@ public class LearningModel {
                         }
             }
          }
-      // find the maximum demand for the function with highest load
-      double maxDemandLoad = 0;
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int v = 0; v < pm.getServiceLength(); v++)
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-               double demandLoad = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                       * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
-               if (demandLoad > maxDemandLoad)
-                  maxDemandLoad = demandLoad;
-            }
-      // check which servers can be used based on server capacity
-      for (int x = 0; x < pm.getServers().size(); x++) {
-         double totalTraffic = 0;
-         for (int s = 0; s < pm.getServices().size(); s++) {
-            int traffic = 0;
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
-            for (int v = 0; v < pm.getServiceLength(); v++) {
-               if (environment[x * pm.getServiceLength() + v] == 1)
-                  totalTraffic += (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO) * traffic;
-            }
-         }
-         if (totalTraffic + maxDemandLoad >= pm.getServers().get(x).getCapacity())
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int v = 0; v < pm.getServiceLength(); v++)
-                  actionMask[x * pm.getServiceLength() + v] = 0;
+//      // find the maximum demand for the function with highest load
+//      double maxDemandLoad = 0;
+//      for (int s = 0; s < pm.getServices().size(); s++)
+//         for (int v = 0; v < pm.getServiceLength(); v++)
+//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+//               double demandLoad = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+//                       * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
+//               if (demandLoad > maxDemandLoad)
+//                  maxDemandLoad = demandLoad;
+//            }
+//      // check which servers can be used based on server capacity
+//      for (int x = 0; x < pm.getServers().size(); x++) {
+//         double totalTraffic = 0;
+//         for (int s = 0; s < pm.getServices().size(); s++) {
+//            int traffic = 0;
+//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+//               traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
+//            for (int v = 0; v < pm.getServiceLength(); v++) {
+//               if (environment[x * pm.getServiceLength() + v] == 1)
+//                  totalTraffic += (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO) * traffic;
+//            }
+//         }
+//         if (totalTraffic + maxDemandLoad >= pm.getServers().get(x).getCapacity())
+//            for (int s = 0; s < pm.getServices().size(); s++)
+//               for (int v = 0; v < pm.getServiceLength(); v++)
+//                  actionMask[x * pm.getServiceLength() + v] = 0;
+//      }
 
-      }
       return actionMask;
    }
 
@@ -269,24 +262,61 @@ public class LearningModel {
    private boolean[][][] computezSPD(Map<Integer, List<Path>> tSP) {
       boolean[][][] zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
       double[] uL = new double[pm.getLinks().size()];
+      List<Integer> servicesIndexes = new ArrayList<>();
+      boolean isValid;
+      for (int i = 0; i < pm.getServices().size(); i++)
+         servicesIndexes.add(i);
       for (int s = 0; s < pm.getServices().size(); s++) {
-         if (tSP.get(s).size() == 0) return null;
-         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            int trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
-            Path path = tSP.get(s).get(rnd.nextInt(tSP.get(s).size()));
-            uL = routeDemandOverLinks(path, trafficDemand, uL);
-            if (uL == null)
-               return null;
+         isValid = true;
+         int rndIndex = rnd.nextInt(servicesIndexes.size());
+         int serviceIndex = servicesIndexes.get(rndIndex);
+         if (tSP.get(serviceIndex).size() == 0) return null;
+         Service service = pm.getServices().get(serviceIndex);
+         for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++) {
+            int trafficDemand = service.getTrafficFlow().getDemands().get(d);
+            Path optimumPath = findOptimumPath(tSP.get(serviceIndex), uL);
+            uL = routeDemandOverLinks(optimumPath, trafficDemand, uL);
+            if (uL == null) {
+               s = -1;
+               zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
+               uL = new double[pm.getLinks().size()];
+               servicesIndexes = new ArrayList<>();
+               for (int i = 0; i < pm.getServices().size(); i++)
+                  servicesIndexes.add(i);
+               isValid = false;
+               break;
+            }
             int pathIndex = -1;
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               if (path.equals(pm.getServices().get(s).getTrafficFlow().getPaths().get(p))) {
+            for (int p = 0; p < service.getTrafficFlow().getPaths().size(); p++)
+               if (optimumPath.equals(service.getTrafficFlow().getPaths().get(p))) {
                   pathIndex = p;
                   break;
                }
-            zSPD[s][pathIndex][d] = true;
+            zSPD[serviceIndex][pathIndex][d] = true;
          }
+         if (isValid)
+            servicesIndexes.remove(rndIndex);
       }
       return zSPD;
+   }
+
+   private Path findOptimumPath(List<Path> paths, double[] uL) {
+      Path optimumPath = null;
+      double minOverloadedLink = Double.MAX_VALUE;
+      for (Path path : paths) {
+         double maxLuPath = 0;
+         for (int k = 0; k < path.getEdgePath().size(); k++)
+            for (int l = 0; l < pm.getLinks().size(); l++)
+               if (pm.getLinks().get(l).equals(path.getEdgePath().get(k))) {
+                  if (uL[l] > maxLuPath)
+                     maxLuPath = uL[l];
+               }
+         if (maxLuPath < minOverloadedLink) {
+            minOverloadedLink = maxLuPath;
+            optimumPath = path;
+         }
+      }
+      return optimumPath;
    }
 
    private double[] routeDemandOverLinks(Path path, double trafficDemand, double[] uL) {
@@ -356,17 +386,18 @@ public class LearningModel {
 
    private double[] calculateLinkUtilization(boolean[][][] zSPD) {
       double[] uL = new double[pm.getLinks().size()];
-      for (int l = 0; l < pm.getLinks().size(); l++) {
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
-               if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
-                  continue;
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (zSPD[s][p][d])
-                     uL[l] += (double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                             / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
-            }
-      }
+      if (zSPD != null)
+         for (int l = 0; l < pm.getLinks().size(); l++) {
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+                  if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
+                     continue;
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     if (zSPD[s][p][d])
+                        uL[l] += (double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                                / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
+               }
+         }
       return uL;
    }
 

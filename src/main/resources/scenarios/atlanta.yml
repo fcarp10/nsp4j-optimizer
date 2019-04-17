@@ -17,21 +17,21 @@ serviceChains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 150
+      "max_delay": 100000
     }
   - id: 1
     chain: [0, 1, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 300
+      "max_delay": 100000
     }
   - id: 2
     chain: [0, 1, 1, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 600
+      "max_delay": 100000
     }
 # function definitions
 functionTypes:
@@ -42,7 +42,7 @@ functionTypes:
       "overhead": 10,
       "sync_load": 0.0,
       "process_delay": 1000,
-      "migration_delay": 50,
+      "migration_delay": 40,
       "max_load": 1000
     }
   - type: 1
@@ -52,7 +52,7 @@ functionTypes:
       "overhead": 10,
       "sync_load": 0.1,
       "process_delay": 1500,
-      "migration_delay": 100,
+      "migration_delay": 80,
       "max_load": 1000
     }
 # traffic flow definitions

@@ -8,7 +8,7 @@ aux: {
   "rl_learning_steps": 30,
   "rl_num_hidden_layers": 150,
   "threshold": 1.0,
-  "epsilon": 1.0
+  "epsilon": 0.0
 }
 # service definitions
 serviceChains:
@@ -17,7 +17,6 @@ serviceChains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "functions_per_server": 1,
       "max_delay": 100
     }
 # function definitions
