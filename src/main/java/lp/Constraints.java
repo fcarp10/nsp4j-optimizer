@@ -8,6 +8,7 @@ import manager.elements.Service;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import output.Auxiliary;
+import output.Definitions;
 
 import static output.Definitions.*;
 
@@ -112,9 +113,9 @@ public class Constraints {
 
    private void maxUtilization() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
-         model.getGrbModel().addConstr(vars.uX[x], GRB.LESS_EQUAL, vars.uMax, "maxU");
+         model.getGrbModel().addConstr(vars.uX[x], GRB.LESS_EQUAL, vars.uMax, Definitions.uMax);
       for (int l = 0; l < pm.getLinks().size(); l++)
-         model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, "maxU");
+         model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, Definitions.uMax);
    }
 
    private void serviceDelay(GRBModel initialModel) throws GRBException {
