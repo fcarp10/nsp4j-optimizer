@@ -1,6 +1,6 @@
 # auxiliary parameters
 aux: {
-  "gap": 0.01,
+  "gap": 0.0001,
   "offset_results": 0,
   "scaling_x": 0.5,
   "scaling_y": 0.4,
@@ -17,21 +17,21 @@ serviceChains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 100000
+      "max_delay": 150
     }
   - id: 1
     chain: [0, 1, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 100000
+      "max_delay": 300
     }
   - id: 2
     chain: [0, 1, 1, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 100000
+      "max_delay": 600
     }
 # function definitions
 functionTypes:

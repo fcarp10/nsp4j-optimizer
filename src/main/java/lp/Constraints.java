@@ -66,18 +66,20 @@ public class Constraints {
                   expr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
                           / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY), vars.zSPD[s][p][d]);
             }
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               for (int p = 0; p < pm.getPaths().size(); p++) {
-                  if (!pm.getPaths().get(p).contains(pm.getLinks().get(l)))
-                     continue;
-                  double traf = 0;
-                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                     traf += pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                             * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO);
-                  expr.addTerm(traf / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY)
-                          , vars.hSVP[s][v][p]);
+         for (int p = 0; p < pm.getPaths().size(); p++) {
+            if (!pm.getPaths().get(p).contains(pm.getLinks().get(l)))
+               continue;
+            for (int s = 0; s < pm.getServices().size(); s++) {
+               double traffic = 0;
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                  double trafficScaled = traffic * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO)
+                          / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
+                  expr.addTerm(trafficScaled, vars.hSVP[s][v][p]);
                }
+            }
+         }
          model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.uL[l], "link utilization");
          linearCostFunctions(expr, vars.kL[l]);
       }
@@ -342,6 +344,39 @@ public class Constraints {
                }
    }
 
+   // Synchronization traffic
+//   private void FDC4() throws GRBException {
+//      for (int s = 0; s < pm.getServices().size(); s++)
+//         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+//            for (int x = 0; x < pm.getServers().size(); x++)
+//               for (int y = 0; y < pm.getServers().size(); y++) {
+//                  if (x == y) continue;
+//                  if (pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent())) continue;
+//                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[x][s][v], FDC4);
+//                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[y][s][v], FDC4);
+//                  GRBLinExpr expr = new GRBLinExpr();
+//                  expr.addTerm(1.0, vars.fXSV[x][s][v]);
+//                  expr.addTerm(1.0, vars.fXSV[y][s][v]);
+//                  expr.addConstant(-1.0);
+//                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, FDC4);
+//                  expr = new GRBLinExpr();
+//                  for (int p = 0; p < pm.getPaths().size(); p++) {
+//                     Path pa = pm.getPaths().get(p);
+//                     if (pa.getNodePath().get(0).equals(pm.getServers().get(x).getParent())
+//                             & pa.getNodePath().get(pa.getNodePath().size() - 1)
+//                             .equals(pm.getServers().get(y).getParent()))
+//                        expr.addTerm(1.0, vars.hSVP[s][v][p]);
+//                  }
+//                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.gSVXY[s][v][x][y], FDC4);
+//               }
+//            GRBLinExpr expr = new GRBLinExpr();
+//            for (int p = 0; p < pm.getPaths().size(); p++)
+//               expr.addTerm(1.0, vars.hSVP[s][v][p]);
+//            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, FDC4);
+//
+//         }
+//   }
+
    private void notFDC4() throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -352,9 +387,8 @@ public class Constraints {
                }
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-            for (int p = 0; p < pm.getPaths().size(); p++) {
+            for (int p = 0; p < pm.getPaths().size(); p++)
                model.getGrbModel().addConstr(vars.hSVP[s][v][p], GRB.EQUAL, 0, FDC4);
-            }
    }
    ///////////////////////////////////////////////////////////////////////////////////////////
 

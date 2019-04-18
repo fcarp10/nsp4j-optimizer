@@ -37,7 +37,7 @@ functionTypes:
       "replicable": true,
       "load_ratio": 1.0,
       "overhead": 10,
-      "sync_load": 0.1,
+      "sync_load": 0.0,
       "process_delay": 10,
       "migration_delay": 5,
       "max_instances": 0,
