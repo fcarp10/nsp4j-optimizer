@@ -1,22 +1,22 @@
 DGS004
 test 0 0
 
-an n1 x:-122.07 y:37.25
-an n2 x:-117.08 y:32.42
-an n3 x:-105.16 y:40.0
-an n4 x:-77.02 y:38.52
-an n5 x:-84.23 y:33.44
-an n6 x:-88.14 y:40.06
-an n7 x:-83.43 y:42.16
-an n8 x:-96.42 y:40.47
-an n9 x:-74.39 y:40.21
-an n10 x:-76.3 y:42.26
-an n11 x:-79.58 y:40.26
-an n12 x:-95.21 y:29.45
-an n13 x:-111.55 y:40.39
-an n14 x:-122.24 y:47.33
+an n1 x:-122 y:37 num_servers:2 server_capacity:1000 process_delay:0
+an n2 x:-117 y:32
+an n3 x:-105 y:40
+an n4 x:-77 y:38
+an n5 x:-84 y:33
+an n6 x:-88 y:40
+an n7 x:-83 y:42
+an n8 x:-96 y:40
+an n9 x:-74 y:40
+an n10 x:-76 y:42
+an n11 x:-79 y:40
+an n12 x:-95 y:29
+an n13 x:-111 y:40
+an n14 x:-122 y:47
 
-ae n1n2 n1 > n2
+ae n1n2 n1 > n2 capacity:1000
 ae n2n1 n2 > n1
 ae n1n13 n1 > n13
 ae n13n1 n13 > n1
