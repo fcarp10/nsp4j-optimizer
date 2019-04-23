@@ -113,7 +113,6 @@ public class Variables {
          mS = new GRBVar[pm.getServices().size()];
          for (int s = 0; s < pm.getServices().size(); s++)
             mS[s] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Definitions.mS + "[" + s + "]");
-
          model.update();
       } catch (Exception ignored) {
       }

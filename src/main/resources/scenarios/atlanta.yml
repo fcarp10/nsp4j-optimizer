@@ -1,6 +1,6 @@
 # auxiliary parameters
 aux: {
-  "gap": 0.0001,
+  "gap": 0.015,
   "offset_results": 0,
   "scaling_x": 0.5,
   "scaling_y": 0.4,
