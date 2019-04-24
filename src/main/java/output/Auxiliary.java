@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import gui.WebClient;
 import gurobi.GRB;
 import gurobi.GRBException;
+import gurobi.GRBModel;
 import gurobi.GRBVar;
 import lp.CostFunctions;
 import org.decimal4j.util.DoubleRounder;
@@ -85,7 +86,7 @@ public class Auxiliary {
       WebClient.postMessage(status + message);
    }
 
-   public static boolean[] convertVariablesToBooleans(GRBVar[] var) throws GRBException {
+   public static boolean[] grbVarsToBooleans(GRBVar[] var) throws GRBException {
       boolean[] convertedVar = new boolean[var.length];
       for (int i = 0; i < var.length; i++) {
          if (var[i] == null) continue;
@@ -95,7 +96,7 @@ public class Auxiliary {
       return convertedVar;
    }
 
-   public static boolean[][] convertVariablesToBooleans(GRBVar[][] var) throws GRBException {
+   public static boolean[][] grbVarsToBooleans(GRBVar[][] var) throws GRBException {
       boolean[][] convertedVar;
       if (var.length > 0)
          convertedVar = new boolean[var.length][var[0].length];
@@ -110,7 +111,7 @@ public class Auxiliary {
       return convertedVar;
    }
 
-   public static boolean[][][] convertVariablesToBooleans(GRBVar[][][] var) throws GRBException {
+   public static boolean[][][] grbVarsToBooleans(GRBVar[][][] var) throws GRBException {
       boolean[][][] convertedVar;
       if (var.length > 0)
          convertedVar = new boolean[var.length][var[0].length][var[0][0].length];
@@ -126,7 +127,7 @@ public class Auxiliary {
       return convertedVar;
    }
 
-   public static boolean[][][][] convertVariablesToBooleans(GRBVar[][][][] var) throws GRBException {
+   public static boolean[][][][] grbVarsToBooleans(GRBVar[][][][] var) throws GRBException {
       boolean[][][][] convertedVar;
       if (var.length > 0)
          convertedVar = new boolean[var.length][var[0].length][var[0][0].length][var[0][0][0].length];
@@ -143,7 +144,7 @@ public class Auxiliary {
       return convertedVar;
    }
 
-   public static double[] convertVariablesToDoubles(GRBVar[] var) throws GRBException {
+   public static double[] grbVarsToDoubles(GRBVar[] var) throws GRBException {
       double[] convertedVar = new double[var.length];
       for (int i = 0; i < var.length; i++)
          if (var[i] != null)
@@ -151,7 +152,7 @@ public class Auxiliary {
       return convertedVar;
    }
 
-   public static double[][] convertVariablesToDoubles(GRBVar[][] var) throws GRBException {
+   public static double[][] grbVarsToDoubles(GRBVar[][] var) throws GRBException {
       double[][] convertedVar = new double[var.length][var[0].length];
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++)
@@ -160,7 +161,7 @@ public class Auxiliary {
       return convertedVar;
    }
 
-   public static double[][][] convertVariablesToDoubles(GRBVar[][][] var) throws GRBException {
+   public static double[][][] grbVarsToDoubles(GRBVar[][][] var) throws GRBException {
       double[][][] convertedVar = new double[var.length][var[0].length][var[0][0].length];
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++)
@@ -170,7 +171,7 @@ public class Auxiliary {
       return convertedVar;
    }
 
-   public static double[][][][] convertVariablesToDoubles(GRBVar[][][][] var) throws GRBException {
+   public static double[][][][] grbVarsToDoubles(GRBVar[][][][] var) throws GRBException {
       double[][][][] convertedVar = new double[var.length][var[0].length][var[0][0].length][var[0][0][0].length];
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++)

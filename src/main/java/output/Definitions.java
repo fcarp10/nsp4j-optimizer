@@ -2,7 +2,8 @@ package output;
 
 public class Definitions {
    // objective functions
-   public static final String NUM_OF_SERVERS_OBJ = "num_of_servers";
+   public static final String NUM_SERVERS_OBJ = "num_servers";
+   public static final String NUM_SERVERS_COSTS_OBJ = "num_servers_and_costs";
    public static final String COSTS_OBJ = "costs";
    public static final String UTILIZATION_OBJ = "utilization";
    public static final String MAX_UTILIZATION_OBJ = "max_utilization";
@@ -35,28 +36,26 @@ public class Definitions {
    public static final String ySVXD = "ySVXD";
    public static final String nXSV = "nXSV";
    public static final String mS = "mS";
-   public static final String mSVX = "mSVX";
+   public static final String zSVP = "zSVP";
    // general constraints
-   public static final String RPC1 = "RPC1";
-   public static final String RPC2 = "RPC2";
-   public static final String PFC1 = "PFC1";
-   public static final String PFC2 = "PFC2";
-   public static final String FDC1 = "FDC1";
-   public static final String FDC2 = "FDC2";
-   public static final String FDC3 = "FDC3";
-   public static final String FDC4 = "FDC4";
+   public static final String RP1 = "RP1";
+   public static final String RP2 = "RP2";
+   public static final String PF1 = "PF1";
+   public static final String PF2 = "PF2";
+   public static final String FD1 = "FD1";
+   public static final String FD2 = "FD2";
+   public static final String FD3 = "FD3";
+   // additional constraints
+   public static final String ST = "ST";
+   public static final String SD = "SD";
    // model specific constraints
-   public static final String IPC = "IPC";
-   public static final String IPMGRC = "IPMGRC";
-   public static final String REPC = "REPC";
+   public static final String IP = "IP";
+   public static final String IP_MGR = "IP_MGR";
+   public static final String REP = "REP";
    // extra constraints
-   public static final String RC = "RC";
-   public static final String FXC = "FXC";
-   public static final String SDC = "SDC";
-   public static final String DIC1 = "DIC1";
-   public static final String DVC1 = "DVC1";
-   public static final String DVC2 = "DVC2";
-   public static final String DVC3 = "DVC3";
+   public static final String CR = "CR";
+   public static final String FX = "FX";
+   public static final String FSD = "FSD";
    // service parameters
    public static final String SERVICE_MIN_PATHS = "min_paths";
    public static final String SERVICE_MAX_PATHS = "max_paths";
@@ -69,7 +68,6 @@ public class Definitions {
    public static final String FUNCTION_OVERHEAD = "overhead";
    public static final String FUNCTION_SYNC_LOAD_RATIO = "sync_load";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
-   public static final String FUNCTION_MAX_INSTANCES = "max_instances";
    public static final String FUNCTION_MAX_LOAD = "max_load";
    // link parameters
    public static final String LINK_CAPACITY = "capacity";

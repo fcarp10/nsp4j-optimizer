@@ -159,27 +159,27 @@ function generatePaths() {
 function check(elem) {
     var model = document.getElementById("model").value;
     if (model === "init") {
-        document.getElementById("IPC").checked = true;
-        document.getElementById("IPMGRC").checked = true;
-        document.getElementById("REPC").checked = false;
+        document.getElementById("IP").checked = true;
+        document.getElementById("IP_MGR").checked = true;
+        document.getElementById("REP").checked = false;
         document.getElementById("objectiveFunction").getElementsByTagName('option')[0].selected = "selected";
     }
     else if (model === "mgr") {
-        document.getElementById("IPC").checked = false;
-        document.getElementById("IPMGRC").checked = true;
-        document.getElementById("REPC").checked = false;
+        document.getElementById("IP").checked = false;
+        document.getElementById("IP_MGR").checked = true;
+        document.getElementById("REP").checked = false;
         document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
     }
     else if (model === "rep") {
-        document.getElementById("IPC").checked = false;
-        document.getElementById("IPMGRC").checked = false;
-        document.getElementById("REPC").checked = true;
+        document.getElementById("IP").checked = false;
+        document.getElementById("IP_MGR").checked = false;
+        document.getElementById("REP").checked = true;
         document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";;
     }
     else if (model === "mgrep") {
-        document.getElementById("IPC").checked = false;
-        document.getElementById("IPMGRC").checked = false;
-        document.getElementById("REPC").checked = false;
+        document.getElementById("IP").checked = false;
+        document.getElementById("IP_MGR").checked = false;
+        document.getElementById("REP").checked = false;
         document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
     }
     else if (model === "mgrep_rl") {
@@ -199,26 +199,25 @@ function generateScenario() {
     var weights = parseFloat(document.getElementById("lu").value).toFixed(1) + "-" + parseFloat(document.getElementById("xu").value).toFixed(1) + "-" + parseFloat(document.getElementById("maxU").value).toFixed(1);
     var model = document.getElementById("model").value;
     // general constraints
-    var RPC1 = $("#RPC1").is(":checked");
-    var RPC2 = $("#RPC2").is(":checked");
-    var PFC1 = $("#PFC1").is(":checked");
-    var PFC2 = $("#PFC2").is(":checked");
-    var FDC1 = $("#FDC1").is(":checked");
-    var FDC2 = $("#FDC2").is(":checked");
-    var FDC3 = $("#FDC3").is(":checked");
-    var FDC4 = $("#FDC4").is(":checked");
+    var RP1 = $("#RP1").is(":checked");
+    var RP2 = $("#RP2").is(":checked");
+    var PF1 = $("#PF1").is(":checked");
+    var PF2 = $("#PF2").is(":checked");
+    var FD1 = $("#FD1").is(":checked");
+    var FD2 = $("#FD2").is(":checked");
+    var FD3 = $("#FD3").is(":checked");
+    var FD4 = $("#FD4").is(":checked");
+    // additional constraints
+    var ST = $("#ST").is(":checked");
+    var SD = $("#SD").is(":checked");
     // specific constraints
-    var IPC = $("#IPC").is(":checked");
-    var IPMGRC = $("#IPMGRC").is(":checked");
-    var REPC = $("#REPC").is(":checked");
+    var IP = $("#IP").is(":checked");
+    var IP_MGR = $("#IP_MGR").is(":checked");
+    var REP = $("#REP").is(":checked");
     // extra constraints
-    var RC = $("#RC").is(":checked");
-    var FXC = $("#FXC").is(":checked");
-    var SDC = $("#SDC").is(":checked");
-    var DIC1 = $("#DIC1").is(":checked");
-    var DVC1 = $("#DVC1").is(":checked");
-    var DVC2 = $("#DVC2").is(":checked");
-    var DVC3 = $("#DVC3").is(":checked");
+    var CR = $("#CR").is(":checked");
+    var FX = $("#FX").is(":checked");
+    var FSD = $("#FSD").is(":checked");
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
         objectiveFunction: objectiveFunction,
@@ -227,26 +226,25 @@ function generateScenario() {
         model: model,
         constraints: {
             // general constraints
-            RPC1: RPC1,
-            RPC2: RPC2,
-            PFC1: PFC1,
-            PFC2: PFC2,
-            FDC1: FDC1,
-            FDC2: FDC2,
-            FDC3: FDC3,
-            FDC4: FDC4,
+            RP1: RP1,
+            RP2: RP2,
+            PF1: PF1,
+            PF2: PF2,
+            FD1: FD1,
+            FD2: FD2,
+            FD3: FD3,
+            FD4: FD4,
+            // additional constraints
+            ST: ST,
+            SD: SD,
             // specific constraints
-            IPC: IPC,
-            IPMGRC: IPMGRC,
-            REPC: REPC,
+            IP: IP,
+            IP_MGR: IP_MGR,
+            REP: REP,
             // extra constraints
-            RC: RC,
-            FXC: FXC,
-            SDC: SDC,
-            DIC1: DIC1,
-            DVC1: DVC1,
-            DVC2: DVC2,
-            DVC3: DVC3
+            CR: CR,
+            FX: FX,
+            FSD: FSD
         }
     });
     return scenario;

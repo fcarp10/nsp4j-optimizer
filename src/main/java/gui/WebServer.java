@@ -52,7 +52,7 @@ public class WebServer {
                  , server.getParent().getAttribute("y"), "Gray", server.getId()));
       for (Edge edge : parameters.getLinks())
          linkJsonMap.put(edge.getId(), new LinkJson(edge.getId(), edge.getSourceNode().getId()
-                 , edge.getTargetNode().getId(), edge.getId(), "Gray"));
+                 , edge.getTargetNode().getId(), "", "Gray"));
    }
 
    private static void interfaces() {

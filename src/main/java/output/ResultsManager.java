@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gui.elements.Scenario;
 import gurobi.*;
 import lp.Variables;
 import manager.Parameters;
@@ -54,14 +55,14 @@ public class ResultsManager {
       }
    }
 
-   public static GRBModel importModel(String path, String filename, Parameters pm) {
+   public static GRBModel importModel(String path, String filename, Parameters pm, Scenario scenario) {
       path = path.replaceAll("%20", " ");
       GRBModel model;
       try {
          GRBEnv grbEnv = new GRBEnv();
          grbEnv.set(GRB.IntParam.LogToConsole, 0);
          model = new GRBModel(grbEnv);
-         new Variables(pm, model);
+         new Variables(pm, model, scenario);
          model.read(path + filename + "_initial_placement.mst");
          model.optimize();
          Auxiliary.printLog(log, INFO, "initial placement loaded");

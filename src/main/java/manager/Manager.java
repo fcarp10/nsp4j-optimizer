@@ -80,7 +80,7 @@ public class Manager {
    public static GRBModel start(Scenario sce, GRBModel initialModel) {
       try {
          interrupted = false;
-         GRBModel importedModel = ResultsManager.importModel(getResourcePath(sce.getInputFileName()), sce.getInputFileName(), pm);
+         GRBModel importedModel = ResultsManager.importModel(getResourcePath(sce.getInputFileName()), sce.getInputFileName(), pm, sce);
          if (initialModel == null && importedModel != null)
             initialModel = importedModel;
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
@@ -103,7 +103,7 @@ public class Manager {
                break;
             case REINFORCEMENT_LEARNING:
                if (initialModel == null)
-                  initialModel = runLP(INITIAL_PLACEMENT, sce, Definitions.NUM_OF_SERVERS_OBJ, resultsManager, null);
+                  initialModel = runLP(INITIAL_PLACEMENT, sce, Definitions.NUM_SERVERS_OBJ, resultsManager, null);
                GRBModel mgrRepModel = runLP(MIGRATION_REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel);
                runRL(sce, resultsManager, initialModel, mgrRepModel);
                break;
@@ -139,7 +139,8 @@ public class Manager {
       GRBLinExpr expr;
       OptimizationModel model = new OptimizationModel(pm);
       printLog(log, INFO, "setting variables");
-      Variables variables = new Variables(pm, model.getGrbModel());
+      Variables variables = new Variables(pm, model.getGrbModel(), scenario);
+      variables.initializeAdditionalVariables(pm, model.getGrbModel(), scenario);
       model.setVariables(variables);
       printLog(log, INFO, "setting constraints");
       new Constraints(pm, model, scenario, initialModel);
@@ -174,8 +175,12 @@ public class Manager {
       double linksWeight = Double.valueOf(weights[0]) / pm.getLinks().size();
       double serversWeight = Double.valueOf(weights[1]) / pm.getServers().size();
       switch (objectiveFunction) {
-         case NUM_OF_SERVERS_OBJ:
+         case NUM_SERVERS_OBJ:
             expr.add(model.usedServersExpr());
+            break;
+         case NUM_SERVERS_COSTS_OBJ:
+            expr.add(model.usedServersExpr());
+            expr.add(model.serverCostsExpr(1));
             break;
          case COSTS_OBJ:
             expr.add(model.linkCostsExpr(linksWeight));
@@ -197,20 +202,19 @@ public class Manager {
    private static Results generateResultsForLP(OptimizationModel optimizationModel, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
       // primary variables
-      results.setVariable(zSP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().zSP));
-      results.setVariable(zSPD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().zSPD));
-      results.setVariable(fXSV, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSV));
-      results.setVariable(fXSVD, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fXSVD));
-      results.setVariable(uL, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().uL));
-      results.setVariable(uX, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().uX));
+      results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().zSP));
+      results.setVariable(zSPD, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().zSPD));
+      results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fXSV));
+      results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fXSVD));
+      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().uL));
+      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().uX));
       // secondary variables
-      results.setVariable(fX, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().fX));
-      results.setVariable(gSVXY, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().gSVXY));
-      results.setVariable(hSVP, Auxiliary.convertVariablesToBooleans(optimizationModel.getVariables().hSVP));
-      results.setVariable(dSPD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().dSPD));
-      results.setVariable(ySVXD, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().ySVXD));
-      results.setVariable(nXSV, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().nXSV));
-      results.setVariable(mS, Auxiliary.convertVariablesToDoubles(optimizationModel.getVariables().mS));
+      results.setVariable(fX, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fX));
+      results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().gSVXY));
+      results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().hSVP));
+      results.setVariable(dSPD, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().dSPD));
+      results.setVariable(ySVXD, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().ySVXD));
+      results.setVariable(mS, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().mS));
       results.initializeResults(optimizationModel.getObjVal(), convertInitialPlacement(initialModel), true);
       return results;
    }

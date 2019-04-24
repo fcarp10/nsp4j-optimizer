@@ -30,6 +30,8 @@ public class Results {
    private double totalTraffic;
    @JsonProperty("traffic_on_links")
    private double trafficLinks;
+   @JsonProperty("synchronization_traffic")
+   private double synchronizationTraffic;
    @JsonProperty("migrations")
    private int migrations;
    @JsonProperty("replications")
@@ -110,6 +112,7 @@ public class Results {
       totalTraffic = pm.getTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
       avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
+      synchronizationTraffic = Auxiliary.roundDouble(synchronizationTraffic(), 2);
       this.objVal = Auxiliary.roundDouble(objVal, 4);
    }
 
@@ -241,28 +244,55 @@ public class Results {
       return trafficOnLinks;
    }
 
+   private double synchronizationTraffic() {
+      double synchronizationTraffic = 0;
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(hSVP);
+         for (int l = 0; l < pm.getLinks().size(); l++) {
+            for (int p = 0; p < pm.getPaths().size(); p++) {
+               if (!pm.getPaths().get(p).contains(pm.getLinks().get(l)))
+                  continue;
+               for (int s = 0; s < pm.getServices().size(); s++) {
+                  double traffic = 0;
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
+                  for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                     double trafficScaled = traffic * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO);
+                     if (var[s][v][p])
+                        synchronizationTraffic += trafficScaled;
+                  }
+               }
+            }
+         }
+
+      } catch (Exception ignored) {
+      }
+      return synchronizationTraffic;
+   }
+
    private void convertVariables(boolean additional, boolean[][][] initialPlacement) {
-      convertzSP();
-      convertzSPD();
-      convertfXSV();
-      convertfXSVD();
-      convertuX();
-      convertuL();
+      zSP();
+      zSPD();
+      fXSV();
+      fXSVD();
+      uX();
+      uL();
       if (additional) {
-         convertfX();
-         convertgSVXY();
-         convertsSVP();
+         fX();
+         gSVXY();
+         hSVP();
+         zSVP();
          if (initialPlacement != null)
-            convertdSP(initialPlacement);
+            dSP(initialPlacement);
          else
-            convertdSP();
-         convertqSVXP();
-         convertnXSV();
-         convertmS();
+            dSP();
+         qSVXP();
+         nXSV();
+         mS();
       }
    }
 
-   private void convertzSP() {
+   private void zSP() {
       try {
          boolean[][] var = (boolean[][]) rawVariables.get(zSP);
          List<String> strings = new ArrayList<>();
@@ -277,7 +307,7 @@ public class Results {
       }
    }
 
-   private void convertzSPD() {
+   private void zSPD() {
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(zSPD);
          List<String> strings = new ArrayList<>();
@@ -295,7 +325,7 @@ public class Results {
       }
    }
 
-   private void convertfXSV() {
+   private void fXSV() {
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
          List<String> strings = new ArrayList<>();
@@ -313,7 +343,7 @@ public class Results {
       }
    }
 
-   private void convertfXSVD() {
+   private void fXSVD() {
       try {
          boolean[][][][] var = (boolean[][][][]) rawVariables.get(fXSVD);
          List<String> strings = new ArrayList<>();
@@ -333,7 +363,7 @@ public class Results {
       }
    }
 
-   private void convertuX() {
+   private void uX() {
       try {
          double[] var = (double[]) rawVariables.get(uX);
          List<String> strings = new ArrayList<>();
@@ -346,7 +376,7 @@ public class Results {
       }
    }
 
-   private void convertuL() {
+   private void uL() {
       try {
          double[] var = (double[]) rawVariables.get(uL);
          List<String> strings = new ArrayList<>();
@@ -360,7 +390,7 @@ public class Results {
       }
    }
 
-   private void convertfX() {
+   private void fX() {
       try {
          boolean[] var = (boolean[]) rawVariables.get(fX);
          List<String> strings = new ArrayList<>();
@@ -372,7 +402,7 @@ public class Results {
       }
    }
 
-   private void convertgSVXY() {
+   private void gSVXY() {
       try {
          boolean[][][][] var = (boolean[][][][]) rawVariables.get(gSVXY);
          List<String> strings = new ArrayList<>();
@@ -390,7 +420,7 @@ public class Results {
       }
    }
 
-   private void convertsSVP() {
+   private void hSVP() {
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(hSVP);
          List<String> strings = new ArrayList<>();
@@ -405,7 +435,22 @@ public class Results {
       }
    }
 
-   private void convertdSP() {
+   private void zSVP() {
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(zSVP);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                  if (var[s][v][p])
+                     strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
+                             + pm.getPaths().get(p).getNodePath());
+         variables.put(zSVP, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void dSP() {
       try {
          double[][][] var = (double[][][]) rawVariables.get(dSPD);
          boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
@@ -422,7 +467,7 @@ public class Results {
       }
    }
 
-   private void convertdSP(boolean[][][] initialPlacement) {
+   private void dSP(boolean[][][] initialPlacement) {
       try {
          double[][][] var = (double[][][]) rawVariables.get(dSPD);
          boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
@@ -456,7 +501,7 @@ public class Results {
       }
    }
 
-   private void convertqSVXP() {
+   private void qSVXP() {
       try {
          double[][][][] var = (double[][][][]) rawVariables.get(ySVXD);
          List<String> strings = new ArrayList<>();
@@ -474,7 +519,7 @@ public class Results {
       }
    }
 
-   private void convertnXSV() {
+   private void nXSV() {
       try {
          double[][][] var = (double[][][]) rawVariables.get(nXSV);
          List<String> strings = new ArrayList<>();
@@ -489,7 +534,7 @@ public class Results {
       }
    }
 
-   private void convertmS() {
+   private void mS() {
       try {
          double[] var = (double[]) rawVariables.get(mS);
          List<String> strings = new ArrayList<>();
@@ -597,6 +642,10 @@ public class Results {
 
    public double getTrafficLinks() {
       return trafficLinks;
+   }
+
+   public double getSynchronizationTraffic() {
+      return synchronizationTraffic;
    }
 
    public int getMigrations() {

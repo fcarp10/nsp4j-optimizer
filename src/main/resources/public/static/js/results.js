@@ -65,8 +65,8 @@ function setSummaryResults(results){
       document.getElementById("minSd").innerText = results['sdSummary'][1];
       document.getElementById("maxSd").innerText = results['sdSummary'][2];
       document.getElementById("stdSd").innerText = results['sdSummary'][3];
-      document.getElementById("mgr").innerText = results['migrations'];
-      document.getElementById("rep").innerText = results['replications'];
+      document.getElementById("mgr_num").innerText = results['migrations'];
+      document.getElementById("rep_num").innerText = results['replications'];
 }
 
 function cleanSummaryResults(){
@@ -87,8 +87,8 @@ function cleanSummaryResults(){
       document.getElementById("minSd").innerText = value;
       document.getElementById("maxSd").innerText = value;
       document.getElementById("stdSd").innerText = value;
-      document.getElementById("mgr").innerText = value;
-      document.getElementById("rep").innerText = value;
+      document.getElementById("mgr_num").innerText = value;
+      document.getElementById("rep_num").innerText = value;
 }
 
 function initializeGraphs(data) {

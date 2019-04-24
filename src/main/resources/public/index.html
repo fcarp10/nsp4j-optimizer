@@ -45,8 +45,9 @@
                     <div class="form-group">
                         <label>Objective function</label>
                         <select class="form-control custom-select my-1 mr-sm-2" id="objectiveFunction">
-                            <option value="num_of_servers">num of servers</option>
-                            <option value="costs">linear cost functions</option>
+                            <option value="num_servers">num. servers</option>
+                            <option value="num_servers_and_costs">num. servers + costs</option>
+                            <option value="costs">cost functions</option>
                             <option value="utilization">utilization</option>
                             <option value="max_utilization">max utilization</option>
                         </select>
@@ -81,82 +82,75 @@
                 <div class="col-6">
                     <div class="form-group">
                         <label>General</label>
-                        <label class="check ">RPC1
-                            <input type="checkbox" id="RPC1" checked>
+                        <label class="check ">RP1
+                            <input type="checkbox" id="RP1" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">RPC2
-                            <input type="checkbox" id="RPC2" checked>
+                        <label class="check ">RP2
+                            <input type="checkbox" id="RP2" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">PFC1
-                            <input type="checkbox" id="PFC1" checked>
+                        <label class="check ">PF1
+                            <input type="checkbox" id="PF1" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">PFC2
-                            <input type="checkbox" id="PFC2" checked>
+                        <label class="check ">PF2
+                            <input type="checkbox" id="PF2" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">FDC1
-                            <input type="checkbox" id="FDC1" checked>
+                        <label class="check ">FD1
+                            <input type="checkbox" id="FD1" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">FDC2
-                            <input type="checkbox" id="FDC2" checked>
+                        <label class="check ">FD2
+                            <input type="checkbox" id="FD2" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">FDC3
-                            <input type="checkbox" id="FDC3" checked>
+                        <label class="check ">FD3
+                            <input type="checkbox" id="FD3" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">FDC4
-                            <input type="checkbox" id="FDC4" checked>
+                        <label class="check ">FD4
+                            <input type="checkbox" id="FD4" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label>Specific</label>
-                        <label class="check ">IPC
-                            <input type="checkbox" id="IPC" checked>
+                        <label>Additional</label>
+                        <label class="check ">ST
+                            <input type="checkbox" id="ST" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">IPMGRC
-                            <input type="checkbox" id="IPMGRC" checked>
-                            <span class="checkmark"></span>
-                        </label>
-                        <label class="check ">REPC
-                            <input type="checkbox" id="REPC">
+                        <label class="check ">SD
+                            <input type="checkbox" id="SD" checked>
                             <span class="checkmark"></span>
                         </label>
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="form-group">
+                        <label>Specific</label>
+                        <label class="check ">IP
+                            <input type="checkbox" id="IP" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">IP_MGR
+                            <input type="checkbox" id="IP_MGR" checked>
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">REP
+                            <input type="checkbox" id="REP">
+                            <span class="checkmark"></span>
+                        </label>
                         <label>Extra</label>
-                        <label class="check ">RC
-                            <input type="checkbox" id="RC">
+                        <label class="check ">CR
+                            <input type="checkbox" id="CR">
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">FXC
-                            <input type="checkbox" id="FXC">
+                        <label class="check ">FX
+                            <input type="checkbox" id="FX">
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">SDC
-                            <input type="checkbox" id="SDC">
-                            <span class="checkmark"></span>
-                        </label>
-                        <label class="check ">DIC1
-                            <input type="checkbox" id="DIC1">
-                            <span class="checkmark"></span>
-                        </label>
-                        <label class="check ">DVC1
-                            <input type="checkbox" id="DVC1">
-                            <span class="checkmark"></span>
-                        </label>
-                        <label class="check ">DVC2
-                            <input type="checkbox" id="DVC2">
-                            <span class="checkmark"></span>
-                        </label>
-                        <label class="check ">DVC3
-                            <input type="checkbox" id="DVC3">
+                        <label class="check ">FSD
+                            <input type="checkbox" id="FSD">
                             <span class="checkmark"></span>
                         </label>
                     </div>
@@ -213,9 +207,9 @@
                     <thead class="thead-light">
                     <tr>
                         <th>Migrations</th>
-                        <th id="mgr">0</th>
+                        <th id="mgr_num">0</th>
                         <th>Replications</th>
-                        <th id="rep">0</th>
+                        <th id="rep_num">0</th>
                     </tr>
                     </thead>
                 </table>

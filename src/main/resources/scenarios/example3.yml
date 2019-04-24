@@ -17,7 +17,7 @@ serviceChains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 100
+      "max_delay": 1000
     }
 # function definitions
 functionTypes:
@@ -26,7 +26,7 @@ functionTypes:
       "replicable": false,
       "load_ratio": 1.0,
       "overhead": 0,
-      "sync_load": 0.1,
+      "sync_load": 0.0,
       "process_delay": 10,
       "migration_delay": 5,
       "max_instances": 0,
