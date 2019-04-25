@@ -26,7 +26,7 @@ import java.util.*;
 
 public class WebClient {
 
-   public static void updateResultsToWebApp(Results results) throws GRBException {
+   public static void updateResultsToWebApp(Results results) {
       if (results != null) {
          List<ServerJson> serverJsonList = generateServerStrings(results);
          List<LinkJson> linkJsonList = generateLinkStrings(results);
@@ -96,7 +96,7 @@ public class WebClient {
       }
    }
 
-   private static List<ServerJson> generateServerStrings(Results results) throws GRBException {
+   private static List<ServerJson> generateServerStrings(Results results) {
       Map<Server, String> functions = generateFunctionsPerServerStringMap(results);
       List<ServerJson> serverJsonList = new ArrayList<>();
       Iterator entries = results.serverUtilizationMap().entrySet().iterator();
@@ -108,7 +108,7 @@ public class WebClient {
          StringBuilder u = new StringBuilder();
          if (utilization != 0) {
             u.append(df.format(utilization));
-            if (functions.get(server).length() < 40)
+            if (functions.get(server).length() < 20)
                u.append("\n").append(functions.get(server));
          }
          serverJsonList.add(new ServerJson(server.getId(), server.getParent().getAttribute("x")

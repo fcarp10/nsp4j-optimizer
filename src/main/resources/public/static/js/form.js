@@ -162,28 +162,28 @@ function check(elem) {
         document.getElementById("IP").checked = true;
         document.getElementById("IP_MGR").checked = true;
         document.getElementById("REP").checked = false;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[0].selected = "selected";
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
     }
     else if (model === "mgr") {
         document.getElementById("IP").checked = false;
         document.getElementById("IP_MGR").checked = true;
         document.getElementById("REP").checked = false;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";
     }
     else if (model === "rep") {
         document.getElementById("IP").checked = false;
         document.getElementById("IP_MGR").checked = false;
         document.getElementById("REP").checked = true;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";;
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";;
     }
     else if (model === "mgrep") {
         document.getElementById("IP").checked = false;
         document.getElementById("IP_MGR").checked = false;
         document.getElementById("REP").checked = false;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";
     }
     else if (model === "mgrep_rl") {
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";
     }
 }
 

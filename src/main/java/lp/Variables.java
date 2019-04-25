@@ -10,24 +10,25 @@ import output.Definitions;
 import static output.Definitions.*;
 
 public class Variables {
-   // Objective
-   public GRBVar[] kL; // link cost utilization
-   public GRBVar[] kX; // server cost utilization
+   // objective variables
    public GRBVar[] uL; // link utilization
    public GRBVar[] uX; // server utilization
+   // model specific objective variables
+   public GRBVar[] kL; // link cost utilization
+   public GRBVar[] kX; // server cost utilization
+   public GRBVar[] fX; // binary, true if server is used
    public GRBVar uMax; // max utilization
-   // Elementary
+   // general variables
    public GRBVar[][] zSP; // binary, routing per path
    public GRBVar[][][] zSPD; // binary, routing per demand
    public GRBVar[][][] fXSV; // binary, placement per server
    public GRBVar[][][][] fXSVD; // binary, placement per demand
-   // Additional
-   public GRBVar[] fX; // binary, true if server is used
-   public GRBVar[][][][] gSVXY; //binary, auxiliary variable
-   public GRBVar[][][] hSVP; // binary, traffic synchronization variable
+   // additional variables
    public GRBVar[][][] dSPD; // binary, service delay
    public GRBVar[][][][] ySVXD; // continuous, processing delay of a traffic demand
    public GRBVar[] mS; // integer, maximum migration delay for a service
+   public GRBVar[][][][] gSVXY; //binary, synchronization traffic auxiliary variable
+   public GRBVar[][][] hSVP; // binary, traffic synchronization variable
 
    public Variables(Parameters pm, GRBModel model, Scenario scenario) {
       try {
@@ -70,6 +71,9 @@ public class Variables {
             for (int l = 0; l < pm.getLinks().size(); l++)
                kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                        , Definitions.kL + "[" + l + "]");
+         }
+         if (scenario.getObjectiveFunction().equals(COSTS_OBJ)
+                 || scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ)) {
             kX = new GRBVar[pm.getServers().size()];
             for (int x = 0; x < pm.getServers().size(); x++)
                kX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
@@ -88,7 +92,8 @@ public class Variables {
    public void initializeAdditionalVariables(Parameters pm, GRBModel model, Scenario scenario) {
       try {
          // if model is minimizing number of used servers
-         if (scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ)) {
+         if (scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ)
+                 || scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ)) {
             fX = new GRBVar[pm.getServers().size()];
             for (int x = 0; x < pm.getServers().size(); x++)
                this.fX[x] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY

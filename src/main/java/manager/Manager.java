@@ -6,6 +6,7 @@ import gui.elements.Scenario;
 import gurobi.*;
 import learning.LearningModel;
 import lp.Constraints;
+import lp.constraints.AdditionalConstraints;
 import lp.OptimizationModel;
 import lp.Variables;
 import org.apache.commons.io.FilenameUtils;
@@ -180,7 +181,8 @@ public class Manager {
             break;
          case NUM_SERVERS_COSTS_OBJ:
             expr.add(model.usedServersExpr());
-            expr.add(model.serverCostsExpr(1));
+            serversWeight = 1.0 / pm.getServers().size();
+            expr.add(model.serverCostsExpr(serversWeight));
             break;
          case COSTS_OBJ:
             expr.add(model.linkCostsExpr(linksWeight));
@@ -201,21 +203,29 @@ public class Manager {
 
    private static Results generateResultsForLP(OptimizationModel optimizationModel, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
-      // primary variables
+      // objective variables
+      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().uL));
+      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().uX));
+      // model specific objective variables
+      if (scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ)
+              || scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ))
+         results.setVariable(fX, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fX));
+      // general variables
       results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().zSP));
       results.setVariable(zSPD, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().zSPD));
       results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fXSV));
       results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fXSVD));
-      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().uL));
-      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().uX));
-      // secondary variables
-      results.setVariable(fX, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fX));
-      results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().gSVXY));
-      results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().hSVP));
-      results.setVariable(dSPD, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().dSPD));
-      results.setVariable(ySVXD, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().ySVXD));
-      results.setVariable(mS, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().mS));
-      results.initializeResults(optimizationModel.getObjVal(), convertInitialPlacement(initialModel), true);
+      // additional variables
+      if (scenario.getConstraints().get(ST)) {
+         results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().gSVXY));
+         results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().hSVP));
+      }
+      if (scenario.getConstraints().get(SD)) {
+         results.setVariable(dSPD, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().dSPD));
+         results.setVariable(ySVXD, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().ySVXD));
+         results.setVariable(mS, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().mS));
+      }
+      results.initializeResults(optimizationModel.getObjVal(), convertInitialPlacement(initialModel), scenario);
       return results;
    }
 
@@ -226,7 +236,7 @@ public class Manager {
       results.setVariable(fXSVD, learningModel.getfXSVD());
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
-      results.initializeResults(learningModel.getObjVal(), convertInitialPlacement(initialModel), false);
+      results.initializeResults(learningModel.getObjVal(), convertInitialPlacement(initialModel), scenario);
       return results;
    }
 
