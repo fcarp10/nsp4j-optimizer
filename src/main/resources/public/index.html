@@ -45,6 +45,7 @@
                     <div class="form-group">
                         <label>Objective function</label>
                         <select class="form-control custom-select my-1 mr-sm-2" id="objectiveFunction">
+                            <option value="dimensioning">dimensioning</option>
                             <option value="num_servers">num. servers</option>
                             <option value="num_servers_and_costs">num. servers + costs</option>
                             <option value="costs">cost functions</option>
@@ -124,29 +125,25 @@
                 <div class="col-6">
                     <div class="form-group">
                         <label>Specific</label>
-                        <label class="check ">IP
-                            <input type="checkbox" id="IP" checked>
+                        <label class="check ">num_servers
+                            <input type="checkbox" id="num_servers">
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">IP_MGR
-                            <input type="checkbox" id="IP_MGR" checked>
+                        <label class="check ">single_path
+                            <input type="checkbox" id="single_path" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">REP
-                            <input type="checkbox" id="REP">
+                        <label class="check ">fix_init_plc
+                            <input type="checkbox" id="fix_init_plc">
                             <span class="checkmark"></span>
                         </label>
                         <label>Extra</label>
-                        <label class="check ">CR
-                            <input type="checkbox" id="CR">
+                        <label class="check ">const_rep
+                            <input type="checkbox" id="const_rep">
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">FX
-                            <input type="checkbox" id="FX">
-                            <span class="checkmark"></span>
-                        </label>
-                        <label class="check ">FSD
-                            <input type="checkbox" id="FSD">
+                        <label class="check ">fix_src_dst
+                            <input type="checkbox" id="fix_src_dst">
                             <span class="checkmark"></span>
                         </label>
                     </div>
@@ -173,6 +170,7 @@
             <div class="form-group">
                 <label>Scenario</label>
                 <select class="form-control custom-select my-1 mr-sm-2" id="model" onChange="check(this);">
+                    <option value="dimensioning">dimensioning</option>
                     <option value="init">initial placement</option>
                     <option value="mgr">migration</option>
                     <option value="rep">replication</option>

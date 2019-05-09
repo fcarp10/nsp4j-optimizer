@@ -40,6 +40,13 @@ public class OptimizationModel {
          grbModel.setObjective(expr, GRB.MAXIMIZE);
    }
 
+   public GRBLinExpr dimensioningExpr() {
+      GRBLinExpr expr = new GRBLinExpr();
+      for (int n = 0; n < parameters.getNodes().size(); n++)
+         expr.addTerm(1.0, variables.nX[n]);
+      return expr;
+   }
+
    public GRBLinExpr usedServersExpr() {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < parameters.getServers().size(); x++)

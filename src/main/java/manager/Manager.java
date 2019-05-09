@@ -3,10 +3,12 @@ package manager;
 import gui.WebClient;
 import gui.WebServer;
 import gui.elements.Scenario;
-import gurobi.*;
+import gurobi.GRB;
+import gurobi.GRBException;
+import gurobi.GRBLinExpr;
+import gurobi.GRBModel;
 import learning.LearningModel;
 import lp.Constraints;
-import lp.constraints.AdditionalConstraints;
 import lp.OptimizationModel;
 import lp.Variables;
 import org.apache.commons.io.FilenameUtils;
@@ -22,7 +24,7 @@ import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
 
-import static output.Auxiliary.*;
+import static output.Auxiliary.printLog;
 import static output.Definitions.*;
 
 public class Manager {
@@ -176,6 +178,9 @@ public class Manager {
       double linksWeight = Double.valueOf(weights[0]) / pm.getLinks().size();
       double serversWeight = Double.valueOf(weights[1]) / pm.getServers().size();
       switch (objectiveFunction) {
+         case SERVER_DIMENSIONING:
+            expr.add(model.dimensioningExpr());
+            break;
          case NUM_SERVERS_OBJ:
             expr.add(model.usedServersExpr());
             break;
@@ -201,31 +206,33 @@ public class Manager {
       return expr;
    }
 
-   private static Results generateResultsForLP(OptimizationModel optimizationModel, Scenario scenario, GRBModel initialModel) throws GRBException {
+   private static Results generateResultsForLP(OptimizationModel optModel, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
       // objective variables
-      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().uL));
-      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().uX));
+      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModel.getVariables().uL));
+      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModel.getVariables().uX));
       // model specific objective variables
+      if (scenario.getObjectiveFunction().equals(SERVER_DIMENSIONING))
+         results.setVariable(nX, Auxiliary.grbVarsToDoubles(optModel.getVariables().nX));
       if (scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ)
               || scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ))
-         results.setVariable(fX, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fX));
+         results.setVariable(fX, Auxiliary.grbVarsToBooleans(optModel.getVariables().fX));
       // general variables
-      results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().zSP));
-      results.setVariable(zSPD, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().zSPD));
-      results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fXSV));
-      results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().fXSVD));
+      results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optModel.getVariables().zSP));
+      results.setVariable(zSPD, Auxiliary.grbVarsToBooleans(optModel.getVariables().zSPD));
+      results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optModel.getVariables().fXSV));
+      results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optModel.getVariables().fXSVD));
       // additional variables
       if (scenario.getConstraints().get(ST)) {
-         results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().gSVXY));
-         results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optimizationModel.getVariables().hSVP));
+         results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optModel.getVariables().gSVXY));
+         results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optModel.getVariables().hSVP));
       }
       if (scenario.getConstraints().get(SD)) {
-         results.setVariable(dSPD, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().dSPD));
-         results.setVariable(ySVXD, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().ySVXD));
-         results.setVariable(mS, Auxiliary.grbVarsToDoubles(optimizationModel.getVariables().mS));
+         results.setVariable(dSPD, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSPD));
+         results.setVariable(ySVXD, Auxiliary.grbVarsToDoubles(optModel.getVariables().ySVXD));
+         results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVariables().mS));
       }
-      results.initializeResults(optimizationModel.getObjVal(), convertInitialPlacement(initialModel), scenario);
+      results.initializeResults(optModel.getObjVal(), convertInitialPlacement(initialModel), scenario);
       return results;
    }
 

@@ -118,6 +118,8 @@ public class Results {
       uX();
       uL();
       // model specific objective variables
+      if (scenario.getModel().equals(SERVER_DIMENSIONING))
+         nX();
       if (sce.getObjectiveFunction().equals(NUM_SERVERS_OBJ) || sce.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ))
          fX();
       // general variables
@@ -386,6 +388,18 @@ public class Results {
                     + Auxiliary.roundDouble(var[l], 2) + "]["
                     + var[l] * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY) + "]");
          variables.put(uL, strings);
+      } catch (Exception ignored) {
+      }
+   }
+
+   private void nX() {
+      try {
+         double[] var = (double[]) rawVariables.get(nX);
+         List<String> strings = new ArrayList<>();
+         for (int n = 0; n < pm.getNodes().size(); n++)
+            if (var[n] > 0)
+               strings.add("(" + (n + this.offset) + "): [" + pm.getNodes().get(n).getId() + "][" + var[n] + "]");
+         variables.put(nX, strings);
       } catch (Exception ignored) {
       }
    }

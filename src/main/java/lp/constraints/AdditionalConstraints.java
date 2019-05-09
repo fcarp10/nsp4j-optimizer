@@ -17,12 +17,12 @@ public class AdditionalConstraints {
    private Variables vars;
    private Parameters pm;
 
-   public AdditionalConstraints(Parameters pm, OptimizationModel model, Scenario scenario, GRBModel initialModel, GRBLinExpr[] luExpr) {
+   public AdditionalConstraints(Parameters pm, OptimizationModel model, Scenario scenario, GRBModel initialModel, GRBLinExpr[] linkLoadExpr) {
       try {
          this.pm = pm;
          this.model = model;
          this.vars = model.getVariables();
-         if (scenario.getConstraints().get(ST)) ST(luExpr);
+         if (scenario.getConstraints().get(ST)) ST(linkLoadExpr);
          if (scenario.getConstraints().get(SD)) SD(initialModel);
       } catch (Exception e) {
          e.printStackTrace();
@@ -30,7 +30,7 @@ public class AdditionalConstraints {
    }
 
    // synchronization traffic
-   private void ST(GRBLinExpr[] luExpr) throws GRBException {
+   private void ST(GRBLinExpr[] linkLoadExpr) throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
@@ -64,13 +64,12 @@ public class AdditionalConstraints {
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                  double trafficScaled = traffic * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO)
-                          / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
+                  double trafficScaled = traffic * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO);
                   expr.addTerm(trafficScaled, vars.hSVP[s][v][p]);
                }
             }
          }
-         luExpr[l].add(expr);
+         linkLoadExpr[l].add(expr);
       }
    }
    // service delay

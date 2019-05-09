@@ -8,6 +8,7 @@ public class Definitions {
    public static final String UTILIZATION_OBJ = "utilization";
    public static final String MAX_UTILIZATION_OBJ = "max_utilization";
    // models
+   public static final String SERVER_DIMENSIONING = "dimensioning";
    public static final String INITIAL_PLACEMENT = "init";
    public static final String MIGRATION = "mgr";
    public static final String REPLICATION = "rep";
@@ -29,14 +30,13 @@ public class Definitions {
    public static final String fXSV = "fXSV";
    public static final String fXSVD = "fXSVD";
    // additional variables
+   public static final String nX = "nX";
    public static final String fX = "fX";
    public static final String gSVXY = "gSVXY";
    public static final String hSVP = "hSVP";
    public static final String dSPD = "dSPD";
    public static final String ySVXD = "ySVXD";
-   public static final String nXSV = "nXSV";
    public static final String mS = "mS";
-   public static final String zSVP = "zSVP";
    // general constraints
    public static final String RP1 = "RP1";
    public static final String RP2 = "RP2";
@@ -49,17 +49,15 @@ public class Definitions {
    public static final String ST = "ST";
    public static final String SD = "SD";
    // model specific constraints
-   public static final String IP = "IP";
-   public static final String IP_MGR = "IP_MGR";
-   public static final String REP = "REP";
+   public static final String NUM_SERVERS = "num_servers";
+   public static final String SINGLE_PATH = "single_path";
+   public static final String FIX_INIT_PLC = "fix_init_plc";
    // extra constraints
-   public static final String CR = "CR";
-   public static final String FX = "FX";
-   public static final String FSD = "FSD";
+   public static final String CONST_REP = "const_rep";
+   public static final String FIX_SRC_DST = "fix_src_dst";
    // service parameters
    public static final String SERVICE_MIN_PATHS = "min_paths";
    public static final String SERVICE_MAX_PATHS = "max_paths";
-   public static final String SERVICE_FUNCTIONS_PER_SERVER = "functions_per_server";
    public static final String SERVICE_MAX_DELAY = "max_delay";
    public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
    // function parameters
@@ -74,8 +72,10 @@ public class Definitions {
    public static final String LINK_DELAY = "delay";
    // DRL parameters
    public static final String NUM_HIDDEN_LAYERS = "rl_num_hidden_layers";
-   public static final String TRAINING_ITERATIONS = "rl_training_iterations";
    public static final String EPSILON = "epsilon";
    public static final String THRESHOLD = "threshold";
    public static final String LEARNING_STEPS = "rl_learning_steps";
+   // Aux parameters
+   public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
+   public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
 }

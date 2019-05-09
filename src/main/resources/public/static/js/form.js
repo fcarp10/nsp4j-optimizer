@@ -158,32 +158,38 @@ function generatePaths() {
 
 function check(elem) {
     var model = document.getElementById("model").value;
+    if (model === "dimensioning") {
+            document.getElementById("num_servers").checked = false;
+            document.getElementById("single_path").checked = true;
+            document.getElementById("fix_init_plc").checked = false;
+            document.getElementById("objectiveFunction").getElementsByTagName('option')[0].selected = "selected";
+        }
     if (model === "init") {
-        document.getElementById("IP").checked = true;
-        document.getElementById("IP_MGR").checked = true;
-        document.getElementById("REP").checked = false;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[1].selected = "selected";
+        document.getElementById("num_servers").checked = true;
+        document.getElementById("single_path").checked = true;
+        document.getElementById("fix_init_plc").checked = false;
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";
     }
     else if (model === "mgr") {
-        document.getElementById("IP").checked = false;
-        document.getElementById("IP_MGR").checked = true;
-        document.getElementById("REP").checked = false;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";
+        document.getElementById("num_servers").checked = false;
+        document.getElementById("single_path").checked = true;
+        document.getElementById("fix_init_plc").checked = false;
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[3].selected = "selected";
     }
     else if (model === "rep") {
-        document.getElementById("IP").checked = false;
-        document.getElementById("IP_MGR").checked = false;
-        document.getElementById("REP").checked = true;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";;
+        document.getElementById("num_servers").checked = false;
+        document.getElementById("single_path").checked = false;
+        document.getElementById("fix_init_plc").checked = true;
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[3].selected = "selected";;
     }
     else if (model === "mgrep") {
-        document.getElementById("IP").checked = false;
-        document.getElementById("IP_MGR").checked = false;
-        document.getElementById("REP").checked = false;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";
+        document.getElementById("num_servers").checked = false;
+        document.getElementById("single_path").checked = false;
+        document.getElementById("fix_init_plc").checked = false;
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[3].selected = "selected";
     }
     else if (model === "mgrep_rl") {
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";
+        document.getElementById("objectiveFunction").getElementsByTagName('option')[3].selected = "selected";
     }
 }
 
@@ -211,13 +217,12 @@ function generateScenario() {
     var ST = $("#ST").is(":checked");
     var SD = $("#SD").is(":checked");
     // specific constraints
-    var IP = $("#IP").is(":checked");
-    var IP_MGR = $("#IP_MGR").is(":checked");
-    var REP = $("#REP").is(":checked");
+    var num_servers = $("#num_servers").is(":checked");
+    var single_path = $("#single_path").is(":checked");
+    var fix_init_plc = $("#fix_init_plc").is(":checked");
     // extra constraints
-    var CR = $("#CR").is(":checked");
-    var FX = $("#FX").is(":checked");
-    var FSD = $("#FSD").is(":checked");
+    var const_rep = $("#const_rep").is(":checked");
+    var fix_src_dst = $("#fix_src_dst").is(":checked");
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
         objectiveFunction: objectiveFunction,
@@ -238,13 +243,12 @@ function generateScenario() {
             ST: ST,
             SD: SD,
             // specific constraints
-            IP: IP,
-            IP_MGR: IP_MGR,
-            REP: REP,
+            num_servers: num_servers,
+            single_path: single_path,
+            fix_init_plc: fix_init_plc,
             // extra constraints
-            CR: CR,
-            FX: FX,
-            FSD: FSD
+            const_rep: const_rep,
+            fix_src_dst: fix_src_dst
         }
     });
     return scenario;

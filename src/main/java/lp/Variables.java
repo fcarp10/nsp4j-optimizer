@@ -18,6 +18,7 @@ public class Variables {
    public GRBVar[] kX; // server cost utilization
    public GRBVar[] fX; // binary, true if server is used
    public GRBVar uMax; // max utilization
+   public GRBVar[] nX; // integer variable num servers per node
    // general variables
    public GRBVar[][] zSP; // binary, routing per path
    public GRBVar[][][] zSPD; // binary, routing per demand
@@ -91,6 +92,13 @@ public class Variables {
 
    public void initializeAdditionalVariables(Parameters pm, GRBModel model, Scenario scenario) {
       try {
+         // if model is dimensioning number of servers
+         if (scenario.getObjectiveFunction().equals(SERVER_DIMENSIONING)) {
+            nX = new GRBVar[pm.getNodes().size()];
+            for (int x = 0; x < pm.getNodes().size(); x++)
+               this.nX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER
+                       , Definitions.nX + "[" + x + "]");
+         }
          // if model is minimizing number of used servers
          if (scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ)
                  || scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ)) {
