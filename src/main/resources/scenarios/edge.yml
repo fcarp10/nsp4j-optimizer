@@ -1,16 +1,16 @@
 # auxiliary parameters
 aux: {
-  "gap": 0.015,
+  "gap": 0.0,
   "offset_results": 0,
-  "scaling_x": 0.5,
-  "scaling_y": 0.4,
+  "scaling_x": 0.7,
+  "scaling_y": 0.6,
   "rl_training_iterations": 250,
   "rl_learning_steps": 30,
   "rl_num_hidden_layers": 150,
   "threshold": 1.0,
   "epsilon": 1.0,
   "server_dimensioning_capacity": 1000,
-  "overprovisioning_server_capacity": 2.0
+  "overprovisioning_server_capacity": 1.2
 }
 # service definitions
 serviceChains:

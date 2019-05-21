@@ -130,11 +130,11 @@ public class Constraints {
    }
 
    private void dimensioning(GRBLinExpr[] serverLoadExpr) throws GRBException {
-      for (int n = 0; n < pm.getNodes().size(); n++) {
+      for (int x = 0; x < pm.getServers().size(); x++) {
          GRBLinExpr expr1 = new GRBLinExpr();
-         expr1.addTerm((int) pm.getAux(SERVER_DIMENSIONING_CAPACITY), vars.nX[n]);
+         expr1.addTerm((int) pm.getAux(SERVER_DIMENSIONING_CAPACITY), vars.nX[x]);
          GRBLinExpr expr2 = new GRBLinExpr();
-         expr2.multAdd((double) pm.getAux(OVERPROVISIONING_SERVER_CAPACITY), serverLoadExpr[n]);
+         expr2.multAdd((double) pm.getAux(OVERPROVISIONING_SERVER_CAPACITY), serverLoadExpr[x]);
          model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr1, SERVER_DIMENSIONING);
       }
    }
