@@ -45,7 +45,9 @@ public class GeneralConstraints {
             GRBLinExpr expr = new GRBLinExpr();
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                expr.addTerm(1.0, vars.zSPD[s][p][d]);
-            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, RP1);
+            model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, RP1
+                    + " [" + pm.getServices().get(s).getTrafficFlow().getSrc() + "-"
+                    + pm.getServices().get(s).getTrafficFlow().getDst() + "]");
          }
    }
 

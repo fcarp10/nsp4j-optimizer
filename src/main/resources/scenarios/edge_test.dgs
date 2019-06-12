@@ -8,4 +8,4 @@ an n3 x:150 y:0 num_servers:1 server_capacity:100000 process_delay:0 node_cloud:
 ae n1n2 n1 > n2 capacity:1000
 ae n1n3 n1 > n3
 ae n2n1 n2 > n1
-ae n3n1 n3 > n1 factor:5
+ae n3n1 n3 > n1 factor:50

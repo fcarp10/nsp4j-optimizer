@@ -72,6 +72,7 @@ public class AdditionalConstraints {
          linkLoadExpr[l].add(expr);
       }
    }
+
    // service delay
    private void SD(GRBModel initialModel) throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++)
@@ -104,8 +105,10 @@ public class AdditionalConstraints {
                totalDelayExpr.add(linkDelayExpr(s, p)); // adds propagation delay
                if (initialModel != null)
                   totalDelayExpr.add(migrationDelayExpr(initialModel, s, d, p)); // adds migration delay
-               model.getGrbModel().addConstr(totalDelayExpr, GRB.LESS_EQUAL, pathExpr, LINK_DELAY);
-               model.getGrbModel().addConstr(totalDelayExpr, GRB.EQUAL, vars.dSPD[s][p][d], LINK_DELAY);
+               String constrName = SD + " [ " + pm.getServices().get(s).getTrafficFlow().getSrc() + " ]"
+                       + "[ " + pm.getServices().get(s).getTrafficFlow().getDst() + " ]";
+               model.getGrbModel().addConstr(totalDelayExpr, GRB.LESS_EQUAL, pathExpr, constrName);
+               model.getGrbModel().addConstr(totalDelayExpr, GRB.EQUAL, vars.dSPD[s][p][d], constrName);
             }
    }
 
