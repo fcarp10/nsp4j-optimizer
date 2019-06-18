@@ -10,9 +10,9 @@ public class NodeJson {
    NodeJson() {
    }
 
-   public NodeJson(String id, int x, int y, String favecolor, String label) {
+   public NodeJson(String id, int x, int y, String favecolor, String label, String shape) {
       position = new Position(x, y);
-      data = new Data(id, favecolor, label, "ellipse", 25, 25);
+      data = new Data(id, favecolor, label, shape, 25, 25);
    }
 
    public Position getPosition() {

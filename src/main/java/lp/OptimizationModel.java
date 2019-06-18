@@ -43,7 +43,7 @@ public class OptimizationModel {
    public GRBLinExpr dimensioningExpr() {
       GRBLinExpr expr = new GRBLinExpr();
       for (int n = 0; n < parameters.getNodes().size(); n++)
-         expr.addTerm(1.0, variables.nX[n]);
+         expr.addTerm(1.0, variables.xN[n]);
       return expr;
    }
 

@@ -30,7 +30,7 @@ public class Definitions {
    public static final String fXSV = "fXSV";
    public static final String fXSVD = "fXSVD";
    // additional variables
-   public static final String nX = "nX";
+   public static final String xN = "xN";
    public static final String fX = "fX";
    public static final String gSVXY = "gSVXY";
    public static final String hSVP = "hSVP";
@@ -67,9 +67,12 @@ public class Definitions {
    public static final String FUNCTION_SYNC_LOAD_RATIO = "sync_load";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
    public static final String FUNCTION_MAX_LOAD = "max_load";
+   // node and server parameters
+   public static final String NODE_CLOUD = "node_cloud";
    // link parameters
    public static final String LINK_CAPACITY = "capacity";
    public static final String LINK_DELAY = "delay";
+   public static final String LINK_CLOUD = "link_cloud";
    // DRL parameters
    public static final String NUM_HIDDEN_LAYERS = "rl_num_hidden_layers";
    public static final String EPSILON = "epsilon";

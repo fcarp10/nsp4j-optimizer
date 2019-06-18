@@ -20,6 +20,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static output.Definitions.LINK_CLOUD;
+import static output.Definitions.NODE_CLOUD;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
@@ -44,15 +46,29 @@ public class WebServer {
       nodeList = new ArrayList<>();
       serverJsonMap = new HashMap<>();
       linkJsonMap = new HashMap<>();
-      for (Node node : parameters.getNodes())
-         nodeList.add(new NodeJson(node.getId(), node.getAttribute("x"), node.getAttribute("y"), "Gray"
-                 , node.getId()));
-      for (Server server : parameters.getServers())
-         serverJsonMap.put(server.getId(), new ServerJson(server.getId(), server.getParent().getAttribute("x")
-                 , server.getParent().getAttribute("y"), "Gray", server.getId()));
-      for (Edge edge : parameters.getLinks())
-         linkJsonMap.put(edge.getId(), new LinkJson(edge.getId(), edge.getSourceNode().getId()
-                 , edge.getTargetNode().getId(), "", "Gray"));
+      for (Node n : parameters.getNodes()) {
+         String color = "Gray";
+         String shape = "ellipse";
+         if (n.getAttribute(NODE_CLOUD) != null) {
+            color = "LightGray";
+            shape = "barrel";
+         }
+         nodeList.add(new NodeJson(n.getId(), n.getAttribute("x"), n.getAttribute("y"), color, n.getId(), shape));
+      }
+      for (Server s : parameters.getServers()) {
+         String color = "Gray";
+         if (s.getParent().getAttribute(NODE_CLOUD) != null)
+            color = "LightGray";
+         serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute("x")
+                 , s.getParent().getAttribute("y"), color, s.getId()));
+      }
+      for (Edge e : parameters.getLinks()) {
+         String color = "Gray";
+         if (e.getAttribute(LINK_CLOUD) != null)
+            color = "LightGray";
+         linkJsonMap.put(e.getId(), new LinkJson(e.getId(), e.getSourceNode().getId(), e.getTargetNode().getId()
+                 , "", color));
+      }
    }
 
    private static void interfaces() {

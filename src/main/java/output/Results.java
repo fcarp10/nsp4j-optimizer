@@ -119,7 +119,7 @@ public class Results {
       uL();
       // model specific objective variables
       if (scenario.getModel().equals(SERVER_DIMENSIONING))
-         nX();
+         xN();
       if (sce.getObjectiveFunction().equals(NUM_SERVERS_OBJ) || sce.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ))
          fX();
       // general variables
@@ -176,7 +176,8 @@ public class Results {
       try {
          double[] var = (double[]) rawVariables.get(uL);
          for (int l = 0; l < pm.getLinks().size(); l++)
-            linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(var[l], 2));
+            if (pm.getLinks().get(l).getAttribute(LINK_CLOUD) == null)
+               linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(var[l], 2));
       } catch (Exception ignored) {
       }
       return linkMapResults;
@@ -187,7 +188,8 @@ public class Results {
       try {
          double[] var = (double[]) rawVariables.get(uX);
          for (int x = 0; x < pm.getServers().size(); x++)
-            serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(var[x], 2));
+            if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null)
+               serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(var[x], 2));
       } catch (Exception ignored) {
       }
       return serverMapResults;
@@ -392,14 +394,14 @@ public class Results {
       }
    }
 
-   private void nX() {
+   private void xN() {
       try {
-         double[] var = (double[]) rawVariables.get(nX);
+         double[] var = (double[]) rawVariables.get(xN);
          List<String> strings = new ArrayList<>();
          for (int n = 0; n < pm.getNodes().size(); n++)
             if (var[n] > 0)
                strings.add("(" + (n + this.offset) + "): [" + pm.getNodes().get(n).getId() + "][" + var[n] + "]");
-         variables.put(nX, strings);
+         variables.put(xN, strings);
       } catch (Exception ignored) {
       }
    }

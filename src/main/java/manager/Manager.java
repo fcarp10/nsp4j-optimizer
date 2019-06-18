@@ -213,7 +213,7 @@ public class Manager {
       results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModel.getVariables().uX));
       // model specific objective variables
       if (scenario.getObjectiveFunction().equals(SERVER_DIMENSIONING))
-         results.setVariable(nX, Auxiliary.grbVarsToDoubles(optModel.getVariables().nX));
+         results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModel.getVariables().xN));
       if (scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ)
               || scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ))
          results.setVariable(fX, Auxiliary.grbVarsToBooleans(optModel.getVariables().fX));
@@ -260,14 +260,13 @@ public class Manager {
       return initialPlacement;
    }
 
-   private static String generateFileName(Scenario scenario, String modelString) {
-      String fileName = pm.getScenario() + "_" + modelString + "_";
+   private static String generateFileName(Scenario scenario, String model) {
+      String fileName = pm.getScenario() + "_";
       if (String.valueOf(scenario.getWeights()).equals("1.0-0.0-0.0"))
          fileName += "LLB";
       if (String.valueOf(scenario.getWeights()).equals("0.0-1.0-0.0"))
          fileName += "XLB";
-      if (String.valueOf(scenario.getWeights()).equals("0.0-0.0-1.0"))
-         fileName += "SD";
+      fileName += "_" + model;
       return fileName;
    }
 
