@@ -60,13 +60,11 @@ ae n9n11 n9 > n11 capacity:1000
 ae n11n9 n11 > n9 capacity:1000
 ae n10n11 n10 > n11 capacity:1000
 ae n11n10 n11 > n10 capacity:1000
-ae n2n15 n2 > n15 factor:50 capacity:100000000 link_cloud:true
-ae n15n2 n15 > n2 factor:50 capacity:100000000 link_cloud:true
-ae n4n15 n4 > n15 factor:50 capacity:100000000 link_cloud:true
-ae n15n4 n15 > n4 factor:50 capacity:100000000 link_cloud:true
-ae n7n15 n7 > n15 factor:50 capacity:100000000 link_cloud:true
-ae n15n7 n15 > n7 factor:50 capacity:100000000 link_cloud:true
-ae n8n15 n8 > n15 factor:50 capacity:100000000 link_cloud:true
-ae n15n8 n15 > n8 factor:50 capacity:100000000 link_cloud:true
-ae n14n15 n14 > n15 factor:50 capacity:100000000 link_cloud:true
-ae n15n14 n15 > n14 factor:50 capacity:100000000 link_cloud:true
+ae n2n15 n2 > n15 factor:500 capacity:100000000 link_cloud:true
+ae n15n2 n15 > n2 factor:500 capacity:100000000 link_cloud:true
+ae n4n15 n4 > n15 factor:500 capacity:100000000 link_cloud:true
+ae n15n4 n15 > n4 factor:500 capacity:100000000 link_cloud:true
+ae n7n15 n7 > n15 factor:500 capacity:100000000 link_cloud:true
+ae n15n7 n15 > n7 factor:500 capacity:100000000 link_cloud:true
+ae n14n15 n14 > n15 factor:500 capacity:100000000 link_cloud:true
+ae n15n14 n15 > n14 factor:500 capacity:100000000 link_cloud:true
