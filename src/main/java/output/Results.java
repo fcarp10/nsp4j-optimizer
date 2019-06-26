@@ -426,7 +426,7 @@ public class Results {
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int x = 0; x < pm.getServers().size(); x++)
                   for (int y = 0; y < pm.getServers().size(); y++)
-                     if (x != y)
+                     if (!pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent()))
                         if (var[s][v][x][y])
                            strings.add("(" + (s + this.offset) + "," + (v + this.offset)
                                    + "," + (x + this.offset) + "," + (y + this.offset) + "): ["

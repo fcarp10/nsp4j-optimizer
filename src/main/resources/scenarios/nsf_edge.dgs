@@ -15,7 +15,7 @@ an n11 x:-79 y:40 num_servers:1 server_capacity:1000 process_delay:0
 an n12 x:-95 y:29 num_servers:1 server_capacity:1000 process_delay:0
 an n13 x:-111 y:40 num_servers:1 server_capacity:1000 process_delay:0
 an n14 x:-122 y:47 num_servers:2 server_capacity:1000 process_delay:0
-an n15 x:-100 y:18 num_servers:1 server_capacity:100000000 process_delay:0 node_cloud:true
+an n15 x:-100 y:18 num_servers:1 server_capacity:1000000 process_delay:0 node_cloud:true
 
 
 ae n1n2 n1 > n2 capacity:1000

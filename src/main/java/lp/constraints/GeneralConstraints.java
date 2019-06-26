@@ -1,16 +1,14 @@
 package lp.constraints;
 
 import gui.elements.Scenario;
-import gurobi.*;
+import gurobi.GRB;
+import gurobi.GRBException;
+import gurobi.GRBLinExpr;
 import lp.OptimizationModel;
 import lp.Variables;
 import manager.Parameters;
-import manager.elements.Function;
 import manager.elements.Service;
 import org.graphstream.graph.Node;
-import org.graphstream.graph.Path;
-import output.Auxiliary;
-import output.Definitions;
 
 import static output.Definitions.*;
 
@@ -56,13 +54,15 @@ public class GeneralConstraints {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               model.getGrbModel().addConstr(vars.zSPD[s][p][d], GRB.LESS_EQUAL, vars.zSP[s][p], "");
+               model.getGrbModel().addConstr(vars.zSPD[s][p][d], GRB.LESS_EQUAL, vars.zSP[s][p], RP2
+                       + " [" + s + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "[" + d + "]");
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
             GRBLinExpr expr = new GRBLinExpr();
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                expr.addTerm(1.0, vars.zSPD[s][p][d]);
-            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.zSP[s][p], RP2);
+            model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.zSP[s][p], RP2
+                    + " [" + s + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
          }
    }
 
@@ -74,12 +74,12 @@ public class GeneralConstraints {
             for (int x = 0; x < pm.getServers().size(); x++)
                expr.addTerm(1.0, vars.fXSV[x][s][v]);
             if ((boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_REPLICABLE)) {
-               GRBLinExpr expr2 = new GRBLinExpr();
-               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                  expr2.addTerm(1.0, vars.zSP[s][p]);
-               model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, PF1);
+//               GRBLinExpr expr2 = new GRBLinExpr();
+//               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+//                  expr2.addTerm(1.0, vars.zSP[s][p]);
+//               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, PF1 + " [" + s + "][" + v + "]");
             } else
-               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, PF1);
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, PF1 + " [" + s + "][" + v + "]");
          }
    }
 
@@ -96,7 +96,8 @@ public class GeneralConstraints {
                         if (pm.getServers().get(x).getParent()
                                 .equals(service.getTrafficFlow().getPaths().get(p).getNodePath().get(n)))
                            middleExpr.addTerm(1.0, vars.fXSVD[x][s][v][d]);
-                  model.getGrbModel().addConstr(vars.zSPD[s][p][d], GRB.LESS_EQUAL, middleExpr, PF2);
+                  model.getGrbModel().addConstr(vars.zSPD[s][p][d], GRB.LESS_EQUAL, middleExpr, PF2
+                          + " [" + s + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "[" + d + "][" + v + "]");
                }
       }
    }
@@ -109,7 +110,7 @@ public class GeneralConstraints {
                GRBLinExpr expr = new GRBLinExpr();
                for (int x = 0; x < pm.getServers().size(); x++)
                   expr.addTerm(1.0, vars.fXSVD[x][s][v][d]);
-               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, FD1);
+               model.getGrbModel().addConstr(expr, GRB.EQUAL, 1.0, FD1 + " [" + s + "][" + v + "][" + d + "]");
             }
    }
 
@@ -119,14 +120,16 @@ public class GeneralConstraints {
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  model.getGrbModel().addConstr(vars.fXSVD[x][s][v][d], GRB.LESS_EQUAL, vars.fXSV[x][s][v], FD2);
+                  model.getGrbModel().addConstr(vars.fXSVD[x][s][v][d], GRB.LESS_EQUAL, vars.fXSV[x][s][v], FD2
+                          + " [" + s + "][" + v + "][" + x + "][" + d + "]");
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++) {
                GRBLinExpr expr = new GRBLinExpr();
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   expr.addTerm(1.0, vars.fXSVD[x][s][v][d]);
-               model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.fXSV[x][s][v], FD2);
+               model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.fXSV[x][s][v], FD2
+                       + " [" + s + "][" + v + "][" + x + "]");
             }
    }
 
@@ -153,7 +156,9 @@ public class GeneralConstraints {
 
                      expr2.addConstant(-1);
                      expr2.addTerm(1.0, vars.zSPD[s][p][d]);
-                     model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, FD3);
+                     model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, expr2, FD3
+                             + " [" + s + "][" + d + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                             + "[" + v + "][" + se.getTrafficFlow().getPaths().get(p).getNodePath().get(n).getId() + "]");
                   }
                }
          }

@@ -115,7 +115,7 @@ public class Variables {
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   for (int x = 0; x < pm.getServers().size(); x++)
                      for (int y = 0; y < pm.getServers().size(); y++)
-                        if (x != y)
+                        if (!pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent()))
                            gSVXY[s][v][x][y] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
                                    , Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "]");
             hSVP = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getPaths().size()];

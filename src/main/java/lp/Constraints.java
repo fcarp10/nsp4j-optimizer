@@ -37,11 +37,13 @@ public class Constraints {
          GRBLinExpr[] xuExpr = createServerUtilizationExpr(serverLoadExpr);
          // constraint link utilization
          for (int l = 0; l < pm.getLinks().size(); l++)
-            model.getGrbModel().addConstr(luExpr[l], GRB.EQUAL, vars.uL[l], uL);
+            model.getGrbModel().addConstr(luExpr[l], GRB.EQUAL, vars.uL[l], uL
+                    + "[" + pm.getLinks().get(l).getId() + "]");
          // constraint server utilization if no dimensioning
          if (!scenario.getObjectiveFunction().equals(SERVER_DIMENSIONING))
             for (int x = 0; x < pm.getServers().size(); x++)
-               model.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX);
+               model.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX
+                       + "[" + pm.getServers().get(x).getId() + "]");
          // set linear cost functions constraints
          if (scenario.getObjectiveFunction().equals(COSTS_OBJ))
             linearCostFunctions(luExpr, vars.kL);

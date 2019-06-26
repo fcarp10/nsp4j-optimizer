@@ -35,7 +35,6 @@ public class AdditionalConstraints {
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int y = 0; y < pm.getServers().size(); y++) {
-                  if (x == y) continue;
                   if (pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent())) continue;
                   model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[x][s][v], ST);
                   model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[y][s][v], ST);
@@ -53,6 +52,13 @@ public class AdditionalConstraints {
                         expr.addTerm(1.0, vars.hSVP[s][v][p]);
                   }
                   model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, expr, ST);
+                  GRBLinExpr expr2 = new GRBLinExpr();
+                  for (int x1 = 0; x1 < pm.getServers().size(); x1++)
+                     for (int y1 = 0; y1 < pm.getServers().size(); y1++) {
+                        if (pm.getServers().get(x1).getParent().equals(pm.getServers().get(y1).getParent())) continue;
+                        expr2.addTerm(1.0, vars.gSVXY[s][v][x1][y1]);
+                     }
+                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, ST);
                }
       for (int l = 0; l < pm.getLinks().size(); l++) {
          GRBLinExpr expr = new GRBLinExpr();

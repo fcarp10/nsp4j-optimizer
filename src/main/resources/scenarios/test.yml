@@ -2,8 +2,8 @@
 aux: {
   "gap": 0.0,
   "offset_results": 0,
-  "scaling_x": 0.7,
-  "scaling_y": 0.6,
+  "scaling_x": 1.0,
+  "scaling_y": 1.0,
   "server_dimensioning_capacity": 1000,
   "overprovisioning_server_capacity": 2.0
 }
@@ -14,7 +14,7 @@ serviceChains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 150
+      "max_delay": 100000
     }
   - id: 1
     chain: [0, 1, 1, 0]
@@ -35,8 +35,8 @@ functionTypes:
   - type: 0
     attributes: {
       "replicable": false,
-      "load_ratio": 0.1,
-      "overhead": 10,
+      "load_ratio": 0.5,
+      "overhead": 0,
       "sync_load": 0.0,
       "process_delay": 1000,
       "migration_delay": 40,
@@ -46,7 +46,7 @@ functionTypes:
     attributes: {
       "replicable": true,
       "load_ratio": 1.0,
-      "overhead": 10,
+      "overhead": 0,
       "sync_load": 0.05,
       "process_delay": 1500,
       "migration_delay": 80,
@@ -54,7 +54,10 @@ functionTypes:
     }
 # traffic flow definitions
 trafficFlows:
-  - minDem: 1
-    maxDem: 5
-    minBw: 1
-    maxBw: 20
+  - minDem: 3
+    maxDem: 3
+    src: "n1"
+    dst: "n4"
+    serviceId: 0
+    minBw: 300
+    maxBw: 300
