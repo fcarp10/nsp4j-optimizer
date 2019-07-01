@@ -45,7 +45,7 @@ functionTypes:
   - type: 1
     attributes: {
       "replicable": true,
-      "load_ratio": 1.0,
+      "load_ratio": 0.7,
       "overhead": 10,
       "sync_load": 0.05,
       "process_delay": 1500,

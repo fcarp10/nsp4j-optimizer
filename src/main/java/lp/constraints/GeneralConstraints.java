@@ -74,10 +74,10 @@ public class GeneralConstraints {
             for (int x = 0; x < pm.getServers().size(); x++)
                expr.addTerm(1.0, vars.fXSV[x][s][v]);
             if ((boolean) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_REPLICABLE)) {
-//               GRBLinExpr expr2 = new GRBLinExpr();
-//               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-//                  expr2.addTerm(1.0, vars.zSP[s][p]);
-//               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, PF1 + " [" + s + "][" + v + "]");
+               GRBLinExpr expr2 = new GRBLinExpr();
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                  expr2.addTerm(1.0, vars.zSP[s][p]);
+               model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, PF1 + " [" + s + "][" + v + "]");
             } else
                model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, PF1 + " [" + s + "][" + v + "]");
          }

@@ -54,6 +54,10 @@ public class Constraints {
          if (scenario.getObjectiveFunction().equals(MAX_UTILIZATION_OBJ)) maxUtilization();
          // set dimensioning constraints
          if (scenario.getObjectiveFunction().equals(SERVER_DIMENSIONING)) dimensioning(serverLoadExpr);
+         // for cloud servers to be used when minimizing used servers
+         if (scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ)
+                 || scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ))
+            useCloudServers();
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -139,5 +143,11 @@ public class Constraints {
          expr2.multAdd((double) pm.getAux(OVERPROVISIONING_SERVER_CAPACITY), serverLoadExpr[n]);
          model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr1, SERVER_DIMENSIONING);
       }
+   }
+
+   private void useCloudServers() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+            model.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 1.0, SERVER_DIMENSIONING);
    }
 }
