@@ -58,7 +58,8 @@ public class AdditionalConstraints {
                         if (pm.getServers().get(x1).getParent().equals(pm.getServers().get(y1).getParent())) continue;
                         expr2.addTerm(1.0, vars.gSVXY[s][v][x1][y1]);
                      }
-                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, ST);
+//                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, ST);
+                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, ST);
                }
       for (int l = 0; l < pm.getLinks().size(); l++) {
          GRBLinExpr expr = new GRBLinExpr();
