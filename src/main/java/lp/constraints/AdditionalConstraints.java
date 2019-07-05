@@ -52,15 +52,29 @@ public class AdditionalConstraints {
                         expr.addTerm(1.0, vars.hSVP[s][v][p]);
                   }
                   model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, expr, ST);
-                  GRBLinExpr expr2 = new GRBLinExpr();
-                  for (int x1 = 0; x1 < pm.getServers().size(); x1++)
-                     for (int y1 = 0; y1 < pm.getServers().size(); y1++) {
-                        if (pm.getServers().get(x1).getParent().equals(pm.getServers().get(y1).getParent())) continue;
-                        expr2.addTerm(1.0, vars.gSVXY[s][v][x1][y1]);
-                     }
-//                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, ST);
                   model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, ST);
                }
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+            for (int n = 0; n < pm.getNodes().size(); n++)
+               for (int m = 0; m < pm.getNodes().size(); m++) {
+                  if (n == m) continue;
+                  GRBLinExpr expr = new GRBLinExpr();
+                  for (int p = 0; p < pm.getPaths().size(); p++) {
+                     Path path = pm.getPaths().get(p);
+                     if (path.getNodePath().get(0).equals(pm.getNodes().get(n))
+                             & path.getNodePath().get(path.getNodePath().size() - 1).equals(pm.getNodes().get(m)))
+                        expr.addTerm(1.0, vars.hSVP[s][v][p]);
+                  }
+                  GRBLinExpr expr2 = new GRBLinExpr();
+                  for (int x = 0; x < pm.getServers().size(); x++)
+                     for (int y = 0; y < pm.getServers().size(); y++)
+                        if (pm.getServers().get(x).getParent().equals(pm.getNodes().get(n))
+                                && pm.getServers().get(y).getParent().equals(pm.getNodes().get(m)))
+                           expr2.addTerm(1.0, vars.gSVXY[s][v][x][y]);
+                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, ST);
+               }
+
       for (int l = 0; l < pm.getLinks().size(); l++) {
          GRBLinExpr expr = new GRBLinExpr();
          for (int p = 0; p < pm.getPaths().size(); p++) {
