@@ -23,7 +23,8 @@ public class Results {
    @JsonIgnore
    private transient LinkedHashMap<String, Object> rawVariables;
    private transient Scenario scenario;
-   private LinkedHashMap<String, List<String>> variables;
+   @JsonProperty("objective_value")
+   private double objVal;
    @JsonProperty("avg_path_length")
    private double avgPathLength;
    @JsonProperty("total_traffic")
@@ -36,8 +37,6 @@ public class Results {
    private int migrations;
    @JsonProperty("replications")
    private int replications;
-   @JsonProperty("objective_value")
-   private double objVal;
    @JsonProperty("lu_summary")
    private double[] luSummary;
    @JsonProperty("xu_summary")
@@ -46,21 +45,24 @@ public class Results {
    private double[] fpSummary;
    @JsonProperty("sd_summary")
    private double[] sdSummary;
+   @JsonProperty("variables")
+   private LinkedHashMap<String, List<String>> variables;
+   @JsonProperty("xu")
+   private transient List<Double> xu;
+   @JsonProperty("lu")
+   private transient List<Double> lu;
+   @JsonProperty("fp")
+   private transient List<Integer> fp;
+   @JsonProperty("sd")
+   private transient List<Double> sd;
+   @JsonProperty("st")
+   private transient List<Integer> st;
    @JsonIgnore
    private List<GraphData> luGraph;
    @JsonIgnore
    private List<GraphData> xuGraph;
    @JsonIgnore
    private List<GraphData> sdGraph;
-   @JsonProperty("lu")
-   private transient List<Double> lu;
-   @JsonProperty("xu")
-   private transient List<Double> xu;
-   @JsonProperty("fp")
-   private transient List<Integer> fp;
-   @JsonProperty("sd")
-   private transient List<Double> sd;
-   private transient List<Integer> st;
 
    public Results() {
       variables = new LinkedHashMap<>();
@@ -374,7 +376,7 @@ public class Results {
          for (int x = 0; x < pm.getServers().size(); x++)
             strings.add("(" + (x + this.offset) + "): ["
                     + pm.getServers().get(x).getId() + "]["
-                    + Auxiliary.roundDouble(var[x], 2) + "]");
+                    + Auxiliary.roundDouble(var[x], 3) + "]");
          variables.put(uX, strings);
       } catch (Exception ignored) {
       }
@@ -387,8 +389,11 @@ public class Results {
          for (int l = 0; l < pm.getLinks().size(); l++)
             strings.add("(" + (l + this.offset) + "): ["
                     + pm.getLinks().get(l).getId() + "]["
-                    + Auxiliary.roundDouble(var[l], 2) + "]["
-                    + var[l] * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY) + "]");
+                    + pm.getLinks().get(l).getAttribute(LINK_DISTANCE) + "]["
+                    + pm.getLinks().get(l).getAttribute(LINK_DELAY) + "]["
+                    + Auxiliary.roundDouble(var[l], 3) + "]["
+                    + Auxiliary.roundDouble(var[l], 3)
+                    * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY) + "]");
          variables.put(uL, strings);
       } catch (Exception ignored) {
       }

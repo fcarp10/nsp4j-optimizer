@@ -72,6 +72,7 @@ public class Definitions {
    // link parameters
    public static final String LINK_CAPACITY = "capacity";
    public static final String LINK_DELAY = "delay";
+   public static final String LINK_DISTANCE = "distance";
    public static final String LINK_CLOUD = "link_cloud";
    // DRL parameters
    public static final String NUM_HIDDEN_LAYERS = "rl_num_hidden_layers";

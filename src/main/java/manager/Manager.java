@@ -64,11 +64,11 @@ public class Manager {
       double scalingY = (double) pm.getAux("scaling_y");
       if (scalingX != 1.0 || scalingY != 1.0) {
          for (Node node : pm.getNodes()) {
-            int value = (int) Math.round((int) node.getAttribute("y") * scalingY);
+            double value = Math.round((double) node.getAttribute("y") * scalingY);
             node.setAttribute("y", value);
          }
          for (Node node : pm.getNodes()) {
-            int value = (int) Math.round((int) node.getAttribute("x") * scalingX);
+            double value =  Math.round((double) node.getAttribute("x") * scalingX);
             node.setAttribute("x", value);
          }
       }

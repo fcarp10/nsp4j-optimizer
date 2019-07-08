@@ -2,8 +2,8 @@ package gui.elements;
 
 public class ServerJson extends NodeJson {
 
-   public ServerJson(String id, int x, int y, String favecolor, String label) {
-      int xS, yS;
+   public ServerJson(String id, double x, double y, String favecolor, String label) {
+      double xS, yS;
       int index = Integer.valueOf(id.split("_")[1]);
       if (index % 2 == 0)
          xS = x - 11;

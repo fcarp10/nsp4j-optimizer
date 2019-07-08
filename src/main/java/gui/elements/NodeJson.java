@@ -10,7 +10,7 @@ public class NodeJson {
    NodeJson() {
    }
 
-   public NodeJson(String id, int x, int y, String favecolor, String label, String shape) {
+   public NodeJson(String id, double x, double y, String favecolor, String label, String shape) {
       position = new Position(x, y);
       data = new Data(id, favecolor, label, shape, 25, 25);
    }
@@ -40,27 +40,27 @@ public class NodeJson {
    }
 
    public class Position {
-      private int x;
-      private int y;
+      private double x;
+      private double y;
 
-      Position(int x, int y) {
+      Position(double x, double y) {
          this.x = x;
          this.y = y;
       }
 
-      public int getX() {
+      public double getX() {
          return x;
       }
 
-      public void setX(int x) {
+      public void setX(double x) {
          this.x = x;
       }
 
-      public int getY() {
+      public double getY() {
          return y;
       }
 
-      public void setY(int y) {
+      public void setY(double y) {
          this.y = y;
       }
    }

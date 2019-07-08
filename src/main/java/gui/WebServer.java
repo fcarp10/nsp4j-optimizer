@@ -49,25 +49,20 @@ public class WebServer {
       for (Node n : parameters.getNodes()) {
          String color = "Gray";
          String shape = "ellipse";
-         if (n.getAttribute(NODE_CLOUD) != null) {
-            color = "LightGray";
-            shape = "barrel";
-         }
-         nodeList.add(new NodeJson(n.getId(), n.getAttribute("x"), n.getAttribute("y"), color, n.getId(), shape));
+         if (n.getAttribute(NODE_CLOUD) == null)
+            nodeList.add(new NodeJson(n.getId(), n.getAttribute("x"), n.getAttribute("y"), color, n.getId(), shape));
       }
       for (Server s : parameters.getServers()) {
          String color = "Gray";
-         if (s.getParent().getAttribute(NODE_CLOUD) != null)
-            color = "LightGray";
-         serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute("x")
-                 , s.getParent().getAttribute("y"), color, s.getId()));
+         if (s.getParent().getAttribute(NODE_CLOUD) == null)
+            serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute("x")
+                    , s.getParent().getAttribute("y"), color, s.getId()));
       }
       for (Edge e : parameters.getLinks()) {
          String color = "Gray";
-         if (e.getAttribute(LINK_CLOUD) != null)
-            color = "LightGray";
-         linkJsonMap.put(e.getId(), new LinkJson(e.getId(), e.getSourceNode().getId(), e.getTargetNode().getId()
-                 , "", color));
+         if (e.getAttribute(LINK_CLOUD) == null)
+            linkJsonMap.put(e.getId(), new LinkJson(e.getId(), e.getSourceNode().getId(), e.getTargetNode().getId()
+                    , "", color));
       }
    }
 
