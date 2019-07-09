@@ -66,7 +66,8 @@ public class Definitions {
    public static final String FUNCTION_OVERHEAD = "overhead";
    public static final String FUNCTION_SYNC_LOAD_RATIO = "sync_load";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
-   public static final String FUNCTION_MAX_LOAD = "max_load";
+   public static final String FUNCTION_MAX_CAP_SERVER = "max_cap_server";
+   public static final String FUNCTION_MAX_DELAY = "max_delay";
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";
    // link parameters

@@ -101,28 +101,30 @@ public class AdditionalConstraints {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                Service service = pm.getServices().get(s);
                Path path = service.getTrafficFlow().getPaths().get(p);
-               GRBLinExpr processDelayExpr = new GRBLinExpr();
+               GRBLinExpr processDelayGlobalExpr = new GRBLinExpr();
                for (int n = 0; n < path.getNodePath().size(); n++)
                   for (int x = 0; x < pm.getServers().size(); x++)
                      if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
                         for (int v = 0; v < service.getFunctions().size(); v++) {
                            Function function = service.getFunctions().get(v);
-                           GRBLinExpr linExpr3 = processingDelayExpr(s, v, x, (int) function.getAttribute(FUNCTION_PROCESS_DELAY));
-                           GRBLinExpr linExpr4 = new GRBLinExpr();
-                           linExpr4.addTerm((int) function.getAttribute(FUNCTION_PROCESS_DELAY), vars.fXSVD[x][s][v][d]);
-                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.LESS_EQUAL, linExpr4, FUNCTION_PROCESS_DELAY);
-                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.LESS_EQUAL, linExpr3, FUNCTION_PROCESS_DELAY);
-                           linExpr4.addConstant(-(int) function.getAttribute(FUNCTION_PROCESS_DELAY));
-                           linExpr4.add(linExpr3);
-                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.GREATER_EQUAL, linExpr4, FUNCTION_PROCESS_DELAY);
-                           processDelayExpr.addTerm(1.0, vars.ySVXD[s][v][x][d]);
+                           GRBLinExpr processDelayExpr = processingDelayExpr(s, v, x, (int) function.getAttribute(FUNCTION_PROCESS_DELAY));
+                           model.getGrbModel().addConstr(processDelayExpr, GRB.LESS_EQUAL
+                                   , (int) service.getFunctions().get(v).getAttribute(FUNCTION_MAX_DELAY), FUNCTION_PROCESS_DELAY);
+                           GRBLinExpr auxExpr = new GRBLinExpr();
+                           auxExpr.addTerm((int) function.getAttribute(FUNCTION_PROCESS_DELAY), vars.fXSVD[x][s][v][d]);
+                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.LESS_EQUAL, auxExpr, FUNCTION_PROCESS_DELAY);
+                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.LESS_EQUAL, processDelayExpr, FUNCTION_PROCESS_DELAY);
+                           auxExpr.addConstant(-(int) function.getAttribute(FUNCTION_PROCESS_DELAY));
+                           auxExpr.add(processDelayExpr);
+                           model.getGrbModel().addConstr(vars.ySVXD[s][v][x][d], GRB.GREATER_EQUAL, auxExpr, FUNCTION_PROCESS_DELAY);
+                           processDelayGlobalExpr.addTerm(1.0, vars.ySVXD[s][v][x][d]);
                         }
                GRBLinExpr pathExpr = new GRBLinExpr();
                pathExpr.addTerm((int) service.getAttribute(SERVICE_MAX_DELAY), vars.zSPD[s][p][d]);
                pathExpr.addConstant(Integer.MAX_VALUE);
                pathExpr.addTerm(-Integer.MAX_VALUE, vars.zSPD[s][p][d]);
                GRBLinExpr totalDelayExpr = new GRBLinExpr();
-               totalDelayExpr.add(processDelayExpr); // adds processing delay
+               totalDelayExpr.add(processDelayGlobalExpr); // adds processing delay
                totalDelayExpr.add(linkDelayExpr(s, p)); // adds propagation delay
                if (initialModel != null)
                   totalDelayExpr.add(migrationDelayExpr(initialModel, s, d, p)); // adds migration delay
@@ -147,7 +149,7 @@ public class AdditionalConstraints {
       GRBLinExpr linExpr = new GRBLinExpr();
       Service service = pm.getServices().get(s);
       double ratio = (double) service.getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO)
-              * processDelay / (int) service.getFunctions().get(v).getAttribute(FUNCTION_MAX_LOAD);
+              * processDelay / (int) service.getFunctions().get(v).getAttribute(FUNCTION_MAX_CAP_SERVER);
       for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
          linExpr.addTerm(ratio * service.getTrafficFlow().getDemands().get(d), vars.fXSVD[x][s][v][d]);
       return linExpr;
