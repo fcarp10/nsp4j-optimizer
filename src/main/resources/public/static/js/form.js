@@ -223,6 +223,7 @@ function generateScenario() {
     // extra constraints
     var const_rep = $("#const_rep").is(":checked");
     var fix_src_dst = $("#fix_src_dst").is(":checked");
+    var use_cloud = $("#use_cloud").is(":checked");
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
         objectiveFunction: objectiveFunction,
@@ -248,7 +249,8 @@ function generateScenario() {
             fix_init_plc: fix_init_plc,
             // extra constraints
             const_rep: const_rep,
-            fix_src_dst: fix_src_dst
+            fix_src_dst: fix_src_dst,
+            use_cloud: use_cloud
         }
     });
     return scenario;

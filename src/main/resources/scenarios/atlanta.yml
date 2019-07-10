@@ -1,0 +1,62 @@
+# auxiliary parameters
+aux: {
+  "gap": 0.0,
+  "offset_results": 0,
+  "scaling_x": 8000.0,
+  "scaling_y": 8000.0,
+  "server_dimensioning_capacity": 1000,
+  "overprovisioning_server_capacity": 2.0
+}
+# service definitions
+serviceChains:
+  - id: 0
+    chain: [0, 1, 0]
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 5,
+      "max_delay": 10000000
+    }
+  - id: 1
+    chain: [0, 1, 1, 0]
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 5,
+      "max_delay": 10000000
+    }
+  - id: 2
+    chain: [0, 1, 1, 1, 0]
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 5,
+      "max_delay": 10000000
+    }
+# function definitions
+functionTypes:
+  - type: 0
+    attributes: {
+      "replicable": false,
+      "load_ratio": 0.1,
+      "overhead": 10,
+      "sync_load": 0.0,
+      "process_delay": 100,
+      "migration_delay": 20,
+      "max_cap_server": 1000,
+      "max_delay": 10
+    }
+  - type: 1
+    attributes: {
+      "replicable": true,
+      "load_ratio": 0.7,
+      "overhead": 10,
+      "sync_load": 0.05,
+      "process_delay": 150,
+      "migration_delay": 40,
+      "max_cap_server": 1000,
+      "max_delay": 10
+    }
+# traffic flow definitions
+trafficFlows:
+  - minDem: 1
+    maxDem: 5
+    minBw: 1
+    maxBw: 20

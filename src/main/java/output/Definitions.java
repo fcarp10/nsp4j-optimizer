@@ -55,6 +55,7 @@ public class Definitions {
    // extra constraints
    public static final String CONST_REP = "const_rep";
    public static final String FIX_SRC_DST = "fix_src_dst";
+   public static final String USE_CLOUD = "use_cloud";
    // service parameters
    public static final String SERVICE_MIN_PATHS = "min_paths";
    public static final String SERVICE_MAX_PATHS = "max_paths";

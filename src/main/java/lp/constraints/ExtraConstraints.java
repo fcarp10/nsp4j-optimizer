@@ -23,6 +23,7 @@ public class ExtraConstraints {
          this.vars = model.getVariables();
          if (scenario.getConstraints().get(CONST_REP)) constraintReplications();
          if (scenario.getConstraints().get(FIX_SRC_DST)) fixSrcDst();
+         if (scenario.getConstraints().get(USE_CLOUD)) useCloudServers();
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -58,5 +59,12 @@ public class ExtraConstraints {
          model.getGrbModel().addConstr(exprSrc, GRB.EQUAL, 1.0, FIX_SRC_DST);
          model.getGrbModel().addConstr(exprDst, GRB.EQUAL, 1.0, FIX_SRC_DST);
       }
+   }
+
+   // force to use cloud
+   private void useCloudServers() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+            model.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 1.0, SERVER_DIMENSIONING);
    }
 }
