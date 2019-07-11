@@ -7,7 +7,6 @@ import gui.elements.Scenario;
 import manager.Parameters;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
-import org.graphstream.graph.Path;
 
 import java.util.*;
 
@@ -135,7 +134,7 @@ public class Results {
          hSVP();
       }
       if (scenario.getConstraints().get(SD)) {
-         dSP();
+         dSPD();
          ySVXD();
          mS();
       }
@@ -456,7 +455,7 @@ public class Results {
       }
    }
 
-   private void dSP() {
+   private void dSPD() {
       try {
          double[][][] var = (double[][][]) rawVariables.get(dSPD);
          boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);

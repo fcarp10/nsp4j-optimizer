@@ -231,6 +231,7 @@ public class Manager {
          results.setVariable(dSPD, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSPD));
          results.setVariable(ySVXD, Auxiliary.grbVarsToDoubles(optModel.getVariables().ySVXD));
          results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVariables().mS));
+         results.setVariable(ySVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().ySVX));
       }
       results.initializeResults(optModel.getObjVal(), convertInitialPlacement(initialModel), scenario);
       return results;

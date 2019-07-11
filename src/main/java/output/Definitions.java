@@ -37,6 +37,7 @@ public class Definitions {
    public static final String dSPD = "dSPD";
    public static final String ySVXD = "ySVXD";
    public static final String mS = "mS";
+   public static final String ySVX = "ySVX";
    // general constraints
    public static final String RP1 = "RP1";
    public static final String RP2 = "RP2";
@@ -66,9 +67,11 @@ public class Definitions {
    public static final String FUNCTION_LOAD_RATIO = "load_ratio";
    public static final String FUNCTION_OVERHEAD = "overhead";
    public static final String FUNCTION_SYNC_LOAD_RATIO = "sync_load";
-   public static final String FUNCTION_PROCESS_DELAY = "process_delay";
+   public static final String FUNCTION_PROCESS_TRAFFIC_DELAY = "process_traffic_delay";
    public static final String FUNCTION_MAX_CAP_SERVER = "max_cap_server";
    public static final String FUNCTION_MAX_DELAY = "max_delay";
+   public static final String FUNCTION_MIN_DELAY = "min_delay";
+   public static final String FUNCTION_PROCESS_DELAY = "process_delay";
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";
    // link parameters

@@ -1,6 +1,6 @@
 # auxiliary parameters
 aux: {
-  "gap": 0.0,
+  "gap": 0.08,
   "offset_results": 0,
   "scaling_x": 8000.0,
   "scaling_y": 8000.0,
@@ -21,14 +21,14 @@ serviceChains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 10000000
+      "max_delay": 100000000
     }
   - id: 2
     chain: [0, 1, 1, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 10000000
+      "max_delay": 100000000
     }
 # function definitions
 functionTypes:
@@ -38,10 +38,12 @@ functionTypes:
       "load_ratio": 0.1,
       "overhead": 10,
       "sync_load": 0.0,
-      "process_delay": 100,
+      "process_traffic_delay": 10,
       "migration_delay": 20,
-      "max_cap_server": 1000,
-      "max_delay": 10
+      "max_cap_server": 100,
+      "max_delay": 100000000,
+      "min_delay": 1,
+      "process_delay": 3
     }
   - type: 1
     attributes: {
@@ -49,10 +51,12 @@ functionTypes:
       "load_ratio": 0.7,
       "overhead": 10,
       "sync_load": 0.05,
-      "process_delay": 150,
+      "process_traffic_delay": 15,
       "migration_delay": 40,
-      "max_cap_server": 1000,
-      "max_delay": 10
+      "max_cap_server": 100,
+      "max_delay": 100000000,
+      "min_delay": 3,
+      "process_delay": 5
     }
 # traffic flow definitions
 trafficFlows:

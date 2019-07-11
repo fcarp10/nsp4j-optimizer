@@ -25,10 +25,11 @@ public class Variables {
    public GRBVar[][][] fXSV; // binary, placement per server
    public GRBVar[][][][] fXSVD; // binary, placement per demand
    // additional variables
-   public GRBVar[][][] dSPD; // binary, service delay
-   public GRBVar[][][][] ySVXD; // continuous, processing delay of a traffic demand
-   public GRBVar[] mS; // integer, maximum migration delay for a service
-   public GRBVar[][][][] gSVXY; //binary, synchronization traffic auxiliary variable
+   public GRBVar[][][] dSPD; // binary, service delay for a demand
+   public GRBVar[][][][] ySVXD; // continuous, processing delay of a traffic demand in a server
+   public GRBVar[] mS; // integer, migration delay for a service
+   public GRBVar[][][] ySVX; //continuous, aux delay variable
+   public GRBVar[][][][] gSVXY; //binary, aux synchronization traffic variable
    public GRBVar[][][] hSVP; // binary, traffic synchronization variable
 
    public Variables(Parameters pm, GRBModel model, Scenario scenario) {
@@ -143,6 +144,12 @@ public class Variables {
             mS = new GRBVar[pm.getServices().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                mS[s] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Definitions.mS + "[" + s + "]");
+            ySVX = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  for (int x = 0; x < pm.getServers().size(); x++)
+                     ySVX[s][v][x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
+                             , Definitions.ySVX + "[" + s + "][" + v + "][" + x + "]");
          }
          model.update();
       } catch (Exception ignored) {
