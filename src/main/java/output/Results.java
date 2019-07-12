@@ -93,7 +93,7 @@ public class Results {
       rawVariables.put(key, variable);
    }
 
-   public void initializeResults(double objVal, boolean[][][] initialPlacement, Scenario sce) {
+   public void initializeResults(double objVal, boolean[][][] initialPlacement) {
       migrations = countNumOfMigrations(initialPlacement);
       replications = countNumOfReplications();
       totalTraffic = pm.getTotalTraffic();
@@ -109,34 +109,28 @@ public class Results {
       setSummaryResults(fpSummary, fp);
       luGraph(lu);
       xuGraph(xu);
-      if (sce.getConstraints().get(SD)) {
+      uX(); // link utilization
+      uL(); // server utilization
+      if (scenario.getModel().equals(SERVER_DIMENSIONING))
+         xN(); // integer, num servers per node
+      if (scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ)
+              || scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ))
+         fX(); // binary, used servers
+      zSP(); // binary, routing per path
+      zSPD(); // binary, routing per demand
+      fXSV(); // binary, placement per server
+      fXSVD(); // binary, placement per demand
+      if (scenario.getConstraints().get(ST)) {
+         gSVXY(); // binary, aux synchronization traffic
+         hSVP(); // binary, traffic synchronization
+      }
+      if (scenario.getConstraints().get(SD)) {
          sd = serviceDelayList();
          st = serviceTypes();
          setSummaryResults(sdSummary, sd);
          sdGraph(sd);
-      }
-      // objective variables
-      uX();
-      uL();
-      // model specific objective variables
-      if (scenario.getModel().equals(SERVER_DIMENSIONING))
-         xN();
-      if (sce.getObjectiveFunction().equals(NUM_SERVERS_OBJ) || sce.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ))
-         fX();
-      // general variables
-      zSP();
-      zSPD();
-      fXSV();
-      fXSVD();
-      // additional variables
-      if (scenario.getConstraints().get(ST)) {
-         gSVXY();
-         hSVP();
-      }
-      if (scenario.getConstraints().get(SD)) {
-         dSPD();
-         ySVXD();
-         mS();
+         dSVX(); // processing delay
+         mS(); // migration delay
       }
    }
 
@@ -196,7 +190,7 @@ public class Results {
       return serverMapResults;
    }
 
-   List<Integer> numOfFunctionsPerServer() {
+   private List<Integer> numOfFunctionsPerServer() {
       List<Integer> numOfFunctionsPerServer = new ArrayList<>();
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
@@ -213,22 +207,37 @@ public class Results {
       return numOfFunctionsPerServer;
    }
 
-   List<Double> serviceDelayList() {
+   private List<Double> serviceDelayList() {
       List<Double> serviceDelayList = new ArrayList<>();
-      try {
-         double[][][] var = (double[][][]) rawVariables.get(dSPD);
-         boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (var2[s][p][d])
-                     serviceDelayList.add(var[s][p][d]);
-      } catch (Exception ignored) {
-      }
+      boolean[][][] routingVar = (boolean[][][]) rawVariables.get(zSPD);
+      double[][][] processDelayVar = (double[][][]) rawVariables.get(dSVX);
+      double[] migrationDelayVar = (double[]) rawVariables.get(mS);
+      boolean[][][][] placementVar = (boolean[][][][]) rawVariables.get(fXSVD);
+      List<String> strings = new ArrayList<>();
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+               if (routingVar[s][p][d]) {
+                  double delay = 0;
+                  for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                     for (int x = 0; x < pm.getServers().size(); x++)
+                        if (placementVar[x][s][v][d])
+                           delay += processDelayVar[s][v][x];
+                  if (delay == 0) continue;
+                  List<Edge> links = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getEdgePath();
+                  for (Edge link : links) delay += (double) link.getAttribute(LINK_DELAY);
+                  delay += migrationDelayVar[s];
+                  delay = Auxiliary.roundDouble(delay, 3);
+                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): "
+                          + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                          + "[" + delay + "]");
+                  serviceDelayList.add(delay);
+               }
+      variables.put(dSPD, strings);
       return serviceDelayList;
    }
 
-   List<Integer> serviceTypes() {
+   private List<Integer> serviceTypes() {
       List<Integer> serviceTypesList = new ArrayList<>();
       try {
          boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
@@ -455,48 +464,29 @@ public class Results {
       }
    }
 
-   private void dSPD() {
+   private void dSVX() {
       try {
-         double[][][] var = (double[][][]) rawVariables.get(dSPD);
-         boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
-         List<String> strings = new ArrayList<>();
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (var2[s][p][d])
-                     strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): "
-                             + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                             + "[" + Auxiliary.roundDouble(var[s][p][d], 2) + "]");
-         variables.put(dSPD, strings);
-      } catch (Exception ignored) {
-      }
-   }
-
-   private void ySVXD() {
-      try {
-         double[][][][] var = (double[][][][]) rawVariables.get(ySVXD);
+         double[][][] processDelayVarVar = (double[][][]) rawVariables.get(dSVX);
          List<String> strings = new ArrayList<>();
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int x = 0; x < pm.getServers().size(); x++)
-                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                     if (var[s][v][x][p] > 0)
-                        strings.add("(" + (s + this.offset) + "," + (v + this.offset)
-                                + "," + (x + this.offset) + "," + (p + this.offset) + "): "
-                                + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                                + "[" + var[s][v][x][p] + "]");
-         variables.put(ySVXD, strings);
+                  if (processDelayVarVar[x][s][v] > 0)
+                     strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (x + this.offset) + "): ["
+                             + pm.getServers().get(x).getId() + "]["
+                             + Auxiliary.roundDouble(processDelayVarVar[x][s][v], 2) + "]");
+         variables.put(dSVX, strings);
       } catch (Exception ignored) {
       }
    }
 
    private void mS() {
       try {
-         double[] var = (double[]) rawVariables.get(mS);
+         double[] migrationDelayVar = (double[]) rawVariables.get(mS);
          List<String> strings = new ArrayList<>();
          for (int s = 0; s < pm.getServices().size(); s++)
-            if (var[s] > 0)
-               strings.add("(" + (s + this.offset) + "): " + "[" + var[s] + "]");
+            if (migrationDelayVar[s] > 0)
+               strings.add("(" + (s + this.offset) + "): " + "[" + migrationDelayVar[s] + "]");
          variables.put(mS, strings);
       } catch (Exception ignored) {
       }

@@ -35,7 +35,8 @@ public class Definitions {
    public static final String gSVXY = "gSVXY";
    public static final String hSVP = "hSVP";
    public static final String dSPD = "dSPD";
-   public static final String ySVXD = "ySVXD";
+   public static final String dSVX = "dSVX";
+   public static final String dSVXD = "dSVXD";
    public static final String mS = "mS";
    public static final String ySVX = "ySVX";
    // general constraints

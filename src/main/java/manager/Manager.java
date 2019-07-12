@@ -228,12 +228,12 @@ public class Manager {
          results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optModel.getVariables().hSVP));
       }
       if (scenario.getConstraints().get(SD)) {
-         results.setVariable(dSPD, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSPD));
-         results.setVariable(ySVXD, Auxiliary.grbVarsToDoubles(optModel.getVariables().ySVXD));
+         results.setVariable(dSVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVX));
+         results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVXD));
          results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVariables().mS));
          results.setVariable(ySVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().ySVX));
       }
-      results.initializeResults(optModel.getObjVal(), convertInitialPlacement(initialModel), scenario);
+      results.initializeResults(optModel.getObjVal(), convertInitialPlacement(initialModel));
       return results;
    }
 
@@ -244,7 +244,7 @@ public class Manager {
       results.setVariable(fXSVD, learningModel.getfXSVD());
       results.setVariable(uL, learningModel.getuL());
       results.setVariable(uX, learningModel.getuX());
-      results.initializeResults(learningModel.getObjVal(), convertInitialPlacement(initialModel), scenario);
+      results.initializeResults(learningModel.getObjVal(), convertInitialPlacement(initialModel));
       return results;
    }
 
