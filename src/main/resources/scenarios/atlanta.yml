@@ -41,7 +41,7 @@ functionTypes:
       "process_traffic_delay": 5,
       "migration_delay": 20,
       "max_cap_server": 100,
-      "max_delay": 10,
+      "max_delay": 10000,
       "min_delay": 1,
       "process_delay": 2
     }
@@ -54,7 +54,7 @@ functionTypes:
       "process_traffic_delay": 10,
       "migration_delay": 40,
       "max_cap_server": 100,
-      "max_delay": 10,
+      "max_delay": 10000,
       "min_delay": 2,
       "process_delay": 5
     }

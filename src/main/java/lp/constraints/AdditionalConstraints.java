@@ -224,6 +224,7 @@ public class AdditionalConstraints {
                            GRBLinExpr processDelayExpr2 = new GRBLinExpr();
                            processDelayExpr2.addTerm((int) function.getAttribute(FUNCTION_PROCESS_DELAY), vars.uX[x]);
                            GRBLinExpr processDelayExpr = new GRBLinExpr();
+                           processDelayExpr.add(loadDelayExpr);
                            processDelayExpr.add(processDelayExpr1);
                            processDelayExpr.add(processDelayExpr2);
                            int bigM = 10000000;
