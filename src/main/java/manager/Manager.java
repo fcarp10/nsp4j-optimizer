@@ -264,10 +264,10 @@ public class Manager {
    private static String generateFileName(Scenario scenario, String model) {
       String fileName = pm.getScenario() + "_";
       if (String.valueOf(scenario.getWeights()).equals("1.0-0.0-0.0"))
-         fileName += "LLB";
+         fileName += "LLB_";
       if (String.valueOf(scenario.getWeights()).equals("0.0-1.0-0.0"))
-         fileName += "XLB";
-      fileName += "_" + model;
+         fileName += "XLB_";
+      fileName += model;
       return fileName;
    }
 

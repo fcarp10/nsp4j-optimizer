@@ -135,7 +135,8 @@ public class OptimizationModel {
    }
 
    private class Callback extends GRBCallback {
-      private int status;
+
+      private boolean isPresolving = false;
       private double gap;
 
       Callback() {
@@ -144,19 +145,20 @@ public class OptimizationModel {
       @Override
       protected void callback() {
          try {
-            if (where == GRB.CB_PRESOLVE && status != GRB.CB_PRESOLVE) {
-               status = GRB.CB_PRESOLVE;
-               printLog(log, INFO, "pre-resolving model");
+            if (where == GRB.CB_POLLING) {
+               // Ignore polling callback
+            } else if (where == GRB.CB_PRESOLVE && !isPresolving) {
+               printLog(log, INFO, "pre-solving model");
+               isPresolving = true;
             } else if (where == GRB.CB_MIPNODE) {
-               double objbst = getDoubleInfo(GRB.CB_MIPNODE_OBJBST);
-               double objbnd = getDoubleInfo(GRB.CB_MIPNODE_OBJBND);
-               double newGap = Auxiliary.roundDouble(((objbst - objbnd) / objbnd) * 100, 2);
+               double objbst = Auxiliary.roundDouble(getDoubleInfo(GRB.CB_MIPNODE_OBJBST), 2);
+               double objbnd = Auxiliary.roundDouble(getDoubleInfo(GRB.CB_MIPNODE_OBJBND), 2);
+               double numerator = Math.abs(objbnd - objbst);
+               double denominator = Math.abs(objbst);
+               double newGap = Auxiliary.roundDouble((numerator / denominator) * 100, 2);
                if (newGap != gap) {
-                  if (newGap <= 100)
-                     printLog(log, INFO, "gap [" + newGap + "%]");
-                  else
-                     printLog(log, INFO, "reducing solution space");
                   gap = newGap;
+                  printLog(log, INFO, "[" + objbst + "-" + objbnd + "][" + gap + "%]");
                }
             }
             if (Manager.isInterrupted())
