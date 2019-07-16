@@ -71,7 +71,7 @@ public class Definitions {
    public static final String FUNCTION_PROCESS_TRAFFIC_DELAY = "process_traffic_delay";
    public static final String FUNCTION_MAX_CAP_SERVER = "max_cap_server";
    public static final String FUNCTION_MAX_DELAY = "max_delay";
-   public static final String FUNCTION_MIN_DELAY = "min_delay";
+   public static final String FUNCTION_MIN_PROCESS_DELAY = "min_process_delay";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";

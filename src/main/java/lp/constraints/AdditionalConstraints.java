@@ -164,7 +164,7 @@ public class AdditionalConstraints {
       for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
          loadDelayExpr.addTerm(ratio * service.getTrafficFlow().getDemands().get(d), vars.fXSVD[x][s][v][d]);
       GRBLinExpr processDelayExpr = new GRBLinExpr();
-      processDelayExpr.addTerm((int) function.getAttribute(FUNCTION_MIN_DELAY), vars.fXSV[x][s][v]);
+      processDelayExpr.addTerm((int) function.getAttribute(FUNCTION_MIN_PROCESS_DELAY), vars.fXSV[x][s][v]);
       processDelayExpr.addTerm((int) function.getAttribute(FUNCTION_PROCESS_DELAY), vars.ySVX[s][v][x]);
       // constraint ySVX variable
       model.getGrbModel().addConstr(vars.ySVX[s][v][x], GRB.LESS_EQUAL, vars.uX[x], FUNCTION_PROCESS_TRAFFIC_DELAY);
@@ -220,7 +220,7 @@ public class AdditionalConstraints {
                            for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
                               loadDelayExpr.addTerm(ratio * service.getTrafficFlow().getDemands().get(d1), vars.fXSVD[x][s][v][d1]);
                            GRBLinExpr processDelayExpr1 = new GRBLinExpr();
-                           processDelayExpr1.addTerm((int) function.getAttribute(FUNCTION_MIN_DELAY), vars.fXSV[x][s][v]);
+                           processDelayExpr1.addTerm((int) function.getAttribute(FUNCTION_MIN_PROCESS_DELAY), vars.fXSV[x][s][v]);
                            GRBLinExpr processDelayExpr2 = new GRBLinExpr();
                            processDelayExpr2.addTerm((int) function.getAttribute(FUNCTION_PROCESS_DELAY), vars.uX[x]);
                            GRBLinExpr processDelayExpr = new GRBLinExpr();

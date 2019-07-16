@@ -7,12 +7,16 @@ import gui.elements.Scenario;
 import manager.Parameters;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static output.Auxiliary.printLog;
 import static output.Definitions.*;
 
 public class Results {
+   private transient static final Logger log = LoggerFactory.getLogger(Results.class);
    // @JsonIgnore tag -> ignores specific variable for json result file
    // transient modifier -> ignores specific variable for posting results to web UI.
    @JsonIgnore
@@ -99,7 +103,6 @@ public class Results {
       totalTraffic = pm.getTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
       avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
-      synchronizationTraffic = Auxiliary.roundDouble(synchronizationTraffic(), 2);
       this.objVal = Auxiliary.roundDouble(objVal, 4);
       lu = new ArrayList<>(linkUtilizationMap().values());
       xu = new ArrayList<>(serverUtilizationMap().values());
@@ -123,6 +126,7 @@ public class Results {
       if (scenario.getConstraints().get(ST)) {
          gSVXY(); // binary, aux synchronization traffic
          hSVP(); // binary, traffic synchronization
+         synchronizationTraffic = Auxiliary.roundDouble(synchronizationTraffic(), 2);
       }
       if (scenario.getConstraints().get(SD)) {
          sd = serviceDelayList();
@@ -144,7 +148,8 @@ public class Results {
                   for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                      if (initialPlacement[x][s][v] && !var[x][s][v])
                         totalMigrations++;
-         } catch (Exception ignored) {
+         } catch (Exception e) {
+            printLog(log, ERROR, e.getMessage());
          }
       return totalMigrations;
    }
@@ -161,7 +166,8 @@ public class Results {
                      replicasPerFunction++;
                totalReplicas += replicasPerFunction;
             }
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
       return totalReplicas;
    }
@@ -173,7 +179,8 @@ public class Results {
          for (int l = 0; l < pm.getLinks().size(); l++)
             if (pm.getLinks().get(l).getAttribute(LINK_CLOUD) == null)
                linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(var[l], 2));
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
       return linkMapResults;
    }
@@ -185,7 +192,8 @@ public class Results {
          for (int x = 0; x < pm.getServers().size(); x++)
             if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null)
                serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(var[x], 2));
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
       return serverMapResults;
    }
@@ -202,7 +210,8 @@ public class Results {
                      numOfFunctions++;
             numOfFunctionsPerServer.add(numOfFunctions);
          }
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
       return numOfFunctionsPerServer;
    }
@@ -228,7 +237,8 @@ public class Results {
                   for (Edge link : links) delay += (double) link.getAttribute(LINK_DELAY);
                   delay += migrationDelayVar[s];
                   delay = Auxiliary.roundDouble(delay, 3);
-                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): "
+                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
+                          + pm.getServices().get(s).getId() + "]"
                           + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
                           + "[" + delay + "]");
                   serviceDelayList.add(delay);
@@ -246,7 +256,8 @@ public class Results {
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   if (var2[s][p][d])
                      serviceTypesList.add(pm.getServices().get(s).getId());
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
       return serviceTypesList;
    }
@@ -264,7 +275,8 @@ public class Results {
                }
          if (usedPaths != 0)
             avgPathLength = avgPathLength / usedPaths;
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
       return avgPathLength;
    }
@@ -275,7 +287,8 @@ public class Results {
          double[] var = (double[]) rawVariables.get(uL);
          for (int l = 0; l < pm.getLinks().size(); l++)
             trafficOnLinks += var[l] * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
       return trafficOnLinks;
    }
@@ -300,8 +313,8 @@ public class Results {
                }
             }
          }
-
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
       return synchronizationTraffic;
    }
@@ -317,7 +330,8 @@ public class Results {
                           + pm.getServices().get(s).getId() + "]"
                           + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
          variables.put(zSP, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -335,7 +349,8 @@ public class Results {
                              + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
                              + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
          variables.put(zSPD, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -353,7 +368,8 @@ public class Results {
                              + pm.getServices().get(s).getId() + "]["
                              + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
          variables.put(fXSV, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -373,7 +389,8 @@ public class Results {
                                 + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
                                 + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
          variables.put(fXSVD, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -386,7 +403,8 @@ public class Results {
                     + pm.getServers().get(x).getId() + "]["
                     + Auxiliary.roundDouble(var[x], 3) + "]");
          variables.put(uX, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -403,7 +421,8 @@ public class Results {
                     + Auxiliary.roundDouble(var[l], 3)
                     * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY) + "]");
          variables.put(uL, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -415,7 +434,8 @@ public class Results {
             if (var[n] > 0)
                strings.add("(" + (n + this.offset) + "): [" + pm.getNodes().get(n).getId() + "][" + var[n] + "]");
          variables.put(xN, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -427,7 +447,8 @@ public class Results {
             if (var[x])
                strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]");
          variables.put(fX, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -445,7 +466,8 @@ public class Results {
                                    + "," + (x + this.offset) + "," + (y + this.offset) + "): ["
                                    + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
          variables.put(gSVXY, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -460,23 +482,30 @@ public class Results {
                      strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
                              + pm.getPaths().get(p).getNodePath());
          variables.put(hSVP, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
    private void dSVX() {
       try {
-         double[][][] processDelayVarVar = (double[][][]) rawVariables.get(dSVX);
+         double[][][] processDelayVar = (double[][][]) rawVariables.get(dSVX);
+         boolean[][][][] placementVar = (boolean[][][][]) rawVariables.get(fXSVD);
          List<String> strings = new ArrayList<>();
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               for (int x = 0; x < pm.getServers().size(); x++)
-                  if (processDelayVarVar[x][s][v] > 0)
+               for (int x = 0; x < pm.getServers().size(); x++) {
+                  boolean isUsed = false;
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     if (placementVar[x][s][v][d]) isUsed = true;
+                  if (processDelayVar[s][v][x] > 0 && isUsed)
                      strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (x + this.offset) + "): ["
                              + pm.getServers().get(x).getId() + "]["
-                             + Auxiliary.roundDouble(processDelayVarVar[x][s][v], 2) + "]");
+                             + Auxiliary.roundDouble(processDelayVar[s][v][x], 2) + "]");
+               }
          variables.put(dSVX, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 
@@ -488,7 +517,8 @@ public class Results {
             if (migrationDelayVar[s] > 0)
                strings.add("(" + (s + this.offset) + "): " + "[" + migrationDelayVar[s] + "]");
          variables.put(mS, strings);
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
       }
    }
 

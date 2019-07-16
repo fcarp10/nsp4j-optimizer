@@ -38,12 +38,12 @@ functionTypes:
       "load_ratio": 0.1,
       "overhead": 10,
       "sync_load": 0.0,
-      "process_traffic_delay": 5,
-      "migration_delay": 20,
+      "process_traffic_delay": 2,
       "max_cap_server": 100,
-      "max_delay": 10000,
-      "min_delay": 1,
-      "process_delay": 2
+      "process_delay": 2,
+      "min_process_delay": 1,
+      "max_delay": 1000,
+      "migration_delay": 20
     }
   - type: 1
     attributes: {
@@ -51,12 +51,12 @@ functionTypes:
       "load_ratio": 1.0,
       "overhead": 10,
       "sync_load": 0.05,
-      "process_traffic_delay": 10,
-      "migration_delay": 40,
+      "process_traffic_delay": 5,
       "max_cap_server": 100,
-      "max_delay": 10000,
-      "min_delay": 2,
-      "process_delay": 5
+      "process_delay": 5,
+      "min_process_delay": 2,
+      "max_delay": 1000,
+      "migration_delay": 40
     }
 # traffic flow definitions
 trafficFlows:
