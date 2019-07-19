@@ -7,6 +7,7 @@ import gui.elements.Scenario;
 import manager.Parameters;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
+import org.graphstream.graph.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,19 +220,22 @@ public class Results {
    private List<Double> serviceDelayList() {
       List<Double> serviceDelayList = new ArrayList<>();
       boolean[][][] routingVar = (boolean[][][]) rawVariables.get(zSPD);
-      double[][][] processDelayVar = (double[][][]) rawVariables.get(dSVX);
+      double[][][][] processDelayVar = (double[][][][]) rawVariables.get(dSVXD);
       double[] migrationDelayVar = (double[]) rawVariables.get(mS);
       boolean[][][][] placementVar = (boolean[][][][]) rawVariables.get(fXSVD);
       List<String> strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+            Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (routingVar[s][p][d]) {
                   double delay = 0;
-                  for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  for (int n = 0; n < path.getNodePath().size(); n++)
                      for (int x = 0; x < pm.getServers().size(); x++)
-                        if (placementVar[x][s][v][d])
-                           delay += processDelayVar[s][v][x];
+                        if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
+                           for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                              if (placementVar[x][s][v][d])
+                                 delay += processDelayVar[s][v][x][d];
                   if (delay == 0) continue;
                   List<Edge> links = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getEdgePath();
                   for (Edge link : links) delay += (double) link.getAttribute(LINK_DELAY);
@@ -243,6 +247,7 @@ public class Results {
                           + "[" + delay + "]");
                   serviceDelayList.add(delay);
                }
+         }
       variables.put(dSPD, strings);
       return serviceDelayList;
    }

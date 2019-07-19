@@ -42,8 +42,7 @@ public class Constraints {
          // constraint server utilization if no dimensioning
          if (!scenario.getObjectiveFunction().equals(SERVER_DIMENSIONING))
             for (int x = 0; x < pm.getServers().size(); x++)
-               model.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX
-                       + "[" + pm.getServers().get(x).getId() + "]");
+               model.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX + "[x] --> " + "[" + x + "]");
          // set linear cost functions constraints
          if (scenario.getObjectiveFunction().equals(COSTS_OBJ))
             linearCostFunctions(luExpr, vars.kL);
@@ -86,8 +85,7 @@ public class Constraints {
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   expr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
                           * (double) function.getAttribute(FUNCTION_LOAD_RATIO)), vars.fXSVD[x][s][v][d]);
-               expr.addTerm((double) function.getAttribute(FUNCTION_LOAD_RATIO) * (int) function.getAttribute(FUNCTION_OVERHEAD)
-                       , vars.fXSV[x][s][v]);
+               expr.addTerm((int) function.getAttribute(FUNCTION_OVERHEAD), vars.fXSV[x][s][v]);
             }
          expressions[x] = expr;
       }
