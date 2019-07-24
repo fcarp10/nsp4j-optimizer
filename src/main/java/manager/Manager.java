@@ -95,21 +95,6 @@ public class Manager {
             default:
                runLP(sce.getModel(), sce, sce.getObjectiveFunction(), resultsManager, initialModel);
                break;
-            case ALL_CASES:
-               if (initialModel == null)
-                  Auxiliary.printLog(log, ERROR, "run initial placement first");
-               else {
-                  runLP(MIGRATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel);
-                  runLP(REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel);
-                  runLP(MIGRATION_REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel);
-               }
-               break;
-            case REINFORCEMENT_LEARNING:
-               if (initialModel == null)
-                  initialModel = runLP(INITIAL_PLACEMENT, sce, Definitions.NUM_SERVERS_OBJ, resultsManager, null);
-               GRBModel mgrRepModel = runLP(MIGRATION_REPLICATION, sce, sce.getObjectiveFunction(), resultsManager, initialModel);
-               runRL(sce, resultsManager, initialModel, mgrRepModel);
-               break;
          }
          printLog(log, INFO, "ready");
       } catch (Exception e) {

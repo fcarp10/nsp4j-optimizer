@@ -137,7 +137,7 @@ public class OptimizationModel {
    private class Callback extends GRBCallback {
 
       private boolean isPresolving = false;
-      private double gap;
+      private double gap = Double.MAX_VALUE;
 
       Callback() {
       }
@@ -151,14 +151,19 @@ public class OptimizationModel {
                printLog(log, INFO, "pre-solving model");
                isPresolving = true;
             } else if (where == GRB.CB_MIPNODE) {
-               double objbst = Auxiliary.roundDouble(getDoubleInfo(GRB.CB_MIPNODE_OBJBST), 2);
-               double objbnd = Auxiliary.roundDouble(getDoubleInfo(GRB.CB_MIPNODE_OBJBND), 2);
+               double objbst = getDoubleInfo(GRB.CB_MIPNODE_OBJBST);
+               double objbnd = getDoubleInfo(GRB.CB_MIPNODE_OBJBND);
                double numerator = Math.abs(objbnd - objbst);
                double denominator = Math.abs(objbst);
-               double newGap = Auxiliary.roundDouble((numerator / denominator) * 100, 2);
-               if (newGap != gap) {
-                  gap = newGap;
-                  printLog(log, INFO, "[" + objbst + "-" + objbnd + "][" + gap + "%]");
+               if (denominator > 0) {
+                  double newGap = (numerator / denominator) * 100;
+                  if (newGap != gap) {
+                     gap = newGap;
+                     objbst = Auxiliary.roundDouble(objbst, 2);
+                     objbnd = Auxiliary.roundDouble(objbnd, 2);
+                     double showGap = Auxiliary.roundDouble(newGap, 2);
+                     printLog(log, INFO, "[" + objbst + "-" + objbnd + "][" + showGap + "%]");
+                  }
                }
             }
             if (Manager.isInterrupted())

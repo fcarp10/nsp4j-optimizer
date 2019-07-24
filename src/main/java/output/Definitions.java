@@ -13,8 +13,7 @@ public class Definitions {
    public static final String MIGRATION = "mgr";
    public static final String REPLICATION = "rep";
    public static final String MIGRATION_REPLICATION = "mgrep";
-   public static final String ALL_CASES = "all";
-   public static final String REINFORCEMENT_LEARNING = "mgrep_rl";
+
    // logs and messages
    public static final String ERROR = "Error: ";
    public static final String INFO = "Info: ";

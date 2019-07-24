@@ -65,10 +65,10 @@ public class ResultsManager {
          new Variables(pm, model, scenario);
          model.read(path + filename + "_initial_placement.mst");
          model.optimize();
-         Auxiliary.printLog(log, INFO, "initial placement loaded");
+         Auxiliary.printLog(log, INFO, "ext. init. placement loaded");
          return model;
       } catch (Exception e) {
-         Auxiliary.printLog(log, INFO, "no initial placement");
+         Auxiliary.printLog(log, INFO, "no ext. init. placement");
          return null;
       }
    }
