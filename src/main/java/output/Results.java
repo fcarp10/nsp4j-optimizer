@@ -248,15 +248,16 @@ public class Results {
 
                   // add migration delay
                   double maxMigrationDelay = 0;
-                  for (int n = 0; n < path.getNodePath().size(); n++)
-                     for (int x = 0; x < pm.getServers().size(); x++)
-                        if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-                           for (int v = 0; v < service.getFunctions().size(); v++)
-                              if (initialPlacement[x][s][v] && !fXSVvar[x][s][v]) {
-                                 double migrationDelay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
-                                 if (migrationDelay > maxMigrationDelay)
-                                    maxMigrationDelay = migrationDelay;
-                              }
+                  if (initialPlacement != null)
+                     for (int n = 0; n < path.getNodePath().size(); n++)
+                        for (int x = 0; x < pm.getServers().size(); x++)
+                           if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
+                              for (int v = 0; v < service.getFunctions().size(); v++)
+                                 if (initialPlacement[x][s][v] && !fXSVvar[x][s][v]) {
+                                    double migrationDelay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
+                                    if (migrationDelay > maxMigrationDelay)
+                                       maxMigrationDelay = migrationDelay;
+                                 }
                   endToEndDelay += maxMigrationDelay;
 
                   // print total end to end delay
