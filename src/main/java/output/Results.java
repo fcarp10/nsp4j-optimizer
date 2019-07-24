@@ -220,7 +220,7 @@ public class Results {
    private List<Double> serviceDelayList() {
       List<Double> serviceDelayList = new ArrayList<>();
       boolean[][][] routingVar = (boolean[][][]) rawVariables.get(zSPD);
-      double[][][][] processDelayVar = (double[][][][]) rawVariables.get(dSVXD);
+      double[][][] processDelayVar = (double[][][]) rawVariables.get(dSVX);
       double[] migrationDelayVar = (double[]) rawVariables.get(mS);
       boolean[][][][] placementVar = (boolean[][][][]) rawVariables.get(fXSVD);
       List<String> strings = new ArrayList<>();
@@ -235,7 +235,7 @@ public class Results {
                         if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
                            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                               if (placementVar[x][s][v][d])
-                                 delay += processDelayVar[s][v][x][d];
+                                 delay += processDelayVar[s][v][x];
                   if (delay == 0) continue;
                   List<Edge> links = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getEdgePath();
                   for (Edge link : links) delay += (double) link.getAttribute(LINK_DELAY);
