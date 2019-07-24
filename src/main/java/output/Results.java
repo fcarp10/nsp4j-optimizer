@@ -6,6 +6,7 @@ import gui.elements.GraphData;
 import gui.elements.Scenario;
 import manager.Parameters;
 import manager.elements.Server;
+import manager.elements.Service;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Path;
 import org.slf4j.Logger;
@@ -130,7 +131,7 @@ public class Results {
          synchronizationTraffic = Auxiliary.roundDouble(synchronizationTraffic(), 2);
       }
       if (scenario.getConstraints().get(SD)) {
-         sd = serviceDelayList();
+         sd = serviceDelayList(initialPlacement);
          st = serviceTypes();
          setSummaryResults(sdSummary, sd);
          sdGraph(sd);
@@ -217,37 +218,57 @@ public class Results {
       return numOfFunctionsPerServer;
    }
 
-   private List<Double> serviceDelayList() {
+   private List<Double> serviceDelayList(boolean[][][] initialPlacement) {
       List<Double> serviceDelayList = new ArrayList<>();
-      boolean[][][] routingVar = (boolean[][][]) rawVariables.get(zSPD);
-      double[][][] processDelayVar = (double[][][]) rawVariables.get(dSVX);
-      double[] migrationDelayVar = (double[]) rawVariables.get(mS);
-      boolean[][][][] placementVar = (boolean[][][][]) rawVariables.get(fXSVD);
+      boolean[][][] zSPDvar = (boolean[][][]) rawVariables.get(zSPD);
+      double[][][] dSVXvar = (double[][][]) rawVariables.get(dSVX);
+      boolean[][][][] fXSVDvar = (boolean[][][][]) rawVariables.get(fXSVD);
+      boolean[][][] fXSVvar = (boolean[][][]) rawVariables.get(fXSV);
       List<String> strings = new ArrayList<>();
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
-            Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               if (routingVar[s][p][d]) {
-                  double delay = 0;
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         Service service = pm.getServices().get(s);
+         for (int p = 0; p < service.getTrafficFlow().getPaths().size(); p++) {
+            Path path = service.getTrafficFlow().getPaths().get(p);
+            for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
+               if (zSPDvar[s][p][d]) {
+
+                  // add processing delay
+                  double endToEndDelay = 0;
                   for (int n = 0; n < path.getNodePath().size(); n++)
                      for (int x = 0; x < pm.getServers().size(); x++)
                         if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-                           for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                              if (placementVar[x][s][v][d])
-                                 delay += processDelayVar[s][v][x];
-                  if (delay == 0) continue;
-                  List<Edge> links = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getEdgePath();
-                  for (Edge link : links) delay += (double) link.getAttribute(LINK_DELAY);
-                  delay += migrationDelayVar[s];
-                  delay = Auxiliary.roundDouble(delay, 3);
+                           for (int v = 0; v < service.getFunctions().size(); v++)
+                              if (fXSVDvar[x][s][v][d])
+                                 endToEndDelay += dSVXvar[s][v][x];
+                  if (endToEndDelay == 0) continue;
+
+                  // add propagation delay
+                  List<Edge> links = service.getTrafficFlow().getPaths().get(p).getEdgePath();
+                  for (Edge link : links) endToEndDelay += (double) link.getAttribute(LINK_DELAY);
+
+                  // add migration delay
+                  double maxMigrationDelay = 0;
+                  for (int n = 0; n < path.getNodePath().size(); n++)
+                     for (int x = 0; x < pm.getServers().size(); x++)
+                        if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
+                           for (int v = 0; v < service.getFunctions().size(); v++)
+                              if (initialPlacement[x][s][v] && !fXSVvar[x][s][v]) {
+                                 double migrationDelay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
+                                 if (migrationDelay > maxMigrationDelay)
+                                    maxMigrationDelay = migrationDelay;
+                              }
+                  endToEndDelay += maxMigrationDelay;
+
+                  // print total end to end delay
+                  endToEndDelay = Auxiliary.roundDouble(endToEndDelay, 3);
                   strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
                           + pm.getServices().get(s).getId() + "]"
                           + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                          + "[" + delay + "]");
-                  serviceDelayList.add(delay);
+                          + "[" + endToEndDelay + "]");
+                  serviceDelayList.add(endToEndDelay);
                }
          }
+      }
       variables.put(dSPD, strings);
       return serviceDelayList;
    }
