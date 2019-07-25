@@ -162,34 +162,26 @@ function check(elem) {
             document.getElementById("num_servers").checked = false;
             document.getElementById("single_path").checked = true;
             document.getElementById("fix_init_plc").checked = false;
-            document.getElementById("objectiveFunction").getElementsByTagName('option')[0].selected = "selected";
         }
     if (model === "init") {
         document.getElementById("num_servers").checked = true;
         document.getElementById("single_path").checked = true;
         document.getElementById("fix_init_plc").checked = false;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[2].selected = "selected";
     }
     else if (model === "mgr") {
         document.getElementById("num_servers").checked = false;
         document.getElementById("single_path").checked = true;
         document.getElementById("fix_init_plc").checked = false;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[3].selected = "selected";
     }
     else if (model === "rep") {
         document.getElementById("num_servers").checked = false;
         document.getElementById("single_path").checked = false;
         document.getElementById("fix_init_plc").checked = true;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[3].selected = "selected";;
     }
     else if (model === "mgrep") {
         document.getElementById("num_servers").checked = false;
         document.getElementById("single_path").checked = false;
         document.getElementById("fix_init_plc").checked = false;
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[3].selected = "selected";
-    }
-    else if (model === "mgrep_rl") {
-        document.getElementById("objectiveFunction").getElementsByTagName('option')[3].selected = "selected";
     }
 }
 

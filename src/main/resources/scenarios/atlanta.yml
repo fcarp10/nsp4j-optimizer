@@ -61,6 +61,8 @@ functionTypes:
 # traffic flow definitions
 trafficFlows:
   - minDem: 1
-    maxDem: 5
-    minBw: 1
-    maxBw: 20
+    maxDem: 1
+    minBw: 400
+    maxBw: 400
+    src: "n1"
+    dst: "n9"

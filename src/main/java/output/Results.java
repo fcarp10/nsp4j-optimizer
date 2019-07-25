@@ -105,7 +105,7 @@ public class Results {
       totalTraffic = pm.getTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
       avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
-      this.objVal = Auxiliary.roundDouble(objVal, 4);
+      this.objVal = Auxiliary.roundDouble(objVal, 6);
       lu = new ArrayList<>(linkUtilizationMap().values());
       xu = new ArrayList<>(serverUtilizationMap().values());
       fp = numOfFunctionsPerServer();

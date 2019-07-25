@@ -16,18 +16,18 @@ public class OptimizationModel {
    private GRBModel grbModel;
    private GRBEnv grbEnv;
    private Variables variables;
-   private Parameters parameters;
+   private Parameters pm;
    private double objVal;
 
-   public OptimizationModel(Parameters parameters) {
-      this.parameters = parameters;
+   public OptimizationModel(Parameters pm) {
+      this.pm = pm;
       try {
          grbEnv = new GRBEnv();
          grbEnv.set(GRB.IntParam.LogToConsole, 0);
          grbModel = new GRBModel(grbEnv);
          Callback cb = new Callback();
          grbModel.setCallback(cb);
-         grbModel.getEnv().set(GRB.DoubleParam.MIPGap, (double) parameters.getAux().get("gap"));
+         grbModel.getEnv().set(GRB.DoubleParam.MIPGap, (double) pm.getAux().get("gap"));
       } catch (GRBException e) {
          e.printStackTrace();
       }
@@ -42,42 +42,42 @@ public class OptimizationModel {
 
    public GRBLinExpr dimensioningExpr() {
       GRBLinExpr expr = new GRBLinExpr();
-      for (int n = 0; n < parameters.getNodes().size(); n++)
+      for (int n = 0; n < pm.getNodes().size(); n++)
          expr.addTerm(1.0, variables.xN[n]);
       return expr;
    }
 
    public GRBLinExpr usedServersExpr() {
       GRBLinExpr expr = new GRBLinExpr();
-      for (int x = 0; x < parameters.getServers().size(); x++)
+      for (int x = 0; x < pm.getServers().size(); x++)
          expr.addTerm(1.0, variables.fX[x]);
       return expr;
    }
 
    public GRBLinExpr linkCostsExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
-      for (int l = 0; l < parameters.getLinks().size(); l++)
+      for (int l = 0; l < pm.getLinks().size(); l++)
          expr.addTerm(weight, variables.kL[l]);
       return expr;
    }
 
    public GRBLinExpr serverCostsExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
-      for (int x = 0; x < parameters.getServers().size(); x++)
+      for (int x = 0; x < pm.getServers().size(); x++)
          expr.addTerm(weight, variables.kX[x]);
       return expr;
    }
 
    public GRBLinExpr linkUtilizationExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
-      for (int l = 0; l < parameters.getLinks().size(); l++)
+      for (int l = 0; l < pm.getLinks().size(); l++)
          expr.addTerm(weight, variables.uL[l]);
       return expr;
    }
 
    public GRBLinExpr serverUtilizationExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
-      for (int x = 0; x < parameters.getServers().size(); x++)
+      for (int x = 0; x < pm.getServers().size(); x++)
          expr.addTerm(weight, variables.uX[x]);
       return expr;
    }
@@ -88,10 +88,26 @@ public class OptimizationModel {
       return expr;
    }
 
+   public GRBLinExpr numOfMigrations(double weight, GRBModel initialPlacement) {
+      GRBLinExpr expr = new GRBLinExpr();
+      try {
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (initialPlacement.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
+                     expr.addConstant(weight);
+                     expr.addTerm(-weight, variables.fXSV[x][s][v]);
+                  }
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
+      }
+      return expr;
+   }
+
    public double run() throws GRBException {
       grbModel.optimize();
       if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
-         objVal = Auxiliary.roundDouble(grbModel.get(GRB.DoubleAttr.ObjVal), 2);
+         objVal = Auxiliary.roundDouble(grbModel.get(GRB.DoubleAttr.ObjVal), 4);
          printLog(log, INFO, "finished [" + objVal + "]");
          return objVal;
       } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {

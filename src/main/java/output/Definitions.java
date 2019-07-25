@@ -5,6 +5,7 @@ public class Definitions {
    public static final String NUM_SERVERS_OBJ = "num_servers";
    public static final String NUM_SERVERS_COSTS_OBJ = "num_servers_and_costs";
    public static final String COSTS_OBJ = "costs";
+   public static final String COSTS_MIGRATIONS_OBJ = "costs_and_migrations";
    public static final String UTILIZATION_OBJ = "utilization";
    public static final String MAX_UTILIZATION_OBJ = "max_utilization";
    // models
@@ -17,6 +18,7 @@ public class Definitions {
    // logs and messages
    public static final String ERROR = "Error: ";
    public static final String INFO = "Info: ";
+   public static final String WARNING = "Warning: ";
    // objective variables
    public static final String kL = "kL";
    public static final String kX = "kX";

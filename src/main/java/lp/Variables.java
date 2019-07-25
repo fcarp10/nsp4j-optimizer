@@ -79,20 +79,16 @@ public class Variables {
             uX[x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
                     , Definitions.uX + "[" + x + "]");
 
-         // if model is using optimizing costs functions
-         if (scenario.getObjectiveFunction().equals(COSTS_OBJ)) {
-            kL = new GRBVar[pm.getLinks().size()];
-            for (int l = 0; l < pm.getLinks().size(); l++)
-               kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                       , Definitions.kL + "[" + l + "]");
-         }
-         if (scenario.getObjectiveFunction().equals(COSTS_OBJ)
-                 || scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ)) {
-            kX = new GRBVar[pm.getServers().size()];
-            for (int x = 0; x < pm.getServers().size(); x++)
-               kX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                       , Definitions.kX + "[" + x + "]");
-         }
+         kL = new GRBVar[pm.getLinks().size()];
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                    , Definitions.kL + "[" + l + "]");
+
+         kX = new GRBVar[pm.getServers().size()];
+         for (int x = 0; x < pm.getServers().size(); x++)
+            kX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                    , Definitions.kX + "[" + x + "]");
+
          // if model is optimizing max utilization
          if (scenario.getObjectiveFunction().equals(MAX_UTILIZATION_OBJ)) {
             uMax = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS

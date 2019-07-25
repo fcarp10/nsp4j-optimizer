@@ -44,11 +44,8 @@ public class Constraints {
             for (int x = 0; x < pm.getServers().size(); x++)
                model.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX + "[x] --> " + "[" + x + "]");
          // set linear cost functions constraints
-         if (scenario.getObjectiveFunction().equals(COSTS_OBJ))
-            linearCostFunctions(luExpr, vars.kL);
-         if (scenario.getObjectiveFunction().equals(COSTS_OBJ)
-                 || scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ))
-            linearCostFunctions(xuExpr, vars.kX);
+         linearCostFunctions(luExpr, vars.kL);
+         linearCostFunctions(xuExpr, vars.kX);
          // set max utilization constraint
          if (scenario.getObjectiveFunction().equals(MAX_UTILIZATION_OBJ)) maxUtilization();
          // set dimensioning constraints

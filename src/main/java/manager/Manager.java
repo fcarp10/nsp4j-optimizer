@@ -68,7 +68,7 @@ public class Manager {
             node.setAttribute("y", value);
          }
          for (Node node : pm.getNodes()) {
-            double value =  Math.round((double) node.getAttribute("x") * scalingX);
+            double value = Math.round((double) node.getAttribute("x") * scalingX);
             node.setAttribute("x", value);
          }
       }
@@ -132,7 +132,7 @@ public class Manager {
       model.setVariables(variables);
       printLog(log, INFO, "setting constraints");
       new Constraints(pm, model, scenario, initialModel);
-      expr = generateExprForObjectiveFunction(model, scenario, objectiveFunction);
+      expr = generateExprForObjectiveFunction(model, scenario, objectiveFunction, initialModel);
       model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running LP model");
       double objVal = model.run();
@@ -157,11 +157,10 @@ public class Manager {
       WebClient.updateResultsToWebApp(results);
    }
 
-   private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, Scenario scenario, String objectiveFunction) throws GRBException {
+   private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, Scenario scenario, String objectiveFunction, GRBModel initialPlacement) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       String[] weights = scenario.getWeights().split("-");
-      double linksWeight = Double.valueOf(weights[0]) / pm.getLinks().size();
-      double serversWeight = Double.valueOf(weights[1]) / pm.getServers().size();
+      double serversWeight, linksWeight;
       switch (objectiveFunction) {
          case SERVER_DIMENSIONING:
             expr.add(model.dimensioningExpr());
@@ -175,17 +174,30 @@ public class Manager {
             expr.add(model.serverCostsExpr(serversWeight));
             break;
          case COSTS_OBJ:
+            linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
+            serversWeight = Double.parseDouble(weights[1]) / pm.getServers().size();
             expr.add(model.linkCostsExpr(linksWeight));
             expr.add(model.serverCostsExpr(serversWeight));
             break;
+         case COSTS_MIGRATIONS_OBJ:
+            expr.add(model.linkCostsExpr(1.0));
+            expr.add(model.serverCostsExpr(1.0));
+            if (initialPlacement != null)
+               expr.add(model.numOfMigrations(0.0 , initialPlacement));
+            else printLog(log, WARNING, "no init. placement");
+            break;
          case UTILIZATION_OBJ:
+            linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
+            serversWeight = Double.parseDouble(weights[1]) / pm.getServers().size();
             expr.add(model.linkUtilizationExpr(linksWeight));
             expr.add(model.serverUtilizationExpr(serversWeight));
             break;
          case MAX_UTILIZATION_OBJ:
+            linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
+            serversWeight = Double.parseDouble(weights[1]) / pm.getServers().size();
             expr.add(model.linkUtilizationExpr(linksWeight));
             expr.add(model.serverUtilizationExpr(serversWeight));
-            expr.add(model.maxUtilizationExpr(Double.valueOf(weights[2])));
+            expr.add(model.maxUtilizationExpr(Double.parseDouble(weights[2])));
             break;
       }
       return expr;
