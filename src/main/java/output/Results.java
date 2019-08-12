@@ -260,6 +260,24 @@ public class Results {
                                  }
                   endToEndDelay += maxMigrationDelay;
 
+//                  double maxMigrationDelay = 0;
+//                   for (int pmgr= 0; pmgr < service.getTrafficFlow().getPaths().size(); pmgr++) {
+//                      Path pathm = service.getTrafficFlow().getPaths().get(pmgr);
+//                      if(initialPlacement!=null)
+//                         for (int n = 0; n < pathm.getNodePath().size(); n++)
+//                            for (int x = 0; x < pm.getServers().size(); x++)
+//                               if(pm.getServers().get(x).getParent().equals(pathm.getNodePath().get(n)))
+//                                  for (int v = 0; v < service.getFunctions().size(); v++) {
+//                                     if (initialPlacement[x][s][v] && !fXSVvar[x][s][v]) {
+//                                        double migrationDelay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
+//                                        System.out.println("n= " + n + "x= " + x + " v= " + v + "F" + initialPlacement[x][s][v] + "f" + fXSVvar[x][s][v]);
+//                                        if (migrationDelay > maxMigrationDelay)
+//                                           maxMigrationDelay = migrationDelay;
+//                                     }
+//                                     System.out.println("n= " + n + " x=" + x + " v= " + v + " F= " + initialPlacement[x][s][v] + " f= " + fXSVvar[x][s][v]);
+//                                  }
+//                      System.out.println("s= " + s + " pmgr= " + pmgr + " md= " + maxMigrationDelay);
+
                   // print total end to end delay
                   endToEndDelay = Auxiliary.roundDouble(endToEndDelay, 3);
                   strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
