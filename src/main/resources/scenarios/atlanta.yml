@@ -43,7 +43,7 @@ functionTypes:
       "process_delay": 2.0,
       "min_process_delay": 1.0,
       "max_delay": 1000.0,
-      "migration_delay": 0.0
+      "migration_delay": 10.0
     }
   - type: 1
     attributes: {
@@ -56,7 +56,7 @@ functionTypes:
       "process_delay": 5.0,
       "min_process_delay": 2.0,
       "max_delay": 1000.0,
-      "migration_delay": 0.0
+      "migration_delay": 20.0
     }
 # traffic flow definitions
 trafficFlows:
