@@ -230,47 +230,48 @@ public class Results {
          for (int p = 0; p < service.getTrafficFlow().getPaths().size(); p++) {
             Path path = service.getTrafficFlow().getPaths().get(p);
             for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
-               if (zSPDvar[s][p][d]) {
+               if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                  if (zSPDvar[s][p][d]) {
 
-                  // add processing delay
-                  double endToEndDelay = 0;
-                  for (int n = 0; n < path.getNodePath().size(); n++)
-                     for (int x = 0; x < pm.getServers().size(); x++)
-                        if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-                           for (int v = 0; v < service.getFunctions().size(); v++)
-                              if (fXSVDvar[x][s][v][d])
-                                 endToEndDelay += dSVXvar[s][v][x];
-                  if (endToEndDelay == 0) continue;
+                     // add processing delay
+                     double endToEndDelay = 0;
+                     for (int n = 0; n < path.getNodePath().size(); n++)
+                        for (int x = 0; x < pm.getServers().size(); x++)
+                           if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
+                              for (int v = 0; v < service.getFunctions().size(); v++)
+                                 if (fXSVDvar[x][s][v][d])
+                                    endToEndDelay += dSVXvar[s][v][x];
+                     if (endToEndDelay == 0) continue;
 
-                  // add propagation delay
-                  List<Edge> links = service.getTrafficFlow().getPaths().get(p).getEdgePath();
-                  for (Edge link : links) endToEndDelay += (double) link.getAttribute(LINK_DELAY);
+                     // add propagation delay
+                     List<Edge> links = service.getTrafficFlow().getPaths().get(p).getEdgePath();
+                     for (Edge link : links) endToEndDelay += (double) link.getAttribute(LINK_DELAY);
 
-                  // add migration delay
-                  double maxMigrationDelay = 0;
-                  for (int q = 0; q < service.getTrafficFlow().getPaths().size(); q++) {
-                     Path pathMgr = service.getTrafficFlow().getPaths().get(q);
-                     if (initialPlacement != null)
-                        for (int n = 0; n < pathMgr.getNodePath().size(); n++)
-                           for (int x = 0; x < pm.getServers().size(); x++)
-                              if (pm.getServers().get(x).getParent().equals(pathMgr.getNodePath().get(n)))
-                                 for (int v = 0; v < service.getFunctions().size(); v++)
-                                    if (initialPlacement[x][s][v] && !fXSVvar[x][s][v]) {
-                                       double migrationDelay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
-                                       if (migrationDelay > maxMigrationDelay)
-                                          maxMigrationDelay = migrationDelay;
-                                    }
+                     // add migration delay
+                     double maxMigrationDelay = 0;
+                     for (int q = 0; q < service.getTrafficFlow().getPaths().size(); q++) {
+                        Path pathMgr = service.getTrafficFlow().getPaths().get(q);
+                        if (initialPlacement != null)
+                           for (int n = 0; n < pathMgr.getNodePath().size(); n++)
+                              for (int x = 0; x < pm.getServers().size(); x++)
+                                 if (pm.getServers().get(x).getParent().equals(pathMgr.getNodePath().get(n)))
+                                    for (int v = 0; v < service.getFunctions().size(); v++)
+                                       if (initialPlacement[x][s][v] && !fXSVvar[x][s][v]) {
+                                          double migrationDelay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
+                                          if (migrationDelay > maxMigrationDelay)
+                                             maxMigrationDelay = migrationDelay;
+                                       }
+                     }
+                     endToEndDelay += maxMigrationDelay;
+
+                     // print total end to end delay
+                     endToEndDelay = Auxiliary.roundDouble(endToEndDelay, 3);
+                     strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
+                             + pm.getServices().get(s).getId() + "]"
+                             + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
+                             + "[" + endToEndDelay + "]");
+                     serviceDelayList.add(endToEndDelay);
                   }
-                  endToEndDelay += maxMigrationDelay;
-
-                  // print total end to end delay
-                  endToEndDelay = Auxiliary.roundDouble(endToEndDelay, 3);
-                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
-                          + pm.getServices().get(s).getId() + "]"
-                          + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                          + "[" + endToEndDelay + "]");
-                  serviceDelayList.add(endToEndDelay);
-               }
          }
       }
       variables.put(dSPD, strings);
@@ -284,8 +285,9 @@ public class Results {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (var2[s][p][d])
-                     serviceTypesList.add(pm.getServices().get(s).getId());
+                  if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                     if (var2[s][p][d])
+                        serviceTypesList.add(pm.getServices().get(s).getId());
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }
@@ -372,12 +374,13 @@ public class Results {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (var[s][p][d])
-                     strings.add("(" + (s + this.offset) + "," + (p + this.offset) + ","
-                             + (d + this.offset) + "): ["
-                             + pm.getServices().get(s).getId() + "]"
-                             + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
-                             + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
+                  if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                     if (var[s][p][d])
+                        strings.add("(" + (s + this.offset) + "," + (p + this.offset) + ","
+                                + (d + this.offset) + "): ["
+                                + pm.getServices().get(s).getId() + "]"
+                                + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
+                                + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
          variables.put(zSPD, strings);
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
@@ -411,13 +414,14 @@ public class Results {
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                     if (var[x][s][v][d])
-                        strings.add("(" + (x + this.offset) + "," + (s + this.offset)
-                                + "," + (v + this.offset) + "," + (d + this.offset) + "): ["
-                                + pm.getServers().get(x).getId() + "]["
-                                + pm.getServices().get(s).getId() + "]["
-                                + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
-                                + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
+                     if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                        if (var[x][s][v][d])
+                           strings.add("(" + (x + this.offset) + "," + (s + this.offset)
+                                   + "," + (v + this.offset) + "," + (d + this.offset) + "): ["
+                                   + pm.getServers().get(x).getId() + "]["
+                                   + pm.getServices().get(s).getId() + "]["
+                                   + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
+                                   + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
          variables.put(fXSVD, strings);
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
@@ -527,7 +531,8 @@ public class Results {
                for (int x = 0; x < pm.getServers().size(); x++) {
                   boolean isUsed = false;
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                     if (placementVar[x][s][v][d]) isUsed = true;
+                     if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                        if (placementVar[x][s][v][d]) isUsed = true;
                   if (processDelayVar[s][v][x] > 0 && isUsed)
                      strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (x + this.offset) + "): ["
                              + pm.getServers().get(x).getId() + "]["

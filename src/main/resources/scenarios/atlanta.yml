@@ -5,7 +5,8 @@ aux: {
   "scaling_x": 8000.0,
   "scaling_y": 8000.0,
   "server_dimensioning_capacity": 1000,
-  "overprovisioning_server_capacity": 1.0
+  "overprovisioning_server_capacity": 1.0,
+  "initial_traffic_load": 0.5
 }
 # service definitions
 serviceChains:
@@ -60,9 +61,9 @@ functionTypes:
     }
 # traffic flow definitions
 trafficFlows:
-  - minDem: 1
-    maxDem: 1
-    minBw: 400
-    maxBw: 400
+  - minDem: 4
+    maxDem: 4
+    minBw: 200
+    maxBw: 200
     src: "n1"
     dst: "n9"

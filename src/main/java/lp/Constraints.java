@@ -19,7 +19,7 @@ public class Constraints {
    private Variables vars;
    private Parameters pm;
 
-   public Constraints(Parameters pm, OptimizationModel model, Scenario scenario, GRBModel initialModel) {
+   public Constraints(Parameters pm, OptimizationModel model, Scenario scenario, GRBModel initialPlacement) {
       try {
          this.pm = pm;
          this.model = model;
@@ -29,8 +29,8 @@ public class Constraints {
          GRBLinExpr[] serverLoadExpr = createServerLoadExpr();
          // Generate constraints
          new GeneralConstraints(pm, model, scenario);
-         new AdditionalConstraints(pm, model, scenario, initialModel, linkLoadExpr);
-         new ModelSpecificConstraints(pm, model, scenario, initialModel);
+         new AdditionalConstraints(pm, model, scenario, initialPlacement, linkLoadExpr);
+         new ModelSpecificConstraints(pm, model, scenario, initialPlacement);
          new ExtraConstraints(pm, model, scenario);
          // create link and server utilization expressions
          GRBLinExpr[] luExpr = createLinkUtilizationExpr(linkLoadExpr);
@@ -65,7 +65,8 @@ public class Constraints {
                if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
                   continue;
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  expr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.zSPD[s][p][d]);
+                  if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                     expr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.zSPD[s][p][d]);
             }
          expressions[l] = expr;
       }
@@ -80,8 +81,9 @@ public class Constraints {
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                Function function = pm.getServices().get(s).getFunctions().get(v);
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  expr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
-                          * (double) function.getAttribute(FUNCTION_LOAD_RATIO)), vars.fXSVD[x][s][v][d]);
+                  if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                     expr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                             * (double) function.getAttribute(FUNCTION_LOAD_RATIO)), vars.fXSVD[x][s][v][d]);
                expr.addTerm((int) function.getAttribute(FUNCTION_OVERHEAD), vars.fXSV[x][s][v]);
             }
          expressions[x] = expr;

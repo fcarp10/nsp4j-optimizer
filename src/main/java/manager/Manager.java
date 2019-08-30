@@ -7,22 +7,23 @@ import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBModel;
-import learning.LearningModel;
 import lp.Constraints;
 import lp.OptimizationModel;
 import lp.Variables;
+import manager.elements.TrafficFlow;
 import org.apache.commons.io.FilenameUtils;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import output.Auxiliary;
-import output.Definitions;
 import output.Results;
 import output.ResultsManager;
 import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
+
+import java.util.ArrayList;
 
 import static output.Auxiliary.printLog;
 import static output.Definitions.*;
@@ -32,6 +33,21 @@ public class Manager {
    private static final Logger log = LoggerFactory.getLogger(Manager.class);
    private static Parameters pm;
    private static boolean interrupted;
+
+   public static void loadTopology(String fileName) {
+      String path = getResourcePath(fileName);
+      if (path != null)
+         try {
+            printLog(log, INFO, "loading topology");
+            pm = ConfigFiles.readParameters(path, fileName + ".yml");
+            pm.initialize(path);
+            checkTopologyScale();
+            WebServer.initialize(pm);
+            printLog(log, INFO, "topology loaded");
+         } catch (Exception e) {
+            printLog(log, ERROR, "input parameters");
+         }
+   }
 
    private static String getResourcePath(String fileName) {
       try {
@@ -43,19 +59,6 @@ public class Manager {
       } catch (Exception e) {
          printLog(log, ERROR, "input file not found");
          return null;
-      }
-   }
-
-   private static void readParameters(String pathFile, String fileName) {
-      try {
-         printLog(log, INFO, "loading topology");
-         pm = ConfigFiles.readParameters(pathFile, fileName + ".yml");
-         pm.initialize(pathFile);
-         checkTopologyScale();
-         WebServer.initialize(pm);
-         printLog(log, INFO, "topology loaded");
-      } catch (Exception e) {
-         printLog(log, ERROR, "input parameters");
       }
    }
 
@@ -74,10 +77,18 @@ public class Manager {
       }
    }
 
-   public static void loadTopology(String fileName) {
-      String path = getResourcePath(fileName);
-      if (path != null)
-         readParameters(path, fileName);
+   private static void specifyUsedTrafficDemands(boolean isInitialPlacement) {
+      for (TrafficFlow trafficFlow : pm.getTrafficFlows()) {
+         trafficFlow.getAux().clear();
+         for (int d = 0; d < trafficFlow.getDemands().size(); d++)
+            trafficFlow.getAux().add(true);
+         if (isInitialPlacement) {
+            double initialTrafficLoad = (double) pm.getAux().get(INITIAL_TRAFFIC_LOAD);
+            int index = (int) (trafficFlow.getDemands().size() * initialTrafficLoad);
+            for (int d = index; d < trafficFlow.getDemands().size(); d++)
+               trafficFlow.getAux().set(d, false);
+         }
+      }
    }
 
    public static GRBModel start(Scenario sce, GRBModel initialModel) {
@@ -90,9 +101,11 @@ public class Manager {
          printLog(log, INFO, "initializing " + sce.getModel());
          switch (sce.getModel()) {
             case INITIAL_PLACEMENT:
+               specifyUsedTrafficDemands(true);
                initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjectiveFunction(), resultsManager, null);
                break;
             default:
+               specifyUsedTrafficDemands(false);
                runLP(sce.getModel(), sce, sce.getObjectiveFunction(), resultsManager, initialModel);
                break;
          }
@@ -147,16 +160,6 @@ public class Manager {
       return model.getGrbModel();
    }
 
-   private static void runRL(Scenario scenario, ResultsManager resultsManager, GRBModel initialModel, GRBModel mgrRepModel) throws GRBException {
-      String resultsFileName = pm.getScenario() + "_" + scenario.getModel();
-      LearningModel learningModel = new LearningModel(pm);
-      printLog(log, INFO, "running RL model");
-      learningModel.run(initialModel, Auxiliary.roundDouble(mgrRepModel.get(GRB.DoubleAttr.ObjVal), 4), mgrRepModel);
-      Results results = generateResultsForRL(learningModel, scenario, initialModel);
-      resultsManager.exportJsonFile(resultsFileName, results);
-      WebClient.updateResultsToWebApp(results);
-   }
-
    private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, Scenario scenario, String objectiveFunction, GRBModel initialPlacement) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       String[] weights = scenario.getWeights().split("-");
@@ -183,7 +186,7 @@ public class Manager {
             expr.add(model.linkCostsExpr(1.0));
             expr.add(model.serverCostsExpr(1.0));
             if (initialPlacement != null)
-               expr.add(model.numOfMigrations(0.0 , initialPlacement));
+               expr.add(model.numOfMigrations(0.0, initialPlacement));
             else printLog(log, WARNING, "no init. placement");
             break;
          case UTILIZATION_OBJ:
@@ -231,17 +234,6 @@ public class Manager {
          results.setVariable(ySVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().ySVX));
       }
       results.initializeResults(optModel.getObjVal(), convertInitialPlacement(initialModel));
-      return results;
-   }
-
-   private static Results generateResultsForRL(LearningModel learningModel, Scenario scenario, GRBModel initialModel) throws GRBException {
-      Results results = new Results(pm, scenario);
-      results.setVariable(zSPD, learningModel.getzSPD());
-      results.setVariable(fXSV, learningModel.getfXSV());
-      results.setVariable(fXSVD, learningModel.getfXSVD());
-      results.setVariable(uL, learningModel.getuL());
-      results.setVariable(uX, learningModel.getuX());
-      results.initializeResults(learningModel.getObjVal(), convertInitialPlacement(initialModel));
       return results;
    }
 

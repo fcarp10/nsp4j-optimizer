@@ -14,7 +14,6 @@ public class Definitions {
    public static final String MIGRATION = "mgr";
    public static final String REPLICATION = "rep";
    public static final String MIGRATION_REPLICATION = "mgrep";
-
    // logs and messages
    public static final String ERROR = "Error: ";
    public static final String INFO = "Info: ";
@@ -89,4 +88,5 @@ public class Definitions {
    // Aux parameters
    public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
    public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
+   public static final String INITIAL_TRAFFIC_LOAD = "initial_traffic_load";
 }
