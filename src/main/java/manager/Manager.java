@@ -11,7 +11,6 @@ import lp.Constraints;
 import lp.Model;
 import lp.Variables;
 import manager.elements.TrafficFlow;
-import org.apache.commons.io.FilenameUtils;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
@@ -22,6 +21,8 @@ import output.ResultsManager;
 import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
+
+import java.io.File;
 
 import static output.Auxiliary.printLog;
 import static output.Definitions.*;
@@ -49,10 +50,14 @@ public class Manager {
 
    private static String getResourcePath(String fileName) {
       try {
-         String path = FilenameUtils.getPath(Manager.class.getClassLoader()
+         File file = new File(Manager.class.getClassLoader()
                  .getResource("scenarios/" + fileName + ".yml").getFile());
+         String absolutePath = file.getAbsolutePath();
+         String path = absolutePath.substring(0, absolutePath.lastIndexOf(File.separator));
          if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
-            path = "/" + path;
+            path = path + "/";
+         else
+            path = path + "\\";
          return path;
       } catch (Exception e) {
          printLog(log, ERROR, "input file not found");
@@ -219,11 +224,11 @@ public class Manager {
       results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optModel.getVariables().fXSV));
       results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optModel.getVariables().fXSVD));
       // additional variables
-      if (scenario.getConstraints().get(ST)) {
+      if (scenario.getConstraints().get(SYNC_TRAFFIC)) {
          results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optModel.getVariables().gSVXY));
          results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optModel.getVariables().hSVP));
       }
-      if (scenario.getConstraints().get(SD)) {
+      if (scenario.getConstraints().get(SERV_DELAY)) {
          results.setVariable(dSVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVX));
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVXD));
          results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVariables().mS));

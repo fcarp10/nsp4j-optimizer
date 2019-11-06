@@ -41,20 +41,20 @@ public class Definitions {
    public static final String RP2 = "RP2";
    public static final String PF1 = "PF1";
    public static final String PF2 = "PF2";
+   public static final String PF3 = "PF3";
    public static final String FD1 = "FD1";
    public static final String FD2 = "FD2";
    public static final String FD3 = "FD3";
    // additional constraints
-   public static final String ST = "ST";
-   public static final String SD = "SD";
-   // model specific constraints
-   public static final String NUM_SERVERS = "num_servers";
+   public static final String SYNC_TRAFFIC = "sync_traffic";
+   public static final String SERV_DELAY = "serv_delay";
+   public static final String ONLY_CLOUD = "only_cloud";
+   public static final String ONLY_EDGE = "only_edge";
+   // other constraints
    public static final String SINGLE_PATH = "single_path";
-   public static final String FIX_INIT_PLC = "fix_init_plc";
-   // extra constraints
+   public static final String SET_INIT_PLC = "set_init_plc";
+   public static final String FORCE_SRC_DST = "force_src_dst";
    public static final String CONST_REP = "const_rep";
-   public static final String FIX_SRC_DST = "fix_src_dst";
-   public static final String USE_CLOUD = "use_cloud";
    // service parameters
    public static final String SERVICE_MIN_PATHS = "min_paths";
    public static final String SERVICE_MAX_PATHS = "max_paths";
@@ -90,4 +90,5 @@ public class Definitions {
    public static final String LINK_CLOUD_COLOR = "LightGray";
    public static final String X_SCALING = "x_scaling";
    public static final String Y_SCALING = "y_scaling";
+   public static final int MAX_NUM_SERVERS = 12;
 }

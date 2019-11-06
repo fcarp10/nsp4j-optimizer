@@ -22,27 +22,29 @@ public class AdditionalConstraints {
          this.pm = pm;
          this.model = model;
          this.vars = model.getVariables();
-         if (scenario.getConstraints().get(ST)) ST(linkLoadExpr);
-         if (scenario.getConstraints().get(SD)) SD(initialModel);
+         if (scenario.getConstraints().get(SYNC_TRAFFIC)) SyncTraffic(linkLoadExpr);
+         if (scenario.getConstraints().get(SERV_DELAY)) ServDelay(initialModel);
+         if (scenario.getConstraints().get(ONLY_CLOUD)) useOnlyCloudServers();
+         if (scenario.getConstraints().get(ONLY_EDGE)) useOnlyEdgeServers();
       } catch (Exception e) {
          e.printStackTrace();
       }
    }
 
    // synchronization traffic
-   private void ST(GRBLinExpr[] linkLoadExpr) throws GRBException {
+   private void SyncTraffic(GRBLinExpr[] linkLoadExpr) throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int y = 0; y < pm.getServers().size(); y++) {
                   if (pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent())) continue;
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[x][s][v], ST);
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[y][s][v], ST);
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[x][s][v], SYNC_TRAFFIC);
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[y][s][v], SYNC_TRAFFIC);
                   GRBLinExpr expr = new GRBLinExpr();
                   expr.addTerm(1.0, vars.fXSV[x][s][v]);
                   expr.addTerm(1.0, vars.fXSV[y][s][v]);
                   expr.addConstant(-1.0);
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, ST);
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, SYNC_TRAFFIC);
                   expr = new GRBLinExpr();
                   for (int p = 0; p < pm.getPaths().size(); p++) {
                      Path pa = pm.getPaths().get(p);
@@ -51,8 +53,8 @@ public class AdditionalConstraints {
                              .equals(pm.getServers().get(y).getParent()))
                         expr.addTerm(1.0, vars.hSVP[s][v][p]);
                   }
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, expr, ST);
-                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, ST);
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, expr, SYNC_TRAFFIC);
+                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, SYNC_TRAFFIC);
                }
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -72,7 +74,7 @@ public class AdditionalConstraints {
                         if (pm.getServers().get(x).getParent().equals(pm.getNodes().get(n))
                                 && pm.getServers().get(y).getParent().equals(pm.getNodes().get(m)))
                            expr2.addTerm(1.0, vars.gSVXY[s][v][x][y]);
-                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, ST);
+                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, SYNC_TRAFFIC);
                }
       for (int l = 0; l < pm.getLinks().size(); l++) {
          GRBLinExpr expr = new GRBLinExpr();
@@ -94,7 +96,7 @@ public class AdditionalConstraints {
    }
 
    // service delay
-   private void SD(GRBModel initialModel) throws GRBException {
+   private void ServDelay(GRBModel initialModel) throws GRBException {
       int bigM = 10000000;
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
@@ -143,7 +145,7 @@ public class AdditionalConstraints {
                totalDelayExpr.add(linkDelayExpr(s, p)); // adds propagation delay
                if (initialModel != null)
                   totalDelayExpr.add(migrationDelayExpr(initialModel, s, d, p)); // adds migration delay
-               String constrName = SD + "[s][p][d] --> " + "[" + s + "]"
+               String constrName = SERV_DELAY + "[s][p][d] --> " + "[" + s + "]"
                        + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "[" + d + "]";
                model.getGrbModel().addConstr(totalDelayExpr, GRB.LESS_EQUAL, pathDelayExpr, constrName);
             }
@@ -176,5 +178,19 @@ public class AdditionalConstraints {
       GRBLinExpr linExpr = new GRBLinExpr();
       linExpr.addTerm(1.0, vars.mS[s]);
       return linExpr;
+   }
+
+   // use only cloud servers
+   private void useOnlyCloudServers() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null)
+            model.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, SERVER_DIMENSIONING);
+   }
+
+   // use only edge servers
+   private void useOnlyEdgeServers() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+            model.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, SERVER_DIMENSIONING);
    }
 }

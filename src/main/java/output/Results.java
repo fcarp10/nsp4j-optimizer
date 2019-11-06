@@ -125,12 +125,12 @@ public class Results {
       zSPD(); // binary, routing per demand
       fXSV(); // binary, placement per server
       fXSVD(); // binary, placement per demand
-      if (scenario.getConstraints().get(ST)) {
+      if (scenario.getConstraints().get(SYNC_TRAFFIC)) {
          gSVXY(); // binary, aux synchronization traffic
          hSVP(); // binary, traffic synchronization
          synchronizationTraffic = Auxiliary.roundDouble(synchronizationTraffic(), 2);
       }
-      if (scenario.getConstraints().get(SD)) {
+      if (scenario.getConstraints().get(SERV_DELAY)) {
          sd = serviceDelayList(initialPlacement);
          st = serviceTypes();
          setSummaryResults(sdSummary, sd);
@@ -192,8 +192,7 @@ public class Results {
       try {
          double[] var = (double[]) rawVariables.get(uX);
          for (int x = 0; x < pm.getServers().size(); x++)
-            if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null)
-               serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(var[x], 2));
+            serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(var[x], 2));
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }

@@ -3,9 +3,8 @@ package lp;
 import gui.elements.Scenario;
 import gurobi.*;
 import lp.constraints.AdditionalConstraints;
-import lp.constraints.ExtraConstraints;
 import lp.constraints.GeneralConstraints;
-import lp.constraints.ModelSpecificConstraints;
+import lp.constraints.OtherConstraints;
 import manager.Parameters;
 import manager.elements.Function;
 import output.Auxiliary;
@@ -30,8 +29,7 @@ public class Constraints {
          // Generate constraints
          new GeneralConstraints(pm, model, scenario);
          new AdditionalConstraints(pm, model, scenario, initialPlacement, linkLoadExpr);
-         new ModelSpecificConstraints(pm, model, scenario, initialPlacement);
-         new ExtraConstraints(pm, model, scenario);
+         new OtherConstraints(pm, model, scenario, initialPlacement);
          // create link and server utilization expressions
          GRBLinExpr[] luExpr = createLinkUtilizationExpr(linkLoadExpr);
          GRBLinExpr[] xuExpr = createServerUtilizationExpr(serverLoadExpr);

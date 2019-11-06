@@ -159,29 +159,21 @@ function generatePaths() {
 function check(elem) {
     var model = document.getElementById("model").value;
     if (model === "dimensioning") {
-            document.getElementById("num_servers").checked = false;
-            document.getElementById("single_path").checked = true;
-            document.getElementById("fix_init_plc").checked = false;
-        }
-    if (model === "init") {
-        document.getElementById("num_servers").checked = true;
-        document.getElementById("single_path").checked = true;
-        document.getElementById("fix_init_plc").checked = false;
+        document.getElementById("PF3").checked = false;
+    } else {
+        document.getElementById("PF3").checked = true;
     }
-    else if (model === "mgr") {
-        document.getElementById("num_servers").checked = false;
-        document.getElementById("single_path").checked = true;
-        document.getElementById("fix_init_plc").checked = false;
+    if (model === "dimensioning" || model === "init" || model === "mgr") {
+        document.getElementById("single-path").checked = true;
+        document.getElementById("fix-init-plc").checked = false;
     }
-    else if (model === "rep") {
-        document.getElementById("num_servers").checked = false;
-        document.getElementById("single_path").checked = false;
-        document.getElementById("fix_init_plc").checked = true;
+    if (model === "rep") {
+        document.getElementById("single-path").checked = false;
+        document.getElementById("fix-init-plc").checked = true;
     }
-    else if (model === "mgrep") {
-        document.getElementById("num_servers").checked = false;
-        document.getElementById("single_path").checked = false;
-        document.getElementById("fix_init_plc").checked = false;
+    if (model === "mgrep") {
+        document.getElementById("single-path").checked = false;
+        document.getElementById("fix-init-plc").checked = false;
     }
 }
 
@@ -196,26 +188,26 @@ function generateScenario() {
     var maximization = $("#max").is(":checked");
     var weights = parseFloat(document.getElementById("lu").value).toFixed(1) + "-" + parseFloat(document.getElementById("xu").value).toFixed(1) + "-" + parseFloat(document.getElementById("maxU").value).toFixed(1);
     var model = document.getElementById("model").value;
-    // general constraints
+    // general
     var RP1 = $("#RP1").is(":checked");
     var RP2 = $("#RP2").is(":checked");
     var PF1 = $("#PF1").is(":checked");
     var PF2 = $("#PF2").is(":checked");
+    var PF3 = $("#PF3").is(":checked");
     var FD1 = $("#FD1").is(":checked");
     var FD2 = $("#FD2").is(":checked");
     var FD3 = $("#FD3").is(":checked");
     var FD4 = $("#FD4").is(":checked");
-    // additional constraints
-    var ST = $("#ST").is(":checked");
-    var SD = $("#SD").is(":checked");
-    // specific constraints
-    var num_servers = $("#num_servers").is(":checked");
-    var single_path = $("#single_path").is(":checked");
-    var fix_init_plc = $("#fix_init_plc").is(":checked");
-    // extra constraints
-    var const_rep = $("#const_rep").is(":checked");
-    var fix_src_dst = $("#fix_src_dst").is(":checked");
-    var use_cloud = $("#use_cloud").is(":checked");
+    // additional
+    var sync_traffic = $("#sync-traffic").is(":checked");
+    var serv_delay = $("#serv-delay").is(":checked");
+    var only_cloud = $("#only-cloud").is(":checked");
+    var only_edge = $("#only-edge").is(":checked");
+    // other
+    var single_path = $("#single-path").is(":checked");
+    var set_init_plc = $("#set-init-plc").is(":checked");
+    var force_src_dst = $("#force-src-dst").is(":checked");
+    var const_rep = $("#const-rep").is(":checked");
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
         objectiveFunction: objectiveFunction,
@@ -223,26 +215,26 @@ function generateScenario() {
         weights: weights,
         model: model,
         constraints: {
-            // general constraints
+            // general
             RP1: RP1,
             RP2: RP2,
             PF1: PF1,
             PF2: PF2,
+            PF3: PF3,
             FD1: FD1,
             FD2: FD2,
             FD3: FD3,
             FD4: FD4,
-            // additional constraints
-            ST: ST,
-            SD: SD,
-            // specific constraints
-            num_servers: num_servers,
+            // additional
+            sync_traffic: sync_traffic,
+            serv_delay: serv_delay,
+            only_cloud: only_cloud,
+            only_edge: only_edge,
+            // other
             single_path: single_path,
-            fix_init_plc: fix_init_plc,
-            // extra constraints
-            const_rep: const_rep,
-            fix_src_dst: fix_src_dst,
-            use_cloud: use_cloud
+            set_init_plc: set_init_plc,
+            force_src_dst: force_src_dst,
+            const_rep: const_rep
         }
     });
     return scenario;

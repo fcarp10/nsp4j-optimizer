@@ -43,7 +43,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="form-group">
-                        <label>Objective function</label>
+                        <h5>Objective Function</h5>
                         <select class="form-control custom-select my-1 mr-sm-2" id="objectiveFunction">
                             <option value="dimensioning">dimensioning</option>
                             <option value="num_servers">num-servers</option>
@@ -81,7 +81,12 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-6">
+                <div class="col-12">
+                    <h5>Constraints</h5>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
                     <div class="form-group">
                         <label>General</label>
                         <label class="check ">RP1
@@ -100,6 +105,10 @@
                             <input type="checkbox" id="PF2" checked>
                             <span class="checkmark"></span>
                         </label>
+                        <label class="check ">PF3
+                            <input type="checkbox" id="PF3" checked>
+                            <span class="checkmark"></span>
+                        </label>
                         <label class="check ">FD1
                             <input type="checkbox" id="FD1" checked>
                             <span class="checkmark"></span>
@@ -112,43 +121,42 @@
                             <input type="checkbox" id="FD3" checked>
                             <span class="checkmark"></span>
                         </label>
-                        <label>Additional</label>
-                        <label class="check ">ST
-                            <input type="checkbox" id="ST">
-                            <span class="checkmark"></span>
-                        </label>
-                        <label class="check ">SD
-                            <input type="checkbox" id="SD">
-                            <span class="checkmark"></span>
-                        </label>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-8">
                     <div class="form-group">
-                        <label>Specific</label>
-                        <label class="check ">num_servers
-                            <input type="checkbox" id="num_servers">
+                        <label>Additional</label>
+                        <label class="check ">sync-traffic
+                            <input type="checkbox" id="sync-traffic">
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">single_path
-                            <input type="checkbox" id="single_path" checked>
+                        <label class="check ">serv-delay
+                            <input type="checkbox" id="serv-delay">
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">fix_init_plc
-                            <input type="checkbox" id="fix_init_plc">
+                        <label class="check ">only-cloud
+                            <input type="checkbox" id="only-cloud">
                             <span class="checkmark"></span>
                         </label>
-                        <label>Extra</label>
-                        <label class="check ">const_rep
-                            <input type="checkbox" id="const_rep">
+                        <label class="check ">only-edge
+                            <input type="checkbox" id="only-edge">
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">fix_src_dst
-                            <input type="checkbox" id="fix_src_dst">
+                        <label>Other</label>
+                        <label class="check ">single-path
+                            <input type="checkbox" id="single-path">
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">use_cloud
-                            <input type="checkbox" id="use_cloud">
+                        <label class="check ">set-init-plc
+                            <input type="checkbox" id="set-init-plc">
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">force-src-dst
+                            <input type="checkbox" id="force-src-dst">
+                            <span class="checkmark"></span>
+                        </label>
+                        <label class="check ">const-rep
+                            <input type="checkbox" id="const-rep">
                             <span class="checkmark"></span>
                         </label>
                     </div>
@@ -160,7 +168,7 @@
             <h4>Parameters</h4>
             <hr>
             <div class="form-group">
-                <label>Parameters file</label>
+                <label>Input file</label>
                 <input type="text" class="form-control my-1 mr-sm-2" id="inputFileName" placeholder="file name"
                        value="atlanta">
                 <div class="btn-group">

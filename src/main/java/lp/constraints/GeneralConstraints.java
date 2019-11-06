@@ -28,6 +28,7 @@ public class GeneralConstraints {
          if (scenario.getConstraints().get(RP2)) RP2();
          if (scenario.getConstraints().get(PF1)) PF1();
          if (scenario.getConstraints().get(PF2)) PF2();
+         if (scenario.getConstraints().get(PF3)) PF3();
          if (scenario.getConstraints().get(FD1)) FD1();
          if (scenario.getConstraints().get(FD2)) FD2();
          if (scenario.getConstraints().get(FD3)) FD3();
@@ -68,27 +69,6 @@ public class GeneralConstraints {
          }
    }
 
-//   private void RP2() throws GRBException {
-//      for (int s = 0; s < pm.getServices().size(); s++)
-//         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
-//            GRBLinExpr expr = new GRBLinExpr();
-//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-//               if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
-//                  expr.addTerm(1.0 / 10000000, vars.zSPD[s][p][d]);
-//            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.zSP[s][p], RP2 + "[s][p] --> "
-//                    + "[" + s + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
-//         }
-//      for (int s = 0; s < pm.getServices().size(); s++)
-//         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
-//            GRBLinExpr expr = new GRBLinExpr();
-//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-//               if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
-//                  expr.addTerm(1.0, vars.zSPD[s][p][d]);
-//            model.getGrbModel().addConstr(vars.zSP[s][p], GRB.LESS_EQUAL, expr, RP2 + "[s][p] --> "
-//                    + "[" + s + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
-//         }
-//   }
-
    // Paths constrained by functions
    private void PF1() throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++)
@@ -128,6 +108,22 @@ public class GeneralConstraints {
                              + "[" + d + "][" + v + "]");
                   }
       }
+   }
+
+   // Count number of used servers
+   private void PF3() throws GRBException {
+      if (vars.fX != null)
+         for (int x = 0; x < pm.getServers().size(); x++) {
+            GRBLinExpr expr = new GRBLinExpr();
+            GRBLinExpr expr2 = new GRBLinExpr();
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                  expr.addTerm(1.0 / pm.getTotalNumFunctions(), vars.fXSV[x][s][v]);
+                  expr2.addTerm(1.0, vars.fXSV[x][s][v]);
+               }
+            model.getGrbModel().addConstr(vars.fX[x], GRB.GREATER_EQUAL, expr, PF3);
+            model.getGrbModel().addConstr(vars.fX[x], GRB.LESS_EQUAL, expr2, PF3);
+         }
    }
 
    // One function per demand
@@ -198,4 +194,6 @@ public class GeneralConstraints {
             }
       }
    }
+
+
 }
