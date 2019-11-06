@@ -15,11 +15,11 @@ import static output.Definitions.*;
 
 public class Constraints {
 
-   private OptimizationModel model;
+   private Model model;
    private Variables vars;
    private Parameters pm;
 
-   public Constraints(Parameters pm, OptimizationModel model, Scenario scenario, GRBModel initialPlacement) {
+   public Constraints(Parameters pm, Model model, Scenario scenario, GRBModel initialPlacement) {
       try {
          this.pm = pm;
          this.model = model;

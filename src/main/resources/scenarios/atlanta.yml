@@ -2,8 +2,8 @@
 aux: {
   "gap": 0.0,
   "offset_results": 0,
-  "scaling_x": 8000.0,
-  "scaling_y": 8000.0,
+  "x_scaling": 8000.0,
+  "y_scaling": 8000.0,
   "server_dimensioning_capacity": 1000,
   "overprovisioning_server_capacity": 1.0,
   "initial_traffic_load": 0.5
@@ -61,9 +61,7 @@ functionTypes:
     }
 # traffic flow definitions
 trafficFlows:
-  - minDem: 4
-    maxDem: 4
-    minBw: 200
-    maxBw: 200
-    src: "n1"
-    dst: "n9"
+  - minDem: 1
+    maxDem: 5
+    minBw: 1
+    maxBw: 20

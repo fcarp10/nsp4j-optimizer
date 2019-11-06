@@ -4,7 +4,7 @@ import gui.elements.Scenario;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
-import lp.OptimizationModel;
+import lp.Model;
 import lp.Variables;
 import manager.Parameters;
 import manager.elements.Service;
@@ -14,11 +14,11 @@ import static output.Definitions.*;
 
 public class GeneralConstraints {
 
-   private OptimizationModel model;
+   private Model model;
    private Variables vars;
    private Parameters pm;
 
-   public GeneralConstraints(Parameters pm, OptimizationModel model, Scenario scenario) {
+   public GeneralConstraints(Parameters pm, Model model, Scenario scenario) {
       this.pm = pm;
       this.model = model;
       this.vars = model.getVariables();
@@ -67,6 +67,27 @@ public class GeneralConstraints {
                     + "[" + s + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
          }
    }
+
+//   private void RP2() throws GRBException {
+//      for (int s = 0; s < pm.getServices().size(); s++)
+//         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+//            GRBLinExpr expr = new GRBLinExpr();
+//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+//               if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+//                  expr.addTerm(1.0 / 10000000, vars.zSPD[s][p][d]);
+//            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.zSP[s][p], RP2 + "[s][p] --> "
+//                    + "[" + s + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
+//         }
+//      for (int s = 0; s < pm.getServices().size(); s++)
+//         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+//            GRBLinExpr expr = new GRBLinExpr();
+//            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+//               if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+//                  expr.addTerm(1.0, vars.zSPD[s][p][d]);
+//            model.getGrbModel().addConstr(vars.zSP[s][p], GRB.LESS_EQUAL, expr, RP2 + "[s][p] --> "
+//                    + "[" + s + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
+//         }
+//   }
 
    // Paths constrained by functions
    private void PF1() throws GRBException {

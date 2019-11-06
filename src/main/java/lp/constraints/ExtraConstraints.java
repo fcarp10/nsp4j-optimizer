@@ -2,7 +2,7 @@ package lp.constraints;
 
 import gui.elements.Scenario;
 import gurobi.*;
-import lp.OptimizationModel;
+import lp.Model;
 import lp.Variables;
 import manager.Parameters;
 import org.graphstream.graph.Node;
@@ -12,11 +12,11 @@ import static output.Definitions.*;
 
 public class ExtraConstraints {
 
-   private OptimizationModel model;
+   private Model model;
    private Variables vars;
    private Parameters pm;
 
-   public ExtraConstraints(Parameters pm, OptimizationModel model, Scenario scenario) {
+   public ExtraConstraints(Parameters pm, Model model, Scenario scenario) {
       try {
          this.pm = pm;
          this.model = model;

@@ -1,10 +1,10 @@
 DGS004
 test 0 0
 
-an n1 x:100 y:100 num_servers:1 server_capacity:500 process_delay:0
-an n2 x:150 y:50 num_servers:2 server_capacity:1000 process_delay:0
-an n3 x:150 y:150 num_servers:2 server_capacity:1000 process_delay:0
-an n4 x:200 y:100 num_servers:1 server_capacity:500 process_delay:0
+an n1 x:100.0 y:100.0 num_servers:1 server_capacity:500 process_delay:0
+an n2 x:150.0 y:50.0 num_servers:2 server_capacity:1000 process_delay:0
+an n3 x:150.0 y:150.0 num_servers:2 server_capacity:1000 process_delay:0
+an n4 x:200.0 y:100.0 num_servers:1 server_capacity:500 process_delay:0
 
 
 

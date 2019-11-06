@@ -10,19 +10,18 @@ import output.Auxiliary;
 import static output.Auxiliary.*;
 import static output.Definitions.*;
 
-public class OptimizationModel {
+public class Model {
 
-   private static final Logger log = LoggerFactory.getLogger(OptimizationModel.class);
+   private static final Logger log = LoggerFactory.getLogger(Model.class);
    private GRBModel grbModel;
-   private GRBEnv grbEnv;
    private Variables variables;
    private Parameters pm;
    private double objVal;
 
-   public OptimizationModel(Parameters pm) {
+   public Model(Parameters pm) {
       this.pm = pm;
       try {
-         grbEnv = new GRBEnv();
+         GRBEnv grbEnv = new GRBEnv();
          grbEnv.set(GRB.IntParam.LogToConsole, 0);
          grbModel = new GRBModel(grbEnv);
          Callback cb = new Callback();

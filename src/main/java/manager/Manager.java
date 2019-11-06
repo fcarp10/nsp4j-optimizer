@@ -8,7 +8,7 @@ import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBModel;
 import lp.Constraints;
-import lp.OptimizationModel;
+import lp.Model;
 import lp.Variables;
 import manager.elements.TrafficFlow;
 import org.apache.commons.io.FilenameUtils;
@@ -22,8 +22,6 @@ import output.ResultsManager;
 import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
-
-import java.util.ArrayList;
 
 import static output.Auxiliary.printLog;
 import static output.Definitions.*;
@@ -63,18 +61,18 @@ public class Manager {
    }
 
    private static void checkTopologyScale() {
-      double scalingX = (double) pm.getAux("scaling_x");
-      double scalingY = (double) pm.getAux("scaling_y");
-      if (scalingX != 1.0 || scalingY != 1.0) {
+      double scalingX = (double) pm.getAux(X_SCALING);
+      double scalingY = (double) pm.getAux(Y_SCALING);
+      if (scalingX != 1.0 || scalingY != 1.0)
          for (Node node : pm.getNodes()) {
-            double value = Math.round((double) node.getAttribute("y") * scalingY);
-            node.setAttribute("y", value);
+            String xAttr = "x", yAttr = "y";
+            if (node.getAttribute(NODE_CLOUD) != null) {
+               xAttr = "x_gui";
+               yAttr = "y_gui";
+            }
+            node.setAttribute(xAttr, (double) node.getAttribute(xAttr) * scalingX);
+            node.setAttribute(yAttr, (double) node.getAttribute(yAttr) * scalingY);
          }
-         for (Node node : pm.getNodes()) {
-            double value = Math.round((double) node.getAttribute("x") * scalingX);
-            node.setAttribute("x", value);
-         }
-      }
    }
 
    private static void specifyUsedTrafficDemands(boolean isInitialPlacement) {
@@ -85,8 +83,9 @@ public class Manager {
          if (isInitialPlacement) {
             double initialTrafficLoad = (double) pm.getAux().get(INITIAL_TRAFFIC_LOAD);
             int index = (int) (trafficFlow.getDemands().size() * initialTrafficLoad);
-            for (int d = index; d < trafficFlow.getDemands().size(); d++)
-               trafficFlow.getAux().set(d, false);
+            if (index > 1) //at least one traffic demand per traffic flow
+               for (int d = index; d < trafficFlow.getDemands().size(); d++)
+                  trafficFlow.getAux().set(d, false);
          }
       }
    }
@@ -99,15 +98,12 @@ public class Manager {
             initialModel = importedModel;
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
          printLog(log, INFO, "initializing " + sce.getModel());
-         switch (sce.getModel()) {
-            case INITIAL_PLACEMENT:
-               specifyUsedTrafficDemands(true);
-               initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjectiveFunction(), resultsManager, null);
-               break;
-            default:
-               specifyUsedTrafficDemands(false);
-               runLP(sce.getModel(), sce, sce.getObjectiveFunction(), resultsManager, initialModel);
-               break;
+         if (INITIAL_PLACEMENT.equals(sce.getModel())) {
+            specifyUsedTrafficDemands(true);
+            initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjectiveFunction(), resultsManager, null);
+         } else {
+            specifyUsedTrafficDemands(false);
+            runLP(sce.getModel(), sce, sce.getObjectiveFunction(), resultsManager, initialModel);
          }
          printLog(log, INFO, "ready");
       } catch (Exception e) {
@@ -138,7 +134,7 @@ public class Manager {
 
    private static GRBModel runLP(String modelName, Scenario scenario, String objectiveFunction, ResultsManager resultsManager, GRBModel initialModel) throws GRBException {
       GRBLinExpr expr;
-      OptimizationModel model = new OptimizationModel(pm);
+      Model model = new Model(pm);
       printLog(log, INFO, "setting variables");
       Variables variables = new Variables(pm, model.getGrbModel(), scenario);
       variables.initializeAdditionalVariables(pm, model.getGrbModel(), scenario);
@@ -160,7 +156,7 @@ public class Manager {
       return model.getGrbModel();
    }
 
-   private static GRBLinExpr generateExprForObjectiveFunction(OptimizationModel model, Scenario scenario, String objectiveFunction, GRBModel initialPlacement) throws GRBException {
+   private static GRBLinExpr generateExprForObjectiveFunction(Model model, Scenario scenario, String objectiveFunction, GRBModel initialPlacement) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       String[] weights = scenario.getWeights().split("-");
       double serversWeight, linksWeight;
@@ -206,7 +202,7 @@ public class Manager {
       return expr;
    }
 
-   private static Results generateResultsForLP(OptimizationModel optModel, Scenario scenario, GRBModel initialModel) throws GRBException {
+   private static Results generateResultsForLP(Model optModel, Scenario scenario, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, scenario);
       // objective variables
       results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModel.getVariables().uL));

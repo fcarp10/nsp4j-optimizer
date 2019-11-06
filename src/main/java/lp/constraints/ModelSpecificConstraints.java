@@ -2,7 +2,7 @@ package lp.constraints;
 
 import gui.elements.Scenario;
 import gurobi.*;
-import lp.OptimizationModel;
+import lp.Model;
 import lp.Variables;
 import manager.Parameters;
 
@@ -10,11 +10,11 @@ import static output.Definitions.*;
 
 public class ModelSpecificConstraints {
 
-   private OptimizationModel model;
+   private Model model;
    private Variables vars;
    private Parameters pm;
 
-   public ModelSpecificConstraints(Parameters pm, OptimizationModel model, Scenario scenario, GRBModel initialModel) {
+   public ModelSpecificConstraints(Parameters pm, Model model, Scenario scenario, GRBModel initialModel) {
       try {
          this.pm = pm;
          this.model = model;

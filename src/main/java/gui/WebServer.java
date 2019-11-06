@@ -20,8 +20,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static output.Definitions.LINK_CLOUD;
-import static output.Definitions.NODE_CLOUD;
+import static output.Definitions.*;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
@@ -47,22 +46,29 @@ public class WebServer {
       serverJsonMap = new HashMap<>();
       linkJsonMap = new HashMap<>();
       for (Node n : parameters.getNodes()) {
-         String color = "Gray";
-         String shape = "ellipse";
-         if (n.getAttribute(NODE_CLOUD) == null)
-            nodeList.add(new NodeJson(n.getId(), n.getAttribute("x"), n.getAttribute("y"), color, n.getId(), shape));
+         String xAttr = "x", yAttr = "y";
+         if (n.getAttribute(NODE_CLOUD) != null) {
+            xAttr = "x_gui";
+            yAttr = "y_gui";
+         }
+         nodeList.add(new NodeJson(n.getId(), n.getAttribute(xAttr), n.getAttribute(yAttr)
+                 , NODE_COLOR, n.getId(), NODE_SHAPE));
       }
       for (Server s : parameters.getServers()) {
-         String color = "Gray";
-         if (s.getParent().getAttribute(NODE_CLOUD) == null)
-            serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute("x")
-                    , s.getParent().getAttribute("y"), color, s.getId()));
+         String xAttr = "x", yAttr = "y";
+         if (s.getParent().getAttribute(NODE_CLOUD) != null) {
+            xAttr = "x_gui";
+            yAttr = "y_gui";
+         }
+         serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute(xAttr)
+                 , s.getParent().getAttribute(yAttr), SERVER_COLOR, s.getId()));
       }
       for (Edge e : parameters.getLinks()) {
-         String color = "Gray";
-         if (e.getAttribute(LINK_CLOUD) == null)
-            linkJsonMap.put(e.getId(), new LinkJson(e.getId(), e.getSourceNode().getId(), e.getTargetNode().getId()
-                    , "", color));
+         String color = LINK_COLOR;
+         if (e.getSourceNode().getAttribute(NODE_CLOUD) != null || e.getTargetNode().getAttribute(NODE_CLOUD) != null)
+            color = LINK_CLOUD_COLOR;
+         linkJsonMap.put(e.getId(), new LinkJson(e.getId(), e.getSourceNode().getId(), e.getTargetNode().getId()
+                 , "", color));
       }
    }
 

@@ -2,7 +2,7 @@ package lp.constraints;
 
 import gui.elements.Scenario;
 import gurobi.*;
-import lp.OptimizationModel;
+import lp.Model;
 import lp.Variables;
 import manager.Parameters;
 import manager.elements.Function;
@@ -13,11 +13,11 @@ import static output.Definitions.*;
 
 public class AdditionalConstraints {
 
-   private OptimizationModel model;
+   private Model model;
    private Variables vars;
    private Parameters pm;
 
-   public AdditionalConstraints(Parameters pm, OptimizationModel model, Scenario scenario, GRBModel initialModel, GRBLinExpr[] linkLoadExpr) {
+   public AdditionalConstraints(Parameters pm, Model model, Scenario scenario, GRBModel initialModel, GRBLinExpr[] linkLoadExpr) {
       try {
          this.pm = pm;
          this.model = model;

@@ -1,5 +1,7 @@
 package gui.elements;
 
+import static output.Definitions.SERVER_SHAPE;
+
 public class ServerJson extends NodeJson {
 
    public ServerJson(String id, double x, double y, String favecolor, String label) {
@@ -14,6 +16,6 @@ public class ServerJson extends NodeJson {
       else
          yS = y + (26 * 2);
       position = new Position(xS, yS);
-      data = new Data(id, favecolor, label, "rectangle", 20, 25);
+      data = new Data(id, favecolor, label, SERVER_SHAPE, 20, 25);
    }
 }

@@ -11,9 +11,6 @@ public class Definitions {
    // models
    public static final String SERVER_DIMENSIONING = "dimensioning";
    public static final String INITIAL_PLACEMENT = "init";
-   public static final String MIGRATION = "mgr";
-   public static final String REPLICATION = "rep";
-   public static final String MIGRATION_REPLICATION = "mgrep";
    // logs and messages
    public static final String ERROR = "Error: ";
    public static final String INFO = "Info: ";
@@ -80,13 +77,17 @@ public class Definitions {
    public static final String LINK_DELAY = "delay";
    public static final String LINK_DISTANCE = "distance";
    public static final String LINK_CLOUD = "link_cloud";
-   // DRL parameters
-   public static final String NUM_HIDDEN_LAYERS = "rl_num_hidden_layers";
-   public static final String EPSILON = "epsilon";
-   public static final String THRESHOLD = "threshold";
-   public static final String LEARNING_STEPS = "rl_learning_steps";
    // Aux parameters
    public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
    public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
    public static final String INITIAL_TRAFFIC_LOAD = "initial_traffic_load";
+   // GUI parameters
+   public static final String NODE_COLOR = "Gray";
+   public static final String NODE_SHAPE = "ellipse";
+   public static final String SERVER_COLOR = "Gray";
+   public static final String SERVER_SHAPE = "rectangle";
+   public static final String LINK_COLOR = "Gray";
+   public static final String LINK_CLOUD_COLOR = "LightGray";
+   public static final String X_SCALING = "x_scaling";
+   public static final String Y_SCALING = "y_scaling";
 }
