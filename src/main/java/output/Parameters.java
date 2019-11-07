@@ -1,6 +1,6 @@
 package output;
 
-public class Definitions {
+public class Parameters {
    // objective functions
    public static final String NUM_SERVERS_OBJ = "num_servers";
    public static final String NUM_SERVERS_COSTS_OBJ = "num_servers_and_costs";
@@ -48,8 +48,8 @@ public class Definitions {
    // additional constraints
    public static final String SYNC_TRAFFIC = "sync_traffic";
    public static final String SERV_DELAY = "serv_delay";
-   public static final String ONLY_CLOUD = "only_cloud";
-   public static final String ONLY_EDGE = "only_edge";
+   public static final String CLOUD_ONLY = "cloud_only";
+   public static final String EDGE_ONLY = "edge_only";
    // other constraints
    public static final String SINGLE_PATH = "single_path";
    public static final String SET_INIT_PLC = "set_init_plc";
@@ -90,5 +90,6 @@ public class Definitions {
    public static final String LINK_CLOUD_COLOR = "LightGray";
    public static final String X_SCALING = "x_scaling";
    public static final String Y_SCALING = "y_scaling";
-   public static final int MAX_NUM_SERVERS = 12;
+   public static final int MAX_NUM_SERVERS = 24;
+   public static final int PORT = 8080;
 }

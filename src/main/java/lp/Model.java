@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import output.Auxiliary;
 
-import static output.Auxiliary.*;
-import static output.Definitions.*;
+import static output.Auxiliary.printLog;
+import static output.Parameters.*;
 
 public class Model {
 
@@ -103,11 +103,14 @@ public class Model {
       return expr;
    }
 
-   public double run() throws GRBException {
+   public Double run() throws GRBException {
       grbModel.optimize();
-      if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL) {
+      if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL
+              || grbModel.get(GRB.IntAttr.Status) == GRB.Status.INTERRUPTED) {
          objVal = Auxiliary.roundDouble(grbModel.get(GRB.DoubleAttr.ObjVal), 4);
          printLog(log, INFO, "finished [" + objVal + "]");
+         if (objVal > 100000)
+            return null;
          return objVal;
       } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
          grbModel.computeIIS();
@@ -115,11 +118,9 @@ public class Model {
          printLog(log, ERROR, "model is infeasible");
       } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INF_OR_UNBD)
          printLog(log, ERROR, "solution is inf. or unbd.");
-      else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INTERRUPTED)
-         printLog(log, INFO, "optimization interrupted");
       else
          printLog(log, ERROR, "no solution [" + grbModel.get(GRB.IntAttr.Status) + "]");
-      return -1;
+      return null;
    }
 
    private void printISS() throws GRBException {
@@ -150,7 +151,6 @@ public class Model {
    }
 
    private class Callback extends GRBCallback {
-
       private boolean isPresolving = false;
       private double gap = Double.MAX_VALUE;
 
@@ -182,7 +182,7 @@ public class Model {
                }
             }
             if (Manager.isInterrupted())
-               abort();
+               grbModel.terminate();
          } catch (GRBException e) {
             e.printStackTrace();
          }

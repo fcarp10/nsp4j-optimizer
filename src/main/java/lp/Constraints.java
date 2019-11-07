@@ -1,24 +1,23 @@
 package lp;
 
-import gui.elements.Scenario;
+import gui.Scenario;
 import gurobi.*;
 import lp.constraints.AdditionalConstraints;
 import lp.constraints.GeneralConstraints;
 import lp.constraints.OtherConstraints;
-import manager.Parameters;
 import manager.elements.Function;
 import output.Auxiliary;
-import output.Definitions;
+import output.Parameters;
 
-import static output.Definitions.*;
+import static output.Parameters.*;
 
 public class Constraints {
 
    private Model model;
    private Variables vars;
-   private Parameters pm;
+   private manager.Parameters pm;
 
-   public Constraints(Parameters pm, Model model, Scenario scenario, GRBModel initialPlacement) {
+   public Constraints(manager.Parameters pm, Model model, Scenario scenario, GRBModel initialPlacement) {
       try {
          this.pm = pm;
          this.model = model;
@@ -121,9 +120,9 @@ public class Constraints {
 
    private void maxUtilization() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
-         model.getGrbModel().addConstr(vars.uX[x], GRB.LESS_EQUAL, vars.uMax, Definitions.uMax);
+         model.getGrbModel().addConstr(vars.uX[x], GRB.LESS_EQUAL, vars.uMax, Parameters.uMax);
       for (int l = 0; l < pm.getLinks().size(); l++)
-         model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, Definitions.uMax);
+         model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, Parameters.uMax);
    }
 
    private void dimensioning(GRBLinExpr[] serverLoadExpr) throws GRBException {

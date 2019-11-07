@@ -201,8 +201,8 @@ function generateScenario() {
     // additional
     var sync_traffic = $("#sync-traffic").is(":checked");
     var serv_delay = $("#serv-delay").is(":checked");
-    var only_cloud = $("#only-cloud").is(":checked");
-    var only_edge = $("#only-edge").is(":checked");
+    var cloud_only = $("#cloud-only").is(":checked");
+    var edge_only = $("#edge-only").is(":checked");
     // other
     var single_path = $("#single-path").is(":checked");
     var set_init_plc = $("#set-init-plc").is(":checked");
@@ -228,8 +228,8 @@ function generateScenario() {
             // additional
             sync_traffic: sync_traffic,
             serv_delay: serv_delay,
-            only_cloud: only_cloud,
-            only_edge: only_edge,
+            cloud_only: cloud_only,
+            edge_only: edge_only,
             // other
             single_path: single_path,
             set_init_plc: set_init_plc,

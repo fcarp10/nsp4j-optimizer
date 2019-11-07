@@ -1,8 +1,7 @@
 package manager;
 
-import gui.WebClient;
-import gui.WebServer;
-import gui.elements.Scenario;
+import gui.ResultsGUI;
+import gui.Scenario;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
@@ -25,7 +24,7 @@ import utils.KShortestPathGenerator;
 import java.io.File;
 
 import static output.Auxiliary.printLog;
-import static output.Definitions.*;
+import static output.Parameters.*;
 
 public class Manager {
 
@@ -41,7 +40,7 @@ public class Manager {
             pm = ConfigFiles.readParameters(path, fileName + ".yml");
             pm.initialize(path);
             checkTopologyScale();
-            WebServer.initialize(pm);
+            ResultsGUI.initialize(pm);
             printLog(log, INFO, "topology loaded");
          } catch (Exception e) {
             printLog(log, ERROR, "input parameters");
@@ -149,14 +148,14 @@ public class Manager {
       expr = generateExprForObjectiveFunction(model, scenario, objectiveFunction, initialModel);
       model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running LP model");
-      double objVal = model.run();
+      Double objVal = model.run();
       Results results;
-      if (objVal != -1) {
+      if (objVal != null) {
          results = generateResultsForLP(model, scenario, initialModel);
          resultsManager.exportJsonFile(generateFileName(scenario, modelName), results);
          if (modelName.equals(INITIAL_PLACEMENT))
             resultsManager.exportModel(model.getGrbModel(), scenario.getInputFileName());
-         WebClient.updateResultsToWebApp(results);
+         ResultsGUI.updateResults(results);
       }
       return model.getGrbModel();
    }

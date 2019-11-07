@@ -2,8 +2,8 @@ package output;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gui.elements.GraphData;
-import gui.elements.Scenario;
+import gui.GraphData;
+import gui.Scenario;
 import manager.Parameters;
 import manager.elements.Server;
 import manager.elements.Service;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static output.Auxiliary.printLog;
-import static output.Definitions.*;
+import static output.Parameters.*;
 
 public class Results {
    private transient static final Logger log = LoggerFactory.getLogger(Results.class);

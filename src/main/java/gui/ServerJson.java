@@ -1,13 +1,13 @@
-package gui.elements;
+package gui;
 
-import static output.Definitions.MAX_NUM_SERVERS;
-import static output.Definitions.SERVER_SHAPE;
+import static output.Parameters.MAX_NUM_SERVERS;
+import static output.Parameters.SERVER_SHAPE;
 
-public class ServerJson extends NodeJson {
+class ServerJson extends NodeJson {
 
-   public ServerJson(String id, double x, double y, String favecolor, String label) {
+   ServerJson(String id, double x, double y, String favecolor, String label) {
       double xS, yS = y + 11;
-      int index = Integer.valueOf(id.split("_")[1]);
+      int index = Integer.parseInt(id.split("_")[1]);
       if (index % 2 == 0)
          xS = x - 11;
       else

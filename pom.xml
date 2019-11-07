@@ -9,7 +9,7 @@
     <version>1.0.2</version>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>13</java.version>
         <nsp4j-api.version>0.6.6</nsp4j-api.version>
         <gurobi.version>8.0.0</gurobi.version>
         <sparkjava.version>2.7.2</sparkjava.version>
@@ -51,12 +51,6 @@
             <groupId>org.decimal4j</groupId>
             <artifactId>decimal4j</artifactId>
             <version>${decimal4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 

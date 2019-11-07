@@ -1,6 +1,6 @@
 package lp.constraints;
 
-import gui.elements.Scenario;
+import gui.Scenario;
 import gurobi.*;
 import lp.Model;
 import lp.Variables;
@@ -9,7 +9,7 @@ import manager.elements.Function;
 import manager.elements.Service;
 import org.graphstream.graph.Path;
 
-import static output.Definitions.*;
+import static output.Parameters.*;
 
 public class AdditionalConstraints {
 
@@ -24,8 +24,8 @@ public class AdditionalConstraints {
          this.vars = model.getVariables();
          if (scenario.getConstraints().get(SYNC_TRAFFIC)) SyncTraffic(linkLoadExpr);
          if (scenario.getConstraints().get(SERV_DELAY)) ServDelay(initialModel);
-         if (scenario.getConstraints().get(ONLY_CLOUD)) useOnlyCloudServers();
-         if (scenario.getConstraints().get(ONLY_EDGE)) useOnlyEdgeServers();
+         if (scenario.getConstraints().get(CLOUD_ONLY)) useOnlyCloudServers();
+         if (scenario.getConstraints().get(EDGE_ONLY)) useOnlyEdgeServers();
       } catch (Exception e) {
          e.printStackTrace();
       }

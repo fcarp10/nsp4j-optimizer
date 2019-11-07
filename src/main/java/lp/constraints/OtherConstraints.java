@@ -1,6 +1,6 @@
 package lp.constraints;
 
-import gui.elements.Scenario;
+import gui.Scenario;
 import gurobi.*;
 import lp.Model;
 import lp.Variables;
@@ -8,7 +8,7 @@ import manager.Parameters;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 
-import static output.Definitions.*;
+import static output.Parameters.*;
 
 public class OtherConstraints {
 

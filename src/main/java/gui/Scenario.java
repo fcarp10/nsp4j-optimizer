@@ -1,4 +1,4 @@
-package gui.elements;
+package gui;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

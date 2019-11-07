@@ -1,13 +1,12 @@
 package lp;
 
-import gui.elements.Scenario;
+import gui.Scenario;
 import gurobi.GRB;
 import gurobi.GRBModel;
 import gurobi.GRBVar;
-import manager.Parameters;
-import output.Definitions;
+import output.Parameters;
 
-import static output.Definitions.*;
+import static output.Parameters.*;
 
 public class Variables {
 
@@ -34,32 +33,32 @@ public class Variables {
    GRBVar[] kX; // server cost utilization
    GRBVar uMax; // max utilization
 
-   public Variables(Parameters pm, GRBModel model, Scenario scenario) {
+   public Variables(manager.Parameters pm, GRBModel model, Scenario scenario) {
       try {
          zSP = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                zSP[s][p] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                       , Definitions.zSP + "[" + s + "][" + p + "]");
+                       , Parameters.zSP + "[" + s + "][" + p + "]");
 
          zSPD = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   zSPD[s][p][d] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                          , Definitions.zSPD + "[" + s + "][" + p + "][" + d + "]");
+                          , Parameters.zSPD + "[" + s + "][" + p + "][" + d + "]");
 
          fX = new GRBVar[pm.getServers().size()];
          for (int x = 0; x < pm.getServers().size(); x++)
             this.fX[x] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                    , Definitions.fX + "[" + x + "]");
+                    , Parameters.fX + "[" + x + "]");
 
          fXSV = new GRBVar[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   fXSV[x][s][v] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                          , Definitions.fXSV + "[" + x + "][" + s + "][" + v + "]");
+                          , Parameters.fXSV + "[" + x + "][" + s + "][" + v + "]");
 
          fXSVD = new GRBVar[pm.getServers().size()][pm.getServices().size()]
                  [pm.getServiceLength()][pm.getDemandsTrafficFlow()];
@@ -68,46 +67,46 @@ public class Variables {
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                      fXSVD[x][s][v][d] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                             , Definitions.fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "]");
+                             , Parameters.fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "]");
 
          uL = new GRBVar[pm.getLinks().size()];
          for (int l = 0; l < pm.getLinks().size(); l++)
             uL[l] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
-                    , Definitions.uL + "[" + l + "]");
+                    , Parameters.uL + "[" + l + "]");
 
          uX = new GRBVar[pm.getServers().size()];
          for (int x = 0; x < pm.getServers().size(); x++)
             uX[x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
-                    , Definitions.uX + "[" + x + "]");
+                    , Parameters.uX + "[" + x + "]");
 
          kL = new GRBVar[pm.getLinks().size()];
          for (int l = 0; l < pm.getLinks().size(); l++)
             kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                    , Definitions.kL + "[" + l + "]");
+                    , Parameters.kL + "[" + l + "]");
 
          kX = new GRBVar[pm.getServers().size()];
          for (int x = 0; x < pm.getServers().size(); x++)
             kX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                    , Definitions.kX + "[" + x + "]");
+                    , Parameters.kX + "[" + x + "]");
 
          // if model is optimizing max utilization
          if (scenario.getObjectiveFunction().equals(MAX_UTILIZATION_OBJ)) {
             uMax = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
-                    , Definitions.uMax);
+                    , Parameters.uMax);
          }
          model.update();
       } catch (Exception ignored) {
       }
    }
 
-   public void initializeAdditionalVariables(Parameters pm, GRBModel model, Scenario scenario) {
+   public void initializeAdditionalVariables(manager.Parameters pm, GRBModel model, Scenario scenario) {
       try {
          // if model is dimensioning number of servers
          if (scenario.getObjectiveFunction().equals(SERVER_DIMENSIONING)) {
             xN = new GRBVar[pm.getNodes().size()];
             for (int n = 0; n < pm.getNodes().size(); n++)
                this.xN[n] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER
-                       , Definitions.xN + "[" + n + "]");
+                       , Parameters.xN + "[" + n + "]");
          }
          // if model is considering synchronization traffic
          if (scenario.getConstraints().get(SYNC_TRAFFIC)) {
@@ -119,14 +118,14 @@ public class Variables {
                      for (int y = 0; y < pm.getServers().size(); y++)
                         if (!pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent()))
                            gSVXY[s][v][x][y] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                                   , Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "]");
+                                   , Parameters.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "]");
 
             hSVP = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getPaths().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   for (int p = 0; p < pm.getPaths().size(); p++)
                      hSVP[s][v][p] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
-                             , Definitions.hSVP + "[" + s + "][" + v + "][" + p + "]");
+                             , Parameters.hSVP + "[" + s + "][" + v + "][" + p + "]");
          }
          // if model is considering delay constraints
          if (scenario.getConstraints().get(SERV_DELAY)) {
@@ -135,7 +134,7 @@ public class Variables {
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   for (int x = 0; x < pm.getServers().size(); x++)
                      dSVX[s][v][x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                             , Definitions.dSVX + "[" + s + "][" + v + "][" + x + "]");
+                             , Parameters.dSVX + "[" + s + "][" + v + "][" + x + "]");
 
             dSVXD = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm.getDemandsTrafficFlow()];
             for (int s = 0; s < pm.getServices().size(); s++)
@@ -143,18 +142,18 @@ public class Variables {
                   for (int x = 0; x < pm.getServers().size(); x++)
                      for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                         dSVXD[s][v][x][d] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                                , Definitions.dSVXD + "[" + s + "][" + v + "][" + x + "][" + d + "]");
+                                , Parameters.dSVXD + "[" + s + "][" + v + "][" + x + "][" + d + "]");
 
             mS = new GRBVar[pm.getServices().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
-               mS[s] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Definitions.mS + "[" + s + "]");
+               mS[s] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Parameters.mS + "[" + s + "]");
 
             ySVX = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   for (int x = 0; x < pm.getServers().size(); x++)
                      ySVX[s][v][x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
-                             , Definitions.ySVX + "[" + s + "][" + v + "][" + x + "]");
+                             , Parameters.ySVX + "[" + s + "][" + v + "][" + x + "]");
          }
          model.update();
       } catch (Exception ignored) {

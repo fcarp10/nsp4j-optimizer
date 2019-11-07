@@ -1,4 +1,4 @@
-package gui.elements;
+package gui;
 
 public class LinkJson {
 
