@@ -44,14 +44,15 @@
                 <div class="col-12">
                     <div class="form-group">
                         <h5>Objective Function</h5>
-                        <select class="form-control custom-select my-1 mr-sm-2" id="objectiveFunction">
+                        <select class="form-control custom-select my-1 mr-sm-2" id="objFunc" onChange="checkObjFunc(this);">
                             <option value="dimensioning">dimensioning</option>
                             <option value="num_servers">num-servers</option>
-                            <option value="num_servers_and_costs">num-servers + costs</option>
-                            <option value="costs">costs</option>
-                            <option value="costs_and_migrations">costs + migrations</option>
+                            <option value="num_servers_util_costs">num-servers + util-costs</option>
+                            <option value="util_costs">util-costs</option>
+                            <option value="util_costs_migrations">util-costs + migrations</option>
+                            <option value="util_costs_max_utilization">util-costs + max utilization</option>
                             <option value="utilization">utilization</option>
-                            <option value="max_utilization">max utilization</option>
+                            <option value="oper_costs">oper-costs</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -66,16 +67,16 @@
                     </div>
                     <div class="form-group">
                         <label>Weights [links, servers, max]</label>
-                        <div class="input-group-prepend my-1 mr-sm-2">
+                        <div class="input-group-prepend my-1 mr-sm-2" id="weights">
                             <input type="number" step="0.1" onchange="setDecimals(this.value)"
                                    class="form-control input-number"
-                                   id="lu" placeholder="0.0" value="0.0">
+                                   id="lu-weight" placeholder="0.0" value="0.0">
                             <input type="number" step="0.1" onchange="setDecimals(this.value)"
                                    class="form-control input-number"
-                                   id="xu" placeholder="0.0" value="1.0">
+                                   id="xu-weight" placeholder="0.0" value="1.0">
                             <input type="number" step="0.1" onchange="setDecimals(this.value)"
                                    class="form-control input-number"
-                                   id="maxU" placeholder="0.0" value="0.0">
+                                   id="maxU-weight" placeholder="0.0" value="0.0">
                         </div>
                     </div>
                 </div>
@@ -86,7 +87,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-4">
+                <div class="col-3">
                     <div class="form-group">
                         <label>General</label>
                         <label class="check ">RP1
@@ -123,9 +124,9 @@
                         </label>
                     </div>
                 </div>
-                <div class="col-8">
+                <div class="col-9">
                     <div class="form-group">
-                        <label>Additional</label>
+                        <label>Model Specific</label>
                         <label class="check ">sync-traffic
                             <input type="checkbox" id="sync-traffic">
                             <span class="checkmark"></span>
@@ -142,15 +143,15 @@
                             <input type="checkbox" id="edge-only">
                             <span class="checkmark"></span>
                         </label>
-                        <label>Other</label>
-                        <label class="check ">single-path
+                        <label class="check ">single-path (mgr-only)
                             <input type="checkbox" id="single-path">
                             <span class="checkmark"></span>
                         </label>
-                        <label class="check ">set-init-plc
+                        <label class="check ">set-init-plc (rep-only)
                             <input type="checkbox" id="set-init-plc">
                             <span class="checkmark"></span>
                         </label>
+                        <label>Other</label>
                         <label class="check ">force-src-dst
                             <input type="checkbox" id="force-src-dst">
                             <span class="checkmark"></span>
@@ -165,7 +166,7 @@
 
         </div>
         <div class="col-2">
-            <h4>Parameters</h4>
+            <h4>optimizer.Parameters</h4>
             <hr>
             <div class="form-group">
                 <label>Input file</label>
@@ -182,12 +183,10 @@
             </div>
             <div class="form-group">
                 <label>Scenario</label>
-                <select class="form-control custom-select my-1 mr-sm-2" id="model" onChange="check(this);">
+                <select class="form-control custom-select my-1 mr-sm-2" id="model" onChange="checkScenario(this);">
                     <option value="dimensioning">dimensioning</option>
                     <option value="init">initial placement</option>
-                    <option value="mgr">migration</option>
-                    <option value="rep">replication</option>
-                    <option value="mgrep">migration and replication</option>
+                    <option value="place">placement</option>
                 </select>
             </div>
             <div class="btn-group">
@@ -198,14 +197,14 @@
                         disabled>Stop
                 </button>
             </div>
-            <div class="div div-output-emphasis" id="message"></div>
+            <div class="div div-optimizer.results-emphasis" id="message"></div>
         </div>
 
     </div>
 
-    <div id="results" class="row">
+    <div id="optimizer.results" class="row">
         <div class="col-3">
-            <h4>Summary results</h4>
+            <h4>Summary optimizer.results</h4>
             <hr>
             <div class="table-responsive">
                 <table class="table table-hover ">
@@ -315,6 +314,6 @@
 <script src="static/js/morris.min.js"></script>
 <script src="static/js/topology.js"></script>
 <script src="static/js/form.js"></script>
-<script src="static/js/results.js"></script>
+<script src="static/js/optimizer.results.js"></script>
 </body>
 </html>

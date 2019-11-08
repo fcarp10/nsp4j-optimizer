@@ -1,29 +1,50 @@
-package lp.constraints;
+package optimizer.lp.constraints;
 
-import gui.Scenario;
-import gurobi.GRB;
-import gurobi.GRBException;
-import gurobi.GRBLinExpr;
-import lp.Model;
-import lp.Variables;
-import manager.Parameters;
+import gurobi.*;
+import manager.elements.Function;
 import manager.elements.Service;
+import optimizer.gui.Scenario;
+import optimizer.lp.Model;
+import optimizer.lp.Variables;
 import org.graphstream.graph.Node;
 
-import static output.Parameters.*;
+import static optimizer.Parameters.*;
 
 public class GeneralConstraints {
 
    private Model model;
    private Variables vars;
-   private Parameters pm;
+   private manager.Parameters pm;
 
-   public GeneralConstraints(Parameters pm, Model model, Scenario scenario) {
-      this.pm = pm;
-      this.model = model;
-      this.vars = model.getVariables();
+   public GeneralConstraints(manager.Parameters pm, Model model, Scenario scenario, GRBModel initialPlacement) {
       try {
-         // General constraints
+         this.pm = pm;
+         this.model = model;
+         this.vars = model.getVariables();
+
+         // create link and server load expressions
+         GRBLinExpr[] linkLoadExpr = createLinkLoadExpr();
+         GRBLinExpr[] serverLoadExpr = createServerLoadExpr();
+
+         // create link and server utilization expressions
+         GRBLinExpr[] luExpr = createLinkUtilizationExpr(linkLoadExpr);
+         GRBLinExpr[] xuExpr = createServerUtilizationExpr(serverLoadExpr);
+
+         // Generate additional constraints
+         new ModelSpecificConstraints(pm, model, scenario, initialPlacement, serverLoadExpr, linkLoadExpr, xuExpr, luExpr);
+         new OtherConstraints(pm, model, scenario);
+
+         // constraint link utilization
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            model.getGrbModel().addConstr(luExpr[l], GRB.EQUAL, vars.uL[l], uL
+                    + "[" + pm.getLinks().get(l).getId() + "]");
+
+         // constraint server utilization if no dimensioning
+         if (!scenario.getObjFunc().equals(SERVER_DIMENSIONING))
+            for (int x = 0; x < pm.getServers().size(); x++)
+               model.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX + "[x] --> " + "[" + x + "]");
+
+         // create rest of constraints
          if (scenario.getConstraints().get(RP1)) RP1();
          if (scenario.getConstraints().get(RP2)) RP2();
          if (scenario.getConstraints().get(PF1)) PF1();
@@ -35,6 +56,61 @@ public class GeneralConstraints {
       } catch (Exception e) {
          e.printStackTrace();
       }
+   }
+
+   private GRBLinExpr[] createLinkLoadExpr() {
+      GRBLinExpr[] expressions = new GRBLinExpr[pm.getLinks().size()];
+      for (int l = 0; l < pm.getLinks().size(); l++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+               if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
+                  continue;
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                     expr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.zSPD[s][p][d]);
+            }
+         expressions[l] = expr;
+      }
+      return expressions;
+   }
+
+   private GRBLinExpr[] createServerLoadExpr() {
+      GRBLinExpr[] expressions = new GRBLinExpr[pm.getServers().size()];
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               Function function = pm.getServices().get(s).getFunctions().get(v);
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                     expr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                             * (double) function.getAttribute(FUNCTION_LOAD_RATIO)), vars.fXSVD[x][s][v][d]);
+               expr.addTerm((int) function.getAttribute(FUNCTION_OVERHEAD), vars.fXSV[x][s][v]);
+            }
+         expressions[x] = expr;
+      }
+      return expressions;
+   }
+
+   private GRBLinExpr[] createLinkUtilizationExpr(GRBLinExpr[] linkLoadExpr) throws GRBException {
+      GRBLinExpr[] luExprs = new GRBLinExpr[pm.getLinks().size()];
+      for (int l = 0; l < pm.getLinks().size(); l++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         expr.multAdd(1.0 / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY), linkLoadExpr[l]);
+         luExprs[l] = expr;
+      }
+      return luExprs;
+   }
+
+   private GRBLinExpr[] createServerUtilizationExpr(GRBLinExpr[] serverLoadExpr) throws GRBException {
+      GRBLinExpr[] xuExprs = new GRBLinExpr[pm.getServers().size()];
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         expr.multAdd(1.0 / pm.getServers().get(x).getCapacity(), serverLoadExpr[x]);
+         xuExprs[x] = expr;
+      }
+      return xuExprs;
    }
 
    // One path per demand
@@ -194,6 +270,4 @@ public class GeneralConstraints {
             }
       }
    }
-
-
 }

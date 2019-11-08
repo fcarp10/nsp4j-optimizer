@@ -1,8 +1,8 @@
-package gui;
+package optimizer.gui;
 
 
 import com.google.gson.Gson;
-import manager.Manager;
+import optimizer.Manager;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,7 +56,7 @@ public class WebServer {
          return new Gson().toJson(ResultsGUI.getLinkJsonMap().values());
       });
 
-      get("/results", (request, response) -> {
+      get("/optimizer/results", (request, response) -> {
          response.type("application/json");
          return new Gson().toJson(ResultsGUI.getResults());
       });

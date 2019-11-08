@@ -1,14 +1,15 @@
-package lp.constraints;
+package optimizer.lp.constraints;
 
-import gui.Scenario;
+import optimizer.gui.Scenario;
 import gurobi.*;
-import lp.Model;
-import lp.Variables;
+import optimizer.lp.Model;
+import optimizer.lp.Variables;
 import manager.Parameters;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 
-import static output.Parameters.*;
+import static optimizer.Parameters.*;
+
 
 public class OtherConstraints {
 
@@ -16,39 +17,15 @@ public class OtherConstraints {
    private Variables vars;
    private Parameters pm;
 
-   public OtherConstraints(Parameters pm, Model model, Scenario scenario, GRBModel initialModel) {
+   public OtherConstraints(Parameters pm, Model model, Scenario scenario) {
       try {
          this.pm = pm;
          this.model = model;
          this.vars = model.getVariables();
-         if (scenario.getConstraints().get(SINGLE_PATH)) singlePath();
-         if (scenario.getConstraints().get(SET_INIT_PLC)) setInitPlc(initialModel);
          if (scenario.getConstraints().get(FORCE_SRC_DST)) forceSrcDst();
          if (scenario.getConstraints().get(CONST_REP)) constRep();
       } catch (Exception e) {
          e.printStackTrace();
-      }
-   }
-
-   // Single path
-   private void singlePath() throws GRBException {
-      for (int s = 0; s < pm.getServices().size(); s++) {
-         GRBLinExpr expr = new GRBLinExpr();
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            expr.addTerm(1.0, vars.zSP[s][p]);
-         model.getGrbModel().addConstr(expr, GRB.EQUAL, 1, SINGLE_PATH);
-      }
-   }
-
-   // Initial placement as constraints
-   private void setInitPlc(GRBModel initialModel) throws GRBException {
-      if (initialModel != null) {
-         for (int x = 0; x < pm.getServers().size(); x++)
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]")
-                          .get(GRB.DoubleAttr.X) == 1.0)
-                     model.getGrbModel().addConstr(vars.fXSV[x][s][v], GRB.EQUAL, 1, SET_INIT_PLC);
       }
    }
 

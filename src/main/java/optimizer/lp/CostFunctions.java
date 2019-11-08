@@ -1,4 +1,4 @@
-package lp;
+package optimizer.lp;
 
 import java.util.LinkedList;
 

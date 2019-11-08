@@ -1,9 +1,9 @@
-package output;
+package optimizer.results;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gui.GraphData;
-import gui.Scenario;
+import optimizer.gui.GraphData;
+import optimizer.gui.Scenario;
 import manager.Parameters;
 import manager.elements.Server;
 import manager.elements.Service;
@@ -14,13 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static output.Auxiliary.printLog;
-import static output.Parameters.*;
+import static optimizer.Parameters.*;
+import static optimizer.results.Auxiliary.printLog;
 
 public class Results {
    private transient static final Logger log = LoggerFactory.getLogger(Results.class);
    // @JsonIgnore tag -> ignores specific variable for json result file
-   // transient modifier -> ignores specific variable for posting results to web UI.
+   // transient modifier -> ignores specific variable for posting optimizer.results to web UI.
    @JsonIgnore
    private transient Parameters pm;
    @JsonIgnore
@@ -118,8 +118,8 @@ public class Results {
       uL(); // server utilization
       if (scenario.getModel().equals(SERVER_DIMENSIONING))
          xN(); // integer, num servers per node
-      if (scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ)
-              || scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ))
+      if (scenario.getObjFunc().equals(NUM_SERVERS_OBJ)
+              || scenario.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ))
          fX(); // binary, used servers
       zSP(); // binary, routing per path
       zSPD(); // binary, routing per demand

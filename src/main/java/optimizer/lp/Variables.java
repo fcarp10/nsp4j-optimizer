@@ -1,37 +1,41 @@
-package lp;
+package optimizer.lp;
 
-import gui.Scenario;
 import gurobi.GRB;
 import gurobi.GRBModel;
 import gurobi.GRBVar;
-import output.Parameters;
+import optimizer.Parameters;
+import optimizer.gui.Scenario;
 
-import static output.Parameters.*;
+import static optimizer.Parameters.*;
 
 public class Variables {
 
-   // objective variables
-   public GRBVar[] uL; // link utilization
-   public GRBVar[] uX; // server utilization
-   public GRBVar[] fX; // binary, true if server is used
-   public GRBVar[] xN; // integer, num servers per node
    // general variables
    public GRBVar[][] zSP; // binary, routing per path
    public GRBVar[][][] zSPD; // binary, routing per demand
+   public GRBVar[] fX; // binary, true if server is used
    public GRBVar[][][] fXSV; // binary, placement per server
    public GRBVar[][][][] fXSVD; // binary, placement per demand
-   // delay
+   public GRBVar[] uL; // link utilization
+   public GRBVar[] uX; // server utilization
+
+   // model specific variables
+   public GRBVar[] xN; // integer, num servers per node
+   public GRBVar[] kL; // link cost utilization
+   public GRBVar[] kX; // server cost utilization
+   public GRBVar uMax; // max utilization
+   public GRBVar[] oX; // operational server cost
+   public GRBVar[][] oSV; // operational function cost
+
+   // service delay variables
    public GRBVar[][][] dSVX;// processing delay of a function v in server x
    public GRBVar[] mS; // continuous, migration delay of a service
    public GRBVar[][][][] dSVXD; // continuous, aux variable for processing delay
    public GRBVar[][][] ySVX; //continuous, aux delay
-   // synchronization traffic
+
+   // synchronization traffic variables
    public GRBVar[][][][] gSVXY; //binary, aux synchronization traffic
    public GRBVar[][][] hSVP; // binary, traffic synchronization
-   // model specific
-   GRBVar[] kL; // link cost utilization
-   GRBVar[] kX; // server cost utilization
-   GRBVar uMax; // max utilization
 
    public Variables(manager.Parameters pm, GRBModel model, Scenario scenario) {
       try {
@@ -50,7 +54,7 @@ public class Variables {
 
          fX = new GRBVar[pm.getServers().size()];
          for (int x = 0; x < pm.getServers().size(); x++)
-            this.fX[x] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
+            fX[x] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
                     , Parameters.fX + "[" + x + "]");
 
          fXSV = new GRBVar[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
@@ -79,37 +83,58 @@ public class Variables {
             uX[x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
                     , Parameters.uX + "[" + x + "]");
 
-         kL = new GRBVar[pm.getLinks().size()];
-         for (int l = 0; l < pm.getLinks().size(); l++)
-            kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                    , Parameters.kL + "[" + l + "]");
-
-         kX = new GRBVar[pm.getServers().size()];
-         for (int x = 0; x < pm.getServers().size(); x++)
-            kX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                    , Parameters.kX + "[" + x + "]");
-
-         // if model is optimizing max utilization
-         if (scenario.getObjectiveFunction().equals(MAX_UTILIZATION_OBJ)) {
-            uMax = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
-                    , Parameters.uMax);
-         }
          model.update();
       } catch (Exception ignored) {
       }
    }
 
-   public void initializeAdditionalVariables(manager.Parameters pm, GRBModel model, Scenario scenario) {
+   public void initializeAdditionalVariables(manager.Parameters pm, GRBModel model, Scenario sc) {
       try {
+
          // if model is dimensioning number of servers
-         if (scenario.getObjectiveFunction().equals(SERVER_DIMENSIONING)) {
+         if (sc.getObjFunc().equals(SERVER_DIMENSIONING)) {
             xN = new GRBVar[pm.getNodes().size()];
             for (int n = 0; n < pm.getNodes().size(); n++)
                this.xN[n] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER
                        , Parameters.xN + "[" + n + "]");
          }
+
+         // if model is optimizing with utilization costs
+         if (sc.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_OBJ)
+                 || sc.getObjFunc().equals(UTIL_COSTS_MIGRATIONS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
+            kL = new GRBVar[pm.getLinks().size()];
+            for (int l = 0; l < pm.getLinks().size(); l++)
+               kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                       , Parameters.kL + "[" + l + "]");
+
+            kX = new GRBVar[pm.getServers().size()];
+            for (int x = 0; x < pm.getServers().size(); x++)
+               kX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                       , Parameters.kX + "[" + x + "]");
+         }
+
+         // if model is optimizing max utilization
+         if (sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
+            uMax = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
+                    , Parameters.uMax);
+         }
+
+         // if model is optimizing with operational costs
+         if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+            oX = new GRBVar[pm.getServers().size()];
+            for (int x = 0; x < pm.getServers().size(); x++)
+               oX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                       , Parameters.oX + "[" + x + "]");
+
+            oSV = new GRBVar[pm.getServices().size()][pm.getServiceLength()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  oSV[s][v] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                          , Parameters.oSV + "[" + s + "][" + v + "]");
+         }
+
          // if model is considering synchronization traffic
-         if (scenario.getConstraints().get(SYNC_TRAFFIC)) {
+         if (sc.getConstraints().get(SYNC_TRAFFIC)) {
             gSVXY = new GRBVar[pm.getServices().size()][pm.getServiceLength()]
                     [pm.getServers().size()][pm.getServers().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
@@ -127,8 +152,9 @@ public class Variables {
                      hSVP[s][v][p] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY
                              , Parameters.hSVP + "[" + s + "][" + v + "][" + p + "]");
          }
+
          // if model is considering delay constraints
-         if (scenario.getConstraints().get(SERV_DELAY)) {
+         if (sc.getConstraints().get(SERV_DELAY)) {
             dSVX = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)

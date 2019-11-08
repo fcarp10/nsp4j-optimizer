@@ -1,12 +1,12 @@
-package output;
+package optimizer.results;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gui.Scenario;
+import optimizer.gui.Scenario;
 import gurobi.*;
-import lp.Variables;
+import optimizer.lp.Variables;
 import manager.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static output.Parameters.*;
+import static optimizer.Parameters.*;
+
 
 public class ResultsManager {
 
@@ -30,10 +31,10 @@ public class ResultsManager {
       Date date = new Date();
       String path = ResultsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
       path = path.replaceAll("%20", " ");
-      File parentDirectory = new File(path + "/../results");
+      File parentDirectory = new File(path + "/../optimizer.results");
       if (!parentDirectory.exists())
          parentDirectory.mkdir();
-      resultsFolder = path + "/../results/" + MY_FORMAT.format(date) + folderName;
+      resultsFolder = path + "/../optimizer.results/" + MY_FORMAT.format(date) + folderName;
       new File(resultsFolder).mkdir();
    }
 

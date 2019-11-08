@@ -1,16 +1,12 @@
-package gui;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package optimizer.gui;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Scenario {
 
-   @JsonProperty("input_file_name")
    private String inputFileName;
-   @JsonProperty("objective_function")
-   private String objectiveFunction;
+   private String objFunc;
    private boolean maximization;
    private String weights;
    private String model;
@@ -28,12 +24,12 @@ public class Scenario {
       this.inputFileName = inputFileName;
    }
 
-   public String getObjectiveFunction() {
-      return objectiveFunction;
+   public String getObjFunc() {
+      return objFunc;
    }
 
-   public void setObjectiveFunction(String objectiveFunction) {
-      this.objectiveFunction = objectiveFunction;
+   public void setObjFunc(String objFunc) {
+      this.objFunc = objFunc;
    }
 
    public String getModel() {

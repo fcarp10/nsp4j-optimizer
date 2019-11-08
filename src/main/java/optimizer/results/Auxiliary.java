@@ -1,14 +1,14 @@
-package output;
+package optimizer.results;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import gui.ResultsGUI;
+import optimizer.gui.ResultsGUI;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBVar;
-import lp.CostFunctions;
+import optimizer.lp.CostFunctions;
 import org.decimal4j.util.DoubleRounder;
 import org.slf4j.Logger;
 
@@ -16,8 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import static output.Parameters.ERROR;
-import static output.Parameters.INFO;
+import static optimizer.Parameters.*;
 
 public class Auxiliary {
 

@@ -1,14 +1,14 @@
-package lp;
+package optimizer.lp;
 
 import gurobi.*;
-import manager.Manager;
 import manager.Parameters;
+import optimizer.Manager;
+import optimizer.results.Auxiliary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import output.Auxiliary;
 
-import static output.Auxiliary.printLog;
-import static output.Parameters.*;
+import static optimizer.Parameters.*;
+import static optimizer.results.Auxiliary.printLog;
 
 public class Model {
 
@@ -46,7 +46,7 @@ public class Model {
       return expr;
    }
 
-   public GRBLinExpr usedServersExpr() {
+   public GRBLinExpr numUsedServersExpr() {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < pm.getServers().size(); x++)
          expr.addTerm(1.0, variables.fX[x]);
@@ -84,6 +84,16 @@ public class Model {
    public GRBLinExpr maxUtilizationExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
       expr.addTerm(weight, variables.uMax);
+      return expr;
+   }
+
+   public GRBLinExpr operationalCostsExpr() {
+      GRBLinExpr expr = new GRBLinExpr();
+      for (int x = 0; x < pm.getServers().size(); x++)
+         expr.addTerm(1.0, variables.oX[x]);
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+            expr.addTerm(1.0, variables.oSV[s][v]);
       return expr;
    }
 

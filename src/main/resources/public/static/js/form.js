@@ -156,22 +156,31 @@ function generatePaths() {
     }
 }
 
-function check(elem) {
+function checkObjFunc(elem) {
+    var objFunc = document.getElementById("objFunc").value;
+    if (objFunc === "num_servers_util_costs" || objFunc === "util_costs" || objFunc === "util_costs_migrations"
+    || objFunc === "util_costs_max_utilization") {
+        document.getElementById("lu-weight").disabled = false;
+        document.getElementById("xu-weight").disabled = false;
+        document.getElementById("maxU-weight").disabled = false;
+    } else {
+        document.getElementById("lu-weight").disabled = true;
+        document.getElementById("xu-weight").disabled = true;
+        document.getElementById("maxU-weight").disabled = true;
+    }
+}
+
+function checkScenario(elem) {
     var model = document.getElementById("model").value;
     if (model === "dimensioning") {
         document.getElementById("PF3").checked = false;
     } else {
         document.getElementById("PF3").checked = true;
     }
-    if (model === "dimensioning" || model === "init" || model === "mgr") {
+    if (model === "dimensioning" || model === "init") {
         document.getElementById("single-path").checked = true;
         document.getElementById("fix-init-plc").checked = false;
-    }
-    if (model === "rep") {
-        document.getElementById("single-path").checked = false;
-        document.getElementById("fix-init-plc").checked = true;
-    }
-    if (model === "mgrep") {
+    } else {
         document.getElementById("single-path").checked = false;
         document.getElementById("fix-init-plc").checked = false;
     }
@@ -184,9 +193,11 @@ function setDecimals(value) {
 function generateScenario() {
     // model
     var inputFileName = document.getElementById("inputFileName").value;
-    var objectiveFunction = document.getElementById("objectiveFunction").value;
+    var objFunc = document.getElementById("objFunc").value;
     var maximization = $("#max").is(":checked");
-    var weights = parseFloat(document.getElementById("lu").value).toFixed(1) + "-" + parseFloat(document.getElementById("xu").value).toFixed(1) + "-" + parseFloat(document.getElementById("maxU").value).toFixed(1);
+    var weights = parseFloat(document.getElementById("lu-weight").value).toFixed(1) + "-"
+    + parseFloat(document.getElementById("xu-weight").value).toFixed(1) + "-"
+    + parseFloat(document.getElementById("maxU-weight").value).toFixed(1);
     var model = document.getElementById("model").value;
     // general
     var RP1 = $("#RP1").is(":checked");
@@ -198,19 +209,19 @@ function generateScenario() {
     var FD2 = $("#FD2").is(":checked");
     var FD3 = $("#FD3").is(":checked");
     var FD4 = $("#FD4").is(":checked");
-    // additional
+    // model specific
     var sync_traffic = $("#sync-traffic").is(":checked");
     var serv_delay = $("#serv-delay").is(":checked");
     var cloud_only = $("#cloud-only").is(":checked");
     var edge_only = $("#edge-only").is(":checked");
-    // other
     var single_path = $("#single-path").is(":checked");
     var set_init_plc = $("#set-init-plc").is(":checked");
+    // other
     var force_src_dst = $("#force-src-dst").is(":checked");
     var const_rep = $("#const-rep").is(":checked");
     var scenario = JSON.stringify({
         inputFileName: inputFileName,
-        objectiveFunction: objectiveFunction,
+        objFunc: objFunc,
         maximization: maximization,
         weights: weights,
         model: model,
@@ -230,9 +241,9 @@ function generateScenario() {
             serv_delay: serv_delay,
             cloud_only: cloud_only,
             edge_only: edge_only,
-            // other
             single_path: single_path,
             set_init_plc: set_init_plc,
+            // other
             force_src_dst: force_src_dst,
             const_rep: const_rep
         }

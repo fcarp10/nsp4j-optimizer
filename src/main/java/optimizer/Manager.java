@@ -1,30 +1,31 @@
-package manager;
+package optimizer;
 
-import gui.ResultsGUI;
-import gui.Scenario;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBModel;
-import lp.Constraints;
-import lp.Model;
-import lp.Variables;
+import manager.Parameters;
 import manager.elements.TrafficFlow;
+import optimizer.gui.ResultsGUI;
+import optimizer.gui.Scenario;
+import optimizer.lp.constraints.GeneralConstraints;
+import optimizer.lp.Model;
+import optimizer.lp.Variables;
+import optimizer.results.Auxiliary;
+import optimizer.results.Results;
+import optimizer.results.ResultsManager;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import output.Auxiliary;
-import output.Results;
-import output.ResultsManager;
 import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
 
 import java.io.File;
 
-import static output.Auxiliary.printLog;
-import static output.Parameters.*;
+import static optimizer.Parameters.*;
+import static optimizer.results.Auxiliary.printLog;
 
 public class Manager {
 
@@ -104,10 +105,10 @@ public class Manager {
          printLog(log, INFO, "initializing " + sce.getModel());
          if (INITIAL_PLACEMENT.equals(sce.getModel())) {
             specifyUsedTrafficDemands(true);
-            initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjectiveFunction(), resultsManager, null);
+            initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjFunc(), resultsManager, null);
          } else {
             specifyUsedTrafficDemands(false);
-            runLP(sce.getModel(), sce, sce.getObjectiveFunction(), resultsManager, initialModel);
+            runLP(sce.getModel(), sce, sce.getObjFunc(), resultsManager, initialModel);
          }
          printLog(log, INFO, "ready");
       } catch (Exception e) {
@@ -144,7 +145,7 @@ public class Manager {
       variables.initializeAdditionalVariables(pm, model.getGrbModel(), scenario);
       model.setVariables(variables);
       printLog(log, INFO, "setting constraints");
-      new Constraints(pm, model, scenario, initialModel);
+      new GeneralConstraints(pm, model, scenario, initialModel);
       expr = generateExprForObjectiveFunction(model, scenario, objectiveFunction, initialModel);
       model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running LP model");
@@ -169,25 +170,32 @@ public class Manager {
             expr.add(model.dimensioningExpr());
             break;
          case NUM_SERVERS_OBJ:
-            expr.add(model.usedServersExpr());
+            expr.add(model.numUsedServersExpr());
             break;
-         case NUM_SERVERS_COSTS_OBJ:
-            expr.add(model.usedServersExpr());
+         case NUM_SERVERS_UTIL_COSTS_OBJ:
+            expr.add(model.numUsedServersExpr());
             serversWeight = 1.0 / pm.getServers().size();
             expr.add(model.serverCostsExpr(serversWeight));
             break;
-         case COSTS_OBJ:
+         case UTIL_COSTS_OBJ:
             linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
             serversWeight = Double.parseDouble(weights[1]) / pm.getServers().size();
             expr.add(model.linkCostsExpr(linksWeight));
             expr.add(model.serverCostsExpr(serversWeight));
             break;
-         case COSTS_MIGRATIONS_OBJ:
+         case UTIL_COSTS_MIGRATIONS_OBJ:
             expr.add(model.linkCostsExpr(1.0));
             expr.add(model.serverCostsExpr(1.0));
             if (initialPlacement != null)
                expr.add(model.numOfMigrations(0.0, initialPlacement));
             else printLog(log, WARNING, "no init. placement");
+            break;
+         case UTIL_COSTS_MAX_UTIL_OBJ:
+            linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
+            serversWeight = Double.parseDouble(weights[1]) / pm.getServers().size();
+            expr.add(model.linkUtilizationExpr(linksWeight));
+            expr.add(model.serverUtilizationExpr(serversWeight));
+            expr.add(model.maxUtilizationExpr(Double.parseDouble(weights[2])));
             break;
          case UTILIZATION_OBJ:
             linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
@@ -195,12 +203,8 @@ public class Manager {
             expr.add(model.linkUtilizationExpr(linksWeight));
             expr.add(model.serverUtilizationExpr(serversWeight));
             break;
-         case MAX_UTILIZATION_OBJ:
-            linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
-            serversWeight = Double.parseDouble(weights[1]) / pm.getServers().size();
-            expr.add(model.linkUtilizationExpr(linksWeight));
-            expr.add(model.serverUtilizationExpr(serversWeight));
-            expr.add(model.maxUtilizationExpr(Double.parseDouble(weights[2])));
+         case OPER_COSTS_OBJ:
+            expr.add(model.operationalCostsExpr());
             break;
       }
       return expr;
@@ -212,10 +216,10 @@ public class Manager {
       results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModel.getVariables().uL));
       results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModel.getVariables().uX));
       // model specific objective variables
-      if (scenario.getObjectiveFunction().equals(SERVER_DIMENSIONING))
+      if (scenario.getObjFunc().equals(SERVER_DIMENSIONING))
          results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModel.getVariables().xN));
-      if (scenario.getObjectiveFunction().equals(NUM_SERVERS_COSTS_OBJ)
-              || scenario.getObjectiveFunction().equals(NUM_SERVERS_OBJ))
+      if (scenario.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ)
+              || scenario.getObjFunc().equals(NUM_SERVERS_OBJ))
          results.setVariable(fX, Auxiliary.grbVarsToBooleans(optModel.getVariables().fX));
       // general variables
       results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optModel.getVariables().zSP));

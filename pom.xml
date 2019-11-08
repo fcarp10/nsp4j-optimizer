@@ -79,7 +79,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>manager.Launcher</mainClass>
+                            <mainClass>optimizer.Launcher</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

@@ -1,7 +1,7 @@
-package gui;
+package optimizer.gui;
 
-import static output.Parameters.MAX_NUM_SERVERS;
-import static output.Parameters.SERVER_SHAPE;
+
+import static optimizer.Parameters.*;
 
 class ServerJson extends NodeJson {
 

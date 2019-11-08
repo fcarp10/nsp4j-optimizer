@@ -1,4 +1,4 @@
-package gui;
+package optimizer.gui;
 
 public class LinkJson {
 

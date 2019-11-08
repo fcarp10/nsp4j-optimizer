@@ -1,16 +1,16 @@
-package gui;
+package optimizer.gui;
 
 import gurobi.GRBModel;
 import manager.Parameters;
 import manager.elements.Server;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
-import output.Results;
+import optimizer.results.Results;
 
 import java.text.DecimalFormat;
 import java.util.*;
 
-import static output.Parameters.*;
+import static optimizer.Parameters.*;
 
 public class ResultsGUI {
 

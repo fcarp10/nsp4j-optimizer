@@ -1,34 +1,88 @@
-package lp.constraints;
+package optimizer.lp.constraints;
 
-import gui.Scenario;
 import gurobi.*;
-import lp.Model;
-import lp.Variables;
 import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Service;
+import optimizer.gui.Scenario;
+import optimizer.lp.Model;
+import optimizer.lp.Variables;
+import optimizer.results.Auxiliary;
 import org.graphstream.graph.Path;
 
-import static output.Parameters.*;
+import static optimizer.Parameters.*;
 
-public class AdditionalConstraints {
+
+public class ModelSpecificConstraints {
 
    private Model model;
    private Variables vars;
    private Parameters pm;
 
-   public AdditionalConstraints(Parameters pm, Model model, Scenario scenario, GRBModel initialModel, GRBLinExpr[] linkLoadExpr) {
+   public ModelSpecificConstraints(Parameters pm, Model model, Scenario sc, GRBModel initialModel
+           , GRBLinExpr[] serverLoadExpr, GRBLinExpr[] linkLoadExpr, GRBLinExpr[] xuExpr, GRBLinExpr[] luExpr) {
       try {
          this.pm = pm;
          this.model = model;
          this.vars = model.getVariables();
-         if (scenario.getConstraints().get(SYNC_TRAFFIC)) SyncTraffic(linkLoadExpr);
-         if (scenario.getConstraints().get(SERV_DELAY)) ServDelay(initialModel);
-         if (scenario.getConstraints().get(CLOUD_ONLY)) useOnlyCloudServers();
-         if (scenario.getConstraints().get(EDGE_ONLY)) useOnlyEdgeServers();
+
+         // set dimensioning constraints
+         if (sc.getObjFunc().equals(SERVER_DIMENSIONING)) dimensioning(serverLoadExpr);
+
+         // set linear utilization cost functions constraints
+         if (sc.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_OBJ)
+                 || sc.getObjFunc().equals(UTIL_COSTS_MIGRATIONS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
+            linearUtilCostFunctions(luExpr, vars.kL);
+            linearUtilCostFunctions(xuExpr, vars.kX);
+         }
+
+         // set max utilization constraint
+         if (sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) maxUtilization();
+
+         // set operational costs
+         if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) operationalCosts();
+
+         // rest of specific constraints
+         if (sc.getConstraints().get(SYNC_TRAFFIC)) SyncTraffic(linkLoadExpr);
+         if (sc.getConstraints().get(SERV_DELAY)) ServDelay(initialModel);
+         if (sc.getConstraints().get(CLOUD_ONLY)) useOnlyCloudServers();
+         if (sc.getConstraints().get(EDGE_ONLY)) useOnlyEdgeServers();
+         if (sc.getConstraints().get(SINGLE_PATH)) singlePath();
+         if (sc.getConstraints().get(SET_INIT_PLC)) setInitPlc(initialModel);
       } catch (Exception e) {
          e.printStackTrace();
       }
+   }
+
+   private void dimensioning(GRBLinExpr[] serverLoadExpr) throws GRBException {
+      for (int n = 0; n < pm.getNodes().size(); n++) {
+         GRBLinExpr expr1 = new GRBLinExpr();
+         expr1.addTerm((int) pm.getAux(SERVER_DIMENSIONING_CAPACITY), vars.xN[n]);
+         GRBLinExpr expr2 = new GRBLinExpr();
+         expr2.multAdd((double) pm.getAux(OVERPROVISIONING_SERVER_CAPACITY), serverLoadExpr[n]);
+         model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr1, SERVER_DIMENSIONING);
+      }
+   }
+
+   private void linearUtilCostFunctions(GRBLinExpr[] exprs, GRBVar[] grbVar) throws GRBException {
+      for (int e = 0; e < exprs.length; e++)
+         for (int c = 0; c < Auxiliary.costFunctions.getValues().size(); c++) {
+            GRBLinExpr expr2 = new GRBLinExpr();
+            expr2.multAdd(Auxiliary.costFunctions.getValues().get(c)[0], exprs[e]);
+            expr2.addConstant(Auxiliary.costFunctions.getValues().get(c)[1]);
+            model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar[e], UTIL_COSTS_OBJ);
+         }
+   }
+
+   private void maxUtilization() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         model.getGrbModel().addConstr(vars.uX[x], GRB.LESS_EQUAL, vars.uMax, uMax);
+      for (int l = 0; l < pm.getLinks().size(); l++)
+         model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, uMax);
+   }
+
+   private void operationalCosts() throws GRBException {
+
    }
 
    // synchronization traffic
@@ -192,5 +246,27 @@ public class AdditionalConstraints {
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
             model.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, SERVER_DIMENSIONING);
+   }
+
+   // Single path (mgr-only)
+   private void singlePath() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            expr.addTerm(1.0, vars.zSP[s][p]);
+         model.getGrbModel().addConstr(expr, GRB.EQUAL, 1, SINGLE_PATH);
+      }
+   }
+
+   // Initial placement as constraints (rep-only)
+   private void setInitPlc(GRBModel initialModel) throws GRBException {
+      if (initialModel != null) {
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]")
+                          .get(GRB.DoubleAttr.X) == 1.0)
+                     model.getGrbModel().addConstr(vars.fXSV[x][s][v], GRB.EQUAL, 1, SET_INIT_PLC);
+      }
    }
 }
