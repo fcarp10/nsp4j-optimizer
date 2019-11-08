@@ -68,7 +68,6 @@ public class Parameters {
    public static final String SERVICE_MIN_PATHS = "min_paths";
    public static final String SERVICE_MAX_PATHS = "max_paths";
    public static final String SERVICE_MAX_DELAY = "max_delay";
-   public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
 
    // function parameters
    public static final String FUNCTION_REPLICABLE = "replicable";
@@ -80,9 +79,14 @@ public class Parameters {
    public static final String FUNCTION_MAX_DELAY = "max_delay";
    public static final String FUNCTION_MIN_PROCESS_DELAY = "min_process_delay";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
+   public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
+   public static final String FUNCTION_VM_COST = "vm_cost";
+   public static final String FUNCTION_FAAS_COST = "faas_cost";
 
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";
+   public static final String SERVER_IDLE_OPEX = "server_idle_opex";
+   public static final String SERVER_UTIL_OPEX = "server_util_opex";
 
    // link parameters
    public static final String LINK_CAPACITY = "capacity";

@@ -5,11 +5,13 @@ aux: {
   "x_scaling": 8000.0,
   "y_scaling": 8000.0,
   "server_dimensioning_capacity": 1000,
+  "server_idle_opex": 1.0,
+  "server_util_opex": 1.0,
   "overprovisioning_server_capacity": 1.0,
   "initial_traffic_load": 0.5
 }
 # service definitions
-serviceChains:
+service_chains:
   - id: 0
     chain: [0, 1, 0]
     attributes: {
@@ -32,7 +34,7 @@ serviceChains:
       "max_delay": 1000.0
     }
 # function definitions
-functionTypes:
+function_types:
   - type: 0
     attributes: {
       "replicable": false,
@@ -60,8 +62,10 @@ functionTypes:
       "migration_delay": 20.0
     }
 # traffic flow definitions
-trafficFlows:
-  - minDem: 1
-    maxDem: 5
-    minBw: 1
-    maxBw: 20
+traffic_flows:
+  - min_dem: 1
+    max_dem: 5
+    min_bw: 1
+    max_bw: 20
+    min_ht: 1
+    max_ht: 20

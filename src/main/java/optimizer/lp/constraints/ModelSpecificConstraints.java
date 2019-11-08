@@ -67,10 +67,10 @@ public class ModelSpecificConstraints {
    private void linearUtilCostFunctions(GRBLinExpr[] exprs, GRBVar[] grbVar) throws GRBException {
       for (int e = 0; e < exprs.length; e++)
          for (int c = 0; c < Auxiliary.costFunctions.getValues().size(); c++) {
-            GRBLinExpr expr2 = new GRBLinExpr();
-            expr2.multAdd(Auxiliary.costFunctions.getValues().get(c)[0], exprs[e]);
-            expr2.addConstant(Auxiliary.costFunctions.getValues().get(c)[1]);
-            model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, grbVar[e], UTIL_COSTS_OBJ);
+            GRBLinExpr expr = new GRBLinExpr();
+            expr.multAdd(Auxiliary.costFunctions.getValues().get(c)[0], exprs[e]);
+            expr.addConstant(Auxiliary.costFunctions.getValues().get(c)[1]);
+            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, grbVar[e], UTIL_COSTS_OBJ);
          }
    }
 
@@ -83,6 +83,19 @@ public class ModelSpecificConstraints {
 
    private void operationalCosts() throws GRBException {
 
+      // TODO
+
+      for (int x = 0; x < pm.getServers().size(); x++)
+         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
+            GRBLinExpr expr = new GRBLinExpr();
+            expr.addConstant((double) pm.getAux().get(SERVER_IDLE_OPEX));
+            expr.addTerm((double) pm.getAux().get(SERVER_UTIL_OPEX), vars.uX[x]);
+            model.getGrbModel().addConstr(vars.oX[x], GRB.EQUAL, expr, oX);
+         }
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+
+         }
    }
 
    // synchronization traffic
