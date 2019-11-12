@@ -56,7 +56,7 @@ public class WebServer {
          return new Gson().toJson(ResultsGUI.getLinkJsonMap().values());
       });
 
-      get("/optimizer/results", (request, response) -> {
+      get("/results", (request, response) -> {
          response.type("application/json");
          return new Gson().toJson(ResultsGUI.getResults());
       });

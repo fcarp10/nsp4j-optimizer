@@ -31,6 +31,7 @@ public class Parameters {
    public static final String uMax = "uMax";
    public static final String oX = "oX";
    public static final String oSV = "oSV";
+   public static final String hSVX = "hSVX";
 
    // service delay variables
    public static final String dSVX = "dSVX";
@@ -80,8 +81,7 @@ public class Parameters {
    public static final String FUNCTION_MIN_PROCESS_DELAY = "min_process_delay";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
    public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
-   public static final String FUNCTION_VM_COST = "vm_cost";
-   public static final String FUNCTION_FAAS_COST = "faas_cost";
+   public static final String FUNCTION_OPEX = "cost";
 
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";

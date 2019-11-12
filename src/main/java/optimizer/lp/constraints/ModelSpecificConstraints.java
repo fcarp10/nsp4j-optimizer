@@ -83,8 +83,7 @@ public class ModelSpecificConstraints {
 
    private void operationalCosts() throws GRBException {
 
-      // TODO
-
+      // operational costs for using servers
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
             GRBLinExpr expr = new GRBLinExpr();
@@ -92,10 +91,24 @@ public class ModelSpecificConstraints {
             expr.addTerm((double) pm.getAux().get(SERVER_UTIL_OPEX), vars.uX[x]);
             model.getGrbModel().addConstr(vars.oX[x], GRB.EQUAL, expr, oX);
          }
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
 
-         }
+      // operational costs for placing functions in the cloud
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+            for (int x = 0; x < pm.getServers().size(); x++) {
+               // calculate the longest holding time
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+                  GRBLinExpr expr = new GRBLinExpr();
+                  expr.addTerm(pm.getServices().get(s).getTrafficFlow().getHoldingTimes().get(d), vars.fXSVD[x][s][v][d]);
+                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.hSVX[s][v][x], oSV);
+               }
+               // calculate the opex of functions
+               if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null) {
+                  GRBLinExpr expr = new GRBLinExpr();
+                  expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OPEX), vars.hSVX[s][v][x]);
+                  model.getGrbModel().addConstr(vars.oSV[s][v], GRB.EQUAL, expr, oSV);
+               }
+            }
    }
 
    // synchronization traffic

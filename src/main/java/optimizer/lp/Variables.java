@@ -26,6 +26,7 @@ public class Variables {
    public GRBVar uMax; // max utilization
    public GRBVar[] oX; // operational server cost
    public GRBVar[][] oSV; // operational function cost
+   public GRBVar[][][] hSVX; // holding time of function
 
    // service delay variables
    public GRBVar[][][] dSVX;// processing delay of a function v in server x
@@ -131,6 +132,12 @@ public class Variables {
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   oSV[s][v] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                           , Parameters.oSV + "[" + s + "][" + v + "]");
+            hSVX = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  for (int x = 0; x < pm.getServers().size(); x++)
+                     hSVX[s][v][x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                             , Parameters.hSVX + "[" + s + "][" + v + "][" + x + "]");
          }
 
          // if model is considering synchronization traffic
