@@ -81,7 +81,7 @@ public class Parameters {
    public static final String FUNCTION_MIN_PROCESS_DELAY = "min_process_delay";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
    public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
-   public static final String FUNCTION_OPEX = "cost";
+   public static final String FUNCTION_OPEX = "opex";
 
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";

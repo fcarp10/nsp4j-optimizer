@@ -37,7 +37,6 @@ public class Manager {
       String path = getResourcePath(fileName);
       if (path != null)
          try {
-            printLog(log, INFO, "loading topology");
             pm = ConfigFiles.readParameters(path, fileName + ".yml");
             pm.initialize(path);
             checkTopologyScale();
@@ -210,28 +209,34 @@ public class Manager {
       return expr;
    }
 
-   private static Results generateResultsForLP(Model optModel, Scenario scenario, GRBModel initialModel) throws GRBException {
-      Results results = new Results(pm, scenario);
-      // objective variables
-      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModel.getVariables().uL));
-      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModel.getVariables().uX));
-      // model specific objective variables
-      if (scenario.getObjFunc().equals(SERVER_DIMENSIONING))
-         results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModel.getVariables().xN));
-      if (scenario.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ)
-              || scenario.getObjFunc().equals(NUM_SERVERS_OBJ))
-         results.setVariable(fX, Auxiliary.grbVarsToBooleans(optModel.getVariables().fX));
+   private static Results generateResultsForLP(Model optModel, Scenario sc, GRBModel initialModel) throws GRBException {
+      Results results = new Results(pm, sc);
       // general variables
       results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optModel.getVariables().zSP));
       results.setVariable(zSPD, Auxiliary.grbVarsToBooleans(optModel.getVariables().zSPD));
+      results.setVariable(fX, Auxiliary.grbVarsToBooleans(optModel.getVariables().fX));
       results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optModel.getVariables().fXSV));
       results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optModel.getVariables().fXSVD));
-      // additional variables
-      if (scenario.getConstraints().get(SYNC_TRAFFIC)) {
+      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModel.getVariables().uL));
+      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModel.getVariables().uX));
+
+      // model specific variables
+      if (sc.getObjFunc().equals(SERVER_DIMENSIONING))
+         results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModel.getVariables().xN));
+      if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+         results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModel.getVariables().oX));
+         results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModel.getVariables().oSV));
+         results.setVariable(hSVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().hSVX));
+      }
+
+      // traffic sync variables
+      if (sc.getConstraints().get(SYNC_TRAFFIC)) {
          results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optModel.getVariables().gSVXY));
          results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optModel.getVariables().hSVP));
       }
-      if (scenario.getConstraints().get(SERV_DELAY)) {
+
+      // service delay variables
+      if (sc.getConstraints().get(SERV_DELAY)) {
          results.setVariable(dSVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVX));
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVXD));
          results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVariables().mS));

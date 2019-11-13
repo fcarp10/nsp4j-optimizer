@@ -31,10 +31,10 @@ public class ResultsManager {
       Date date = new Date();
       String path = ResultsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
       path = path.replaceAll("%20", " ");
-      File parentDirectory = new File(path + "/../optimizer.results");
+      File parentDirectory = new File(path + "/../results");
       if (!parentDirectory.exists())
          parentDirectory.mkdir();
-      resultsFolder = path + "/../optimizer.results/" + MY_FORMAT.format(date) + folderName;
+      resultsFolder = path + "/../results/" + MY_FORMAT.format(date) + folderName;
       new File(resultsFolder).mkdir();
    }
 

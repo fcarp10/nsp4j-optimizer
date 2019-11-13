@@ -47,13 +47,13 @@ function_types:
       "min_process_delay": 1.0,
       "max_delay": 1000.0,
       "migration_delay": 10.0,
-      "opex": 0.005
+      "opex": 0.000000972 # <-- VM, FaaS_1GB=0.00001667
     }
   - type: 1
     attributes: {
       "replicable": true,
       "load_ratio": 1.0,
-      "overhead": 10,
+      "overhead": 0,
       "sync_load": 0.05,
       "process_traffic_delay": 5.0,
       "max_cap_server": 100,
@@ -61,13 +61,16 @@ function_types:
       "min_process_delay": 2.0,
       "max_delay": 1000.0,
       "migration_delay": 20.0,
-      "opex": 0.005
+      "opex": 0.00003334 # <-- FaaS, VM_2GB=0.000001917
     }
 # traffic flow definitions
 traffic_flows:
   - min_dem: 1
-    max_dem: 5
-    min_bw: 1
-    max_bw: 20
-    min_ht: 1
-    max_ht: 20
+    max_dem: 1
+    min_bw: 100
+    max_bw: 100
+    min_ht: 100
+    max_ht: 100
+    src: "n1"
+    dst: "n12"
+    service_id: 0

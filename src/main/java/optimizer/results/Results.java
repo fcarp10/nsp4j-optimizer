@@ -2,11 +2,11 @@ package optimizer.results;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import optimizer.gui.GraphData;
-import optimizer.gui.Scenario;
 import manager.Parameters;
 import manager.elements.Server;
 import manager.elements.Service;
+import optimizer.gui.GraphData;
+import optimizer.gui.Scenario;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Path;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public class Results {
    private transient int offset;
    @JsonIgnore
    private transient LinkedHashMap<String, Object> rawVariables;
-   private transient Scenario scenario;
+   private transient Scenario sc;
    @JsonProperty("objective_value")
    private double objVal;
    @JsonProperty("avg_path_length")
@@ -78,7 +78,7 @@ public class Results {
 
    public Results(Parameters pm, Scenario scenario) {
       this.pm = pm;
-      this.scenario = scenario;
+      this.sc = scenario;
       this.offset = (int) pm.getAux("offset_results");
       this.luSummary = new double[4];
       this.xuSummary = new double[4];
@@ -100,6 +100,7 @@ public class Results {
    }
 
    public void initializeResults(double objVal, boolean[][][] initialPlacement) {
+      // summary results
       migrations = countNumOfMigrations(initialPlacement);
       replications = countNumOfReplications();
       totalTraffic = pm.getTotalTraffic();
@@ -114,23 +115,33 @@ public class Results {
       setSummaryResults(fpSummary, fp);
       luGraph(lu);
       xuGraph(xu);
-      uX(); // link utilization
-      uL(); // server utilization
-      if (scenario.getModel().equals(SERVER_DIMENSIONING))
-         xN(); // integer, num servers per node
-      if (scenario.getObjFunc().equals(NUM_SERVERS_OBJ)
-              || scenario.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ))
-         fX(); // binary, used servers
+
+      // general variables
       zSP(); // binary, routing per path
       zSPD(); // binary, routing per demand
+      fX(); // binary, used servers
       fXSV(); // binary, placement per server
       fXSVD(); // binary, placement per demand
-      if (scenario.getConstraints().get(SYNC_TRAFFIC)) {
+      uX(); // link utilization
+      uL(); // server utilization
+
+      // model specific variables
+      if (sc.getModel().equals(SERVER_DIMENSIONING))
+         xN(); // integer, num servers per node
+      if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+         oX(); // opex per server
+         oSV(); // opex per function
+      }
+
+      // sync traffic variables
+      if (sc.getConstraints().get(SYNC_TRAFFIC)) {
          gSVXY(); // binary, aux synchronization traffic
          hSVP(); // binary, traffic synchronization
          synchronizationTraffic = Auxiliary.roundDouble(synchronizationTraffic(), 2);
       }
-      if (scenario.getConstraints().get(SERV_DELAY)) {
+
+      // service delay variables
+      if (sc.getConstraints().get(SERV_DELAY)) {
          sd = serviceDelayList(initialPlacement);
          st = serviceTypes();
          setSummaryResults(sdSummary, sd);
@@ -350,6 +361,8 @@ public class Results {
       return synchronizationTraffic;
    }
 
+
+   /***************************************** GENERAL VARIABLES ************************************/
    private void zSP() {
       try {
          boolean[][] var = (boolean[][]) rawVariables.get(zSP);
@@ -381,6 +394,19 @@ public class Results {
                                 + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
                                 + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
          variables.put(zSPD, strings);
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
+      }
+   }
+
+   private void fX() {
+      try {
+         boolean[] var = (boolean[]) rawVariables.get(fX);
+         List<String> strings = new ArrayList<>();
+         for (int x = 0; x < pm.getServers().size(); x++)
+            if (var[x])
+               strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]");
+         variables.put(fX, strings);
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }
@@ -459,6 +485,9 @@ public class Results {
       }
    }
 
+   /**********************************************************************************************/
+
+   /********************************** MODEL SPECIFIC VARIABLES **********************************/
    private void xN() {
       try {
          double[] var = (double[]) rawVariables.get(xN);
@@ -472,19 +501,35 @@ public class Results {
       }
    }
 
-   private void fX() {
+   private void oX() {
       try {
-         boolean[] var = (boolean[]) rawVariables.get(fX);
+         double[] var = (double[]) rawVariables.get(oX);
          List<String> strings = new ArrayList<>();
          for (int x = 0; x < pm.getServers().size(); x++)
-            if (var[x])
-               strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]");
-         variables.put(fX, strings);
+            if (var[x] > 0)
+               strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "][" + var[x] + "]");
+         variables.put(oX, strings);
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }
    }
 
+   private void oSV() {
+      try {
+         double[][] var = (double[][]) rawVariables.get(oSV);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               if (var[s][v] > 0)
+                  strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "): [" + var[s][v] + "]");
+         variables.put(oSV, strings);
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
+      }
+   }
+
+
+   /************************************* TRAFFIC SYNC VARIABLES **********************************/
    private void gSVXY() {
       try {
          boolean[][][][] var = (boolean[][][][]) rawVariables.get(gSVXY);
@@ -519,7 +564,9 @@ public class Results {
          printLog(log, ERROR, e.getMessage());
       }
    }
+   /**********************************************************************************************/
 
+   /*********************************** SERVICE DELAY VARIABLES **********************************/
    private void dSVX() {
       try {
          double[][][] processDelayVar = (double[][][]) rawVariables.get(dSVX);
@@ -555,6 +602,8 @@ public class Results {
          printLog(log, ERROR, e.getMessage());
       }
    }
+
+   /**********************************************************************************************/
 
    private void setSummaryResults(double[] array, List var) {
       array[0] = Auxiliary.avg(new ArrayList<>(var));
@@ -615,7 +664,7 @@ public class Results {
    }
 
    public Scenario getScenario() {
-      return scenario;
+      return sc;
    }
 
    public Map<String, Object> getRawVariables() {
