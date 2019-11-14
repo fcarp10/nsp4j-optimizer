@@ -117,8 +117,9 @@ public class Model {
       grbModel.optimize();
       if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL
               || grbModel.get(GRB.IntAttr.Status) == GRB.Status.INTERRUPTED) {
-         objVal = Auxiliary.roundDouble(grbModel.get(GRB.DoubleAttr.ObjVal), 4);
-         printLog(log, INFO, "finished [" + objVal + "]");
+         objVal = grbModel.get(GRB.DoubleAttr.ObjVal);
+         double objValLog = Auxiliary.roundDouble(objVal, 4);
+         printLog(log, INFO, "finished [" + objValLog + "]");
          if (objVal > 100000)
             return null;
          return objVal;
