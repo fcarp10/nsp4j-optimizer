@@ -8,7 +8,8 @@ aux: {
   "server_idle_opex": 0.000002857, # consumption cost per second (Dell PowerEdge R320)
   "server_util_opex": 0.000002046, # consumption cost per second (Dell PowerEdge R320)
   "overprovisioning_server_capacity": 1.0,
-  "initial_traffic_load": 0.5
+  "initial_traffic_load": 0.5,
+  "qos_penalty": 1.0
 }
 # service definitions
 service_chains:

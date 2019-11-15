@@ -27,12 +27,13 @@ public class Variables {
    public GRBVar[] oX; // operational server cost
    public GRBVar[][] oSV; // operational function cost
    public GRBVar[][][] hSVX; // holding time of function
+   public GRBVar[][][] qSDP; // qos penalty cost
+   public GRBVar[][][] dSDP; // qos penalty cost
 
    // service delay variables
    public GRBVar[][][] dSVX;// processing delay of a function v in server x
    public GRBVar[] mS; // continuous, migration delay of a service
    public GRBVar[][][][] dSVXD; // continuous, aux variable for processing delay
-   public GRBVar[][][] ySVX; //continuous, aux delay
 
    // synchronization traffic variables
    public GRBVar[][][][] gSVXY; //binary, aux synchronization traffic
@@ -138,6 +139,13 @@ public class Variables {
                   for (int x = 0; x < pm.getServers().size(); x++)
                      hSVX[s][v][x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                              , Parameters.hSVX + "[" + s + "][" + v + "][" + x + "]");
+
+            qSDP = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                     qSDP[s][d][p] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                             , Parameters.qSDP + "[" + s + "][" + d + "][" + p + "]");
          }
 
          // if model is considering synchronization traffic
@@ -181,12 +189,6 @@ public class Variables {
             for (int s = 0; s < pm.getServices().size(); s++)
                mS[s] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Parameters.mS + "[" + s + "]");
 
-            ySVX = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  for (int x = 0; x < pm.getServers().size(); x++)
-                     ySVX[s][v][x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS
-                             , Parameters.ySVX + "[" + s + "][" + v + "][" + x + "]");
          }
          model.update();
       } catch (Exception ignored) {

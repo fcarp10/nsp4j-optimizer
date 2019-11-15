@@ -32,12 +32,13 @@ public class Parameters {
    public static final String oX = "oX";
    public static final String oSV = "oSV";
    public static final String hSVX = "hSVX";
+   public static final String qSDP = "qSDP";
 
    // service delay variables
    public static final String dSVX = "dSVX";
    public static final String mS = "mS";
    public static final String dSVXD = "dSVXD";
-   public static final String ySVX = "ySVX";
+   public static final String dSDP = "dSDP";
 
    // synchronization traffic variables
    public static final String gSVXY = "gSVXY";
@@ -99,6 +100,7 @@ public class Parameters {
    public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
    public static final String INITIAL_TRAFFIC_LOAD = "initial_traffic_load";
    public static final String dSPD = "dSPD";
+   public static final String QOS_PENALTY = "qos_penalty";
 
    // GUI parameters
    public static final String NODE_COLOR = "Gray";
