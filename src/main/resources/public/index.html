@@ -41,10 +41,11 @@
             <h4>Model</h4>
             <hr>
             <div class="row">
-                <div class="col-12">
+                <div class="col">
                     <div class="form-group">
                         <h5>Objective Function</h5>
-                        <select class="form-control custom-select my-1 mr-sm-2" id="objFunc" onChange="checkObjFunc(this);">
+                        <select class="form-control custom-select my-1 mr-sm-2" id="objFunc"
+                                onChange="checkObjFunc(this);">
                             <option value="dimensioning">dimensioning</option>
                             <option value="num_servers">num-servers</option>
                             <option value="num_servers_util_costs">num-servers + util-costs</option>
@@ -69,25 +70,22 @@
                         <label>Weights [links, servers, max]</label>
                         <div class="input-group-prepend my-1 mr-sm-2" id="weights">
                             <input type="number" step="0.1" onchange="setDecimals(this.value)"
-                                   class="form-control input-number"
-                                   id="lu-weight" placeholder="0.0" value="0.0">
+                                   class="form-control input-number" id="lu-weight" placeholder="0.0" value="0.0">
                             <input type="number" step="0.1" onchange="setDecimals(this.value)"
-                                   class="form-control input-number"
-                                   id="xu-weight" placeholder="0.0" value="1.0">
+                                   class="form-control input-number" id="xu-weight" placeholder="0.0" value="1.0">
                             <input type="number" step="0.1" onchange="setDecimals(this.value)"
-                                   class="form-control input-number"
-                                   id="maxU-weight" placeholder="0.0" value="0.0">
+                                   class="form-control input-number" id="maxU-weight" placeholder="0.0" value="0.0">
                         </div>
                     </div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-12">
+                <div class="col">
                     <h5>Constraints</h5>
                 </div>
             </div>
             <div class="row">
-                <div class="col-3">
+                <div class="col-4">
                     <div class="form-group">
                         <label>General</label>
                         <label class="check ">RP1
@@ -124,7 +122,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="col-9">
+                <div class="col-8">
                     <div class="form-group">
                         <label>Model Specific</label>
                         <label class="check ">sync-traffic
