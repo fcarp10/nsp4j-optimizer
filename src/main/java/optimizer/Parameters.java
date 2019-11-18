@@ -38,7 +38,7 @@ public class Parameters {
    public static final String dSVX = "dSVX";
    public static final String mS = "mS";
    public static final String dSVXD = "dSVXD";
-   public static final String dSDP = "dSDP";
+   public static final String ySDP = "dSDP";
 
    // synchronization traffic variables
    public static final String gSVXY = "gSVXY";

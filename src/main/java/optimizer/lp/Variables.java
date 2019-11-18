@@ -28,7 +28,7 @@ public class Variables {
    public GRBVar[][] oSV; // operational function cost
    public GRBVar[][][] hSVX; // holding time of function
    public GRBVar[][][] qSDP; // qos penalty cost
-   public GRBVar[][][] dSDP; // qos penalty cost
+   public GRBVar[][][] ySDP; // aux variable for delay qos penalty cost
 
    // service delay variables
    public GRBVar[][][] dSVX;// processing delay of a function v in server x
@@ -146,6 +146,12 @@ public class Variables {
                   for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                      qSDP[s][d][p] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                              , Parameters.qSDP + "[" + s + "][" + d + "][" + p + "]");
+            ySDP = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                     ySDP[s][d][p] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                             , Parameters.ySDP + "[" + s + "][" + d + "][" + p + "]");
          }
 
          // if model is considering synchronization traffic
@@ -169,7 +175,7 @@ public class Variables {
          }
 
          // if model is considering delay constraints
-         if (sc.getConstraints().get(SERV_DELAY)) {
+         if (sc.getConstraints().get(SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
             dSVX = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)

@@ -183,13 +183,21 @@ public class ModelSpecificConstraints {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-               GRBLinExpr pathDelayExpr = new GRBLinExpr();
-
-
-
-               String constrName = SERV_DELAY + "[s][p][d] --> " + "[" + s + "]"
-                       + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "[" + d + "]";
-               model.getGrbModel().addConstr(serviceDelayExpr(s, p, d, initialPlacement), GRB.LESS_EQUAL, pathDelayExpr, constrName);
+               GRBLinExpr serviceDelayExpr = serviceDelayExpr(s, p, d, initialPlacement);
+               // linearization of delay and routing variables
+               model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, serviceDelayExpr, ySDP);
+               GRBLinExpr expr = new GRBLinExpr();
+               expr.addTerm(bigM, vars.zSPD[s][p][d]);
+               model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, expr, ySDP);
+               expr.addConstant(-bigM);
+               expr.add(serviceDelayExpr);
+               model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.GREATER_EQUAL, expr, ySDP);
+               // apply penalty costs
+               expr = new GRBLinExpr();
+               expr.addTerm((double) pm.getAux().get(QOS_PENALTY), vars.ySDP[s][d][p]);
+               expr.addTerm(-(double) pm.getAux().get(QOS_PENALTY) *
+                       (double) pm.getServices().get(s).getAttribute(SERVICE_MAX_DELAY), vars.zSPD[s][p][d]);
+               model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.GREATER_EQUAL, expr, OPER_COSTS_OBJ);
             }
    }
 
