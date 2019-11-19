@@ -141,7 +141,7 @@ public class Results {
       }
 
       // service delay variables
-      if (sc.getConstraints().get(SERV_DELAY)) {
+      if (sc.getConstraints().get(SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
          sd = serviceDelayList(initialPlacement);
          st = serviceTypes();
          setSummaryResults(sdSummary, sd);

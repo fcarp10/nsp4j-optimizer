@@ -236,7 +236,7 @@ public class Manager {
       }
 
       // service delay variables
-      if (sc.getConstraints().get(SERV_DELAY)) {
+      if (sc.getConstraints().get(SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
          results.setVariable(dSVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVX));
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVXD));
          results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVariables().mS));

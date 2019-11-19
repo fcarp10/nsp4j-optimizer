@@ -9,7 +9,7 @@ aux: {
   "server_util_opex": 0.000002046, # consumption cost per second (Dell PowerEdge R320)
   "overprovisioning_server_capacity": 1.0,
   "initial_traffic_load": 0.5,
-  "qos_penalty": 1.0
+  "qos_penalty": 0.00210042 # 10% of the total revenue per second of the VNF provider
 }
 # service definitions
 service_chains:
@@ -18,21 +18,21 @@ service_chains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 1000.0
+      "max_delay": 100.0
     }
   - id: 1
     chain: [0, 1, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 1000.0
+      "max_delay": 50.0
     }
   - id: 2
     chain: [0, 1, 1, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 1000.0
+      "max_delay": 100.0
     }
 # function definitions
 function_types:
@@ -48,7 +48,7 @@ function_types:
       "min_process_delay": 1.0,
       "max_delay": 1000.0,
       "migration_delay": 10.0,
-      "opex": 0.000000972 # <-- VM, FaaS_1GB=0.00001667 per second
+      "opex": 0.000000972 # <-- cost per VM, cost per FaaS_1GB=0.00001667 per second
     }
   - type: 1
     attributes: {
@@ -62,13 +62,16 @@ function_types:
       "min_process_delay": 2.0,
       "max_delay": 1000.0,
       "migration_delay": 20.0,
-      "opex": 0.00003334 # <-- FaaS, VM_2GB=0.000001917 per second
+      "opex": 0.00003334 # <-- cost per FaaS, cost per VM_2GB=0.000001917 per second
     }
 # traffic flow definitions
 traffic_flows:
   - min_dem: 1
-    max_dem: 5
-    min_bw: 1
-    max_bw: 20
-    min_ht: 1
+    max_dem: 1
+    min_bw: 500
+    max_bw: 500
+    min_ht: 60
     max_ht: 60
+    src: "n1"
+    dst: "n9"
+    service_id: 1
