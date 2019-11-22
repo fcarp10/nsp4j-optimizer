@@ -15,16 +15,17 @@ import static optimizer.Parameters.*;
 
 public class ModelSpecificConstraints {
 
+   private final Integer BIG_M = 100000;
    private Model model;
    private Variables vars;
    private Parameters pm;
 
-   public ModelSpecificConstraints(Parameters pm, Model model, Scenario sc, GRBModel initialModel
+   public ModelSpecificConstraints(Parameters pm, Model model, Scenario sc, GRBModel initialPlacement
            , GRBLinExpr[] serverLoadExpr, GRBLinExpr[] linkLoadExpr, GRBLinExpr[] xuExpr, GRBLinExpr[] luExpr) {
       try {
          this.pm = pm;
          this.model = model;
-         this.vars = model.getVariables();
+         this.vars = model.getVars();
 
          // set dimensioning constraints
          if (sc.getObjFunc().equals(SERVER_DIMENSIONING)) dimensioning(serverLoadExpr);
@@ -40,15 +41,15 @@ public class ModelSpecificConstraints {
          if (sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) maxUtilization();
 
          // set operational costs
-         if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) operationalCosts(initialModel);
+         if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) operationalCosts(initialPlacement);
 
          // rest of specific constraints
          if (sc.getConstraints().get(SYNC_TRAFFIC)) syncTraffic(linkLoadExpr);
-         if (sc.getConstraints().get(SERV_DELAY)) constraintMaxServiceDelay(initialModel);
+         if (sc.getConstraints().get(SERV_DELAY)) constraintMaxServiceDelay(initialPlacement);
          if (sc.getConstraints().get(CLOUD_ONLY)) useOnlyCloudServers();
          if (sc.getConstraints().get(EDGE_ONLY)) useOnlyEdgeServers();
          if (sc.getConstraints().get(SINGLE_PATH)) singlePath();
-         if (sc.getConstraints().get(SET_INIT_PLC)) setInitPlc(initialModel);
+         if (sc.getConstraints().get(SET_INIT_PLC)) setInitPlc(initialPlacement);
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -179,7 +180,6 @@ public class ModelSpecificConstraints {
    }
 
    private void applyQosPenaltyServiceDelay(GRBModel initialPlacement) throws GRBException {
-      int bigM = 10000000;
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
@@ -187,9 +187,9 @@ public class ModelSpecificConstraints {
                // linearization of delay and routing variables
                model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, serviceDelayExpr, ySDP);
                GRBLinExpr expr = new GRBLinExpr();
-               expr.addTerm(bigM, vars.zSPD[s][p][d]);
+               expr.addTerm(BIG_M, vars.zSPD[s][p][d]);
                model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, expr, ySDP);
-               expr.addConstant(-bigM);
+               expr.addConstant(-BIG_M);
                expr.add(serviceDelayExpr);
                model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.GREATER_EQUAL, expr, ySDP);
                // apply penalty costs
@@ -202,14 +202,13 @@ public class ModelSpecificConstraints {
    }
 
    private void constraintMaxServiceDelay(GRBModel initialPlacement) throws GRBException {
-      int bigM = 10000000;
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                GRBLinExpr pathDelayExpr = new GRBLinExpr();
                pathDelayExpr.addTerm((double) pm.getServices().get(s).getAttribute(SERVICE_MAX_DELAY), vars.zSPD[s][p][d]);
-               pathDelayExpr.addConstant(bigM);
-               pathDelayExpr.addTerm(-bigM, vars.zSPD[s][p][d]);
+               pathDelayExpr.addConstant(BIG_M);
+               pathDelayExpr.addTerm(-BIG_M, vars.zSPD[s][p][d]);
                String constrName = SERV_DELAY + "[s][p][d] --> " + "[" + s + "]"
                        + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "[" + d + "]";
                model.getGrbModel().addConstr(serviceDelayExpr(s, p, d, initialPlacement), GRB.LESS_EQUAL, pathDelayExpr, constrName);
@@ -226,7 +225,6 @@ public class ModelSpecificConstraints {
    }
 
    private GRBLinExpr processingDelayExpr(int s, int p, int d) throws GRBException {
-      int bigM = 10000000;
       Service service = pm.getServices().get(s);
       Path path = service.getTrafficFlow().getPaths().get(p);
       GRBLinExpr processDelayGlobalExpr = new GRBLinExpr();
@@ -251,8 +249,8 @@ public class ModelSpecificConstraints {
                   processDelayExpr.add(processDelayExpr2);
                   for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++) {
                      GRBLinExpr processConstraintExpr1 = new GRBLinExpr();
-                     processConstraintExpr1.addTerm(-bigM, vars.fXSVD[x][s][v][d1]);
-                     processConstraintExpr1.addConstant(bigM);
+                     processConstraintExpr1.addTerm(-BIG_M, vars.fXSVD[x][s][v][d1]);
+                     processConstraintExpr1.addConstant(BIG_M);
                      processConstraintExpr1.addTerm(1.0, vars.dSVXD[s][v][x][d1]);
                      model.getGrbModel().addConstr(processDelayExpr, GRB.LESS_EQUAL, processConstraintExpr1, FUNCTION_PROCESS_TRAFFIC_DELAY);
                      GRBLinExpr processConstraintExpr2 = new GRBLinExpr();

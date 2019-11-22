@@ -8,9 +8,9 @@ import manager.Parameters;
 import manager.elements.TrafficFlow;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
-import optimizer.lp.constraints.GeneralConstraints;
 import optimizer.lp.Model;
 import optimizer.lp.Variables;
+import optimizer.lp.constraints.GeneralConstraints;
 import optimizer.results.Auxiliary;
 import optimizer.results.Results;
 import optimizer.results.ResultsManager;
@@ -97,7 +97,7 @@ public class Manager {
    public static GRBModel start(Scenario sce, GRBModel initialModel) {
       try {
          interrupted = false;
-         GRBModel importedModel = ResultsManager.importModel(getResourcePath(sce.getInputFileName()), sce.getInputFileName(), pm, sce);
+         GRBModel importedModel = ResultsManager.importModel(getResourcePath(sce.getInputFileName()), sce.getInputFileName(), pm);
          if (initialModel == null && importedModel != null)
             initialModel = importedModel;
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
@@ -140,14 +140,14 @@ public class Manager {
       GRBLinExpr expr;
       Model model = new Model(pm);
       printLog(log, INFO, "setting variables");
-      Variables variables = new Variables(pm, model.getGrbModel(), scenario);
+      Variables variables = new Variables(pm, model.getGrbModel());
       variables.initializeAdditionalVariables(pm, model.getGrbModel(), scenario);
-      model.setVariables(variables);
+      model.setVars(variables);
       printLog(log, INFO, "setting constraints");
       new GeneralConstraints(pm, model, scenario, initialModel);
       expr = generateExprForObjectiveFunction(model, scenario, objectiveFunction, initialModel);
       model.setObjectiveFunction(expr, scenario.isMaximization());
-      printLog(log, INFO, "running LP model");
+      printLog(log, INFO, "running model");
       Double objVal = model.run();
       Results results;
       if (objVal != null) {
@@ -187,7 +187,7 @@ public class Manager {
             expr.add(model.serverCostsExpr(1.0));
             if (initialPlacement != null)
                expr.add(model.numOfMigrations(0.0, initialPlacement));
-            else printLog(log, WARNING, "no init. placement");
+            else printLog(log, WARNING, "no initial placement");
             break;
          case UTIL_COSTS_MAX_UTIL_OBJ:
             linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
@@ -212,34 +212,35 @@ public class Manager {
    private static Results generateResultsForLP(Model optModel, Scenario sc, GRBModel initialModel) throws GRBException {
       Results results = new Results(pm, sc);
       // general variables
-      results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optModel.getVariables().zSP));
-      results.setVariable(zSPD, Auxiliary.grbVarsToBooleans(optModel.getVariables().zSPD));
-      results.setVariable(fX, Auxiliary.grbVarsToBooleans(optModel.getVariables().fX));
-      results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optModel.getVariables().fXSV));
-      results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optModel.getVariables().fXSVD));
-      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModel.getVariables().uL));
-      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModel.getVariables().uX));
+      results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optModel.getVars().zSP));
+      results.setVariable(zSPD, Auxiliary.grbVarsToBooleans(optModel.getVars().zSPD));
+      results.setVariable(fX, Auxiliary.grbVarsToBooleans(optModel.getVars().fX));
+      results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optModel.getVars().fXSV));
+      results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optModel.getVars().fXSVD));
+      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModel.getVars().uL));
+      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModel.getVars().uX));
 
       // model specific variables
       if (sc.getObjFunc().equals(SERVER_DIMENSIONING))
-         results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModel.getVariables().xN));
+         results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModel.getVars().xN));
       if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
-         results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModel.getVariables().oX));
-         results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModel.getVariables().oSV));
-         results.setVariable(hSVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().hSVX));
+         results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModel.getVars().oX));
+         results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModel.getVars().oSV));
+         results.setVariable(hSVX, Auxiliary.grbVarsToDoubles(optModel.getVars().hSVX));
+         results.setVariable(qSDP, Auxiliary.grbVarsToDoubles(optModel.getVars().qSDP));
       }
 
       // traffic sync variables
       if (sc.getConstraints().get(SYNC_TRAFFIC)) {
-         results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optModel.getVariables().gSVXY));
-         results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optModel.getVariables().hSVP));
+         results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optModel.getVars().gSVXY));
+         results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optModel.getVars().hSVP));
       }
 
       // service delay variables
       if (sc.getConstraints().get(SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
-         results.setVariable(dSVX, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVX));
-         results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVariables().dSVXD));
-         results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVariables().mS));
+         results.setVariable(dSVX, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVX));
+         results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVXD));
+         results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVars().mS));
       }
       results.initializeResults(optModel.getObjVal(), convertInitialPlacement(initialModel));
       return results;

@@ -52,17 +52,17 @@ public class ResultsManager {
       }
    }
 
-   public static GRBModel importModel(String path, String filename, Parameters pm, Scenario scenario) {
+   public static GRBModel importModel(String path, String filename, Parameters pm) {
       path = path.replaceAll("%20", " ");
       GRBModel model;
       try {
          GRBEnv grbEnv = new GRBEnv();
          grbEnv.set(GRB.IntParam.LogToConsole, 0);
          model = new GRBModel(grbEnv);
-         new Variables(pm, model, scenario);
+         new Variables(pm, model);
          model.read(path + filename + "_initial_placement.mst");
          model.optimize();
-         Auxiliary.printLog(log, INFO, "ext. init. placement loaded");
+         Auxiliary.printLog(log, INFO, "initial placement loaded");
          return model;
       } catch (Exception e) {
          Auxiliary.printLog(log, INFO, "no ext. init. placement");

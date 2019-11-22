@@ -14,7 +14,7 @@ public class Model {
 
    private static final Logger log = LoggerFactory.getLogger(Model.class);
    private GRBModel grbModel;
-   private Variables variables;
+   private Variables vars;
    private Parameters pm;
    private double objVal;
 
@@ -42,58 +42,65 @@ public class Model {
    public GRBLinExpr dimensioningExpr() {
       GRBLinExpr expr = new GRBLinExpr();
       for (int n = 0; n < pm.getNodes().size(); n++)
-         expr.addTerm(1.0, variables.xN[n]);
+         expr.addTerm(1.0, vars.xN[n]);
       return expr;
    }
 
    public GRBLinExpr numUsedServersExpr() {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < pm.getServers().size(); x++)
-         expr.addTerm(1.0, variables.fX[x]);
+         expr.addTerm(1.0, vars.fX[x]);
       return expr;
    }
 
    public GRBLinExpr linkCostsExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
       for (int l = 0; l < pm.getLinks().size(); l++)
-         expr.addTerm(weight, variables.kL[l]);
+         expr.addTerm(weight, vars.kL[l]);
       return expr;
    }
 
    public GRBLinExpr serverCostsExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < pm.getServers().size(); x++)
-         expr.addTerm(weight, variables.kX[x]);
+         expr.addTerm(weight, vars.kX[x]);
       return expr;
    }
 
    public GRBLinExpr linkUtilizationExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
       for (int l = 0; l < pm.getLinks().size(); l++)
-         expr.addTerm(weight, variables.uL[l]);
+         expr.addTerm(weight, vars.uL[l]);
       return expr;
    }
 
    public GRBLinExpr serverUtilizationExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < pm.getServers().size(); x++)
-         expr.addTerm(weight, variables.uX[x]);
+         expr.addTerm(weight, vars.uX[x]);
       return expr;
    }
 
    public GRBLinExpr maxUtilizationExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
-      expr.addTerm(weight, variables.uMax);
+      expr.addTerm(weight, vars.uMax);
       return expr;
    }
 
    public GRBLinExpr operationalCostsExpr() {
       GRBLinExpr expr = new GRBLinExpr();
+      // add opex for servers
       for (int x = 0; x < pm.getServers().size(); x++)
-         expr.addTerm(1.0, variables.oX[x]);
+         expr.addTerm(1.0, vars.oX[x]);
+      // add opex for functions
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-            expr.addTerm(1.0, variables.oSV[s][v]);
+            expr.addTerm(1.0, vars.oSV[s][v]);
+      // add qos penalties
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               expr.addTerm(1.0, vars.qSDP[s][d][p]);
       return expr;
    }
 
@@ -105,7 +112,7 @@ public class Model {
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   if (initialPlacement.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
                      expr.addConstant(weight);
-                     expr.addTerm(-weight, variables.fXSV[x][s][v]);
+                     expr.addTerm(-weight, vars.fXSV[x][s][v]);
                   }
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
@@ -149,12 +156,12 @@ public class Model {
       return grbModel;
    }
 
-   public Variables getVariables() {
-      return variables;
+   public Variables getVars() {
+      return vars;
    }
 
-   public void setVariables(Variables variables) {
-      this.variables = variables;
+   public void setVars(Variables vars) {
+      this.vars = vars;
    }
 
    public double getObjVal() {

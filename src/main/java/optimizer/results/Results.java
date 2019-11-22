@@ -131,6 +131,7 @@ public class Results {
       if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
          oX(); // opex per server
          oSV(); // opex per function
+         qSDP();
       }
 
       // sync traffic variables
@@ -523,6 +524,23 @@ public class Results {
                if (var[s][v] > 0)
                   strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "): [" + var[s][v] + "]");
          variables.put(oSV, strings);
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
+      }
+   }
+
+   private void qSDP() {
+      try {
+         double[][][] var = (double[][][]) rawVariables.get(qSDP);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                  if (var[s][d][p] != 0)
+                     strings.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
+                             + "): [" + var[s][d][p] + "]");
+
+         variables.put(qSDP, strings);
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }

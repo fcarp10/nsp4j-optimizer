@@ -20,7 +20,7 @@ public class GeneralConstraints {
       try {
          this.pm = pm;
          this.model = model;
-         this.vars = model.getVariables();
+         this.vars = model.getVars();
 
          // create link and server load expressions
          GRBLinExpr[] linkLoadExpr = createLinkLoadExpr();

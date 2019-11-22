@@ -21,7 +21,7 @@ public class OtherConstraints {
       try {
          this.pm = pm;
          this.model = model;
-         this.vars = model.getVariables();
+         this.vars = model.getVars();
          if (scenario.getConstraints().get(FORCE_SRC_DST)) forceSrcDst();
          if (scenario.getConstraints().get(CONST_REP)) constRep();
       } catch (Exception e) {

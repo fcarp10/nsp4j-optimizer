@@ -67,11 +67,8 @@ function_types:
 # traffic flow definitions
 traffic_flows:
   - min_dem: 1
-    max_dem: 1
-    min_bw: 500
-    max_bw: 500
-    min_ht: 60
-    max_ht: 60
-    src: "n1"
-    dst: "n9"
-    service_id: 1
+    max_dem: 5
+    min_bw: 1
+    max_bw: 30
+    min_ht: 1
+    max_ht: 100
