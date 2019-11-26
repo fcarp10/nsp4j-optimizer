@@ -181,7 +181,7 @@ public class Model {
             if (where == GRB.CB_POLLING) {
                // Ignore polling callback
             } else if (where == GRB.CB_PRESOLVE && !isPresolving) {
-               printLog(log, INFO, "pre-solving model");
+               printLog(log, INFO, "presolving model");
                isPresolving = true;
             } else if (where == GRB.CB_MIPNODE) {
                double objbst = getDoubleInfo(GRB.CB_MIPNODE_OBJBST);

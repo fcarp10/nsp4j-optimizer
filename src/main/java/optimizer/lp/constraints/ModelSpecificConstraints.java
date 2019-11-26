@@ -88,8 +88,9 @@ public class ModelSpecificConstraints {
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
             GRBLinExpr expr = new GRBLinExpr();
-            expr.addTerm((double) pm.getAux().get(SERVER_IDLE_OPEX), vars.fX[x]);
-            expr.addTerm((double) pm.getAux().get(SERVER_UTIL_OPEX), vars.uX[x]);
+            expr.addTerm((double) pm.getAux().get(SERVER_IDLE_ENERGY_COST), vars.fX[x]);
+            expr.addTerm((double) pm.getAux().get(SERVER_UTIL_ENERGY_COST), vars.uX[x]);
+            expr.addConstant((double) pm.getAux().get(SERVER_OTHER_OPEX));
             model.getGrbModel().addConstr(vars.oX[x], GRB.EQUAL, expr, oX);
          }
 

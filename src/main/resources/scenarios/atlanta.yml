@@ -5,8 +5,9 @@ aux: {
   "x_scaling": 8000.0,
   "y_scaling": 8000.0,
   "server_dimensioning_capacity": 1000,
-  "server_idle_opex": 0.000002857, # consumption cost per second (Dell PowerEdge R320)
-  "server_util_opex": 0.000002046, # consumption cost per second (Dell PowerEdge R320)
+  "server_idle_energy_cost": 0.000002857, # consumption cost per second (Dell PowerEdge R320)
+  "server_util_energy_cost": 0.000002046, # consumption cost per second (Dell PowerEdge R320)
+  "server_other_opex": 0.000025727, # other opex costs per server per second
   "overprovisioning_server_capacity": 1.0,
   "initial_traffic_load": 0.5,
   "qos_penalty": 0.00210042 # 10% of the total revenue per second of the VNF provider
@@ -69,6 +70,6 @@ traffic_flows:
   - min_dem: 1
     max_dem: 5
     min_bw: 1
-    max_bw: 30
+    max_bw: 15
     min_ht: 1
     max_ht: 100

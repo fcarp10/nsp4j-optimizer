@@ -16,7 +16,7 @@ an n12 x:-84.2253 y:33.4466 num_servers:1 server_capacity:1000 process_delay:0
 an n13 x:-84.2216 y:33.4059 num_servers:1 server_capacity:1000 process_delay:0
 an n14 x:-84.2097 y:33.4218 num_servers:1 server_capacity:1000 process_delay:0
 an n15 x:-84.2463 y:33.4431 num_servers:1 server_capacity:1000 process_delay:0
-an n16 x:-122.00 y:40.67 x_gui:-84.17 y_gui:33.41 num_servers:20 server_capacity:1000 process_delay:0 node_cloud:true
+an n16 x:-122.00 y:40.67 x_gui:-84.17 y_gui:33.41 num_servers:10 server_capacity:1000 process_delay:0 node_cloud:true
 
 
 ae n1n6 n1 > n6 capacity:1000
