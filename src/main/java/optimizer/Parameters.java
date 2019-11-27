@@ -116,7 +116,7 @@ public class Parameters {
    public static final int PORT = 8080;
 
    // logs and messages
-   public static final String ERROR = "Error: ";
-   public static final String INFO = "Info: ";
-   public static final String WARNING = "Warning: ";
+   public static final String ERROR = "ERROR - ";
+   public static final String INFO = "INFO - ";
+   public static final String WARNING = "WARN - ";
 }

@@ -109,7 +109,7 @@ public class Manager {
             specifyUsedTrafficDemands(false);
             runLP(sce.getModel(), sce, sce.getObjFunc(), resultsManager, initialModel);
          }
-         printLog(log, INFO, "ready");
+         printLog(log, INFO, "backend is ready");
       } catch (Exception e) {
          e.printStackTrace();
          printLog(log, ERROR, "something went wrong");

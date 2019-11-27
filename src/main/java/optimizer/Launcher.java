@@ -15,6 +15,6 @@ public class Launcher {
       new Auxiliary();
       new ResultsGUI();
       WebServer.interfaces();
-      ResultsGUI.log("Info: please, load the topology");
+      ResultsGUI.log("INFO - backend is ready");
    }
 }

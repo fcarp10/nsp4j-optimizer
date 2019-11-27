@@ -131,7 +131,8 @@ public class Results {
       if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
          oX(); // opex per server
          oSV(); // opex per function
-         qSDP();
+         hSVX(); // max holding time aux var
+         qSDP(); // qos penalty var
       }
 
       // sync traffic variables
@@ -524,6 +525,22 @@ public class Results {
                if (var[s][v] > 0)
                   strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "): [" + var[s][v] + "]");
          variables.put(oSV, strings);
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
+      }
+   }
+
+   private void hSVX() {
+      try {
+         double[][][] var = (double[][][]) rawVariables.get(hSVX);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               for (int x = 0; x < pm.getServers().size(); x++)
+                  if (var[s][v][x] > 0)
+                     strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (x + this.offset)
+                             + "): [" + var[s][v][x] + "]");
+         variables.put(hSVX, strings);
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }

@@ -23,8 +23,8 @@ function getMessage() {
 }
 
 function errorConnection() {
-    if (document.getElementById("message").innerText != "Info: framework not running") {
-        document.getElementById("message").innerText = "Info: framework not running";
+    if (document.getElementById("message").innerText != "WARN - backend is stopped") {
+        document.getElementById("message").innerText = "WARN - backend is stopped";
         document.getElementById("run_button").setAttribute("disabled", "true");
         document.getElementById("stop_button").setAttribute("disabled", "true");
         clearInterval(intervalMessages);
@@ -38,12 +38,10 @@ function successConnection(message) {
         document.getElementById("message").innerText = messages.join("");
         if (messages.length >= numMessages)
             messages.shift();
-        if (message == "Info: ready" || message == "Info: topology loaded") {
+        if (message == "INFO - backend is ready") {
             document.getElementById("run_button").removeAttribute("disabled");
             document.getElementById("stop_button").setAttribute("disabled", "true");
             longRefresh();
-        }
-        if (message == "Info: ready"){
             getResults();
         }
         else {

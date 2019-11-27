@@ -65,7 +65,7 @@ public class ResultsManager {
          Auxiliary.printLog(log, INFO, "initial placement loaded");
          return model;
       } catch (Exception e) {
-         Auxiliary.printLog(log, INFO, "no ext. init. placement");
+         Auxiliary.printLog(log, WARNING, "no initial placement");
          return null;
       }
    }

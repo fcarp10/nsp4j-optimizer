@@ -22,9 +22,10 @@ public class Model {
       this.pm = pm;
       try {
          GRBEnv grbEnv = new GRBEnv();
-         grbEnv.set(GRB.IntParam.LogToConsole, 0);
+//         grbEnv.set(GRB.IntParam.LogToConsole, 0);
          grbModel = new GRBModel(grbEnv);
          Callback cb = new Callback();
+//         grbModel.set(GRB.IntParam.Method, 3);
          grbModel.setCallback(cb);
          grbModel.getEnv().set(GRB.DoubleParam.MIPGap, (double) pm.getAux().get("gap"));
       } catch (GRBException e) {

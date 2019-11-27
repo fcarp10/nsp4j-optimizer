@@ -5,11 +5,11 @@ aux: {
   "x_scaling": 8000.0,
   "y_scaling": 8000.0,
   "server_dimensioning_capacity": 1000,
-  "server_idle_energy_cost": 0.000002857, # consumption cost per second (Dell PowerEdge R320)
-  "server_util_energy_cost": 0.000002046, # consumption cost per second (Dell PowerEdge R320)
+  "server_idle_energy_cost": 0.000004524, # consumption cost per second (Dell PowerEdge R320) 0.000004524   0.000002857
+  "server_util_energy_cost": 0.000003042, # consumption cost per second (Dell PowerEdge R320) 0.000003042   0.000002046
   "server_other_opex": 0.000025727, # other opex costs per server per second
   "overprovisioning_server_capacity": 1.0,
-  "initial_traffic_load": 0.5,
+  "initial_traffic_load": 0.3,
   "qos_penalty": 0.00210042 # 10% of the total revenue per second of the VNF provider
 }
 # service definitions
@@ -19,21 +19,21 @@ service_chains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 100.0
+      "max_delay": 40.0
     }
   - id: 1
-    chain: [0, 1, 1, 0]
+    chain: [0, 1, 2, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 50.0
+      "max_delay": 200.0
     }
   - id: 2
-    chain: [0, 1, 1, 1, 0]
+    chain: [0, 1, 2, 1, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 100.0
+      "max_delay": 60.0
     }
 # function definitions
 function_types:
@@ -51,7 +51,21 @@ function_types:
       "migration_delay": 10.0,
       "opex": 0.000000972 # <-- cost per VM, cost per FaaS_1GB=0.00001667 per second
     }
-  - type: 1
+  - type: 1 # VM function
+    attributes: {
+      "replicable": true,
+      "load_ratio": 1.0,
+      "overhead": 10,
+      "sync_load": 0.05,
+      "process_traffic_delay": 5.0,
+      "max_cap_server": 100,
+      "process_delay": 5.0,
+      "min_process_delay": 2.0,
+      "max_delay": 1000.0,
+      "migration_delay": 20.0,
+      "opex": 0.000001917 # <-- cost per VM, cost per FaaS_2GB=0.00003334 per second
+    }
+  - type: 2 # FaaS function
     attributes: {
       "replicable": true,
       "load_ratio": 1.0,
@@ -66,10 +80,21 @@ function_types:
       "opex": 0.00003334 # <-- cost per FaaS, cost per VM_2GB=0.000001917 per second
     }
 # traffic flow definitions
+#traffic_flows:
+#  - min_dem: 1
+#    max_dem: 3
+#    min_bw: 1
+#    max_bw: 40
+#    min_ht: 1
+#    max_ht: 100
+
 traffic_flows:
   - min_dem: 1
-    max_dem: 5
-    min_bw: 1
-    max_bw: 15
+    max_dem: 1
+    min_bw: 980
+    max_bw: 980
     min_ht: 1
     max_ht: 100
+    src: "n1"
+    dst: "n9"
+    service_id: 1

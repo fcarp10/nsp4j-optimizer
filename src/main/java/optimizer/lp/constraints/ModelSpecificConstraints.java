@@ -90,6 +90,7 @@ public class ModelSpecificConstraints {
             GRBLinExpr expr = new GRBLinExpr();
             expr.addTerm((double) pm.getAux().get(SERVER_IDLE_ENERGY_COST), vars.fX[x]);
             expr.addTerm((double) pm.getAux().get(SERVER_UTIL_ENERGY_COST), vars.uX[x]);
+//            expr.addTerm((double) pm.getAux().get(SERVER_OTHER_OPEX), vars.fX[x]);
             expr.addConstant((double) pm.getAux().get(SERVER_OTHER_OPEX));
             model.getGrbModel().addConstr(vars.oX[x], GRB.EQUAL, expr, oX);
          }
@@ -98,18 +99,20 @@ public class ModelSpecificConstraints {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++) {
+               if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) continue;
                // calculate the longest holding time
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-                  GRBLinExpr expr = new GRBLinExpr();
-                  expr.addTerm(pm.getServices().get(s).getTrafficFlow().getHoldingTimes().get(d), vars.fXSVD[x][s][v][d]);
-                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.hSVX[s][v][x], oSV);
-               }
+//               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+//                  GRBLinExpr expr = new GRBLinExpr();
+//                  expr.addTerm(pm.getServices().get(s).getTrafficFlow().getHoldingTimes().get(d), vars.fXSVD[x][s][v][d]);
+//                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.hSVX[s][v][x], hSVX);
+//               }
                // calculate the opex of functions
-               if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null) {
-                  GRBLinExpr expr = new GRBLinExpr();
-                  expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OPEX), vars.hSVX[s][v][x]);
-                  model.getGrbModel().addConstr(vars.oSV[s][v], GRB.EQUAL, expr, oSV);
-               }
+//               GRBLinExpr expr = new GRBLinExpr();
+//               expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OPEX), vars.hSVX[s][v][x]);
+//               model.getGrbModel().addConstr(vars.oSV[s][v], GRB.EQUAL, expr, oSV);
+               GRBLinExpr expr = new GRBLinExpr();
+               expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OPEX), vars.fXSV[x][s][v]);
+               model.getGrbModel().addConstr(vars.oSV[s][v], GRB.EQUAL, expr, oSV);
             }
 
       // apply penalty costs for service delay
