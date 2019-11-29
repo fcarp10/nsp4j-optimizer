@@ -86,8 +86,10 @@ public class Parameters {
 
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";
-   public static final String SERVER_IDLE_ENERGY_COST = "server_idle_energy_cost";
-   public static final String SERVER_UTIL_ENERGY_COST = "server_util_energy_cost";
+   public static final String SERVER_IDLE_AVG_ENERGY_COST = "server_idle_avg_energy_cost";
+   public static final String SERVER_UTIL_AVG_ENERGY_COST = "server_util_avg_energy_cost";
+   public static final String SERVER_IDLE_MAX_ENERGY_COST = "server_idle_max_energy_cost";
+   public static final String SERVER_UTIL_MAX_ENERGY_COST = "server_util_max_energy_cost";
    public static final String SERVER_OTHER_OPEX = "server_other_opex";
 
    // link parameters

@@ -226,7 +226,7 @@ public class Manager {
       if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
          results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModel.getVars().oX));
          results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModel.getVars().oSV));
-         results.setVariable(hSVX, Auxiliary.grbVarsToDoubles(optModel.getVars().hSVX));
+//         results.setVariable(hSVX, Auxiliary.grbVarsToDoubles(optModel.getVars().hSVX));
          results.setVariable(qSDP, Auxiliary.grbVarsToDoubles(optModel.getVars().qSDP));
       }
 
