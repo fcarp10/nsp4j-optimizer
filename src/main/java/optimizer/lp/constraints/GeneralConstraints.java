@@ -172,13 +172,13 @@ public class GeneralConstraints {
             for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                   for (int v = 0; v < service.getFunctions().size(); v++) {
-                     GRBLinExpr middleExpr = new GRBLinExpr();
+                     GRBLinExpr expr = new GRBLinExpr();
                      for (int n = 0; n < service.getTrafficFlow().getPaths().get(p).getNodePath().size(); n++)
                         for (int x = 0; x < pm.getServers().size(); x++)
                            if (pm.getServers().get(x).getParent()
                                    .equals(service.getTrafficFlow().getPaths().get(p).getNodePath().get(n)))
-                              middleExpr.addTerm(1.0, vars.fXSVD[x][s][v][d]);
-                     model.getGrbModel().addConstr(vars.zSPD[s][p][d], GRB.LESS_EQUAL, middleExpr, PF2
+                              expr.addTerm(1.0, vars.fXSVD[x][s][v][d]);
+                     model.getGrbModel().addConstr(vars.zSPD[s][p][d], GRB.LESS_EQUAL, expr, PF2
                              + "[s][p][d][v] --> " + "[" + s + "]"
                              + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
                              + "[" + d + "][" + v + "]");

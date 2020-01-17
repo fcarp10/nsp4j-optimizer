@@ -106,16 +106,6 @@ public class ModelSpecificConstraints {
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++) {
                if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) continue;
-               // calculate the longest holding time
-//               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-//                  GRBLinExpr expr = new GRBLinExpr();
-//                  expr.addTerm(pm.getServices().get(s).getTrafficFlow().getHoldingTimes().get(d), vars.fXSVD[x][s][v][d]);
-//                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.hSVX[s][v][x], hSVX);
-//               }
-               // calculate the opex of functions
-//               GRBLinExpr expr = new GRBLinExpr();
-//               expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OPEX), vars.hSVX[s][v][x]);
-//               model.getGrbModel().addConstr(vars.oSV[s][v], GRB.EQUAL, expr, oSV);
                GRBLinExpr expr = new GRBLinExpr();
                expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OPEX), vars.fXSV[x][s][v]);
                model.getGrbModel().addConstr(vars.oSV[s][v], GRB.EQUAL, expr, oSV);
