@@ -168,7 +168,7 @@ public class Variables {
          }
 
          // if model is considering delay constraints
-         if (sc.getConstraints().get(SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+         if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
             dSVX = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)

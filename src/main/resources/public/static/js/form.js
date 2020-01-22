@@ -154,20 +154,6 @@ function generatePaths() {
     }
 }
 
-function checkObjFunc(elem) {
-    var objFunc = document.getElementById("objFunc").value;
-    if (objFunc === "num_servers_util_costs" || objFunc === "util_costs" || objFunc === "util_costs_migrations"
-    || objFunc === "util_costs_max_utilization") {
-        document.getElementById("lu-weight").disabled = false;
-        document.getElementById("xu-weight").disabled = false;
-        document.getElementById("maxU-weight").disabled = false;
-    } else {
-        document.getElementById("lu-weight").disabled = true;
-        document.getElementById("xu-weight").disabled = true;
-        document.getElementById("maxU-weight").disabled = true;
-    }
-}
-
 function checkScenario(elem) {
     var model = document.getElementById("model").value;
     if (model === "dimensioning") {
@@ -193,9 +179,6 @@ function generateScenario() {
     var inputFileName = document.getElementById("inputFileName").value;
     var objFunc = document.getElementById("objFunc").value;
     var maximization = $("#max").is(":checked");
-    var weights = parseFloat(document.getElementById("lu-weight").value).toFixed(1) + "-"
-    + parseFloat(document.getElementById("xu-weight").value).toFixed(1) + "-"
-    + parseFloat(document.getElementById("maxU-weight").value).toFixed(1);
     var model = document.getElementById("model").value;
     // general
     var RP1 = $("#RP1").is(":checked");
@@ -209,7 +192,7 @@ function generateScenario() {
     var FD4 = $("#FD4").is(":checked");
     // model specific
     var sync_traffic = $("#sync-traffic").is(":checked");
-    var serv_delay = $("#serv-delay").is(":checked");
+    var max_serv_delay = $("#max-serv-delay").is(":checked");
     var cloud_only = $("#cloud-only").is(":checked");
     var edge_only = $("#edge-only").is(":checked");
     var single_path = $("#single-path").is(":checked");
@@ -221,7 +204,6 @@ function generateScenario() {
         inputFileName: inputFileName,
         objFunc: objFunc,
         maximization: maximization,
-        weights: weights,
         model: model,
         constraints: {
             // general
@@ -236,7 +218,7 @@ function generateScenario() {
             FD4: FD4,
             // additional
             sync_traffic: sync_traffic,
-            serv_delay: serv_delay,
+            max_serv_delay: max_serv_delay,
             cloud_only: cloud_only,
             edge_only: edge_only,
             single_path: single_path,

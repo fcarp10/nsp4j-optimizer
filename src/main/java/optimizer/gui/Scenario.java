@@ -8,7 +8,6 @@ public class Scenario {
    private String inputFileName;
    private String objFunc;
    private boolean maximization;
-   private String weights;
    private String model;
    private Map<String, Boolean> constraints;
 
@@ -56,11 +55,4 @@ public class Scenario {
       this.maximization = maximization;
    }
 
-   public String getWeights() {
-      return weights;
-   }
-
-   public void setWeights(String weights) {
-      this.weights = weights;
-   }
 }

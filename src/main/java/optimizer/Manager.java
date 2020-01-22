@@ -23,6 +23,7 @@ import utils.GraphManager;
 import utils.KShortestPathGenerator;
 
 import java.io.File;
+import java.util.Random;
 
 import static optimizer.Parameters.*;
 import static optimizer.results.Auxiliary.printLog;
@@ -80,16 +81,25 @@ public class Manager {
    }
 
    private static void specifyUsedTrafficDemands(boolean isInitialPlacement) {
+      Random rnd = new Random(pm.getSeed());
       for (TrafficFlow trafficFlow : pm.getTrafficFlows()) {
          trafficFlow.getAux().clear();
          for (int d = 0; d < trafficFlow.getDemands().size(); d++)
             trafficFlow.getAux().add(true);
          if (isInitialPlacement) {
             double initialTrafficLoad = (double) pm.getAux().get(INITIAL_TRAFFIC_LOAD);
-            int index = (int) (trafficFlow.getDemands().size() * initialTrafficLoad);
-            if (index > 1) //at least one traffic demand per traffic flow
-               for (int d = index; d < trafficFlow.getDemands().size(); d++)
+            double value;
+            for (int d = 0; d < trafficFlow.getDemands().size(); d++) {
+               value = rnd.nextDouble();
+               if (value > initialTrafficLoad)
                   trafficFlow.getAux().set(d, false);
+            }
+            boolean allFalse = true;
+            for (int d = 0; d < trafficFlow.getDemands().size(); d++)
+               if (trafficFlow.getAux().get(d))
+                  allFalse = false;
+            if (allFalse)
+               trafficFlow.getAux().set(0, true);
          }
       }
    }
@@ -145,14 +155,14 @@ public class Manager {
       model.setVars(variables);
       printLog(log, INFO, "setting constraints");
       new GeneralConstraints(pm, model, scenario, initialModel);
-      expr = generateExprForObjectiveFunction(model, scenario, objectiveFunction, initialModel);
+      expr = generateExprForObjectiveFunction(model, objectiveFunction, initialModel);
       model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running model");
       Double objVal = model.run();
       Results results;
       if (objVal != null) {
          results = generateResultsForLP(model, scenario, initialModel);
-         resultsManager.exportJsonFile(generateFileName(scenario, modelName), results);
+         resultsManager.exportJsonFile(generateFileName(modelName, scenario), results);
          if (modelName.equals(INITIAL_PLACEMENT))
             resultsManager.exportModel(model.getGrbModel(), scenario.getInputFileName());
          ResultsGUI.updateResults(results);
@@ -160,9 +170,8 @@ public class Manager {
       return model.getGrbModel();
    }
 
-   private static GRBLinExpr generateExprForObjectiveFunction(Model model, Scenario scenario, String objectiveFunction, GRBModel initialPlacement) throws GRBException {
+   private static GRBLinExpr generateExprForObjectiveFunction(Model model, String objectiveFunction, GRBModel initialPlacement) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
-      String[] weights = scenario.getWeights().split("-");
       double serversWeight, linksWeight;
       switch (objectiveFunction) {
          case SERVER_DIMENSIONING:
@@ -177,8 +186,8 @@ public class Manager {
             expr.add(model.serverCostsExpr(serversWeight));
             break;
          case UTIL_COSTS_OBJ:
-            linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
-            serversWeight = Double.parseDouble(weights[1]) / pm.getServers().size();
+            linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
+            serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
             expr.add(model.linkCostsExpr(linksWeight));
             expr.add(model.serverCostsExpr(serversWeight));
             break;
@@ -190,15 +199,15 @@ public class Manager {
             else printLog(log, WARNING, "no initial placement");
             break;
          case UTIL_COSTS_MAX_UTIL_OBJ:
-            linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
-            serversWeight = Double.parseDouble(weights[1]) / pm.getServers().size();
+            linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
+            serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
             expr.add(model.linkUtilizationExpr(linksWeight));
             expr.add(model.serverUtilizationExpr(serversWeight));
-            expr.add(model.maxUtilizationExpr(Double.parseDouble(weights[2])));
+            expr.add(model.maxUtilizationExpr((double) pm.getAux().get(MAXU_WEIGHT)));
             break;
          case UTILIZATION_OBJ:
-            linksWeight = Double.parseDouble(weights[0]) / pm.getLinks().size();
-            serversWeight = Double.parseDouble(weights[1]) / pm.getServers().size();
+            linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
+            serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
             expr.add(model.linkUtilizationExpr(linksWeight));
             expr.add(model.serverUtilizationExpr(serversWeight));
             break;
@@ -226,7 +235,6 @@ public class Manager {
       if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
          results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModel.getVars().oX));
          results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModel.getVars().oSV));
-//         results.setVariable(hSVX, Auxiliary.grbVarsToDoubles(optModel.getVars().hSVX));
          results.setVariable(qSDP, Auxiliary.grbVarsToDoubles(optModel.getVars().qSDP));
       }
 
@@ -237,7 +245,7 @@ public class Manager {
       }
 
       // service delay variables
-      if (sc.getConstraints().get(SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
          results.setVariable(dSVX, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVX));
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVXD));
          results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVars().mS));
@@ -259,13 +267,16 @@ public class Manager {
       return initialPlacement;
    }
 
-   private static String generateFileName(Scenario scenario, String model) {
+   private static String generateFileName(String model, Scenario sc) {
       String fileName = pm.getScenario() + "_";
-      if (String.valueOf(scenario.getWeights()).equals("1.0-0.0-0.0"))
-         fileName += "LLB_";
-      if (String.valueOf(scenario.getWeights()).equals("0.0-1.0-0.0"))
-         fileName += "XLB_";
-      fileName += model;
+      if (model.equals(INITIAL_PLACEMENT))
+         fileName += model;
+      else if (sc.getConstraints().get(CLOUD_ONLY))
+         fileName += "cloud-only";
+      else if (sc.getConstraints().get(EDGE_ONLY))
+         fileName += "edge-only";
+      else
+         fileName += "edge-cloud";
       return fileName;
    }
 

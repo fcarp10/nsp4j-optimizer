@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import manager.Parameters;
 import manager.elements.Server;
 import manager.elements.Service;
+import manager.elements.TrafficFlow;
 import optimizer.gui.GraphData;
 import optimizer.gui.Scenario;
 import org.graphstream.graph.Edge;
@@ -62,6 +63,12 @@ public class Results {
    private transient List<Double> sd;
    @JsonProperty("st")
    private transient List<Integer> st;
+   @JsonProperty("ox")
+   private transient List<Double> ox;
+   @JsonProperty("osv")
+   private transient List<Double> osv;
+   @JsonProperty("qsdp")
+   private transient List<Double> qsdp;
    @JsonIgnore
    private List<GraphData> luGraph;
    @JsonIgnore
@@ -103,7 +110,7 @@ public class Results {
       // summary results
       migrations = countNumOfMigrations(initialPlacement);
       replications = countNumOfReplications();
-      totalTraffic = pm.getTotalTraffic();
+      totalTraffic = calculateTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
       avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
       this.objVal = Auxiliary.roundDouble(objVal, 6);
@@ -131,7 +138,6 @@ public class Results {
       if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
          oX(); // opex per server
          oSV(); // opex per function
-//         hSVX(); // max holding time aux var
          qSDP(); // qos penalty var
       }
 
@@ -143,7 +149,7 @@ public class Results {
       }
 
       // service delay variables
-      if (sc.getConstraints().get(SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
          sd = serviceDelayList(initialPlacement);
          st = serviceTypes();
          setSummaryResults(sdSummary, sd);
@@ -185,6 +191,15 @@ public class Results {
          printLog(log, ERROR, e.getMessage());
       }
       return totalReplicas;
+   }
+
+   private int calculateTotalTraffic() {
+      int totalTraffic = 0;
+      for (TrafficFlow trafficFlow : pm.getTrafficFlows())
+         for (int d = 0; d < trafficFlow.getDemands().size(); d++)
+            if (trafficFlow.getAux().get(d))
+               totalTraffic += trafficFlow.getDemands().get(d);
+      return totalTraffic;
    }
 
    public Map<Edge, Double> linkUtilizationMap() {
@@ -348,7 +363,8 @@ public class Results {
                for (int s = 0; s < pm.getServices().size(); s++) {
                   double traffic = 0;
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                     traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
+                     if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                        traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
                   for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                      double trafficScaled = traffic * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO);
                      if (var[s][v][p])
@@ -505,11 +521,14 @@ public class Results {
 
    private void oX() {
       try {
+         ox = new ArrayList<>();
          double[] var = (double[]) rawVariables.get(oX);
          List<String> strings = new ArrayList<>();
          for (int x = 0; x < pm.getServers().size(); x++)
-            if (var[x] > 0)
+            if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
                strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "][" + var[x] + "]");
+               ox.add(var[x]);
+            }
          variables.put(oX, strings);
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
@@ -518,44 +537,35 @@ public class Results {
 
    private void oSV() {
       try {
+         osv = new ArrayList<>();
          double[][] var = (double[][]) rawVariables.get(oSV);
          List<String> strings = new ArrayList<>();
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (var[s][v] > 0)
+               if (var[s][v] > 0) {
                   strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "): [" + var[s][v] + "]");
+                  osv.add(var[s][v]);
+               }
          variables.put(oSV, strings);
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }
    }
 
-//   private void hSVX() {
-//      try {
-//         double[][][] var = (double[][][]) rawVariables.get(hSVX);
-//         List<String> strings = new ArrayList<>();
-//         for (int s = 0; s < pm.getServices().size(); s++)
-//            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-//               for (int x = 0; x < pm.getServers().size(); x++)
-//                  if (var[s][v][x] > 0)
-//                     strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (x + this.offset)
-//                             + "): [" + var[s][v][x] + "]");
-//         variables.put(hSVX, strings);
-//      } catch (Exception e) {
-//         printLog(log, ERROR, e.getMessage());
-//      }
-//   }
-
    private void qSDP() {
       try {
+         qsdp = new ArrayList<>();
          double[][][] var = (double[][][]) rawVariables.get(qSDP);
          List<String> strings = new ArrayList<>();
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                  if (var[s][d][p] != 0)
-                     strings.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
-                             + "): [" + var[s][d][p] + "]");
+               if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                     if (var[s][d][p] != 0) {
+                        strings.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
+                                + "): [" + var[s][d][p] + "]");
+                        qsdp.add(var[s][d][p]);
+                     }
 
          variables.put(qSDP, strings);
       } catch (Exception e) {
@@ -780,5 +790,17 @@ public class Results {
 
    public List<Integer> getSt() {
       return st;
+   }
+
+   public List<Double> getOx() {
+      return ox;
+   }
+
+   public List<Double> getOsv() {
+      return osv;
+   }
+
+   public List<Double> getQsdp() {
+      return qsdp;
    }
 }

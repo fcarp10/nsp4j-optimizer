@@ -4,6 +4,9 @@ aux: {
   "offset_results": 0,
   "x_scaling": 8000.0,
   "y_scaling": 8000.0,
+  "links_weight": 0.0,
+  "servers_weight": 0.0,
+  "maxU_weight": 0.0,
   "server_dimensioning_capacity": 1000,
   "server_idle_avg_energy_cost": 0.000002857, # consumption cost per second (Dell PowerEdge R320) 0.000002857 b=74
   "server_util_avg_energy_cost": 0.000002046, # consumption cost per second (Dell PowerEdge R320) 0.000002046 a=53
@@ -12,7 +15,7 @@ aux: {
   "server_other_opex": 0.000025727, # other opex costs per server per second
   "overprovisioning_server_capacity": 1.0,
   "initial_traffic_load": 0.3,
-  "qos_penalty": 0.00210042 # 10% of the total revenue per second of the VNF provider
+  "qos_penalty": 0.00056126 # (0.00210042 old value) 10% of the total revenue per second of the service provider
 }
 # service definitions
 service_chains:
@@ -78,7 +81,7 @@ function_types:
       "process_delay": 5.0,
       "min_process_delay": 2.0,
       "max_delay": 1000.0,
-      "migration_delay": 40.0,
+      "migration_delay": 0.0,
       "opex": 0.00003334 # <-- cost per FaaS, cost per VM_2GB=0.000001917 per second
     }
 # traffic flow definitions

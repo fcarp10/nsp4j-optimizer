@@ -56,7 +56,7 @@ public class Parameters {
 
    // additional constraints
    public static final String SYNC_TRAFFIC = "sync_traffic";
-   public static final String SERV_DELAY = "serv_delay";
+   public static final String MAX_SERV_DELAY = "max_serv_delay";
    public static final String CLOUD_ONLY = "cloud_only";
    public static final String EDGE_ONLY = "edge_only";
    public static final String SINGLE_PATH = "single_path";
@@ -86,11 +86,13 @@ public class Parameters {
 
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";
+   public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
    public static final String SERVER_IDLE_AVG_ENERGY_COST = "server_idle_avg_energy_cost";
    public static final String SERVER_UTIL_AVG_ENERGY_COST = "server_util_avg_energy_cost";
    public static final String SERVER_IDLE_MAX_ENERGY_COST = "server_idle_max_energy_cost";
    public static final String SERVER_UTIL_MAX_ENERGY_COST = "server_util_max_energy_cost";
    public static final String SERVER_OTHER_OPEX = "server_other_opex";
+   public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
 
    // link parameters
    public static final String LINK_CAPACITY = "capacity";
@@ -99,11 +101,12 @@ public class Parameters {
    public static final String LINK_CLOUD = "link_cloud";
 
    // Aux parameters
-   public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
-   public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
    public static final String INITIAL_TRAFFIC_LOAD = "initial_traffic_load";
    public static final String dSPD = "dSPD";
    public static final String QOS_PENALTY = "qos_penalty";
+   public static final String LINKS_WEIGHT = "links_weight";
+   public static final String SERVERS_WEIGHT = "servers_weight";
+   public static final String MAXU_WEIGHT = "maxU_weight";
 
    // GUI parameters
    public static final String NODE_COLOR = "Gray";
