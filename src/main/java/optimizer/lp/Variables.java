@@ -124,7 +124,7 @@ public class Variables {
          if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
             oX = new GRBVar[pm.getServers().size()];
             for (int x = 0; x < pm.getServers().size(); x++)
-               oX[x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+               oX[x] = model.addVar(0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                        , Parameters.oX + "[" + x + "]");
 
             oSV = new GRBVar[pm.getServices().size()][pm.getServiceLength()];

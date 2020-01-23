@@ -92,13 +92,15 @@ public class ModelSpecificConstraints {
             expr.addTerm((double) pm.getAux().get(SERVER_IDLE_AVG_ENERGY_COST), vars.fX[x]);
             expr.addTerm((double) pm.getAux().get(SERVER_UTIL_AVG_ENERGY_COST), vars.uX[x]);
             expr.addConstant((double) pm.getAux().get(SERVER_OTHER_OPEX));
-            model.getGrbModel().addConstr(vars.oX[x], GRB.GREATER_EQUAL, expr, oX);
+            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.oX[x], oX);
             // add the max energy costs
             expr = new GRBLinExpr();
             expr.addTerm(-(double) pm.getAux().get(SERVER_IDLE_MAX_ENERGY_COST), vars.fX[x]);
             expr.addTerm((double) pm.getAux().get(SERVER_UTIL_MAX_ENERGY_COST), vars.uX[x]);
             expr.addConstant((double) pm.getAux().get(SERVER_OTHER_OPEX));
-            model.getGrbModel().addConstr(vars.oX[x], GRB.GREATER_EQUAL, expr, oX);
+            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.oX[x], oX);
+         } else {
+            model.getGrbModel().addConstr(vars.oX[x], GRB.EQUAL, 0.0, oX);
          }
 
       // operational costs for placing functions in the cloud

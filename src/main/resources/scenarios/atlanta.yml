@@ -8,14 +8,14 @@ aux: {
   "servers_weight": 0.0,
   "maxU_weight": 0.0,
   "server_dimensioning_capacity": 1000,
-  "server_idle_avg_energy_cost": 0.000002857, # consumption cost per second (Dell PowerEdge R320) 0.000002857 b=74
-  "server_util_avg_energy_cost": 0.000002046, # consumption cost per second (Dell PowerEdge R320) 0.000002046 a=53
-  "server_idle_max_energy_cost": 0.000030264, # consumption cost per second (Dell PowerEdge R320) (-)0.000030264 b=(-)776
-  "server_util_max_energy_cost": 0.00003783, # consumption cost per second (Dell PowerEdge R320) 0.00003783 a=970
-  "server_other_opex": 0.000025727, # other opex costs per server per second
+  "server_idle_avg_energy_cost": 0.010286, # ($/h) (Dell PowerEdge R320) // 0.000002886 ($/s) b=74 (W)
+  "server_util_avg_energy_cost": 0.007367, # ($/h) (Dell PowerEdge R320) // 0.000002067 ($/s) a=53 (W)
+  "server_idle_max_energy_cost": 0.026966, # ($/h) (Dell PowerEdge R320) // -0.000007566 ($/s) b=-194 (W)
+  "server_util_max_energy_cost": 0.053932, # ($/h) (Dell PowerEdge R320) // 0.000015132 ($/s) a=388 (W)
+  "server_other_opex": 0.0916844, # ($/h) // 0.000025727 ($/s)
   "overprovisioning_server_capacity": 1.0,
   "initial_traffic_load": 0.3,
-  "qos_penalty": 0.00056126 # (0.00210042 old value) 10% of the total revenue per second of the service provider
+  "qos_penalty": 2.020536 #  ($/h) // 0.00056126 ($/s)
 }
 # service definitions
 service_chains:
@@ -24,7 +24,7 @@ service_chains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 50.0
+      "max_delay": 80.0
     }
   - id: 1
     chain: [0, 1, 2, 0]
@@ -38,14 +38,14 @@ service_chains:
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 150.0
+      "max_delay": 120.0
     }
 # function definitions
 function_types:
   - type: 0
     attributes: {
       "replicable": false,
-      "load_ratio": 0.1,
+      "load_ratio": 0.025,
       "overhead": 10,
       "sync_load": 0.0,
       "process_traffic_delay": 2.0,
@@ -54,12 +54,12 @@ function_types:
       "min_process_delay": 1.0,
       "max_delay": 1000.0,
       "migration_delay": 20.0,
-      "opex": 0.000000972 # <-- cost per VM, cost per FaaS_1GB=0.00001667 per second
+      "opex": 0.0034992 # ($/h) VM // FaaS_1GB=0.00001667 ($/s) // VM_1GB=0.000000972 ($/s)
     }
   - type: 1 # VM function
     attributes: {
       "replicable": true,
-      "load_ratio": 1.0,
+      "load_ratio": 0.35,
       "overhead": 10,
       "sync_load": 0.05,
       "process_traffic_delay": 5.0,
@@ -68,12 +68,12 @@ function_types:
       "min_process_delay": 2.0,
       "max_delay": 1000.0,
       "migration_delay": 40.0,
-      "opex": 0.000001917 # <-- cost per VM, cost per FaaS_2GB=0.00003334 per second
+      "opex": 0.0069012 # ($/h) VM // FaaS_2GB=0.00003334 ($/s) //  VM_2GB=0.000001917 ($/s)
     }
   - type: 2 # FaaS function
     attributes: {
       "replicable": true,
-      "load_ratio": 1.0,
+      "load_ratio": 0.25,
       "overhead": 0,
       "sync_load": 0.05,
       "process_traffic_delay": 5.0,
@@ -82,14 +82,14 @@ function_types:
       "min_process_delay": 2.0,
       "max_delay": 1000.0,
       "migration_delay": 0.0,
-      "opex": 0.00003334 # <-- cost per FaaS, cost per VM_2GB=0.000001917 per second
+      "opex": 0.120024 # ($/h) FaaS // VM_2GB=0.000001917 ($/s) // FaaS_2GB=0.00003334 ($/s)
     }
 # traffic flow definitions
 traffic_flows:
   - min_dem: 1
     max_dem: 3
     min_bw: 1
-    max_bw: 20
+    max_bw: 60
 
 #traffic_flows:
 #  - min_dem: 1
@@ -98,4 +98,5 @@ traffic_flows:
 #    max_bw: 900
 #    src: "n1"
 #    dst: "n9"
-#    service_id: 1
+#    service_id: 2
+
