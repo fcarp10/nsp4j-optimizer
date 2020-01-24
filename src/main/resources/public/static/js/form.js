@@ -38,7 +38,7 @@ function successConnection(message) {
         document.getElementById("message").innerText = messages.join("");
         if (messages.length >= numMessages)
             messages.shift();
-        if (message == "INFO - backend is ready") {
+        if (message == "INFO - topology loaded" || message == "INFO - backend is ready") {
             document.getElementById("run_button").removeAttribute("disabled");
             document.getElementById("stop_button").setAttribute("disabled", "true");
             longRefresh();

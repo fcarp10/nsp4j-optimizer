@@ -88,16 +88,23 @@ public class Model {
       return expr;
    }
 
-   public GRBLinExpr operationalCostsExpr() {
+   public GRBLinExpr opexServersExpr() {
       GRBLinExpr expr = new GRBLinExpr();
-      // add opex for servers
       for (int x = 0; x < pm.getServers().size(); x++)
          expr.addTerm(1.0, vars.oX[x]);
-      // add opex for functions
+      return expr;
+   }
+
+   public GRBLinExpr functionsChargesExpr() {
+      GRBLinExpr expr = new GRBLinExpr();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             expr.addTerm(1.0, vars.oSV[s][v]);
-      // add qos penalties
+      return expr;
+   }
+
+   public GRBLinExpr qosPenaltiesExpr() {
+      GRBLinExpr expr = new GRBLinExpr();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)

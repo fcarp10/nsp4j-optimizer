@@ -120,19 +120,18 @@ public class Variables {
                     , Parameters.uMax);
          }
 
-         // if model is optimizing with operational costs
-         if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+         // if model is optimizing with monetary costs
+         if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
+                 || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
             oX = new GRBVar[pm.getServers().size()];
             for (int x = 0; x < pm.getServers().size(); x++)
                oX[x] = model.addVar(0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                        , Parameters.oX + "[" + x + "]");
-
             oSV = new GRBVar[pm.getServices().size()][pm.getServiceLength()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   oSV[s][v] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                           , Parameters.oSV + "[" + s + "][" + v + "]");
-
             qSDP = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
@@ -168,7 +167,8 @@ public class Variables {
          }
 
          // if model is considering delay constraints
-         if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+         if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
+                 || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
             dSVX = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)

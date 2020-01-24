@@ -135,10 +135,11 @@ public class Results {
       // model specific variables
       if (sc.getModel().equals(SERVER_DIMENSIONING))
          xN(); // integer, num servers per node
-      if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+      if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
+              || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          oX(); // opex per server
-         oSV(); // opex per function
-         qSDP(); // qos penalty var
+         oSV(); // function charges
+         qSDP(); // qos penalties
       }
 
       // sync traffic variables
@@ -149,7 +150,8 @@ public class Results {
       }
 
       // service delay variables
-      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
+              || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          sd = serviceDelayList(initialPlacement);
          st = serviceTypes();
          setSummaryResults(sdSummary, sd);

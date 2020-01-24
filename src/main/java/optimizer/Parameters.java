@@ -8,7 +8,10 @@ public class Parameters {
    public static final String UTIL_COSTS_MIGRATIONS_OBJ = "util_costs_migrations";
    public static final String UTIL_COSTS_MAX_UTIL_OBJ = "util_costs_max_utilization";
    public static final String UTILIZATION_OBJ = "utilization";
-   public static final String OPER_COSTS_OBJ = "oper_costs";
+   public static final String OPEX_SERVERS_OBJ = "opex_servers";
+   public static final String FUNCTIONS_CHARGES_OBJ = "functions_charges";
+   public static final String QOS_PENALTIES_OBJ = "qos_penalties";
+   public static final String ALL_MONETARY_COSTS_OBJ = "all_monetary_costs";
 
    // scenarios
    public static final String SERVER_DIMENSIONING = "dimensioning";
@@ -31,7 +34,6 @@ public class Parameters {
    public static final String uMax = "uMax";
    public static final String oX = "oX";
    public static final String oSV = "oSV";
-   public static final String hSVX = "hSVX";
    public static final String qSDP = "qSDP";
 
    // service delay variables
@@ -87,10 +89,8 @@ public class Parameters {
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";
    public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
-   public static final String SERVER_IDLE_AVG_ENERGY_COST = "server_idle_avg_energy_cost";
-   public static final String SERVER_UTIL_AVG_ENERGY_COST = "server_util_avg_energy_cost";
-   public static final String SERVER_IDLE_MAX_ENERGY_COST = "server_idle_max_energy_cost";
-   public static final String SERVER_UTIL_MAX_ENERGY_COST = "server_util_max_energy_cost";
+   public static final String SERVER_IDLE_ENERGY_COST = "server_idle_energy_cost";
+   public static final String SERVER_UTIL_ENERGY_COST = "server_util_energy_cost";
    public static final String SERVER_OTHER_OPEX = "server_other_opex";
    public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
 

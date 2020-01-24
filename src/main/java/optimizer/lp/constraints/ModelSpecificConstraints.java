@@ -40,8 +40,13 @@ public class ModelSpecificConstraints {
          // set max utilization constraint
          if (sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) maxUtilization();
 
-         // set operational costs
-         if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) operationalCosts(initialPlacement);
+         // set monetary costs
+         if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
+                 || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+            opexServers();
+            functionsCharges();
+            qosPenalties(initialPlacement);
+         }
 
          // rest of specific constraints
          if (sc.getConstraints().get(SYNC_TRAFFIC)) syncTraffic(linkLoadExpr);
@@ -82,28 +87,20 @@ public class ModelSpecificConstraints {
          model.getGrbModel().addConstr(vars.uL[l], GRB.LESS_EQUAL, vars.uMax, uMax);
    }
 
-   private void operationalCosts(GRBModel initialPlacement) throws GRBException {
-
-      // operational costs for using servers
+   private void opexServers() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
-            // add the avg energy costs
             GRBLinExpr expr = new GRBLinExpr();
-            expr.addTerm((double) pm.getAux().get(SERVER_IDLE_AVG_ENERGY_COST), vars.fX[x]);
-            expr.addTerm((double) pm.getAux().get(SERVER_UTIL_AVG_ENERGY_COST), vars.uX[x]);
+            expr.addTerm((double) pm.getAux().get(SERVER_IDLE_ENERGY_COST), vars.fX[x]);
+            expr.addTerm((double) pm.getAux().get(SERVER_UTIL_ENERGY_COST), vars.uX[x]);
             expr.addConstant((double) pm.getAux().get(SERVER_OTHER_OPEX));
-            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.oX[x], oX);
-            // add the max energy costs
-            expr = new GRBLinExpr();
-            expr.addTerm(-(double) pm.getAux().get(SERVER_IDLE_MAX_ENERGY_COST), vars.fX[x]);
-            expr.addTerm((double) pm.getAux().get(SERVER_UTIL_MAX_ENERGY_COST), vars.uX[x]);
-            expr.addConstant((double) pm.getAux().get(SERVER_OTHER_OPEX));
-            model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.oX[x], oX);
+            model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.oX[x], oX);
          } else {
-            model.getGrbModel().addConstr(vars.oX[x], GRB.EQUAL, 0.0, oX);
+            model.getGrbModel().addConstr(vars.oX[x], GRB.EQUAL, 0, oX);
          }
+   }
 
-      // operational costs for placing functions in the cloud
+   private void functionsCharges() throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
@@ -112,8 +109,9 @@ public class ModelSpecificConstraints {
                   expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OPEX), vars.fXSV[x][s][v]);
                   model.getGrbModel().addConstr(vars.oSV[s][v], GRB.EQUAL, expr, oSV);
                }
+   }
 
-      // apply penalty costs for service delay
+   private void qosPenalties(GRBModel initialPlacement) throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
@@ -132,7 +130,7 @@ public class ModelSpecificConstraints {
                   expr.addTerm((double) pm.getAux().get(QOS_PENALTY), vars.ySDP[s][d][p]);
                   expr.addTerm(-(double) pm.getAux().get(QOS_PENALTY) *
                           (double) pm.getServices().get(s).getAttribute(SERVICE_MAX_DELAY), vars.zSPD[s][p][d]);
-                  model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.GREATER_EQUAL, expr, OPER_COSTS_OBJ);
+                  model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.EQUAL, expr, qSDP);
                }
    }
 

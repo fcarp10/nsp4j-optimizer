@@ -211,8 +211,19 @@ public class Manager {
             expr.add(model.linkUtilizationExpr(linksWeight));
             expr.add(model.serverUtilizationExpr(serversWeight));
             break;
-         case OPER_COSTS_OBJ:
-            expr.add(model.operationalCostsExpr());
+         case OPEX_SERVERS_OBJ:
+            expr.add(model.opexServersExpr());
+            break;
+         case FUNCTIONS_CHARGES_OBJ:
+            expr.add(model.functionsChargesExpr());
+            break;
+         case QOS_PENALTIES_OBJ:
+            expr.add(model.qosPenaltiesExpr());
+            break;
+         case ALL_MONETARY_COSTS_OBJ:
+            expr.add(model.opexServersExpr());
+            expr.add(model.functionsChargesExpr());
+            expr.add(model.qosPenaltiesExpr());
             break;
       }
       return expr;
@@ -232,7 +243,8 @@ public class Manager {
       // model specific variables
       if (sc.getObjFunc().equals(SERVER_DIMENSIONING))
          results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModel.getVars().xN));
-      if (sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+      if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
+              || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModel.getVars().oX));
          results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModel.getVars().oSV));
          results.setVariable(qSDP, Auxiliary.grbVarsToDoubles(optModel.getVars().qSDP));
@@ -245,7 +257,8 @@ public class Manager {
       }
 
       // service delay variables
-      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPER_COSTS_OBJ)) {
+      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
+              || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          results.setVariable(dSVX, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVX));
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVXD));
          results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVars().mS));
