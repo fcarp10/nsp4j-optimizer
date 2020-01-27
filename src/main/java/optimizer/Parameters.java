@@ -3,15 +3,15 @@ package optimizer;
 public class Parameters {
    // objective functions
    public static final String NUM_SERVERS_OBJ = "num_servers";
-   public static final String NUM_SERVERS_UTIL_COSTS_OBJ = "num_servers_util_costs";
-   public static final String UTIL_COSTS_OBJ = "util_costs";
-   public static final String UTIL_COSTS_MIGRATIONS_OBJ = "util_costs_migrations";
-   public static final String UTIL_COSTS_MAX_UTIL_OBJ = "util_costs_max_utilization";
+   public static final String NUM_SERVERS_UTIL_COSTS_OBJ = "num-servers-util-costs";
+   public static final String UTIL_COSTS_OBJ = "util-costs";
+   public static final String UTIL_COSTS_MIGRATIONS_OBJ = "util-costs-migrations";
+   public static final String UTIL_COSTS_MAX_UTIL_OBJ = "util-costs-max-utilization";
    public static final String UTILIZATION_OBJ = "utilization";
-   public static final String OPEX_SERVERS_OBJ = "opex_servers";
-   public static final String FUNCTIONS_CHARGES_OBJ = "functions_charges";
-   public static final String QOS_PENALTIES_OBJ = "qos_penalties";
-   public static final String ALL_MONETARY_COSTS_OBJ = "all_monetary_costs";
+   public static final String OPEX_SERVERS_OBJ = "opex-servers";
+   public static final String FUNCTIONS_CHARGES_OBJ = "functions-charges";
+   public static final String QOS_PENALTIES_OBJ = "qos-penalties";
+   public static final String ALL_MONETARY_COSTS_OBJ = "all-monetary-costs";
 
    // scenarios
    public static final String SERVER_DIMENSIONING = "dimensioning";
@@ -118,7 +118,7 @@ public class Parameters {
    public static final String X_SCALING = "x_scaling";
    public static final String Y_SCALING = "y_scaling";
    public static final int MAX_NUM_SERVERS = 24;
-   public static final int PORT = 8080;
+   public static final int PORT = 8081;
 
    // logs and messages
    public static final String ERROR = "ERROR - ";

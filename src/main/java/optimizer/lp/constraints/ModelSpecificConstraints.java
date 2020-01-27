@@ -130,7 +130,7 @@ public class ModelSpecificConstraints {
                   expr.addTerm((double) pm.getAux().get(QOS_PENALTY), vars.ySDP[s][d][p]);
                   expr.addTerm(-(double) pm.getAux().get(QOS_PENALTY) *
                           (double) pm.getServices().get(s).getAttribute(SERVICE_MAX_DELAY), vars.zSPD[s][p][d]);
-                  model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.EQUAL, expr, qSDP);
+                  model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.GREATER_EQUAL, expr, qSDP);
                }
    }
 

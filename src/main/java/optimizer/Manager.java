@@ -290,6 +290,18 @@ public class Manager {
          fileName += "edge-only";
       else
          fileName += "edge-cloud";
+
+      switch (sc.getObjFunc()) {
+         case OPEX_SERVERS_OBJ:
+            fileName += "_O";
+            break;
+         case FUNCTIONS_CHARGES_OBJ:
+            fileName += "_C";
+            break;
+         case QOS_PENALTIES_OBJ:
+            fileName += "_P";
+            break;
+      }
       return fileName;
    }
 
