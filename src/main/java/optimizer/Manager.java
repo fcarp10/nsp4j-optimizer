@@ -173,6 +173,7 @@ public class Manager {
    private static GRBLinExpr generateExprForObjectiveFunction(Model model, String objectiveFunction, GRBModel initialPlacement) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       double serversWeight, linksWeight;
+      Integer BIG_M = 100000;
       switch (objectiveFunction) {
          case SERVER_DIMENSIONING:
             expr.add(model.dimensioningExpr());
@@ -213,17 +214,19 @@ public class Manager {
             break;
          case OPEX_SERVERS_OBJ:
             expr.add(model.opexServersExpr());
+            expr.add(model.qosPenaltiesExpr(1.0 / BIG_M));
             break;
          case FUNCTIONS_CHARGES_OBJ:
             expr.add(model.functionsChargesExpr());
+            expr.add(model.qosPenaltiesExpr(1.0 / BIG_M));
             break;
          case QOS_PENALTIES_OBJ:
-            expr.add(model.qosPenaltiesExpr());
+            expr.add(model.qosPenaltiesExpr(1.0));
             break;
          case ALL_MONETARY_COSTS_OBJ:
             expr.add(model.opexServersExpr());
             expr.add(model.functionsChargesExpr());
-            expr.add(model.qosPenaltiesExpr());
+            expr.add(model.qosPenaltiesExpr(1.0));
             break;
       }
       return expr;
@@ -285,21 +288,24 @@ public class Manager {
       if (model.equals(INITIAL_PLACEMENT))
          fileName += model;
       else if (sc.getConstraints().get(CLOUD_ONLY))
-         fileName += "cloud-only";
+         fileName += "c";
       else if (sc.getConstraints().get(EDGE_ONLY))
-         fileName += "edge-only";
+         fileName += "e";
       else
-         fileName += "edge-cloud";
+         fileName += "ec";
 
       switch (sc.getObjFunc()) {
          case OPEX_SERVERS_OBJ:
-            fileName += "_O";
+            fileName += "_op";
             break;
          case FUNCTIONS_CHARGES_OBJ:
-            fileName += "_C";
+            fileName += "_ch";
             break;
          case QOS_PENALTIES_OBJ:
-            fileName += "_P";
+            fileName += "_pe";
+            break;
+         case ALL_MONETARY_COSTS_OBJ:
+            fileName += "_all";
             break;
       }
       return fileName;
