@@ -69,6 +69,8 @@ public class Results {
    private transient List<Double> osv;
    @JsonProperty("qsdp")
    private transient List<Double> qsdp;
+   @JsonProperty("fxsv")
+   private transient List<Double> fxsv;
    @JsonIgnore
    private List<GraphData> luGraph;
    @JsonIgnore
@@ -100,6 +102,7 @@ public class Results {
       this.xu = new ArrayList<>();
       this.fp = new ArrayList<>();
       this.sd = new ArrayList<>();
+      this.fxsv = new ArrayList<>();
    }
 
    public void setVariable(String key, Object variable) {
@@ -237,8 +240,10 @@ public class Results {
             int numOfFunctions = 0;
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (var[x][s][v])
+                  if (var[x][s][v]) {
                      numOfFunctions++;
+                     fxsv.add(1.0);
+                  } else fxsv.add(0.0);
             numOfFunctionsPerServer.add(numOfFunctions);
          }
       } catch (Exception e) {
@@ -804,5 +809,9 @@ public class Results {
 
    public List<Double> getQsdp() {
       return qsdp;
+   }
+
+   public List<Double> getFxsv() {
+      return fxsv;
    }
 }
