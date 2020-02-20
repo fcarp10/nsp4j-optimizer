@@ -118,7 +118,7 @@ public class Parameters {
    public static final String X_SCALING = "x_scaling";
    public static final String Y_SCALING = "y_scaling";
    public static final int MAX_NUM_SERVERS = 24;
-   public static final int PORT = 8080;
+   public static final int PORT = 8081;
 
    // logs and messages
    public static final String ERROR = "ERROR - ";
