@@ -288,9 +288,9 @@ public class Manager {
       if (model.equals(INITIAL_PLACEMENT))
          fileName += model;
       else if (sc.getConstraints().get(CLOUD_ONLY))
-         fileName += "c";
+         fileName += "co";
       else if (sc.getConstraints().get(EDGE_ONLY))
-         fileName += "e";
+         fileName += "eo";
       else
          fileName += "ec";
 
