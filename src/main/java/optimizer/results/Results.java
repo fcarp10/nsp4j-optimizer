@@ -40,9 +40,9 @@ public class Results {
    @JsonProperty("synchronization_traffic")
    private double synchronizationTraffic;
    @JsonProperty("migrations")
-   private int migrations;
+   private int[] migrations;
    @JsonProperty("replications")
-   private int replications;
+   private int[] replications;
    @JsonProperty("lu_summary")
    private double[] luSummary;
    @JsonProperty("xu_summary")
@@ -111,8 +111,8 @@ public class Results {
 
    public void initializeResults(double objVal, boolean[][][] initialPlacement) {
       // summary results
-      migrations = countNumOfMigrations(initialPlacement);
-      replications = countNumOfReplications();
+      migrations = countMigrations(initialPlacement);
+      replications = countReplications();
       totalTraffic = calculateTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
       avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
@@ -143,6 +143,7 @@ public class Results {
          oX(); // opex per server
          oSV(); // function charges
          qSDP(); // qos penalties
+
       }
 
       // sync traffic variables
@@ -161,11 +162,12 @@ public class Results {
          sdGraph(sd);
          dSVX(); // processing delay
          mS(); // migration delay
+         dSVXD();
       }
    }
 
-   private int countNumOfMigrations(boolean[][][] initialPlacement) {
-      int totalMigrations = 0;
+   private int[] countMigrations(boolean[][][] initialPlacement) {
+      int[] migrations = new int[pm.getFunctionTypes().size()];
       if (initialPlacement != null)
          try {
             boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
@@ -173,29 +175,29 @@ public class Results {
                for (int s = 0; s < pm.getServices().size(); s++)
                   for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                      if (initialPlacement[x][s][v] && !var[x][s][v])
-                        totalMigrations++;
+                        migrations[pm.getServices().get(s).getFunctions().get(v).getType()]++;
          } catch (Exception e) {
             printLog(log, ERROR, e.getMessage());
          }
-      return totalMigrations;
+      return migrations;
    }
 
-   private int countNumOfReplications() {
-      int totalReplicas = 0;
+   private int[] countReplications() {
+      int[] replicas = new int[pm.getFunctionTypes().size()];
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-               int replicasPerFunction = -1;
+               int replicasTemp = -1;
                for (int x = 0; x < pm.getServers().size(); x++)
                   if (var[x][s][v])
-                     replicasPerFunction++;
-               totalReplicas += replicasPerFunction;
+                     replicasTemp++;
+               replicas[pm.getServices().get(s).getFunctions().get(v).getType()] += replicasTemp;
             }
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }
-      return totalReplicas;
+      return replicas;
    }
 
    private int calculateTotalTraffic() {
@@ -655,6 +657,23 @@ public class Results {
       }
    }
 
+   private void dSVXD() {
+      try {
+         double[][][][] var = (double[][][][]) rawVariables.get(dSVXD);
+         List<String> strings = new ArrayList<>();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               for (int x = 0; x < pm.getServers().size(); x++)
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     if (var[s][v][x][d] > 0)
+                        strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (x + this.offset) + ","
+                                + (d + this.offset) + "): " + "[" + var[s][v][x][d] + "]");
+         variables.put(dSVXD, strings);
+      } catch (Exception e) {
+         printLog(log, ERROR, e.getMessage());
+      }
+   }
+
    /**********************************************************************************************/
 
    private void setSummaryResults(double[] array, List var) {
@@ -759,11 +778,11 @@ public class Results {
       return synchronizationTraffic;
    }
 
-   public int getMigrations() {
+   public int[] getMigrations() {
       return migrations;
    }
 
-   public int getReplications() {
+   public int[] getReplications() {
       return replications;
    }
 

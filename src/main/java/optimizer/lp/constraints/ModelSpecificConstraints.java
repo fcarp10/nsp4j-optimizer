@@ -244,9 +244,9 @@ public class ModelSpecificConstraints {
                   GRBLinExpr processDelayExpr2 = new GRBLinExpr();
                   processDelayExpr2.addTerm((double) function.getAttribute(FUNCTION_PROCESS_DELAY), vars.uX[x]);
                   GRBLinExpr processDelayExpr = new GRBLinExpr();
-                  processDelayExpr.add(loadDelayExpr); // d_pro_q
-                  processDelayExpr.add(processDelayExpr1); // d_pro_x_min
-                  processDelayExpr.add(processDelayExpr2); // d_pro_x
+                  processDelayExpr.add(loadDelayExpr); // d_pro_q (first term)
+                  processDelayExpr.add(processDelayExpr1); // d_pro_q (second term)
+                  processDelayExpr.add(processDelayExpr2); // D_pro_x * ux
                   for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
                      if (service.getTrafficFlow().getAux().get(d1)) {
                         GRBLinExpr processConstraintExpr1 = new GRBLinExpr();
