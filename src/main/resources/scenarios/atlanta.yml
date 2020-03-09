@@ -38,6 +38,13 @@ service_chains:
       "max_paths": 5,
       "max_delay": 150.0
     }
+#  - id: 3
+#    chain: [0, 1, 1, 1, 0]
+#    attributes: {
+#      "min_paths": 1,
+#      "max_paths": 5,
+#      "max_delay": 100.0
+#    }
 # function definitions
 function_types:
   - type: 0
@@ -89,12 +96,4 @@ traffic_flows:
     min_bw: 1
     max_bw: 40
 
-#traffic_flows:
-#  - min_dem: 1
-#    max_dem: 1
-#    min_bw: 900
-#    max_bw: 900
-#    src: "n1"
-#    dst: "n9"
-#    service_id: 2
 

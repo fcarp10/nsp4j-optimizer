@@ -31,6 +31,8 @@ public class Results {
    private transient Scenario sc;
    @JsonProperty("objective_value")
    private double objVal;
+   @JsonProperty("computation_time")
+   private double computationTime;
    @JsonProperty("avg_path_length")
    private double avgPathLength;
    @JsonProperty("total_traffic")
@@ -732,6 +734,14 @@ public class Results {
 
    public double getObjVal() {
       return objVal;
+   }
+
+   public double getComputationTime() {
+      return computationTime;
+   }
+
+   public void setComputationTime(double computationTime) {
+      this.computationTime = computationTime;
    }
 
    public Scenario getScenario() {

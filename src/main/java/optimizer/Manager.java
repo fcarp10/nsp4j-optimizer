@@ -158,10 +158,13 @@ public class Manager {
       expr = generateExprForObjectiveFunction(model, objectiveFunction, initialModel);
       model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running model");
+      long startTime = System.nanoTime();
       Double objVal = model.run();
+      long elapsedTime = System.nanoTime() - startTime;
       Results results;
       if (objVal != null) {
          results = generateResultsForLP(model, scenario, initialModel);
+         results.setComputationTime((double) elapsedTime / 1000000000);
          resultsManager.exportJsonFile(generateFileName(modelName, scenario), results);
          if (modelName.equals(INITIAL_PLACEMENT))
             resultsManager.exportModel(model.getGrbModel(), scenario.getInputFileName());
