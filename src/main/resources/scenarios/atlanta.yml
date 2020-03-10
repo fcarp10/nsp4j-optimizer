@@ -17,34 +17,34 @@ aux: {
 }
 # service definitions
 service_chains:
-  - id: 0
-    chain: [0, 1, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 50.0
-    }
-  - id: 1
-    chain: [0, 1, 2, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 100.0
-    }
-  - id: 2
-    chain: [0, 1, 2, 1, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 150.0
-    }
-#  - id: 3
-#    chain: [0, 1, 1, 1, 0]
+#  - id: 0
+#    chain: [0, 1, 0]
+#    attributes: {
+#      "min_paths": 1,
+#      "max_paths": 5,
+#      "max_delay": 50.0
+#    }
+#  - id: 1
+#    chain: [0, 1, 2, 0]
 #    attributes: {
 #      "min_paths": 1,
 #      "max_paths": 5,
 #      "max_delay": 100.0
 #    }
+#  - id: 2
+#    chain: [0, 1, 2, 1, 0]
+#    attributes: {
+#      "min_paths": 1,
+#      "max_paths": 5,
+#      "max_delay": 150.0
+#    }
+  - id: 3
+    chain: [0, 2, 2, 0]
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 5,
+      "max_delay": 100.0
+    }
 # function definitions
 function_types:
   - type: 0
