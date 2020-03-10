@@ -217,11 +217,11 @@ public class Manager {
             break;
          case OPEX_SERVERS_OBJ:
             expr.add(model.opexServersExpr());
-            expr.add(model.qosPenaltiesExpr(1.0 / BIG_M)); // because delay is not constrained
+//            expr.add(model.qosPenaltiesExpr(1.0 / BIG_M)); // because delay is not constrained
             break;
          case FUNCTIONS_CHARGES_OBJ:
             expr.add(model.functionsChargesExpr());
-            expr.add(model.qosPenaltiesExpr(1.0 / BIG_M)); // because delay is not constrained
+//            expr.add(model.qosPenaltiesExpr(1.0 / BIG_M)); // because delay is not constrained
             break;
          case QOS_PENALTIES_OBJ:
             expr.add(model.qosPenaltiesExpr(1.0));
