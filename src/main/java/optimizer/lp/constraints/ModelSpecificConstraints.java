@@ -219,7 +219,7 @@ public class ModelSpecificConstraints {
       serviceDelayExpr.add(processingDelayExpr(s, p, d)); // adds processing delay
       serviceDelayExpr.add(linkDelayExpr(s, p)); // adds propagation delay
       if (initialPlacement != null)
-         serviceDelayExpr.add(migrationDelayExpr(initialPlacement, s, d, p)); // adds migration delay
+         serviceDelayExpr.add(migrationDelayExpr(initialPlacement, s, p)); // adds migration delay
       return serviceDelayExpr;
    }
 
@@ -274,9 +274,10 @@ public class ModelSpecificConstraints {
       return linkDelayExpr;
    }
 
-   private GRBLinExpr migrationDelayExpr(GRBModel initialModel, int s, int d, int p) throws GRBException {
+   private GRBLinExpr migrationDelayExpr(GRBModel initialModel, int s, int p) throws GRBException {
       Service service = pm.getServices().get(s);
       Path path = service.getTrafficFlow().getPaths().get(p);
+      double maxMigrationDelay = 0;
       for (int n = 0; n < path.getNodePath().size(); n++)
          for (int x = 0; x < pm.getServers().size(); x++)
             if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
@@ -284,10 +285,13 @@ public class ModelSpecificConstraints {
                   if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
                      GRBLinExpr linExpr = new GRBLinExpr();
                      double delay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
+                     maxMigrationDelay = delay;
                      linExpr.addTerm(-delay, vars.fXSV[x][s][v]);
                      linExpr.addConstant(delay);
                      model.getGrbModel().addConstr(linExpr, GRB.LESS_EQUAL, vars.mS[s], FUNCTION_MIGRATION_DELAY);
                   }
+
+      model.getGrbModel().addConstr(vars.mS[s], GRB.LESS_EQUAL, maxMigrationDelay, FUNCTION_MIGRATION_DELAY);
       GRBLinExpr linExpr = new GRBLinExpr();
       linExpr.addTerm(1.0, vars.mS[s]);
       return linExpr;
