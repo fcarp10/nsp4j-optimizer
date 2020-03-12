@@ -13,7 +13,8 @@ aux: {
   "server_other_opex": 0.14787654, # ($/h) (PowerEdge R410)
   "overprovisioning_server_capacity": 1.0,
   "initial_traffic_load": 0.3,
-  "qos_penalty": 0.00140516 #  ($/h) //
+  "qos_penalty": 0.00140516, #  ($/h) //
+  "qos_penalty_max": 0.00000003903 # ($/h) for a maximum allowed delay of 150ms - 50ms (the worst case) = (100ms / 3600*1000 ) * qos_penalty
 }
 # service definitions
 service_chains:
@@ -29,21 +30,21 @@ service_chains:
 #    attributes: {
 #      "min_paths": 1,
 #      "max_paths": 5,
-#      "max_delay": 100.0
+#      "max_delay": 100.0 # ms
 #    }
 #  - id: 2
 #    chain: [0, 1, 2, 1, 0]
 #    attributes: {
 #      "min_paths": 1,
 #      "max_paths": 5,
-#      "max_delay": 150.0
+#      "max_delay": 150.0 # ms
 #    }
   - id: 3
     chain: [0, 2, 2, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
-      "max_delay": 100.0
+      "max_delay": 100.0 # ms
     }
 # function definitions
 function_types:
@@ -55,10 +56,10 @@ function_types:
       "sync_load": 0.0,
       "process_traffic_delay": 2.0,
       "max_cap_server": 100,
-      "process_delay": 2.0,
-      "min_process_delay": 1.0,
-      "max_delay": 1000.0,
-      "migration_delay": 20.0,
+      "process_delay": 2.0, # ms
+      "min_process_delay": 1.0, # ms
+      "max_delay": 1000.0, # ms
+      "migration_delay": 20.0, # ms
       "opex": 0.0034992 # ($/h) VM // FaaS_1GB=0.00001667 ($/s) // VM_1GB=0.000000972 ($/s)
     }
   - type: 1 # VM function
@@ -69,10 +70,10 @@ function_types:
       "sync_load": 0.05,
       "process_traffic_delay": 5.0,
       "max_cap_server": 100,
-      "process_delay": 5.0,
-      "min_process_delay": 2.0,
-      "max_delay": 1000.0,
-      "migration_delay": 40.0,
+      "process_delay": 5.0, # ms
+      "min_process_delay": 2.0, # ms
+      "max_delay": 1000.0, # ms
+      "migration_delay": 40.0, # ms
       "opex": 0.0069 # ($/h) VM t2.small (2GB)
     }
   - type: 2 # FaaS function
@@ -83,10 +84,10 @@ function_types:
       "sync_load": 0.025,
       "process_traffic_delay": 2.5,
       "max_cap_server": 50,
-      "process_delay": 2.5,
-      "min_process_delay": 1.0,
-      "max_delay": 500.0,
-      "migration_delay": 0.0,
+      "process_delay": 2.5, # ms
+      "min_process_delay": 1.0, # ms
+      "max_delay": 500.0, # ms
+      "migration_delay": 0.0, # ms
       "opex": 0.060012 # ($/h) FaaS (1GB)
     }
 # traffic flow definitions

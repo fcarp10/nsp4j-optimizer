@@ -103,12 +103,12 @@ public class Model {
       return expr;
    }
 
-   public GRBLinExpr qosPenaltiesExpr(double weight) {
+   public GRBLinExpr qosPenaltiesExpr() {
       GRBLinExpr expr = new GRBLinExpr();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               expr.addTerm(weight, vars.qSDP[s][d][p]);
+               expr.addTerm(1.0, vars.qSDPplus[s][d][p]);
       return expr;
    }
 

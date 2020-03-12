@@ -104,6 +104,7 @@ public class Parameters {
    public static final String INITIAL_TRAFFIC_LOAD = "initial_traffic_load";
    public static final String dSPD = "dSPD";
    public static final String QOS_PENALTY = "qos_penalty";
+   public static final String QOS_PENALTY_MAX = "qos_penalty_max";
    public static final String LINKS_WEIGHT = "links_weight";
    public static final String SERVERS_WEIGHT = "servers_weight";
    public static final String MAXU_WEIGHT = "maxU_weight";

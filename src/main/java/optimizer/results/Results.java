@@ -145,7 +145,6 @@ public class Results {
          oX(); // opex per server
          oSV(); // function charges
          qSDP(); // qos penalties
-
       }
 
       // sync traffic variables
@@ -572,7 +571,7 @@ public class Results {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                   for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                     if (var[s][d][p] != 0) {
+                     if (var[s][d][p] > 0) {
                         strings.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
                                 + "): [" + var[s][d][p] + "]");
                         qsdp.add(var[s][d][p]);
