@@ -18,29 +18,43 @@ aux: {
 }
 # service definitions
 service_chains:
-#  - id: 0
-#    chain: [0, 1, 0]
-#    attributes: {
-#      "min_paths": 1,
-#      "max_paths": 5,
-#      "max_delay": 50.0
-#    }
-#  - id: 1
-#    chain: [0, 1, 2, 0]
-#    attributes: {
-#      "min_paths": 1,
-#      "max_paths": 5,
-#      "max_delay": 100.0 # ms
-#    }
-#  - id: 2
-#    chain: [0, 1, 2, 1, 0]
-#    attributes: {
-#      "min_paths": 1,
-#      "max_paths": 5,
-#      "max_delay": 150.0 # ms
-#    }
+  - id: 0
+    chain: [0, 1, 0]
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 5,
+      "max_delay": 100.0 # ms
+    }
+  - id: 1
+    chain: [0, 1, 1, 0]
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 5,
+      "max_delay": 100.0 # ms
+    }
+  - id: 2
+    chain: [0, 1, 1, 1, 0]
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 5,
+      "max_delay": 100.0 # ms
+    }
   - id: 3
+    chain: [0, 2, 0]
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 5,
+      "max_delay": 100.0 # ms
+    }
+  - id: 4
     chain: [0, 2, 2, 0]
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 5,
+      "max_delay": 100.0 # ms
+    }
+  - id: 5
+    chain: [0, 2, 2, 2, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
@@ -51,43 +65,43 @@ function_types:
   - type: 0
     attributes: {
       "replicable": false,
-      "load_ratio": 0.05,
-      "overhead": 10,
+      "load_ratio": 0.0,
+      "overhead": 0,
       "sync_load": 0.0,
-      "process_traffic_delay": 2.0,
-      "max_cap_server": 100,
-      "process_delay": 2.0, # ms
-      "min_process_delay": 1.0, # ms
-      "max_delay": 1000.0, # ms
-      "migration_delay": 20.0, # ms
-      "opex": 0.0034992 # ($/h) VM // FaaS_1GB=0.00001667 ($/s) // VM_1GB=0.000000972 ($/s)
+      "process_traffic_delay": 0.0,
+      "max_cap_server": 0,
+      "process_delay": 0.0, # ms
+      "min_process_delay": 0.0, # ms
+      "max_delay": 0.0, # ms
+      "migration_delay": 0.0, # ms
+      "opex": 0.0 #
     }
   - type: 1 # VM function
     attributes: {
       "replicable": true,
-      "load_ratio": 0.6,
-      "overhead": 10,
-      "sync_load": 0.05,
-      "process_traffic_delay": 5.0,
-      "max_cap_server": 100,
+      "load_ratio": 1.0,
+      "overhead": 15, # based on "max_bw" --> 150
+      "sync_load": 0.1,
+      "process_traffic_delay": 3.0,
+      "max_cap_server": 150,
       "process_delay": 5.0, # ms
       "min_process_delay": 2.0, # ms
-      "max_delay": 1000.0, # ms
-      "migration_delay": 40.0, # ms
+      "max_delay": 10.0, # ms
+      "migration_delay": 40.0, # ms for atlanta with RTT of ~40ms
       "opex": 0.0069 # ($/h) VM t2.small (2GB)
     }
   - type: 2 # FaaS function
     attributes: {
       "replicable": true,
-      "load_ratio": 0.3,
+      "load_ratio": 1.0,
       "overhead": 0,
-      "sync_load": 0.025,
-      "process_traffic_delay": 2.5,
-      "max_cap_server": 50,
-      "process_delay": 2.5, # ms
-      "min_process_delay": 1.0, # ms
-      "max_delay": 500.0, # ms
-      "migration_delay": 0.0, # ms
+      "sync_load": 0.1,
+      "process_traffic_delay": 3.0,
+      "max_cap_server": 150,
+      "process_delay": 5.0, # ms
+      "min_process_delay": 2.0, # ms
+      "max_delay": 10.0, # ms
+      "migration_delay": 40.0, # ms for atlanta with RTT of ~40ms
       "opex": 0.060012 # ($/h) FaaS (1GB)
     }
 # traffic flow definitions
@@ -95,6 +109,7 @@ traffic_flows:
   - min_dem: 1
     max_dem: 3
     min_bw: 1
-    max_bw: 40
+    service_id: 0
+    max_bw: 50 # change "max_cap_server" accordingly
 
 

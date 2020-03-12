@@ -28,10 +28,10 @@ ae n2n6 n2 > n6 capacity:1000
 ae n3n2 n3 > n2 capacity:1000
 ae n3n5 n3 > n5 capacity:1000
 ae n3n8 n3 > n8 capacity:1000
-ae n3n16 n3 > n16 factor:20 capacity:1000000 link_cloud:true
+ae n3n16 n3 > n16 capacity:1000000 link_cloud:true
 ae n4n5 n4 > n5 capacity:1000
 ae n4n6 n4 > n6 capacity:1000
-ae n4n16 n4 > n16 factor:20 capacity:1000000 link_cloud:true
+ae n4n16 n4 > n16 capacity:1000000 link_cloud:true
 ae n5n2 n5 > n2 capacity:1000
 ae n5n3 n5 > n3 capacity:1000
 ae n5n4 n5 > n4 capacity:1000
@@ -42,12 +42,12 @@ ae n6n13 n6 > n13 capacity:1000
 ae n7n1 n7 > n1 capacity:1000
 ae n7n10 n7 > n10 capacity:1000
 ae n7n14 n7 > n14 capacity:1000
-ae n7n16 n7 > n16 factor:20 capacity:1000000 link_cloud:true
+ae n7n16 n7 > n16 capacity:1000000 link_cloud:true
 ae n8n1 n8 > n1 capacity:1000
 ae n8n3 n8 > n3 capacity:1000
 ae n8n9 n8 > n9 capacity:1000
 ae n8n15 n8 > n15 capacity:1000
-ae n8n16 n8 > n16 factor:20 capacity:1000000 link_cloud:true
+ae n8n16 n8 > n16 capacity:1000000 link_cloud:true
 ae n9n8 n9 > n8 capacity:1000
 ae n9n10 n9 > n10 capacity:1000
 ae n9n12 n9 > n12 capacity:1000
@@ -57,25 +57,25 @@ ae n10n9 n10 > n9 capacity:1000
 ae n10n12 n10 > n12 capacity:1000
 ae n11n13 n11 > n13 capacity:1000
 ae n11n14 n11 > n14 capacity:1000
-ae n11n16 n11 > n16 factor:20 capacity:1000000 link_cloud:true
+ae n11n16 n11 > n16 capacity:1000000 link_cloud:true
 ae n12n9 n12 > n9 capacity:1000
 ae n12n10 n12 > n10 capacity:1000
-ae n12n16 n12 > n16 factor:20 capacity:1000000 link_cloud:true
+ae n12n16 n12 > n16 capacity:1000000 link_cloud:true
 ae n13n6 n13 > n6 capacity:1000
 ae n13n11 n13 > n11 capacity:1000
 ae n13n14 n13 > n14 capacity:1000
-ae n13n16 n13 > n16 factor:20 capacity:1000000 link_cloud:true
+ae n13n16 n13 > n16 capacity:1000000 link_cloud:true
 ae n14n7 n14 > n7 capacity:1000
 ae n14n11 n14 > n11 capacity:1000
 ae n14n13 n14 > n13 capacity:1000
 ae n15n8 n15 > n8 capacity:1000
 ae n15n9 n15 > n9 capacity:1000
-ae n15n16 n15 > n16 factor:20 capacity:1000000 link_cloud:true
-ae n16n3 n16 > n3 factor:20 capacity:1000000 link_cloud:true
-ae n16n4 n16 > n4 factor:20 capacity:1000000 link_cloud:true
-ae n16n7 n16 > n7 factor:20 capacity:1000000 link_cloud:true
-ae n16n8 n16 > n8 factor:20 capacity:1000000 link_cloud:true
-ae n16n11 n16 > n11 factor:20 capacity:1000000 link_cloud:true
-ae n16n12 n16 > n12 factor:20 capacity:1000000 link_cloud:true
-ae n16n13 n16 > n13 factor:20 capacity:1000000 link_cloud:true
-ae n16n15 n16 > n15 factor:20 capacity:1000000 link_cloud:true
+ae n15n16 n15 > n16 capacity:1000000 link_cloud:true
+ae n16n3 n16 > n3 capacity:1000000 link_cloud:true
+ae n16n4 n16 > n4 capacity:1000000 link_cloud:true
+ae n16n7 n16 > n7 capacity:1000000 link_cloud:true
+ae n16n8 n16 > n8 capacity:1000000 link_cloud:true
+ae n16n11 n16 > n11 capacity:1000000 link_cloud:true
+ae n16n12 n16 > n12 capacity:1000000 link_cloud:true
+ae n16n13 n16 > n13 capacity:1000000 link_cloud:true
+ae n16n15 n16 > n15 capacity:1000000 link_cloud:true

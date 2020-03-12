@@ -27,8 +27,7 @@ public class Variables {
    public GRBVar[] oX; // operational server cost
    public GRBVar[][] oSV; // operational function cost
    public GRBVar[][][] qSDP; // qos penalty cost
-   public GRBVar[][][] qSDPplus; // qos penalty cost aux
-   public GRBVar[][][] qSDPminus; // qos penalty cost aux
+   public GRBVar[][][] qSDPaux; // qos penalty cost aux
    public GRBVar[][][] ySDP; // aux variable for delay qos penalty cost
 
    // service delay variables
@@ -140,19 +139,12 @@ public class Variables {
                   for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                      qSDP[s][d][p] = model.addVar(0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                              , Parameters.qSDP + "[" + s + "][" + d + "][" + p + "]");
-            qSDPplus = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
+            qSDPaux = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                     qSDPplus[s][d][p] = model.addVar(0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                     qSDPaux[s][d][p] = model.addVar(0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                              , Parameters.qSDP + "aux" + "[" + s + "][" + d + "][" + p + "]");
-            qSDPminus = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                     qSDPminus[s][d][p] = model.addVar(0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                             , Parameters.qSDP + "aux" + "[" + s + "][" + d + "][" + p + "]");
-
             ySDP = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
