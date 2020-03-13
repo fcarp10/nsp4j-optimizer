@@ -117,16 +117,13 @@ public class ModelSpecificConstraints {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d)) {
                   GRBLinExpr serviceDelayExpr = serviceDelayExpr(s, p, d, initialPlacement);
-                  // convert service delay from ms to hours
-                  GRBLinExpr serviceDelayConvertedExpr = new GRBLinExpr();
-                  serviceDelayConvertedExpr.multAdd(1.0 / 3600000, serviceDelayExpr);
                   // linearization of delay and routing variables
-                  model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, serviceDelayConvertedExpr, ySDP);
+                  model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, serviceDelayExpr, ySDP);
                   GRBLinExpr expr = new GRBLinExpr();
                   expr.addTerm(BIG_M, vars.zSPD[s][p][d]);
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, expr, ySDP);
                   expr.addConstant(-BIG_M);
-                  expr.add(serviceDelayConvertedExpr);
+                  expr.add(serviceDelayExpr);
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.GREATER_EQUAL, expr, ySDP);
                   // penalty costs equations
                   expr = new GRBLinExpr();

@@ -8,13 +8,12 @@ aux: {
   "servers_weight": 0.0,
   "maxU_weight": 0.0,
   "server_dimensioning_capacity": 1000,
-  "server_idle_energy_cost": 0.0184453, # ($/h) b=132.7 (PowerEdge R410)
-  "server_util_energy_cost": 0.0095632, # ($/h) a=68.8 (PowerEdge R410)
-  "server_other_opex": 0.14787654, # ($/h) (PowerEdge R410)
+  "server_idle_energy_cost": 0.000000512, # ($/ms) b=132.7 (PowerEdge R410)
+  "server_util_energy_cost": 0.000000266, # ($/ms) a=68.8 (PowerEdge R410)
+  "server_other_opex": 0.000004108, # ($/ms) (PowerEdge R410)
   "overprovisioning_server_capacity": 1.0,
   "initial_traffic_load": 0.3,
-  "qos_penalty": 0.00140516, #  ($/h) //
-  "qos_penalty_max": 0.00000003903 # ($/h) for a maximum allowed delay of 150ms - 50ms (the worst case) = (100ms / 3600*1000 ) * qos_penalty
+  "qos_penalty": 0.000000019 #  ($/ms) // 0.000000019 ($/ms - all VMs), 0.000000333 ($/ms - all FaaS), 0.000000176  ($/ms - mixed VM/FaaS)
 }
 # service definitions
 service_chains:
@@ -88,7 +87,7 @@ function_types:
       "min_process_delay": 2.0, # ms
       "max_delay": 10.0, # ms
       "migration_delay": 40.0, # ms for atlanta with RTT of ~40ms
-      "opex": 0.0069 # ($/h) VM t2.small (2GB)
+      "opex": 0.0000001917 # ($/ms) VM t2.small (2GB)
     }
   - type: 2 # FaaS function
     attributes: {
@@ -102,7 +101,7 @@ function_types:
       "min_process_delay": 2.0, # ms
       "max_delay": 10.0, # ms
       "migration_delay": 40.0, # ms for atlanta with RTT of ~40ms
-      "opex": 0.060012 # ($/h) FaaS (1GB)
+      "opex": 0.0000033333 # ($/ms) AWS Lambda - 2GB
     }
 # traffic flow definitions
 traffic_flows:
