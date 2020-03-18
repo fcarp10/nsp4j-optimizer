@@ -1,22 +1,22 @@
 DGS004
 test 0 0
 
-an n1 x:-84.2283 y:33.4248 num_servers:1 server_capacity:1000 process_delay:0
-an n2 x:-84.2451 y:33.4201 num_servers:2 server_capacity:1000 process_delay:0
-an n3 x:-84.2516 y:33.4230 num_servers:1 server_capacity:1000 process_delay:0
-an n4 x:-84.2324 y:33.4043 num_servers:1 server_capacity:1000 process_delay:0
-an n5 x:-84.2459 y:33.4031 num_servers:1 server_capacity:1000 process_delay:0
-an n6 x:-84.2339 y:33.4151 num_servers:2 server_capacity:1000 process_delay:0
-an n7 x:-84.2185 y:33.4323 num_servers:2 server_capacity:1000 process_delay:0
-an n8 x:-84.2384 y:33.4298 num_servers:2 server_capacity:1000 process_delay:0
-an n9 x:-84.2318 y:33.4353 num_servers:2 server_capacity:1000 process_delay:0
-an n10 x:-84.2147 y:33.4403 num_servers:1 server_capacity:1000 process_delay:0
-an n11 x:-84.2056 y:33.4132 num_servers:1 server_capacity:1000 process_delay:0
-an n12 x:-84.2253 y:33.4466 num_servers:1 server_capacity:1000 process_delay:0
-an n13 x:-84.2216 y:33.4059 num_servers:1 server_capacity:1000 process_delay:0
-an n14 x:-84.2097 y:33.4218 num_servers:1 server_capacity:1000 process_delay:0
-an n15 x:-84.2463 y:33.4431 num_servers:1 server_capacity:1000 process_delay:0
-an n16 x:-122.00 y:40.67 x_gui:-84.17 y_gui:33.41 num_servers:1 server_capacity:20000 process_delay:0 node_cloud:true
+an n1 x:-84.2283 y:33.4248 num_servers:2 server_capacity:2000 process_delay:0
+an n2 x:-84.2451 y:33.4201 num_servers:2 server_capacity:2000 process_delay:0
+an n3 x:-84.2516 y:33.4230 num_servers:2 server_capacity:2000 process_delay:0
+an n4 x:-84.2324 y:33.4043 num_servers:1 server_capacity:2000 process_delay:0
+an n5 x:-84.2459 y:33.4031 num_servers:1 server_capacity:2000 process_delay:0
+an n6 x:-84.2339 y:33.4151 num_servers:1 server_capacity:2000 process_delay:0
+an n7 x:-84.2185 y:33.4323 num_servers:2 server_capacity:2000 process_delay:0
+an n8 x:-84.2384 y:33.4298 num_servers:1 server_capacity:2000 process_delay:0
+an n9 x:-84.2318 y:33.4353 num_servers:1 server_capacity:2000 process_delay:0
+an n10 x:-84.2147 y:33.4403 num_servers:2 server_capacity:2000 process_delay:0
+an n11 x:-84.2056 y:33.4132 num_servers:1 server_capacity:2000 process_delay:0
+an n12 x:-84.2253 y:33.4466 num_servers:1 server_capacity:2000 process_delay:0
+an n13 x:-84.2216 y:33.4059 num_servers:1 server_capacity:2000 process_delay:0
+an n14 x:-84.2097 y:33.4218 num_servers:1 server_capacity:2000 process_delay:0
+an n15 x:-84.2463 y:33.4431 num_servers:1 server_capacity:2000 process_delay:0
+an n16 x:-122.00 y:40.67 x_gui:-84.19 y_gui:33.41 num_servers:1 server_capacity:40000 process_delay:0 node_cloud:true
 
 
 ae n1n6 n1 > n6 capacity:1000

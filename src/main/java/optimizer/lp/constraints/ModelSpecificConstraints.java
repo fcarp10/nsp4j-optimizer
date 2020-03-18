@@ -130,13 +130,9 @@ public class ModelSpecificConstraints {
                   expr.addTerm((double) pm.getAux().get(QOS_PENALTY), vars.ySDP[s][d][p]);
                   expr.addTerm(-(double) pm.getAux().get(QOS_PENALTY) *
                           (double) pm.getServices().get(s).getAttribute(SERVICE_MAX_DELAY), vars.zSPD[s][p][d]);
-                  GRBLinExpr expr2 = new GRBLinExpr();
-                  expr2.addTerm(1.0, vars.qSDP[s][d][p]);
-                  expr2.addTerm(-1.0, vars.qSDPaux[s][d][p]);
-                  model.getGrbModel().addConstr(expr, GRB.EQUAL, expr2, qSDP);
+                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.qSDP[s][d][p], qSDP);
                } else {
                   model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.EQUAL, 0.0, qSDP);
-                  model.getGrbModel().addConstr(vars.qSDPaux[s][d][p], GRB.EQUAL, 0.0, qSDP);
                }
 
    }

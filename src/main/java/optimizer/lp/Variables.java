@@ -137,14 +137,8 @@ public class Variables {
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                     qSDP[s][d][p] = model.addVar(0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
+                     qSDP[s][d][p] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                              , Parameters.qSDP + "[" + s + "][" + d + "][" + p + "]");
-            qSDPaux = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                     qSDPaux[s][d][p] = model.addVar(0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                             , Parameters.qSDP + "aux" + "[" + s + "][" + d + "][" + p + "]");
             ySDP = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
