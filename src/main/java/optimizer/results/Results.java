@@ -41,6 +41,8 @@ public class Results {
    private double trafficLinks;
    @JsonProperty("synchronization_traffic")
    private double synchronizationTraffic;
+   @JsonProperty("total_number_of_functions")
+   private double totalNumberOfFunctions;
    @JsonProperty("migrations")
    private int[] migrations;
    @JsonProperty("replications")
@@ -115,6 +117,7 @@ public class Results {
       // summary results
       migrations = countMigrations(initialPlacement);
       replications = countReplications();
+      totalNumberOfFunctions = pm.getTotalNumFunctions();
       totalTraffic = calculateTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
       avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
@@ -168,7 +171,7 @@ public class Results {
    }
 
    private int[] countMigrations(boolean[][][] initialPlacement) {
-      int[] migrations = new int[pm.getFunctionTypes().size()];
+      int[] migrations = new int[pm.getNumOfFunctionTypes()];
       if (initialPlacement != null)
          try {
             boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
@@ -184,7 +187,7 @@ public class Results {
    }
 
    private int[] countReplications() {
-      int[] replicas = new int[pm.getFunctionTypes().size()];
+      int[] replicas = new int[pm.getNumOfFunctionTypes()];
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -793,6 +796,10 @@ public class Results {
 
    public int[] getReplications() {
       return replications;
+   }
+
+   public double getTotalNumberOfFunctions() {
+      return totalNumberOfFunctions;
    }
 
    public List<GraphData> getLuGraph() {

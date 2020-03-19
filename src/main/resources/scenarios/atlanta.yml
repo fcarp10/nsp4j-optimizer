@@ -11,7 +11,7 @@ aux: {
   "server_idle_energy_cost": 0.000000512, # ($/ms) b=132.7 (PowerEdge R410)
   "server_util_energy_cost": 0.000000266, # ($/ms) a=68.8 (PowerEdge R410)
   "server_other_opex": 0.000004108, # ($/ms) (PowerEdge R410)
-  "overprovisioning_server_capacity": 1.1,
+  "overprovisioning_server_capacity": 1.0,
   "initial_traffic_load": 0.3,
   "qos_penalty": 0.000000019 #  ($/ms) // 0.000000019 ($/ms - all VMs), 0.000000333 ($/ms - all FaaS), 0.000000176  ($/ms - mixed VM/FaaS)
 }
@@ -24,34 +24,6 @@ service_chains:
       "max_paths": 5,
       "max_delay": 30.0 # ms
     }
-  - id: 11
-    chain: [0, 1, 1, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 40.0 # ms
-    }
-  - id: 111
-    chain: [0, 1, 1, 1, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 50.0 # ms
-    }
-  - id: 1111
-    chain: [0, 1, 1, 1, 1, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 60.0 # ms
-    }
-  - id: 11111
-    chain: [0, 1, 1, 1, 1, 1, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 70.0 # ms
-    }
   - id: 2
     chain: [0, 2, 0]
     attributes: {
@@ -59,47 +31,12 @@ service_chains:
       "max_paths": 5,
       "max_delay": 30.0 # ms
     }
-  - id: 22
-    chain: [0, 2, 2, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 40.0 # ms
-    }
-  - id: 222
-    chain: [0, 2, 2, 2, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 50.0 # ms
-    }
-  - id: 2222
-    chain: [0, 2, 2, 2, 2, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 60.0 # ms
-    }
-  - id: 22222
-    chain: [0, 2, 2, 2, 2, 2, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 70.0 # ms
-    }
   - id: 12
     chain: [0, 1, 2, 0]
     attributes: {
       "min_paths": 1,
       "max_paths": 5,
       "max_delay": 40.0 # ms
-    }
-  - id: 1212
-    chain: [0, 1, 2, 1, 2, 0]
-    attributes: {
-      "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 60.0 # ms
     }
 # function definitions
 function_types:
@@ -120,11 +57,11 @@ function_types:
   - type: 1 # VM function
     attributes: {
       "replicable": true, # (fixed)
-      "load_ratio": 1.0,
-      "overhead": 9, #  == 10%("max_bw" * "max_dem" * "load_ratio")
+      "load_ratio": 1.5,
+      "overhead": 6, #  == 10%("max_bw" * "max_dem" * "load_ratio") !!
       "sync_load": 0.1, # (fixed)
       "process_traffic_delay": 3.0, # (fixed)
-      "max_cap_server": 90, # == "max_bw" * "max_dem" * "load_ratio"
+      "max_cap_server": 60, # == "max_bw" * "max_dem" * "load_ratio" !!
       "process_delay": 5.0, # ms (fixed)
       "min_process_delay": 2.0, # ms (fixed)
       "max_delay": 10.0, # ms (fixed)
@@ -134,11 +71,11 @@ function_types:
   - type: 2 # FaaS function
     attributes: {
       "replicable": true, # (fixed)
-      "load_ratio": 1.0,
+      "load_ratio": 1.5,
       "overhead": 0,
       "sync_load": 0.1, # (fixed)
       "process_traffic_delay": 3.0, # (fixed)
-      "max_cap_server": 90, # == "max_bw" * "max_dem" * "load_ratio"
+      "max_cap_server": 60, # == "max_bw" * "max_dem" * "load_ratio" !!
       "process_delay": 5.0, # ms (fixed)
       "min_process_delay": 2.0, # ms (fixed)
       "max_delay": 10.0, # ms (fixed)
@@ -150,5 +87,6 @@ traffic_flows:
   - min_dem: 1
     max_dem: 3
     min_bw: 1
-    max_bw: 30 # change "max_cap_server" accordingly
-    service_id: 11111
+    max_bw: 20 # change "max_cap_server" accordingly
+    services: [1]
+    service_length_mult: [5]

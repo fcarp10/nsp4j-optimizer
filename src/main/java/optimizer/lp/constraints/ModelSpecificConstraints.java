@@ -128,8 +128,7 @@ public class ModelSpecificConstraints {
                   // penalty costs equations
                   expr = new GRBLinExpr();
                   expr.addTerm((double) pm.getAux().get(QOS_PENALTY), vars.ySDP[s][d][p]);
-                  expr.addTerm(-(double) pm.getAux().get(QOS_PENALTY) *
-                          (double) pm.getServices().get(s).getAttribute(SERVICE_MAX_DELAY), vars.zSPD[s][p][d]);
+                  expr.addTerm(-(double) pm.getAux().get(QOS_PENALTY) * pm.getServices().get(s).getMaxDelay(), vars.zSPD[s][p][d]);
                   model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.qSDP[s][d][p], qSDP);
                } else {
                   model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.EQUAL, 0.0, qSDP);
@@ -208,7 +207,7 @@ public class ModelSpecificConstraints {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d)) {
                   GRBLinExpr pathDelayExpr = new GRBLinExpr();
-                  pathDelayExpr.addTerm((double) pm.getServices().get(s).getAttribute(SERVICE_MAX_DELAY), vars.zSPD[s][p][d]);
+                  pathDelayExpr.addTerm(pm.getServices().get(s).getMaxDelay(), vars.zSPD[s][p][d]);
                   pathDelayExpr.addConstant(BIG_M);
                   pathDelayExpr.addTerm(-BIG_M, vars.zSPD[s][p][d]);
                   String constrName = MAX_SERV_DELAY + "[s][p][d] --> " + "[" + s + "]"
