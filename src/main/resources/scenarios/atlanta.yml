@@ -19,24 +19,24 @@ aux: {
 service_chains:
   - id: 1
     chain: [0, 1, 0]
+    max_delay: 30.0 # ms
     attributes: {
       "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 30.0 # ms
+      "max_paths": 5
     }
   - id: 2
     chain: [0, 2, 0]
+    max_delay: 30.0 # ms
     attributes: {
       "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 30.0 # ms
+      "max_paths": 5
     }
   - id: 12
     chain: [0, 1, 2, 0]
+    max_delay: 40.0 # ms
     attributes: {
       "min_paths": 1,
-      "max_paths": 5,
-      "max_delay": 40.0 # ms
+      "max_paths": 5
     }
 # function definitions
 function_types:
