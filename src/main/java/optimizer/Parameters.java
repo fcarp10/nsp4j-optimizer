@@ -5,7 +5,6 @@ public class Parameters {
    public static final String NUM_SERVERS_OBJ = "num_servers";
    public static final String NUM_SERVERS_UTIL_COSTS_OBJ = "num-servers-util-costs";
    public static final String UTIL_COSTS_OBJ = "util-costs";
-   public static final String UTIL_COSTS_MIGRATIONS_OBJ = "util-costs-migrations";
    public static final String UTIL_COSTS_MAX_UTIL_OBJ = "util-costs-max-utilization";
    public static final String UTILIZATION_OBJ = "utilization";
    public static final String OPEX_SERVERS_OBJ = "opex-servers";

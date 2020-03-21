@@ -104,17 +104,15 @@ public class Manager {
       }
    }
 
-   public static GRBModel start(Scenario sce, GRBModel initialModel) {
+   public static void main(Scenario sce) {
       try {
          interrupted = false;
-         GRBModel importedModel = ResultsManager.importModel(getResourcePath(sce.getInputFileName()), sce.getInputFileName(), pm);
-         if (initialModel == null && importedModel != null)
-            initialModel = importedModel;
+         GRBModel initialModel = ResultsManager.importModel(getResourcePath(sce.getInputFileName()), sce.getInputFileName(), pm);
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
          printLog(log, INFO, "initializing " + sce.getModel());
          if (INITIAL_PLACEMENT.equals(sce.getModel())) {
             specifyUsedTrafficDemands(true);
-            initialModel = runLP(INITIAL_PLACEMENT, sce, sce.getObjFunc(), resultsManager, null);
+            runLP(INITIAL_PLACEMENT, sce, sce.getObjFunc(), resultsManager, null);
          } else {
             specifyUsedTrafficDemands(false);
             runLP(sce.getModel(), sce, sce.getObjFunc(), resultsManager, initialModel);
@@ -124,7 +122,6 @@ public class Manager {
          e.printStackTrace();
          printLog(log, ERROR, "something went wrong");
       }
-      return initialModel;
    }
 
    public static void stop() {
@@ -155,7 +152,7 @@ public class Manager {
       model.setVars(variables);
       printLog(log, INFO, "setting constraints");
       new GeneralConstraints(pm, model, scenario, initialModel);
-      expr = generateExprForObjectiveFunction(model, objectiveFunction, initialModel);
+      expr = generateExprForObjectiveFunction(model, objectiveFunction);
       model.setObjectiveFunction(expr, scenario.isMaximization());
       printLog(log, INFO, "running model");
       long startTime = System.nanoTime();
@@ -173,7 +170,7 @@ public class Manager {
       return model.getGrbModel();
    }
 
-   private static GRBLinExpr generateExprForObjectiveFunction(Model model, String objectiveFunction, GRBModel initialPlacement) throws GRBException {
+   private static GRBLinExpr generateExprForObjectiveFunction(Model model, String objectiveFunction) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       double serversWeight, linksWeight;
       switch (objectiveFunction) {
@@ -193,13 +190,6 @@ public class Manager {
             serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
             expr.add(model.linkCostsExpr(linksWeight));
             expr.add(model.serverCostsExpr(serversWeight));
-            break;
-         case UTIL_COSTS_MIGRATIONS_OBJ:
-            expr.add(model.linkCostsExpr(1.0));
-            expr.add(model.serverCostsExpr(1.0));
-            if (initialPlacement != null)
-               expr.add(model.numOfMigrations(0.0, initialPlacement));
-            else printLog(log, WARNING, "no initial placement");
             break;
          case UTIL_COSTS_MAX_UTIL_OBJ:
             linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();

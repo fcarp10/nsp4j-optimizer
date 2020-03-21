@@ -103,7 +103,7 @@ public class Variables {
 
          // if model is optimizing with utilization costs
          if (sc.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_OBJ)
-                 || sc.getObjFunc().equals(UTIL_COSTS_MIGRATIONS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
+                 || sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
             kL = new GRBVar[pm.getLinks().size()];
             for (int l = 0; l < pm.getLinks().size(); l++)
                kL[l] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS

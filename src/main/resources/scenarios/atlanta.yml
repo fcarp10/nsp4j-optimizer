@@ -58,10 +58,10 @@ function_types:
     attributes: {
       "replicable": true, # (fixed)
       "load_ratio": 1.5,
-      "overhead": 6, #  == 10%("max_bw" * "max_dem" * "load_ratio") !!
+      "overhead": 9, #  == 10%("max_bw" * "max_dem" * "load_ratio") !!
       "sync_load": 0.1, # (fixed)
       "process_traffic_delay": 3.0, # (fixed)
-      "max_cap_server": 60, # == "max_bw" * "max_dem" * "load_ratio" !!
+      "max_cap_server": 90, # == "max_bw" * "max_dem" * "load_ratio" !!
       "process_delay": 5.0, # ms (fixed)
       "min_process_delay": 2.0, # ms (fixed)
       "max_delay": 10.0, # ms (fixed)
@@ -75,7 +75,7 @@ function_types:
       "overhead": 0,
       "sync_load": 0.1, # (fixed)
       "process_traffic_delay": 3.0, # (fixed)
-      "max_cap_server": 60, # == "max_bw" * "max_dem" * "load_ratio" !!
+      "max_cap_server": 90, # == "max_bw" * "max_dem" * "load_ratio" !!
       "process_delay": 5.0, # ms (fixed)
       "min_process_delay": 2.0, # ms (fixed)
       "max_delay": 10.0, # ms (fixed)
@@ -89,4 +89,4 @@ traffic_flows:
     min_bw: 1
     max_bw: 20 # change "max_cap_server" accordingly
     services: [1]
-    service_length_mult: [5]
+    service_length_mult: [10]

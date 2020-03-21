@@ -1,11 +1,10 @@
 package optimizer.gui;
 
-import gurobi.GRBModel;
 import manager.Parameters;
 import manager.elements.Server;
+import optimizer.results.Results;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
-import optimizer.results.Results;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -18,7 +17,6 @@ public class ResultsGUI {
    private static Map<String, ServerJson> serverJsonMap;
    private static Map<String, LinkJson> linkJsonMap;
    private static Results results;
-   private static GRBModel initialModel;
    private static LinkedList<String> messages;
 
    public ResultsGUI() {
@@ -161,14 +159,6 @@ public class ResultsGUI {
 
    public static LinkedList<String> getMessages() {
       return messages;
-   }
-
-   static GRBModel getInitialModel() {
-      return initialModel;
-   }
-
-   static void setInitialModel(GRBModel initialModel) {
-      ResultsGUI.initialModel = initialModel;
    }
 
    public static List<NodeJson> getNodeList() {

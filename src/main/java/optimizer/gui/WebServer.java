@@ -31,7 +31,7 @@ public class WebServer {
 
       post("/run", (request, response) -> {
          Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-         Runnable runnable = () -> ResultsGUI.setInitialModel(Manager.start(scenario, ResultsGUI.getInitialModel()));
+         Runnable runnable = () -> Manager.main(scenario);
          executorService.submit(runnable);
          return 201;
       });
