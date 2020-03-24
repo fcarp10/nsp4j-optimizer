@@ -15,7 +15,6 @@ public class Parameters {
    // scenarios
    public static final String SERVER_DIMENSIONING = "dimensioning";
    public static final String INITIAL_PLACEMENT = "init";
-   public static final String PLACEMENT = "place";
 
    // general variables
    public static final String zSP = "zSP";
@@ -39,7 +38,7 @@ public class Parameters {
    public static final String dSVX = "dSVX";
    public static final String mS = "mS";
    public static final String dSVXD = "dSVXD";
-   public static final String ySDP = "dSDP";
+   public static final String ySDP = "ySDP";
 
    // synchronization traffic variables
    public static final String gSVXY = "gSVXY";
@@ -82,7 +81,7 @@ public class Parameters {
    public static final String FUNCTION_MIN_PROCESS_DELAY = "min_process_delay";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
    public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
-   public static final String FUNCTION_OPEX = "opex";
+   public static final String FUNCTION_CHARGES = "charges";
 
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";
@@ -101,8 +100,7 @@ public class Parameters {
    // Aux parameters
    public static final String INITIAL_TRAFFIC_LOAD = "initial_traffic_load";
    public static final String dSPD = "dSPD";
-   public static final String QOS_PENALTY = "qos_penalty";
-   public static final String QOS_PENALTY_MAX = "qos_penalty_max";
+   public static final String QOS_PENALTY_RATIO = "qos_penalty_ratio";
    public static final String LINKS_WEIGHT = "links_weight";
    public static final String SERVERS_WEIGHT = "servers_weight";
    public static final String MAXU_WEIGHT = "maxU_weight";

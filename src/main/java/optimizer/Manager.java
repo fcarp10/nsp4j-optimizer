@@ -241,6 +241,7 @@ public class Manager {
          results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModel.getVars().oX));
          results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModel.getVars().oSV));
          results.setVariable(qSDP, Auxiliary.grbVarsToDoubles(optModel.getVars().qSDP));
+         results.setVariable(ySDP, Auxiliary.grbVarsToDoubles(optModel.getVars().ySDP));
       }
 
       // traffic sync variables

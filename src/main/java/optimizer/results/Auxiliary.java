@@ -56,7 +56,7 @@ public class Auxiliary {
       for (Object aList : list)
          if (Double.parseDouble(aList.toString()) > max)
             max = Double.parseDouble(aList.toString());
-      return roundDouble(max, 2);
+      return roundDouble(max, 4);
    }
 
    public static double min(List<Object> list) {
@@ -65,7 +65,7 @@ public class Auxiliary {
       for (Object aList : list)
          if (Double.parseDouble(aList.toString()) < min)
             min = Double.parseDouble(aList.toString());
-      return roundDouble(min, 2);
+      return roundDouble(min, 4);
    }
 
    public static double roundDouble(double value, int decimals) {

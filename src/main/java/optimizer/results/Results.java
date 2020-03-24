@@ -280,12 +280,11 @@ public class Results {
                            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
                               for (int v = 0; v < service.getFunctions().size(); v++)
                                  if (fXSVDvar[x][s][v][d])
-                                    endToEndDelay += dSVXvar[s][v][x];
+                                    endToEndDelay += dSVXvar[s][v][x]; // in ms
                      if (endToEndDelay == 0) continue;
 
                      // add propagation delay
-                     List<Edge> links = service.getTrafficFlow().getPaths().get(p).getEdgePath();
-                     for (Edge link : links) endToEndDelay += (double) link.getAttribute(LINK_DELAY);
+                     for (Edge link : path.getEdgePath()) endToEndDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
 
                      // add migration delay
                      double maxMigrationDelay = 0;
@@ -302,7 +301,7 @@ public class Results {
                                              maxMigrationDelay = migrationDelay;
                                        }
                      }
-                     endToEndDelay += maxMigrationDelay;
+                     endToEndDelay += maxMigrationDelay; // in ms
 
                      // print total end to end delay
                      endToEndDelay = Auxiliary.roundDouble(endToEndDelay, 3);
@@ -570,17 +569,24 @@ public class Results {
          qsdp = new ArrayList<>();
          double[][][] var = (double[][][]) rawVariables.get(qSDP);
          List<String> strings = new ArrayList<>();
+         double[][][] varAux = (double[][][]) rawVariables.get(ySDP);
+         List<String> stringsAux = new ArrayList<>();
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
-                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-                     if (var[s][d][p] > 0) {
+                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+                     if (var[s][d][p] != 0) {
                         strings.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
                                 + "): [" + var[s][d][p] + "]");
                         qsdp.add(var[s][d][p]);
                      }
-
+                     if (varAux[s][d][p] != 0) {
+                        stringsAux.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
+                                + "): [" + varAux[s][d][p] + "]");
+                     }
+                  }
          variables.put(qSDP, strings);
+         variables.put(ySDP, stringsAux);
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }
@@ -715,15 +721,15 @@ public class Results {
       int xPoints = 10;
       double min = Auxiliary.min(new ArrayList<>(sd));
       double max = Auxiliary.max(new ArrayList<>(sd));
-      double step = Auxiliary.roundDouble((max - min) / xPoints, 2);
+      double step = Auxiliary.roundDouble((max - min) / xPoints, 4);
       if (max != min) {
          for (int i = 0; i < xPoints + 1; i++)
             sdGraph.add(new GraphData(String.valueOf(
-                    Auxiliary.roundDouble((step * i) + min, 2)), 0));
+                    Auxiliary.roundDouble((step * i) + min, 4)), 0));
          for (Double anSd : sd)
             for (int j = 0; j < xPoints + 1; j++)
-               if (anSd < Double.valueOf(sdGraph.get(j).getYear()) + step
-                       && anSd >= Double.valueOf(sdGraph.get(j).getYear())) {
+               if (anSd < Double.parseDouble(sdGraph.get(j).getYear()) + step
+                       && anSd >= Double.parseDouble(sdGraph.get(j).getYear())) {
                   sdGraph.get(j).setValue(sdGraph.get(j).getValue() + 1);
                   break;
                }

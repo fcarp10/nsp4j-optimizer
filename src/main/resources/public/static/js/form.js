@@ -163,10 +163,12 @@ function checkScenario(elem) {
     }
     if (model === "dimensioning" || model === "init") {
         document.getElementById("single-path").checked = true;
-        document.getElementById("fix-init-plc").checked = false;
+        document.getElementById("set-init-plc").checked = false;
+        document.getElementById("sync-traffic").checked = false;
     } else {
         document.getElementById("single-path").checked = false;
-        document.getElementById("fix-init-plc").checked = false;
+        document.getElementById("set-init-plc").checked = false;
+        document.getElementById("sync-traffic").checked = true;
     }
 }
 
