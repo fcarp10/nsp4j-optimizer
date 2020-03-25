@@ -171,7 +171,7 @@ public class Results {
    }
 
    private int[] countMigrations(boolean[][][] initialPlacement) {
-      int[] migrations = new int[pm.getNumOfFunctionTypes()];
+      int[] migrations = new int[pm.getFunctionTypes().size()];
       if (initialPlacement != null)
          try {
             boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
@@ -187,7 +187,7 @@ public class Results {
    }
 
    private int[] countReplications() {
-      int[] replicas = new int[pm.getNumOfFunctionTypes()];
+      int[] replicas = new int[pm.getFunctionTypes().size()];
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -284,7 +284,8 @@ public class Results {
                      if (endToEndDelay == 0) continue;
 
                      // add propagation delay
-                     for (Edge link : path.getEdgePath()) endToEndDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
+                     for (Edge link : path.getEdgePath())
+                        endToEndDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
 
                      // add migration delay
                      double maxMigrationDelay = 0;
