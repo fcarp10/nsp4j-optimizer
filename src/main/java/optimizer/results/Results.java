@@ -219,7 +219,7 @@ public class Results {
          double[] var = (double[]) rawVariables.get(uL);
          for (int l = 0; l < pm.getLinks().size(); l++)
             if (pm.getLinks().get(l).getAttribute(LINK_CLOUD) == null)
-               linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(var[l], 2));
+               linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(var[l], 4));
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }
@@ -231,7 +231,7 @@ public class Results {
       try {
          double[] var = (double[]) rawVariables.get(uX);
          for (int x = 0; x < pm.getServers().size(); x++)
-            serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(var[x], 2));
+            serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(var[x], 4));
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }

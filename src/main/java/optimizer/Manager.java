@@ -10,7 +10,7 @@ import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
 import optimizer.lp.Model;
 import optimizer.lp.Variables;
-import optimizer.lp.constraints.GeneralConstraints;
+import optimizer.lp.GeneralConstraints;
 import optimizer.results.Auxiliary;
 import optimizer.results.Results;
 import optimizer.results.ResultsManager;

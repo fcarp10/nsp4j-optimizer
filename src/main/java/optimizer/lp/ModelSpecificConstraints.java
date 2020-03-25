@@ -1,14 +1,13 @@
-package optimizer.lp.constraints;
+package optimizer.lp;
 
 import gurobi.*;
 import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Service;
 import optimizer.gui.Scenario;
-import optimizer.lp.Model;
-import optimizer.lp.Variables;
 import optimizer.results.Auxiliary;
 import org.graphstream.graph.Edge;
+import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 
 import static optimizer.Parameters.*;
@@ -21,22 +20,18 @@ public class ModelSpecificConstraints {
    private Variables vars;
    private Parameters pm;
 
-   public ModelSpecificConstraints(Parameters pm, Model model, Scenario sc, GRBModel initialPlacement
-           , GRBLinExpr[] serverLoadExpr, GRBLinExpr[] linkLoadExpr, GRBLinExpr[] xuExpr, GRBLinExpr[] luExpr) {
+   public ModelSpecificConstraints(Parameters pm, Model model, Scenario sc, GRBModel initialPlacement) {
       try {
          this.pm = pm;
          this.model = model;
          this.vars = model.getVars();
 
+         // create link and server load expressions
+         GRBLinExpr[] linkLoadExpr = createLinkLoadExpr();
+         GRBLinExpr[] serverLoadExpr = createServerLoadExpr();
+
          // set dimensioning constraints
          if (sc.getObjFunc().equals(SERVER_DIMENSIONING)) dimensioning(serverLoadExpr);
-
-         // set linear utilization cost functions constraints
-         if (sc.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_OBJ)
-                 || sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
-            linearUtilCostFunctions(luExpr, vars.kL);
-            linearUtilCostFunctions(xuExpr, vars.kX);
-         }
 
          // set max utilization constraint
          if (sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) maxUtilization();
@@ -56,6 +51,29 @@ public class ModelSpecificConstraints {
          if (sc.getConstraints().get(EDGE_ONLY)) useOnlyEdgeServers();
          if (sc.getConstraints().get(SINGLE_PATH)) singlePath();
          if (sc.getConstraints().get(SET_INIT_PLC)) setInitPlc(initialPlacement);
+         if (sc.getConstraints().get(FORCE_SRC_DST)) forceSrcDst();
+         if (sc.getConstraints().get(CONST_REP)) constRep();
+
+         // create link and server utilization expressions
+         GRBLinExpr[] luExpr = createLinkUtilizationExpr(linkLoadExpr);
+         GRBLinExpr[] xuExpr = createServerUtilizationExpr(serverLoadExpr);
+
+         // set linear utilization cost functions constraints
+         if (sc.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_OBJ)
+                 || sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
+            linearUtilCostFunctions(luExpr, vars.kL);
+            linearUtilCostFunctions(xuExpr, vars.kX);
+         }
+
+         // constraint link utilization
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            model.getGrbModel().addConstr(luExpr[l], GRB.EQUAL, vars.uL[l], uL
+                    + "[" + pm.getLinks().get(l).getId() + "]");
+
+         // constraint server utilization if no dimensioning
+         if (!sc.getObjFunc().equals(SERVER_DIMENSIONING))
+            for (int x = 0; x < pm.getServers().size(); x++)
+               model.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX + "[x] --> " + "[" + x + "]");
       } catch (Exception e) {
          e.printStackTrace();
       }
@@ -69,6 +87,61 @@ public class ModelSpecificConstraints {
          expr2.multAdd((double) pm.getAux(OVERPROVISIONING_SERVER_CAPACITY), serverLoadExpr[n]);
          model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr1, SERVER_DIMENSIONING);
       }
+   }
+
+   private GRBLinExpr[] createLinkLoadExpr() {
+      GRBLinExpr[] expressions = new GRBLinExpr[pm.getLinks().size()];
+      for (int l = 0; l < pm.getLinks().size(); l++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+               if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
+                  continue;
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                     expr.addTerm((double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d), vars.zSPD[s][p][d]);
+            }
+         expressions[l] = expr;
+      }
+      return expressions;
+   }
+
+   private GRBLinExpr[] createServerLoadExpr() {
+      GRBLinExpr[] expressions = new GRBLinExpr[pm.getServers().size()];
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+               Function function = pm.getServices().get(s).getFunctions().get(v);
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                     expr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+                             * (double) function.getAttribute(FUNCTION_LOAD_RATIO)), vars.fXSVD[x][s][v][d]);
+               expr.addTerm((int) function.getAttribute(FUNCTION_OVERHEAD), vars.fXSV[x][s][v]);
+            }
+         expressions[x] = expr;
+      }
+      return expressions;
+   }
+
+   private GRBLinExpr[] createLinkUtilizationExpr(GRBLinExpr[] linkLoadExpr) throws GRBException {
+      GRBLinExpr[] luExprs = new GRBLinExpr[pm.getLinks().size()];
+      for (int l = 0; l < pm.getLinks().size(); l++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         expr.multAdd(1.0 / (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY), linkLoadExpr[l]);
+         luExprs[l] = expr;
+      }
+      return luExprs;
+   }
+
+   private GRBLinExpr[] createServerUtilizationExpr(GRBLinExpr[] serverLoadExpr) throws GRBException {
+      GRBLinExpr[] xuExprs = new GRBLinExpr[pm.getServers().size()];
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         expr.multAdd(1.0 / pm.getServers().get(x).getCapacity(), serverLoadExpr[x]);
+         xuExprs[x] = expr;
+      }
+      return xuExprs;
    }
 
    private void linearUtilCostFunctions(GRBLinExpr[] exprs, GRBVar[] grbVar) throws GRBException {
@@ -339,6 +412,38 @@ public class ModelSpecificConstraints {
                   if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]")
                           .get(GRB.DoubleAttr.X) == 1.0)
                      model.getGrbModel().addConstr(vars.fXSV[x][s][v], GRB.EQUAL, 1, SET_INIT_PLC);
+      }
+   }
+
+   // Fix src-dst functions
+   private void forceSrcDst() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(0);
+         Node srcNode = path.getNodePath().get(0);
+         Node dstNode = path.getNodePath().get(path.getNodePath().size() - 1);
+         GRBLinExpr exprSrc = new GRBLinExpr();
+         GRBLinExpr exprDst = new GRBLinExpr();
+         for (int x = 0; x < pm.getServers().size(); x++) {
+            if (pm.getServers().get(x).getParent().getId().equals(srcNode.getId()))
+               exprSrc.addTerm(1.0, vars.fXSV[x][s][0]);
+            if (pm.getServers().get(x).getParent().getId().equals(dstNode.getId()))
+               exprDst.addTerm(1.0, vars.fXSV[x][s][pm.getServices().get(s).getFunctions().size() - 1]);
+         }
+         model.getGrbModel().addConstr(exprSrc, GRB.EQUAL, 1.0, FORCE_SRC_DST);
+         model.getGrbModel().addConstr(exprDst, GRB.EQUAL, 1.0, FORCE_SRC_DST);
+      }
+   }
+
+   // Constraint replications
+   private void constRep() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         GRBLinExpr expr = new GRBLinExpr();
+         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+            expr.addTerm(1.0, vars.zSP[s][p]);
+         int minPaths = (int) pm.getServices().get(s).getAttribute(SERVICE_MIN_PATHS);
+         int maxPaths = (int) pm.getServices().get(s).getAttribute(SERVICE_MAX_PATHS);
+         model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, minPaths, CONST_REP);
+         model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxPaths, CONST_REP);
       }
    }
 }

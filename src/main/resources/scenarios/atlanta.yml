@@ -18,42 +18,28 @@ aux: {
 # service definitions
 service_chains:
   - id: 1
-    chain: [0, 1, 0]
+    chain: [1]
     max_delay: 30.0 # ms
     attributes: {
       "min_paths": 1,
-      "max_paths": 5
+      "max_paths": 3
     }
   - id: 2
-    chain: [0, 2, 0]
+    chain: [2]
     max_delay: 30.0 # ms
     attributes: {
       "min_paths": 1,
-      "max_paths": 5
+      "max_paths": 3
     }
   - id: 12
-    chain: [0, 1, 2, 0]
+    chain: [1, 2]
     max_delay: 40.0 # ms
     attributes: {
       "min_paths": 1,
-      "max_paths": 5
+      "max_paths": 3
     }
 # function definitions
 function_types:
-  - type: 0
-    attributes: {
-      "replicable": false,
-      "load_ratio": 0.0,
-      "overhead": 0,
-      "sync_load": 0.0,
-      "process_traffic_delay": 0.0,
-      "max_cap_server": 0,
-      "process_delay": 0.0,
-      "min_process_delay": 0.0,
-      "max_delay": 0.0,
-      "migration_delay": 0.0,
-      "charges": 0.0
-    }
   - type: 1 # VM function
     attributes: {
       "replicable": true, # (fixed)
@@ -64,7 +50,7 @@ function_types:
       "process_traffic_delay": 3.0, # ms (fixed)
       "process_delay": 5.0, # ms (fixed)
       "min_process_delay": 2.0, # ms (fixed)
-      "max_delay": 10.0, # ms (fixed)
+      "max_delay": 10.0, # ms (fixed) !!! (INCREASE FOR TESTING)
       "migration_delay": 40.0, # ms for atlanta with RTT of ~40ms (fixed)
       "charges": 0.0069  # ($/h) // 0.000001917 ($/sec) VM t2.small (2GB) (fixed)
     }
@@ -78,7 +64,7 @@ function_types:
       "process_traffic_delay": 3.0, # ms (fixed)
       "process_delay": 5.0, # ms (fixed)
       "min_process_delay": 2.0, # ms (fixed)
-      "max_delay": 10.0, # ms (fixed)
+      "max_delay": 10.0, # ms (fixed) !!! (INCREASE FOR TESTING)
       "migration_delay": 40.0, # ms for atlanta with RTT of ~40ms (fixed)
       "charges": 0.1199988 # ($/h) // 0.000033333 ($/sec) AWS Lambda - 2GB (fixed)
     }
