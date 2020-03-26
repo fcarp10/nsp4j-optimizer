@@ -3,6 +3,7 @@ package optimizer.results;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import manager.Parameters;
+import manager.elements.Function;
 import manager.elements.Server;
 import manager.elements.Service;
 import manager.elements.TrafficFlow;
@@ -44,9 +45,9 @@ public class Results {
    @JsonProperty("total_number_of_functions")
    private double totalNumberOfFunctions;
    @JsonProperty("migrations")
-   private int[] migrations;
+   private Integer[] migrations;
    @JsonProperty("replications")
-   private int[] replications;
+   private Integer[] replications;
    @JsonProperty("lu_summary")
    private double[] luSummary;
    @JsonProperty("xu_summary")
@@ -170,24 +171,31 @@ public class Results {
       }
    }
 
-   private int[] countMigrations(boolean[][][] initialPlacement) {
-      int[] migrations = new int[pm.getFunctionTypes().size()];
+   private Integer[] countMigrations(boolean[][][] initialPlacement) {
+      Map<Integer, Integer> migrationsMap = new HashMap<>();
+      for (Function functionType : pm.getFunctionTypes())
+         migrationsMap.put(functionType.getType(), 0);
       if (initialPlacement != null)
          try {
             boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int s = 0; s < pm.getServices().size(); s++)
                   for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                     if (initialPlacement[x][s][v] && !var[x][s][v])
-                        migrations[pm.getServices().get(s).getFunctions().get(v).getType()]++;
+                     if (initialPlacement[x][s][v] && !var[x][s][v]) {
+                        int functionType = pm.getServices().get(s).getFunctions().get(v).getType();
+                        migrationsMap.put(functionType, migrationsMap.get(functionType) + 1);
+                     }
          } catch (Exception e) {
             printLog(log, ERROR, e.getMessage());
          }
-      return migrations;
+      List<Integer> values = new ArrayList<>(migrationsMap.values());
+      return values.<Integer>toArray(new Integer[0]);
    }
 
-   private int[] countReplications() {
-      int[] replicas = new int[pm.getFunctionTypes().size()];
+   private Integer[] countReplications() {
+      Map<Integer, Integer> replicationsMap = new HashMap<>();
+      for (Function functionType : pm.getFunctionTypes())
+         replicationsMap.put(functionType.getType(), 0);
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -196,12 +204,14 @@ public class Results {
                for (int x = 0; x < pm.getServers().size(); x++)
                   if (var[x][s][v])
                      replicasTemp++;
-               replicas[pm.getServices().get(s).getFunctions().get(v).getType()] += replicasTemp;
+               int functionType = pm.getServices().get(s).getFunctions().get(v).getType();
+               replicationsMap.put(functionType, replicationsMap.get(functionType) + replicasTemp);
             }
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }
-      return replicas;
+      List<Integer> values = new ArrayList<>(replicationsMap.values());
+      return values.<Integer>toArray(new Integer[0]);
    }
 
    private int calculateTotalTraffic() {
@@ -797,11 +807,11 @@ public class Results {
       return synchronizationTraffic;
    }
 
-   public int[] getMigrations() {
+   public Integer[] getMigrations() {
       return migrations;
    }
 
-   public int[] getReplications() {
+   public Integer[] getReplications() {
       return replications;
    }
 
