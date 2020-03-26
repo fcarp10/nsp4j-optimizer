@@ -1,38 +1,19 @@
 package optimizer.results;
 
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import optimizer.gui.ResultsGUI;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBVar;
-import optimizer.lp.CostFunctions;
+import optimizer.gui.ResultsGUI;
 import org.decimal4j.util.DoubleRounder;
 import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-import static optimizer.Parameters.*;
+import static optimizer.Parameters.ERROR;
+import static optimizer.Parameters.INFO;
 
 public class Auxiliary {
-
-   public static CostFunctions costFunctions;
-
-   public Auxiliary() {
-      TypeReference<CostFunctions> typeReference = new TypeReference<>() {
-      };
-      InputStream inputStream = TypeReference.class.getResourceAsStream("/aux_files/linear-cost-functions.yml");
-      ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-      try {
-         costFunctions = mapper.readValue(inputStream, typeReference);
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
-   }
 
    static double avg(List<Object> list) {
       if (list.size() == 0) return 0;

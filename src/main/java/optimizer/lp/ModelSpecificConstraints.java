@@ -1,21 +1,26 @@
 package optimizer.lp;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import gurobi.*;
 import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Service;
 import optimizer.gui.Scenario;
-import optimizer.results.Auxiliary;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 import static optimizer.Parameters.*;
 
 
 public class ModelSpecificConstraints {
 
-   private final Integer BIG_M = 100000;
    private Model model;
    private Variables vars;
    private Parameters pm;
@@ -145,11 +150,12 @@ public class ModelSpecificConstraints {
    }
 
    private void linearUtilCostFunctions(GRBLinExpr[] exprs, GRBVar[] grbVar) throws GRBException {
+      CostFunctions costFunctions = getLinearCostFunctions();
       for (int e = 0; e < exprs.length; e++)
-         for (int c = 0; c < Auxiliary.costFunctions.getValues().size(); c++) {
+         for (int c = 0; c < costFunctions.getValues().size(); c++) {
             GRBLinExpr expr = new GRBLinExpr();
-            expr.multAdd(Auxiliary.costFunctions.getValues().get(c)[0], exprs[e]);
-            expr.addConstant(Auxiliary.costFunctions.getValues().get(c)[1]);
+            expr.multAdd(costFunctions.getValues().get(c)[0], exprs[e]);
+            expr.addConstant(costFunctions.getValues().get(c)[1]);
             model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, grbVar[e], UTIL_COSTS_OBJ);
          }
    }
@@ -186,29 +192,35 @@ public class ModelSpecificConstraints {
    }
 
    private void qosPenalties(GRBModel initialPlacement) throws GRBException {
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               if (pm.getServices().get(s).getTrafficFlow().getAux().get(d)) {
+
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         Service service = pm.getServices().get(s);
+         double bigM = 0;
+         bigM += getMaxPathDelay(service.getTrafficFlow().getPaths()); // in ms
+         bigM += getMaxProcessingDelay(service.getFunctions()) * service.getFunctions().size(); // in ms
+         bigM += getMaxMigrationDelay(service.getFunctions()); // in ms
+         for (int p = 0; p < service.getTrafficFlow().getPaths().size(); p++)
+            for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
+               if (service.getTrafficFlow().getAux().get(d)) {
                   GRBLinExpr serviceDelayExpr = serviceDelayExpr(s, p, d, initialPlacement); // in ms
                   // linearization of delay and routing variables
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, serviceDelayExpr, ySDP); // (31a)
                   GRBLinExpr expr = new GRBLinExpr();
-                  expr.addTerm(BIG_M, vars.zSPD[s][p][d]);
+                  expr.addTerm(bigM, vars.zSPD[s][p][d]);
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, expr, ySDP); // (31b)
                   expr = new GRBLinExpr();
-                  expr.addTerm(BIG_M, vars.zSPD[s][p][d]);
-                  expr.addConstant(-BIG_M);
+                  expr.addTerm(bigM, vars.zSPD[s][p][d]);
+                  expr.addConstant(-bigM);
                   expr.add(serviceDelayExpr);
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.GREATER_EQUAL, expr, ySDP); // (31c)
                   // penalty costs equations
                   expr = new GRBLinExpr();
                   double profit = 0;
-                  for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                     profit += (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
+                  for (int v = 0; v < service.getFunctions().size(); v++)
+                     profit += (double) service.getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
                   double qosPenalty = (double) pm.getAux().get(QOS_PENALTY_RATIO) * profit; // in $/h
                   expr.addTerm(1.0, vars.ySDP[s][d][p]); // in ms
-                  expr.addTerm(-pm.getServices().get(s).getMaxDelay(), vars.zSPD[s][p][d]); // in ms
+                  expr.addTerm(-service.getMaxDelay(), vars.zSPD[s][p][d]); // in ms
                   GRBLinExpr convertedUnitsExps = new GRBLinExpr();
                   convertedUnitsExps.multAdd(1.0 / (1000 * 3600), expr); // conversion from ms to hours
                   GRBLinExpr expr2 = new GRBLinExpr();
@@ -218,6 +230,7 @@ public class ModelSpecificConstraints {
                   model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.EQUAL, 0.0, qSDP);
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.EQUAL, 0.0, ySDP);
                }
+      }
 
    }
 
@@ -287,18 +300,23 @@ public class ModelSpecificConstraints {
    }
 
    private void constraintMaxServiceDelay(GRBModel initialPlacement) throws GRBException {
-      for (int s = 0; s < pm.getServices().size(); s++)
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         double bigM = 0;
+         bigM += getMaxPathDelay(pm.getServices().get(s).getTrafficFlow().getPaths()); // in ms
+         bigM += getMaxProcessingDelay(pm.getServices().get(s).getFunctions()) * pm.getServices().get(s).getFunctions().size(); // in ms
+         bigM += getMaxMigrationDelay(pm.getServices().get(s).getFunctions()); // in ms
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d)) {
                   GRBLinExpr pathDelayExpr = new GRBLinExpr();
                   pathDelayExpr.addTerm(pm.getServices().get(s).getMaxDelay(), vars.zSPD[s][p][d]);
-                  pathDelayExpr.addConstant(BIG_M);
-                  pathDelayExpr.addTerm(-BIG_M, vars.zSPD[s][p][d]);
+                  pathDelayExpr.addConstant(bigM);
+                  pathDelayExpr.addTerm(-bigM, vars.zSPD[s][p][d]);
                   String constrName = MAX_SERV_DELAY + "[s][p][d] --> " + "[" + s + "]"
                           + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "[" + d + "]";
                   model.getGrbModel().addConstr(serviceDelayExpr(s, p, d, initialPlacement), GRB.LESS_EQUAL, pathDelayExpr, constrName);
                }
+      }
    }
 
    private GRBLinExpr serviceDelayExpr(int s, int p, int d, GRBModel initialPlacement) throws GRBException {
@@ -337,8 +355,8 @@ public class ModelSpecificConstraints {
                   for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
                      if (service.getTrafficFlow().getAux().get(d1)) {
                         GRBLinExpr processConstraintExpr1 = new GRBLinExpr();
-                        processConstraintExpr1.addTerm(-BIG_M, vars.fXSVD[x][s][v][d1]);
-                        processConstraintExpr1.addConstant(BIG_M);
+                        processConstraintExpr1.addTerm(-(double) function.getAttribute(FUNCTION_MAX_DELAY), vars.fXSVD[x][s][v][d1]);
+                        processConstraintExpr1.addConstant((double) function.getAttribute(FUNCTION_MAX_DELAY));
                         processConstraintExpr1.addTerm(1.0, vars.dSVXD[s][v][x][d1]);
                         model.getGrbModel().addConstr(processDelayExpr, GRB.LESS_EQUAL, processConstraintExpr1, FUNCTION_PROCESS_TRAFFIC_DELAY);
                         GRBLinExpr processConstraintExpr2 = new GRBLinExpr();
@@ -445,5 +463,51 @@ public class ModelSpecificConstraints {
          model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, minPaths, CONST_REP);
          model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, maxPaths, CONST_REP);
       }
+   }
+
+   // read linear cost functions
+   private CostFunctions getLinearCostFunctions() {
+      CostFunctions costFunctions = null;
+      TypeReference<CostFunctions> typeReference = new TypeReference<>() {
+      };
+      InputStream inputStream = TypeReference.class.getResourceAsStream("/aux_files/linear-cost-functions.yml");
+      ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+      try {
+         costFunctions = mapper.readValue(inputStream, typeReference);
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      return costFunctions;
+   }
+
+   // get the longest propagation path delay
+   private double getMaxPathDelay(List<Path> paths) {
+      double maxPathDelay = 0;
+      for (Path p : paths) {
+         double pathDelay = 0;
+         for (Edge e : p.getEdgePath())
+            pathDelay += (double) e.getAttribute(LINK_DELAY) * 1000; // in ms
+         if (pathDelay > maxPathDelay)
+            maxPathDelay = pathDelay;
+      }
+      return maxPathDelay;
+   }
+
+   // get the maximum processing delay
+   private double getMaxProcessingDelay(List<Function> functions) {
+      double maxProcessingDelay = 0;
+      for (Function f : functions)
+         if ((double) f.getAttribute(FUNCTION_MAX_DELAY) > maxProcessingDelay)
+            maxProcessingDelay = (double) f.getAttribute(FUNCTION_MAX_DELAY);
+      return maxProcessingDelay;
+   }
+
+   // get the maximum migration delay
+   private double getMaxMigrationDelay(List<Function> functions) {
+      double maxMigrationDelay = 0;
+      for (Function f : functions)
+         if ((double) f.getAttribute(FUNCTION_MIGRATION_DELAY) > maxMigrationDelay)
+            maxMigrationDelay = (double) f.getAttribute(FUNCTION_MIGRATION_DELAY);
+      return maxMigrationDelay;
    }
 }
