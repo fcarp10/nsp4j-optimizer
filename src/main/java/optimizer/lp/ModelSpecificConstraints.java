@@ -173,7 +173,6 @@ public class ModelSpecificConstraints {
             GRBLinExpr expr = new GRBLinExpr();
             expr.addTerm((double) pm.getAux().get(SERVER_IDLE_ENERGY_COST), vars.fX[x]);
             expr.addTerm((double) pm.getAux().get(SERVER_UTIL_ENERGY_COST), vars.uX[x]);
-            expr.addConstant((double) pm.getAux().get(SERVER_OTHER_OPEX));
             model.getGrbModel().addConstr(expr, GRB.EQUAL, vars.oX[x], oX);
          } else {
             model.getGrbModel().addConstr(vars.oX[x], GRB.EQUAL, 0, oX);
@@ -199,10 +198,12 @@ public class ModelSpecificConstraints {
          bigM += getMaxPathDelay(service.getTrafficFlow().getPaths()); // in ms
          bigM += getMaxProcessingDelay(service.getFunctions()) * service.getFunctions().size(); // in ms
          bigM += getMaxMigrationDelay(service.getFunctions()); // in ms
+
          for (int p = 0; p < service.getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
                if (service.getTrafficFlow().getAux().get(d)) {
                   GRBLinExpr serviceDelayExpr = serviceDelayExpr(s, p, d, initialPlacement); // in ms
+
                   // linearization of delay and routing variables
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.LESS_EQUAL, serviceDelayExpr, ySDP); // (31a)
                   GRBLinExpr expr = new GRBLinExpr();
@@ -213,25 +214,26 @@ public class ModelSpecificConstraints {
                   expr.addConstant(-bigM);
                   expr.add(serviceDelayExpr);
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.GREATER_EQUAL, expr, ySDP); // (31c)
-                  // penalty costs equations
+
+                  // delay / max_delay
                   expr = new GRBLinExpr();
+                  expr.addTerm(1.0 / service.getMaxDelay(), vars.ySDP[s][d][p]); // ratio
+                  expr.addTerm(-1.0, vars.zSPD[s][p][d]);
+
+                  // qos_penalty value
                   double profit = 0;
                   for (int v = 0; v < service.getFunctions().size(); v++)
                      profit += (double) service.getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
                   double qosPenalty = (double) pm.getAux().get(QOS_PENALTY_RATIO) * profit; // in $/h
-                  expr.addTerm(1.0, vars.ySDP[s][d][p]); // in ms
-                  expr.addTerm(-service.getMaxDelay(), vars.zSPD[s][p][d]); // in ms
-                  GRBLinExpr convertedUnitsExps = new GRBLinExpr();
-                  convertedUnitsExps.multAdd(1.0 / (1000 * 3600), expr); // conversion from ms to hours
+
                   GRBLinExpr expr2 = new GRBLinExpr();
-                  expr2.multAdd(qosPenalty, convertedUnitsExps); // in $$
+                  expr2.multAdd(qosPenalty, expr); // in $/h
                   model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.qSDP[s][d][p], qSDP);
                } else {
                   model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.EQUAL, 0.0, qSDP);
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.EQUAL, 0.0, ySDP);
                }
       }
-
    }
 
    // synchronization traffic
@@ -374,7 +376,8 @@ public class ModelSpecificConstraints {
       GRBLinExpr linkDelayExpr = new GRBLinExpr();
       double pathDelay = 0.0;
       for (Edge link : path.getEdgePath()) pathDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // from sec to ms
-      linkDelayExpr.addTerm(pathDelay, vars.zSP[s][p]);
+//      linkDelayExpr.addTerm(pathDelay, vars.zSP[s][p]);
+      linkDelayExpr.addConstant(pathDelay);
       return linkDelayExpr;
    }
 

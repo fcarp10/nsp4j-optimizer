@@ -582,7 +582,13 @@ public class Results {
          List<String> strings = new ArrayList<>();
          double[][][] varAux = (double[][][]) rawVariables.get(ySDP);
          List<String> stringsAux = new ArrayList<>();
-         for (int s = 0; s < pm.getServices().size(); s++)
+         for (int s = 0; s < pm.getServices().size(); s++) {
+            Service service = pm.getServices().get(s);
+            double profit = 0;
+            for (int v = 0; v < service.getFunctions().size(); v++)
+               profit += (double) service.getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
+            double qosPenalty = (double) pm.getAux().get(QOS_PENALTY_RATIO) * profit; // in $/h
+
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                   for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
@@ -593,9 +599,10 @@ public class Results {
                      }
                      if (varAux[s][d][p] != 0) {
                         stringsAux.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
-                                + "): [" + varAux[s][d][p] + "]");
+                                + "): [" + (varAux[s][d][p]) + "][" + ((varAux[s][d][p] / (pm.getServices().get(s).getMaxDelay()) - 1) * qosPenalty) + "][" + service.getMaxDelay() + "]");
                      }
                   }
+         }
          variables.put(qSDP, strings);
          variables.put(ySDP, stringsAux);
       } catch (Exception e) {

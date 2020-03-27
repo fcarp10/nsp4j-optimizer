@@ -27,7 +27,6 @@ public class Variables {
    public GRBVar[] oX; // operational server cost
    public GRBVar[][] oSV; // operational function cost
    public GRBVar[][][] qSDP; // qos penalty cost
-   public GRBVar[][][] qSDPaux; // qos penalty cost aux
    public GRBVar[][][] ySDP; // aux variable for delay qos penalty cost
 
    // service delay variables
