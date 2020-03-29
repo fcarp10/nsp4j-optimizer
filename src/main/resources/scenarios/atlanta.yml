@@ -20,21 +20,21 @@ aux: {
 service_chains:
   - id: 1
     chain: [1]
-    max_delay: 20.0 # ms
+    max_propagation_delay: 5.0 # ms
     attributes: {
       "min_paths": 1,
       "max_paths": 3
     }
   - id: 2
     chain: [2]
-    max_delay: 20.0 # ms
+    max_propagation_delay: 5.0 # ms
     attributes: {
       "min_paths": 1,
       "max_paths": 3
     }
   - id: 12
     chain: [1, 2]
-    max_delay: 40.0 # ms
+    max_propagation_delay: 5.0 # ms
     attributes: {
       "min_paths": 1,
       "max_paths": 3

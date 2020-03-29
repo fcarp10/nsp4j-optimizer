@@ -11,16 +11,20 @@ import optimizer.gui.Scenario;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import static optimizer.Parameters.*;
+import static optimizer.results.Auxiliary.printLog;
 
 
 public class ModelSpecificConstraints {
 
+   private static final Logger log = LoggerFactory.getLogger(ModelSpecificConstraints.class);
    private Model model;
    private Variables vars;
    private Parameters pm;
@@ -216,8 +220,13 @@ public class ModelSpecificConstraints {
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.GREATER_EQUAL, expr, ySDP); // (31c)
 
                   // delay / max_delay
+                  double maxDelay = 0;
+                  maxDelay += service.getMaxPropagationDelay();
+                  for (int v = 0; v < service.getFunctions().size(); v++)
+                     maxDelay += (double) service.getFunctions().get(v).getAttribute(FUNCTION_MAX_DELAY);
+
                   expr = new GRBLinExpr();
-                  expr.addTerm(1.0 / service.getMaxDelay(), vars.ySDP[s][d][p]); // ratio
+                  expr.addTerm(1.0 / maxDelay, vars.ySDP[s][d][p]); // ratio
                   expr.addTerm(-1.0, vars.zSPD[s][p][d]);
 
                   // qos_penalty value
@@ -229,6 +238,10 @@ public class ModelSpecificConstraints {
                   GRBLinExpr expr2 = new GRBLinExpr();
                   expr2.multAdd(qosPenalty, expr); // in $/h
                   model.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, vars.qSDP[s][d][p], qSDP);
+                  if (maxDelay > bigM)
+                     printLog(log, WARNING, "max. service delay is not bounding");
+                  double upperBound = ((bigM / maxDelay) - 1) * qosPenalty;
+                  model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.LESS_EQUAL, upperBound, qSDP);
                } else {
                   model.getGrbModel().addConstr(vars.qSDP[s][d][p], GRB.EQUAL, 0.0, qSDP);
                   model.getGrbModel().addConstr(vars.ySDP[s][d][p], GRB.EQUAL, 0.0, ySDP);
@@ -311,7 +324,7 @@ public class ModelSpecificConstraints {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d)) {
                   GRBLinExpr pathDelayExpr = new GRBLinExpr();
-                  pathDelayExpr.addTerm(pm.getServices().get(s).getMaxDelay(), vars.zSPD[s][p][d]);
+                  pathDelayExpr.addTerm(pm.getServices().get(s).getMaxDelay(), vars.zSPD[s][p][d]); // <-- TO BE UPDATED
                   pathDelayExpr.addConstant(bigM);
                   pathDelayExpr.addTerm(-bigM, vars.zSPD[s][p][d]);
                   String constrName = MAX_SERV_DELAY + "[s][p][d] --> " + "[" + s + "]"

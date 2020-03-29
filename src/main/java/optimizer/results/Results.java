@@ -585,6 +585,11 @@ public class Results {
          for (int s = 0; s < pm.getServices().size(); s++) {
             Service service = pm.getServices().get(s);
             double profit = 0;
+            double maxServiceDelay = 0;
+            maxServiceDelay += service.getMaxPropagationDelay();
+            for (int v = 0; v < service.getFunctions().size(); v++)
+               maxServiceDelay += (double) service.getFunctions().get(v).getAttribute(FUNCTION_MAX_DELAY);
+
             for (int v = 0; v < service.getFunctions().size(); v++)
                profit += (double) service.getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
             double qosPenalty = (double) pm.getAux().get(QOS_PENALTY_RATIO) * profit; // in $/h
@@ -599,7 +604,7 @@ public class Results {
                      }
                      if (varAux[s][d][p] != 0) {
                         stringsAux.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
-                                + "): [" + (varAux[s][d][p]) + "][" + ((varAux[s][d][p] / (pm.getServices().get(s).getMaxDelay()) - 1) * qosPenalty) + "][" + service.getMaxDelay() + "]");
+                                + "): [" + (varAux[s][d][p]) + "][" + ((varAux[s][d][p] / (maxServiceDelay) - 1) * qosPenalty) + "][" + maxServiceDelay + "]");
                      }
                   }
          }
