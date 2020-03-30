@@ -45,9 +45,9 @@ function_types: # type: 0 reserved for end-point functions
     attributes: {
       "replicable": true, # (fixed)
       "load_ratio": 1.2,
-      "overhead": 9, #  == 10%("max_bw" * "max_dem" * "load_ratio") !!
+      "overhead": 7, #  == 10%("max_bw" * "max_dem" * "load_ratio") !!
       "sync_load": 0.1, # (fixed)
-      "max_cap_server": 90, # == "max_bw" * "max_dem" * "load_ratio" !!
+      "max_cap_server": 72, # == "max_bw" * "max_dem" * "load_ratio" !!
       "process_traffic_delay": 3.0, # ms (fixed)
       "process_delay": 5.0, # ms (fixed)
       "min_process_delay": 2.0, # ms (fixed)
@@ -61,7 +61,7 @@ function_types: # type: 0 reserved for end-point functions
       "load_ratio": 1.2,
       "overhead": 0,
       "sync_load": 0.1, # (fixed)
-      "max_cap_server": 90, # == "max_bw" * "max_dem" * "load_ratio" !!
+      "max_cap_server": 72, # == "max_bw" * "max_dem" * "load_ratio" !!
       "process_traffic_delay": 3.0, # ms (fixed)
       "process_delay": 5.0, # ms (fixed)
       "min_process_delay": 2.0, # ms (fixed)
