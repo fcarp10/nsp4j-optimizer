@@ -278,27 +278,7 @@ public class Manager {
       String fileName = pm.getScenario() + "_";
       if (model.equals(INITIAL_PLACEMENT))
          fileName += model;
-      else if (sc.getConstraints().get(CLOUD_ONLY))
-         fileName += "co";
-      else if (sc.getConstraints().get(EDGE_ONLY))
-         fileName += "eo";
-      else
-         fileName += "ec";
-
-      switch (sc.getObjFunc()) {
-         case OPEX_SERVERS_OBJ:
-            fileName += "_op";
-            break;
-         case FUNCTIONS_CHARGES_OBJ:
-            fileName += "_ch";
-            break;
-         case QOS_PENALTIES_OBJ:
-            fileName += "_pe";
-            break;
-         case ALL_MONETARY_COSTS_OBJ:
-            fileName += "_all";
-            break;
-      }
+      fileName += "_" + sc.getObjFunc();
       return fileName;
    }
 

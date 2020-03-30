@@ -2,7 +2,7 @@ package optimizer;
 
 public class Parameters {
    // objective functions
-   public static final String NUM_SERVERS_OBJ = "num_servers";
+   public static final String NUM_SERVERS_OBJ = "num-servers";
    public static final String NUM_SERVERS_UTIL_COSTS_OBJ = "num-servers-util-costs";
    public static final String UTIL_COSTS_OBJ = "util-costs";
    public static final String UTIL_COSTS_MAX_UTIL_OBJ = "util-costs-max-utilization";
@@ -115,7 +115,7 @@ public class Parameters {
    public static final String X_SCALING = "x_scaling";
    public static final String Y_SCALING = "y_scaling";
    public static final int MAX_NUM_SERVERS = 24;
-   public static final int PORT = 8082;
+   public static final int PORT = 8081;
 
    // logs and messages
    public static final String ERROR = "ERROR - ";
