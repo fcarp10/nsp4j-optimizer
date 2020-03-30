@@ -408,6 +408,7 @@ public class ModelSpecificConstraints {
                      linExpr.addConstant(delay);
                      model.getGrbModel().addConstr(linExpr, GRB.LESS_EQUAL, vars.mS[s], FUNCTION_MIGRATION_DELAY);
                   }
+      model.getGrbModel().addConstr(vars.mS[s], GRB.LESS_EQUAL, getMaxMigrationDelay(service.getFunctions()), FUNCTION_MIGRATION_DELAY);
       GRBLinExpr linExpr = new GRBLinExpr();
       linExpr.addTerm(1.0, vars.mS[s]);
       return linExpr;

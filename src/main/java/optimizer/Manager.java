@@ -275,9 +275,9 @@ public class Manager {
    }
 
    private static String generateFileName(String model, Scenario sc) {
-      String fileName = pm.getScenario() + "_";
+      String fileName = pm.getScenario();
       if (model.equals(INITIAL_PLACEMENT))
-         fileName += model;
+         fileName += "_" + model;
       fileName += "_" + sc.getObjFunc();
       return fileName;
    }
