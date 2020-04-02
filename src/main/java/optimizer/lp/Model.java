@@ -7,7 +7,7 @@ import optimizer.results.Auxiliary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static optimizer.Parameters.*;
+import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.printLog;
 
 public class Model {

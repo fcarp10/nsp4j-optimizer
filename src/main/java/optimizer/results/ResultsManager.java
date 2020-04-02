@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import optimizer.gui.Scenario;
 import gurobi.*;
 import optimizer.lp.Variables;
 import manager.Parameters;
@@ -17,7 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static optimizer.Parameters.*;
+import static optimizer.Definitions.*;
 
 
 public class ResultsManager {

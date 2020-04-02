@@ -1,6 +1,6 @@
 package optimizer;
 
-public class Parameters {
+public class Definitions {
    // objective functions
    public static final String NUM_SERVERS_OBJ = "num-servers";
    public static final String NUM_SERVERS_UTIL_COSTS_OBJ = "num-servers-util-costs";
@@ -15,6 +15,7 @@ public class Parameters {
    // scenarios
    public static final String SERVER_DIMENSIONING = "dimensioning";
    public static final String INITIAL_PLACEMENT = "init";
+   public static final String HEURISTIC = "heu";
 
    // general variables
    public static final String zSP = "zSP";

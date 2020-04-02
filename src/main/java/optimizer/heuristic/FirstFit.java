@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static optimizer.Parameters.FUNCTION_LOAD_RATIO;
-import static optimizer.Parameters.LINK_CAPACITY;
+import static optimizer.Definitions.FUNCTION_LOAD_RATIO;
+import static optimizer.Definitions.LINK_CAPACITY;
 
 public class FirstFit {
 

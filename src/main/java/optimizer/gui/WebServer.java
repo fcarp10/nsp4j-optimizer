@@ -18,7 +18,7 @@ public class WebServer {
 
       post("/load", (request, response) -> {
          Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-         Manager.loadTopology(scenario.getInputFileName());
+         Manager.readInputParameters(scenario.getInputFileName());
          return 201;
       });
 

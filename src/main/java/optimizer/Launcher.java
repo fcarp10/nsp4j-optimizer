@@ -8,7 +8,7 @@ import static spark.Spark.*;
 public class Launcher {
 
    public static void main(String[] args) {
-      port(Parameters.PORT);
+      port(Definitions.PORT);
       staticFiles.location("/public");
       init();
       new ResultsGUI();

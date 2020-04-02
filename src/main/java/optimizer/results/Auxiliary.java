@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 
 import java.util.List;
 
-import static optimizer.Parameters.ERROR;
-import static optimizer.Parameters.INFO;
+import static optimizer.Definitions.ERROR;
+import static optimizer.Definitions.INFO;
 
 public class Auxiliary {
 

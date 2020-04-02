@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import static optimizer.Parameters.*;
+import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.printLog;
 
 

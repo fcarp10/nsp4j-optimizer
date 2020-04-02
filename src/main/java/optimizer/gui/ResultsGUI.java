@@ -9,7 +9,7 @@ import org.graphstream.graph.Node;
 import java.text.DecimalFormat;
 import java.util.*;
 
-import static optimizer.Parameters.*;
+import static optimizer.Definitions.*;
 
 public class ResultsGUI {
 

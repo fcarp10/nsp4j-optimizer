@@ -1,7 +1,7 @@
 package optimizer.gui;
 
 
-import static optimizer.Parameters.*;
+import static optimizer.Definitions.*;
 
 class ServerJson extends NodeJson {
 

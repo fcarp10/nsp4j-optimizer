@@ -8,7 +8,7 @@ import manager.elements.Service;
 import optimizer.gui.Scenario;
 import org.graphstream.graph.Node;
 
-import static optimizer.Parameters.*;
+import static optimizer.Definitions.*;
 
 public class GeneralConstraints {
 
