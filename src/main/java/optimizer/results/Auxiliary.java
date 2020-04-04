@@ -3,15 +3,19 @@ package optimizer.results;
 
 import gurobi.GRB;
 import gurobi.GRBException;
+import gurobi.GRBModel;
 import gurobi.GRBVar;
+import manager.Parameters;
+import manager.elements.Function;
 import optimizer.gui.ResultsGUI;
 import org.decimal4j.util.DoubleRounder;
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Path;
 import org.slf4j.Logger;
 
 import java.util.List;
 
-import static optimizer.Definitions.ERROR;
-import static optimizer.Definitions.INFO;
+import static optimizer.Definitions.*;
 
 public class Auxiliary {
 
@@ -63,6 +67,52 @@ public class Auxiliary {
             break;
       }
       ResultsGUI.log(status + message);
+   }
+
+   public static boolean[][][] convertInitialPlacement(Parameters pm, GRBModel initialModel) {
+      boolean[][][] initialPlacement = null;
+      if (initialModel != null) {
+         initialPlacement = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                  try {
+                     if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
+                        initialPlacement[x][s][v] = true;
+                  } catch (GRBException e) {
+                     e.printStackTrace();
+                  }
+               }
+      }
+      return initialPlacement;
+   }
+
+   public static double getMaxMigrationDelay(List<Function> functions) {
+      double maxMigrationDelay = 0;
+      for (Function f : functions)
+         if ((double) f.getAttribute(FUNCTION_MIGRATION_DELAY) > maxMigrationDelay)
+            maxMigrationDelay = (double) f.getAttribute(FUNCTION_MIGRATION_DELAY);
+      return maxMigrationDelay;
+   }
+
+   public static double getMaxPathDelay(List<Path> paths) {
+      double maxPathDelay = 0;
+      for (Path p : paths) {
+         double pathDelay = 0;
+         for (Edge e : p.getEdgePath())
+            pathDelay += (double) e.getAttribute(LINK_DELAY) * 1000; // in ms
+         if (pathDelay > maxPathDelay)
+            maxPathDelay = pathDelay;
+      }
+      return maxPathDelay;
+   }
+
+   public static double getMaxProcessingDelay(List<Function> functions) {
+      double maxProcessingDelay = 0;
+      for (Function f : functions)
+         if ((double) f.getAttribute(FUNCTION_MAX_DELAY) > maxProcessingDelay)
+            maxProcessingDelay = (double) f.getAttribute(FUNCTION_MAX_DELAY);
+      return maxProcessingDelay;
    }
 
    public static boolean[] grbVarsToBooleans(GRBVar[] var) throws GRBException {

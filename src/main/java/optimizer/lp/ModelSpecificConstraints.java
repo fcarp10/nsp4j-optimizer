@@ -16,10 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 import static optimizer.Definitions.*;
-import static optimizer.results.Auxiliary.printLog;
+import static optimizer.results.Auxiliary.*;
 
 
 public class ModelSpecificConstraints {
@@ -389,7 +388,6 @@ public class ModelSpecificConstraints {
       GRBLinExpr linkDelayExpr = new GRBLinExpr();
       double pathDelay = 0.0;
       for (Edge link : path.getEdgePath()) pathDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // from sec to ms
-//      linkDelayExpr.addTerm(pathDelay, vars.zSP[s][p]);
       linkDelayExpr.addConstant(pathDelay);
       return linkDelayExpr;
    }
@@ -495,36 +493,5 @@ public class ModelSpecificConstraints {
          e.printStackTrace();
       }
       return costFunctions;
-   }
-
-   // get the longest propagation path delay
-   private double getMaxPathDelay(List<Path> paths) {
-      double maxPathDelay = 0;
-      for (Path p : paths) {
-         double pathDelay = 0;
-         for (Edge e : p.getEdgePath())
-            pathDelay += (double) e.getAttribute(LINK_DELAY) * 1000; // in ms
-         if (pathDelay > maxPathDelay)
-            maxPathDelay = pathDelay;
-      }
-      return maxPathDelay;
-   }
-
-   // get the maximum processing delay
-   private double getMaxProcessingDelay(List<Function> functions) {
-      double maxProcessingDelay = 0;
-      for (Function f : functions)
-         if ((double) f.getAttribute(FUNCTION_MAX_DELAY) > maxProcessingDelay)
-            maxProcessingDelay = (double) f.getAttribute(FUNCTION_MAX_DELAY);
-      return maxProcessingDelay;
-   }
-
-   // get the maximum migration delay
-   private double getMaxMigrationDelay(List<Function> functions) {
-      double maxMigrationDelay = 0;
-      for (Function f : functions)
-         if ((double) f.getAttribute(FUNCTION_MIGRATION_DELAY) > maxMigrationDelay)
-            maxMigrationDelay = (double) f.getAttribute(FUNCTION_MIGRATION_DELAY);
-      return maxMigrationDelay;
    }
 }

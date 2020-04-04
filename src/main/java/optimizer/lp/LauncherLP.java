@@ -1,7 +1,6 @@
 package optimizer.lp;
 
 
-import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBModel;
@@ -15,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static optimizer.Definitions.*;
+import static optimizer.results.Auxiliary.convertInitialPlacement;
 import static optimizer.results.Auxiliary.printLog;
 
 public class LauncherLP {
@@ -135,19 +135,6 @@ public class LauncherLP {
       }
       results.initializeResults(optModel.getObjVal(), convertInitialPlacement(pm, initialModel));
       return results;
-   }
-
-   private static boolean[][][] convertInitialPlacement(Parameters pm, GRBModel initialModel) throws GRBException {
-      boolean[][][] initialPlacement = null;
-      if (initialModel != null) {
-         initialPlacement = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
-         for (int x = 0; x < pm.getServers().size(); x++)
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
-                     initialPlacement[x][s][v] = true;
-      }
-      return initialPlacement;
    }
 
    private static String generateFileName(Parameters pm, String model, Scenario sc) {

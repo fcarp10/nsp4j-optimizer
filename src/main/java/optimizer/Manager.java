@@ -102,15 +102,15 @@ public class Manager {
    public static void main(Scenario sce) {
       try {
          interrupted = false;
-         GRBModel initialModel = ResultsManager.importModel(getResourcePath(sce.getInputFileName()), sce.getInputFileName(), pm);
+         GRBModel initialPlacement = ResultsManager.importModel(getResourcePath(sce.getInputFileName()), sce.getInputFileName(), pm);
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
          printLog(log, INFO, "initializing " + sce.getModel());
 
          specifyUsedTrafficDemands(pm, sce);
          if (sce.getModel().equals(HEURISTIC))
-            LauncherHeu.run(pm, sce, resultsManager);
+            LauncherHeu.run(pm, sce, resultsManager, initialPlacement);
          else
-            LauncherLP.run(pm, sce, resultsManager, initialModel);
+            LauncherLP.run(pm, sce, resultsManager, initialPlacement);
 
          printLog(log, INFO, "backend is ready");
       } catch (Exception e) {
