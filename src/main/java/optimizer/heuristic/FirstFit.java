@@ -42,6 +42,7 @@ public class FirstFit {
    public FirstFit(Parameters pm) {
       this.pm = pm;
       zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
+      fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm.getDemandsTrafficFlow()];
       uL = new HashMap<>();
       for (Edge link : pm.getLinks())
@@ -105,16 +106,50 @@ public class FirstFit {
                   break;
                } else {
                   // TO-DO blocking !!
+                  log.error("No server found for functions");
                }
             }
+         }
+
+         // add synchronization traffic
+         for (int v = 0; v < service.getFunctions().size(); v++) {
+            for (int x = 0; x < pm.getServers().size(); x++)
+               for (int y = 0; y < pm.getServers().size(); y++) {
+                  if (pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent())) continue;
+                  if (fXSV[x][s][v] && fXSV[y][s][v]) {
+
+                     // calculate the sync traffic
+                     double traffic = 0;
+                     for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
+                        traffic += service.getTrafficFlow().getDemands().get(d);
+                     double syncTraffic = traffic * (double) service.getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO);
+
+                     // search an available path for the sync traffic
+                     boolean foundSyncPath = false;
+                     for (int p = 0; p < pm.getPaths().size(); p++) {
+                        Path path = pm.getPaths().get(p);
+                        if (path.getNodePath().get(0).equals(pm.getServers().get(x).getParent())
+                                & path.getNodePath().get(path.getNodePath().size() - 1)
+                                .equals(pm.getServers().get(y).getParent()))
+                           if (checkIfFreePathResources(path, syncTraffic)) {
+                              addSyncTraffic(path, syncTraffic);
+                              foundSyncPath = true;
+                              break;
+                           }
+                     }
+                     if (!foundSyncPath) {
+                        // TO-DO implement blocking
+                        log.error("No available path found for sync traffic");
+                     }
+                  }
+               }
          }
       }
    }
 
-   protected void generateRestOfVariablesForResults() {
+   protected void generateRestOfVariablesForResults(GRBModel initialPlacement) throws GRBException {
 
       fX = new boolean[pm.getServers().size()];
-      fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       zSP = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
       oX = new double[pm.getServers().size()];
       oSV = new double[pm.getServices().size()][pm.getServiceLength()];
@@ -123,10 +158,10 @@ public class FirstFit {
       mS = new double[pm.getServices().size()];
 
       fXgenerate();
-      fXSVgenerate();
       zSPgenerate();
       oXgenerate();
       oSVgenerate();
+      qSDPgenerate(initialPlacement);
    }
 
    private boolean checkIfFreePathResources(Path path, double trafficDemand) {
@@ -179,7 +214,13 @@ public class FirstFit {
       double trafficDemand = service.getTrafficFlow().getDemands().get(d);
       Function function = service.getFunctions().get(v);
       fXSVD[x][s][v][d] = true;
+      fXSV[x][s][v] = true;
       uX.put(server.getId(), uX.get(server.getId()) + (trafficDemand * (double) function.getAttribute(FUNCTION_LOAD_RATIO) / server.getCapacity()));
+   }
+
+   private void addSyncTraffic(Path path, double trafficDemand) {
+      for (Edge pathLink : path.getEdgePath())
+         uL.put(pathLink.getId(), uL.get(pathLink.getId()) + (trafficDemand / (int) pathLink.getAttribute(LINK_CAPACITY)));
    }
 
    private void fXgenerate() {
@@ -193,17 +234,6 @@ public class FirstFit {
                      break outerLoop;
                   }
       }
-   }
-
-   private void fXSVgenerate() {
-      for (int x = 0; x < pm.getServers().size(); x++)
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (fXSVD[x][s][v][d]) {
-                     fXSV[x][s][v] = true;
-                     break;
-                  }
    }
 
    private void zSPgenerate() {

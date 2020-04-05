@@ -1,6 +1,7 @@
 package optimizer.heuristic;
 
 
+import gurobi.GRBException;
 import gurobi.GRBModel;
 import manager.Parameters;
 import optimizer.gui.ResultsGUI;
@@ -21,7 +22,7 @@ public class LauncherHeu {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherHeu.class);
 
-   public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager, GRBModel initialPlacement) {
+   public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager, GRBModel initialPlacement) throws GRBException {
 
       printLog(log, INFO, "initializing heuristic");
       FirstFit firstFit = new FirstFit(pm);
@@ -29,7 +30,7 @@ public class LauncherHeu {
       long startTime = System.nanoTime();
       firstFit.run();
       long elapsedTime = System.nanoTime() - startTime;
-      firstFit.generateRestOfVariablesForResults();
+      firstFit.generateRestOfVariablesForResults(initialPlacement);
       Results results = generateResults(pm, scenario, firstFit, initialPlacement);
       results.setComputationTime((double) elapsedTime / 1000000000);
       resultsManager.exportJsonFile(generateFileName(pm), results);
