@@ -107,7 +107,10 @@ public class Manager {
          printLog(log, INFO, "initializing " + sce.getModel());
 
          specifyUsedTrafficDemands(pm, sce);
-         if (sce.getModel().equals(HEURISTIC))
+
+         if (sce.getModel().equals(INITIAL_PLACEMENT))
+            LauncherLP.run(pm, sce, resultsManager, null);
+         else if (sce.getModel().equals(HEURISTIC))
             LauncherHeu.run(pm, sce, resultsManager, initialPlacement);
          else
             LauncherLP.run(pm, sce, resultsManager, initialPlacement);

@@ -1,9 +1,6 @@
 package optimizer.heuristic;
 
 
-import gurobi.GRB;
-import gurobi.GRBException;
-import gurobi.GRBModel;
 import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Server;
@@ -37,6 +34,7 @@ public class FirstFit {
    protected double[][][] qSDP;
    protected double[][][] dSVX;
    protected double[] mS;
+   protected boolean[][][] hSVP;
    protected Parameters pm;
 
    public FirstFit(Parameters pm) {
@@ -44,6 +42,7 @@ public class FirstFit {
       zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
       fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm.getDemandsTrafficFlow()];
+      hSVP = new boolean[pm.getServices().size()][pm.getServiceLength()][pm.getPaths().size()];
       uL = new HashMap<>();
       for (Edge link : pm.getLinks())
          uL.put(link.getId(), 0.0);
@@ -68,47 +67,55 @@ public class FirstFit {
                log.error("No available path found for [s][d] = [" + s + "][" + d + "]");
                continue;
             }
+            boolean isPathAvailable = false;
             for (Integer p : availablePaths) {
-               Path pathFound = tf.getPaths().get(p);
 
+               Path pathFound = tf.getPaths().get(p);
                List<List<Integer>> listAvailableServersPerFunction = new ArrayList<>(); // find available servers for every function
+
                for (int v = 0; v < service.getFunctions().size(); v++) { // for every function
+
                   List<Integer> alreadyUsedServers = getUsedServersForFunction(s, v, d, pathFound); // get list of server where function already exists for the path
                   List<Integer> availableServers = new ArrayList<>();
-                  Function function = service.getFunctions().get(v);
-                  if (!alreadyUsedServers.isEmpty()) { // if function already exist...
+
+                  if (!alreadyUsedServers.isEmpty()) // if function already exist...
                      for (int x = 0; x < alreadyUsedServers.size(); x++)
-                        if (checkIfFreeServerResources(pm.getServers().get(x), trafficDemand, function)) // if free resources, save it
+                        if (checkIfFreeServerResources(s, x, v, d)) // if free resources, save it
                            availableServers.add(x);
-                  }
-                  if (!availableServers.isEmpty()) { // if there are available servers, save them
+
+                  if (!availableServers.isEmpty()) { // if there are available servers with functions already, save them
                      listAvailableServersPerFunction.add(availableServers);
                      continue;
                   }
-                  if (alreadyUsedServers.isEmpty()) { // if function does not exist yet in the path...
-                     listAvailableServersPerFunction.add(getAvailableServers(pathFound, trafficDemand, function));
-                  }
+
+                  if (alreadyUsedServers.isEmpty()) // if function does not exist yet in the path, get available servers for placement
+                     listAvailableServersPerFunction.add(getAvailableServers(s, p, d, v));
                }
 
                boolean noServerForFunctions = false;
                for (int v = 0; v < service.getFunctions().size(); v++) // check if all functions have at least one available server
                   if (listAvailableServersPerFunction.get(v).isEmpty()) {
                      noServerForFunctions = true;
-                     log.error("No available servers for function [s][d][v] = [" + s + "][" + d + "][" + v + "]");
                   }
-               if (!noServerForFunctions) { // if there are servers, make a pre-assigment of traffic
-                  for (int v = 0; v < service.getFunctions().size(); v++) { // pre-assign traffic to servers
+
+               if (!noServerForFunctions) { // if there are servers, assign traffic
+                  for (int v = 0; v < service.getFunctions().size(); v++) { // assign traffic to servers
                      List<Integer> availableServers = listAvailableServersPerFunction.get(v);
-                     for (Integer availableServer : availableServers)
-                        assignFunctionAndTrafficToServer(s, availableServer, v, d);
+                     for (Integer xAvailable : availableServers)
+                        if (checkIfFreeServerResources(s, xAvailable, v, d)) {
+                           assignFunctionAndTrafficToServer(s, xAvailable, v, d);
+                           break;
+                        }
                   }
                   assignTrafficDemandToPath(s, p, d);
-                  break;
-               } else {
-                  // TO-DO blocking !!
-                  log.error("No server found for functions");
+                  isPathAvailable = true;
+                  break; // go to the next demand
                }
             }
+            if (!isPathAvailable)
+               // TO-DO blocking
+               log.error("No path available");
+
          }
 
          // add synchronization traffic
@@ -132,7 +139,7 @@ public class FirstFit {
                                 & path.getNodePath().get(path.getNodePath().size() - 1)
                                 .equals(pm.getServers().get(y).getParent()))
                            if (checkIfFreePathResources(path, syncTraffic)) {
-                              addSyncTraffic(path, syncTraffic);
+                              addSyncTraffic(path, syncTraffic, s, v, p);
                               foundSyncPath = true;
                               break;
                            }
@@ -147,7 +154,7 @@ public class FirstFit {
       }
    }
 
-   protected void generateRestOfVariablesForResults(GRBModel initialPlacement) throws GRBException {
+   protected void generateRestOfVariablesForResults(boolean[][][] initialPlacement) {
 
       fX = new boolean[pm.getServers().size()];
       zSP = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
@@ -186,18 +193,28 @@ public class FirstFit {
       return foundServers;
    }
 
-   private List<Integer> getAvailableServers(Path path, int trafficDemand, Function function) {
+   private List<Integer> getAvailableServers(int s, int p, int d, int v) {
+      Service service = pm.getServices().get(s);
+      Path path = service.getTrafficFlow().getPaths().get(p);
       List<Integer> availableServers = new ArrayList<>();
       for (int n = 0; n < path.getNodePath().size(); n++)
          for (int x = 0; x < pm.getServers().size(); x++)
             if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-               if (checkIfFreeServerResources(pm.getServers().get(x), trafficDemand, function))
+               if (checkIfFreeServerResources(s, x, v, d))
                   availableServers.add(x);
       return availableServers;
    }
 
-   private boolean checkIfFreeServerResources(Server server, double trafficDemand, Function function) {
-      return uX.get(server.getId()) + ((trafficDemand * (double) function.getAttribute(FUNCTION_LOAD_RATIO)) / server.getCapacity()) <= 1;
+   private boolean checkIfFreeServerResources(int s, int x, int v, int d) {
+      Service service = pm.getServices().get(s);
+      Server server = pm.getServers().get(x);
+      double trafficDemand = service.getTrafficFlow().getDemands().get(d);
+      Function function = service.getFunctions().get(v);
+      int functionOverhead = 0;
+      if (!fXSV[x][s][v])
+         functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
+      double resourcesToAdd = functionOverhead + (trafficDemand * (double) function.getAttribute(FUNCTION_LOAD_RATIO));
+      return uX.get(server.getId()) + (resourcesToAdd / server.getCapacity()) <= 1.0;
    }
 
    private void assignTrafficDemandToPath(int s, int p, int d) {
@@ -214,13 +231,18 @@ public class FirstFit {
       double trafficDemand = service.getTrafficFlow().getDemands().get(d);
       Function function = service.getFunctions().get(v);
       fXSVD[x][s][v][d] = true;
-      fXSV[x][s][v] = true;
+      if (!fXSV[x][s][v]) {
+         fXSV[x][s][v] = true;
+         int functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
+         uX.put(server.getId(), uX.get(server.getId()) + ((double) functionOverhead / server.getCapacity()));
+      }
       uX.put(server.getId(), uX.get(server.getId()) + (trafficDemand * (double) function.getAttribute(FUNCTION_LOAD_RATIO) / server.getCapacity()));
    }
 
-   private void addSyncTraffic(Path path, double trafficDemand) {
+   private void addSyncTraffic(Path path, double trafficDemand, int s, int v, int p) {
       for (Edge pathLink : path.getEdgePath())
          uL.put(pathLink.getId(), uL.get(pathLink.getId()) + (trafficDemand / (int) pathLink.getAttribute(LINK_CAPACITY)));
+      hSVP[s][v][p] = true;
    }
 
    private void fXgenerate() {
@@ -264,7 +286,7 @@ public class FirstFit {
                      oSV[s][v] = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
    }
 
-   private void qSDPgenerate(GRBModel initialPlacement) throws GRBException {
+   private void qSDPgenerate(boolean[][][] initialPlacement) {
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
@@ -302,24 +324,32 @@ public class FirstFit {
                               }
 
                   // migration delay
-                  double maxDelay = 0;
+                  double maxMigrationDelay = 0;
                   for (int n = 0; n < path.getNodePath().size(); n++)
                      for (int x = 0; x < pm.getServers().size(); x++)
                         if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-                           for (int v = 0; v < service.getFunctions().size(); v++)
-                              if (initialPlacement.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0 && !fXSV[x][s][v]) {
+                           for (int v = 0; v < service.getFunctions().size(); v++) {
+                              if (initialPlacement[x][s][v] && !fXSV[x][s][v]) {
                                  double delay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
-                                 if (delay > maxDelay)
-                                    maxDelay = delay;
+                                 if (delay > maxMigrationDelay)
+                                    maxMigrationDelay = delay;
                               }
-                  serviceDelay += maxDelay;
-                  mS[s] = maxDelay;
+                           }
+                  serviceDelay += maxMigrationDelay;
+                  mS[s] = maxMigrationDelay;
+
+                  double maxDelay = 0;
+                  maxDelay += service.getMaxPropagationDelay();
+                  for (int v = 0; v < service.getFunctions().size(); v++)
+                     maxDelay += (double) service.getFunctions().get(v).getAttribute(FUNCTION_MAX_DELAY);
+
                   double profit = 0;
                   for (int v = 0; v < service.getFunctions().size(); v++)
                      profit += (double) service.getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
                   double qosPenalty = (double) pm.getAux().get(QOS_PENALTY_RATIO) * profit; // in $/h
 
-                  qSDP[s][d][p] = ((serviceDelay / service.getMaxDelay()) - 1) * qosPenalty; // in $/h
+                  if (serviceDelay > maxDelay)
+                     qSDP[s][d][p] = ((serviceDelay / maxDelay) - 1) * qosPenalty; // in $/h
                }
    }
 

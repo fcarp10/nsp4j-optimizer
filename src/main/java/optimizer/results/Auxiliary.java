@@ -62,6 +62,9 @@ public class Auxiliary {
          case ERROR:
             log.error(message);
             break;
+         case WARNING:
+            log.warn(message);
+            break;
          case INFO:
             log.info(message);
             break;

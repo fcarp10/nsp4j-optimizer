@@ -186,7 +186,7 @@ public class Results {
                         migrationsMap.put(functionType, migrationsMap.get(functionType) + 1);
                      }
          } catch (Exception e) {
-            printLog(log, ERROR, e.getMessage());
+            printLog(log, ERROR, "counting migrations: " + e.getMessage());
          }
       List<Integer> values = new ArrayList<>(migrationsMap.values());
       return values.<Integer>toArray(new Integer[0]);
@@ -208,7 +208,7 @@ public class Results {
                replicationsMap.put(functionType, replicationsMap.get(functionType) + replicasTemp);
             }
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, "counting replications: " + e.getMessage());
       }
       List<Integer> values = new ArrayList<>(replicationsMap.values());
       return values.<Integer>toArray(new Integer[0]);
@@ -231,7 +231,7 @@ public class Results {
             if (pm.getLinks().get(l).getAttribute(LINK_CLOUD) == null)
                linkMapResults.put(pm.getLinks().get(l), Auxiliary.roundDouble(var[l], 4));
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, "link utilization results: " + e.getMessage());
       }
       return linkMapResults;
    }
@@ -243,7 +243,7 @@ public class Results {
          for (int x = 0; x < pm.getServers().size(); x++)
             serverMapResults.put(pm.getServers().get(x), Auxiliary.roundDouble(var[x], 4));
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, "server utilization results: " + e.getMessage());
       }
       return serverMapResults;
    }
@@ -263,7 +263,7 @@ public class Results {
             numOfFunctionsPerServer.add(numOfFunctions);
          }
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, "counting number of functions per server: " + e.getMessage());
       }
       return numOfFunctionsPerServer;
    }
@@ -339,7 +339,7 @@ public class Results {
                      if (var2[s][p][d])
                         serviceTypesList.add(pm.getServices().get(s).getId());
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, "counting types of services: " + e.getMessage());
       }
       return serviceTypesList;
    }
@@ -358,7 +358,7 @@ public class Results {
          if (usedPaths != 0)
             avgPathLength = avgPathLength / usedPaths;
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, "calculating average path length: " + e.getMessage());
       }
       return avgPathLength;
    }
@@ -370,7 +370,7 @@ public class Results {
          for (int l = 0; l < pm.getLinks().size(); l++)
             trafficOnLinks += var[l] * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, "calculating traffic on links: " + e.getMessage());
       }
       return trafficOnLinks;
    }
@@ -397,7 +397,7 @@ public class Results {
             }
          }
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, "calculating synchronization traffic: " + e.getMessage());
       }
       return synchronizationTraffic;
    }
@@ -416,7 +416,7 @@ public class Results {
                           + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
          variables.put(zSP, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, zSP + " var results: " + e.getMessage());
       }
    }
 
@@ -436,7 +436,7 @@ public class Results {
                                 + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
          variables.put(zSPD, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, zSPD + " var results: " + e.getMessage());
       }
    }
 
@@ -449,7 +449,7 @@ public class Results {
                strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]");
          variables.put(fX, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, fX + " var results: " + e.getMessage());
       }
    }
 
@@ -468,7 +468,7 @@ public class Results {
                              + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
          variables.put(fXSV, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, fXSV + " var results: " + e.getMessage());
       }
    }
 
@@ -490,7 +490,7 @@ public class Results {
                                    + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
          variables.put(fXSVD, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, fXSVD + " var results: " + e.getMessage());
       }
    }
 
@@ -504,7 +504,7 @@ public class Results {
                     + Auxiliary.roundDouble(var[x], 3) + "]");
          variables.put(uX, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, uX + " var results: " + e.getMessage());
       }
    }
 
@@ -522,7 +522,7 @@ public class Results {
                     * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY) + "]");
          variables.put(uL, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, ERROR, uL + " var results: " + e.getMessage());
       }
    }
 
@@ -538,7 +538,7 @@ public class Results {
                strings.add("(" + (n + this.offset) + "): [" + pm.getNodes().get(n).getId() + "][" + var[n] + "]");
          variables.put(xN, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, WARNING, xN + " var results: " + e.getMessage());
       }
    }
 
@@ -554,7 +554,7 @@ public class Results {
             }
          variables.put(oX, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, WARNING, oX + " var results: " + e.getMessage());
       }
    }
 
@@ -571,7 +571,7 @@ public class Results {
                }
          variables.put(oSV, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, WARNING, oSV + " var results: " + e.getMessage());
       }
    }
 
@@ -602,16 +602,16 @@ public class Results {
                                 + "): [" + var[s][d][p] + "]");
                         qsdp.add(var[s][d][p]);
                      }
-                     if (varAux[s][d][p] != 0) {
-                        stringsAux.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
-                                + "): [" + (varAux[s][d][p]) + "][" + ((varAux[s][d][p] / (maxServiceDelay) - 1) * qosPenalty) + "][" + maxServiceDelay + "]");
-                     }
+                     if (varAux != null)
+                        if (varAux[s][d][p] != 0)
+                           stringsAux.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
+                                   + "): [" + (varAux[s][d][p]) + "][" + ((varAux[s][d][p] / (maxServiceDelay) - 1) * qosPenalty) + "][" + maxServiceDelay + "]");
                   }
          }
          variables.put(qSDP, strings);
          variables.put(ySDP, stringsAux);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, WARNING, qSDP + " var results: " + e.getMessage());
       }
    }
 
@@ -632,7 +632,7 @@ public class Results {
                                    + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
          variables.put(gSVXY, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, WARNING, gSVXY + " var results: " + e.getMessage());
       }
    }
 
@@ -648,7 +648,7 @@ public class Results {
                              + pm.getPaths().get(p).getNodePath());
          variables.put(hSVP, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, WARNING, hSVP + " var results: " + e.getMessage());
       }
    }
    /**********************************************************************************************/
@@ -673,7 +673,7 @@ public class Results {
                }
          variables.put(dSVX, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, WARNING, dSVX + " var results: " + e.getMessage());
       }
    }
 
@@ -686,7 +686,7 @@ public class Results {
                strings.add("(" + (s + this.offset) + "): " + "[" + migrationDelayVar[s] + "]");
          variables.put(mS, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, WARNING, mS + " var results: " + e.getMessage());
       }
    }
 
@@ -703,7 +703,7 @@ public class Results {
                                 + (d + this.offset) + "): " + "[" + var[s][v][x][d] + "]");
          variables.put(dSVXD, strings);
       } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
+         printLog(log, WARNING, dSVXD + " var results: " + e.getMessage());
       }
    }
 
