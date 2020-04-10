@@ -7,6 +7,7 @@ import gurobi.GRBModel;
 import gurobi.GRBVar;
 import manager.Parameters;
 import manager.elements.Function;
+import manager.elements.Service;
 import optimizer.gui.ResultsGUI;
 import org.decimal4j.util.DoubleRounder;
 import org.graphstream.graph.Edge;
@@ -90,12 +91,9 @@ public class Auxiliary {
       return initialPlacement;
    }
 
-   public static double getMaxMigrationDelay(List<Function> functions) {
-      double maxMigrationDelay = 0;
-      for (Function f : functions)
-         if ((double) f.getAttribute(FUNCTION_MIGRATION_DELAY) > maxMigrationDelay)
-            maxMigrationDelay = (double) f.getAttribute(FUNCTION_MIGRATION_DELAY);
-      return maxMigrationDelay;
+   public static double getMaxServiceDowntime(Service service) {
+      double downtime = (double) service.getAttribute(SERVICE_DOWNTIME);
+      return downtime * service.getFunctions().size();
    }
 
    public static double getMaxPathDelay(List<Path> paths) {

@@ -32,8 +32,6 @@ public class FirstFit {
    protected double[] oX;
    protected double[][] oSV;
    protected double[][][] qSDP;
-   protected double[][][] dSVX;
-   protected double[] mS;
    protected boolean[][][] hSVP;
    protected Parameters pm;
 
@@ -161,8 +159,6 @@ public class FirstFit {
       oX = new double[pm.getServers().size()];
       oSV = new double[pm.getServices().size()][pm.getServiceLength()];
       qSDP = new double[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
-      dSVX = new double[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
-      mS = new double[pm.getServices().size()];
 
       fXgenerate();
       zSPgenerate();
@@ -296,12 +292,6 @@ public class FirstFit {
                   Service service = pm.getServices().get(s);
                   Path path = service.getTrafficFlow().getPaths().get(p);
 
-                  // propagation delay
-                  double pathDelay = 0.0;
-                  for (Edge link : path.getEdgePath())
-                     pathDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
-                  serviceDelay += pathDelay;
-
                   // processing delay
                   for (int n = 0; n < path.getNodePath().size(); n++)
                      for (int x = 0; x < pm.getServers().size(); x++)
@@ -320,23 +310,23 @@ public class FirstFit {
                                  processinDelay += (double) function.getAttribute(FUNCTION_MIN_PROCESS_DELAY);
                                  processinDelay += (double) function.getAttribute(FUNCTION_PROCESS_DELAY) * uX.get(pm.getServers().get(x).getId());
                                  serviceDelay += processinDelay;
-                                 dSVX[s][v][x] = processinDelay;
                               }
 
+                  // propagation delay
+                  double pathDelay = 0.0;
+                  for (Edge link : path.getEdgePath())
+                     pathDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
+                  serviceDelay += pathDelay;
+
                   // migration delay
-                  double maxMigrationDelay = 0;
-                  for (int n = 0; n < path.getNodePath().size(); n++)
-                     for (int x = 0; x < pm.getServers().size(); x++)
-                        if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-                           for (int v = 0; v < service.getFunctions().size(); v++) {
-                              if (initialPlacement[x][s][v] && !fXSV[x][s][v]) {
-                                 double delay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
-                                 if (delay > maxMigrationDelay)
-                                    maxMigrationDelay = delay;
-                              }
-                           }
-                  serviceDelay += maxMigrationDelay;
-                  mS[s] = maxMigrationDelay;
+                  double downtime = (double) service.getAttribute(SERVICE_DOWNTIME);
+                  double totalServiceDowntime = 0;
+                  for (int x = 0; x < pm.getServers().size(); x++)
+                     for (int v = 0; v < service.getFunctions().size(); v++)
+                        if (initialPlacement[x][s][v] && !fXSV[x][s][v])
+                           totalServiceDowntime += downtime;
+
+                  serviceDelay += totalServiceDowntime; // in ms
 
                   double maxDelay = 0;
                   maxDelay += service.getMaxPropagationDelay();

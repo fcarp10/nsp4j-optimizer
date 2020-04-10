@@ -200,7 +200,7 @@ public class ModelSpecificConstraints {
          double bigM = 0;
          bigM += getMaxPathDelay(service.getTrafficFlow().getPaths()); // in ms
          bigM += getMaxProcessingDelay(service.getFunctions()) * service.getFunctions().size(); // in ms
-         bigM += getMaxMigrationDelay(service.getFunctions()); // in ms
+         bigM += getMaxServiceDowntime(service); // in ms
 
          for (int p = 0; p < service.getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
@@ -318,7 +318,7 @@ public class ModelSpecificConstraints {
          double bigM = 0;
          bigM += getMaxPathDelay(pm.getServices().get(s).getTrafficFlow().getPaths()); // in ms
          bigM += getMaxProcessingDelay(pm.getServices().get(s).getFunctions()) * pm.getServices().get(s).getFunctions().size(); // in ms
-         bigM += getMaxMigrationDelay(pm.getServices().get(s).getFunctions()); // in ms
+         bigM += getMaxServiceDowntime(pm.getServices().get(s)); // in ms
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d)) {
@@ -338,7 +338,7 @@ public class ModelSpecificConstraints {
       serviceDelayExpr.add(propagationDelayExpr(s, p)); // adds propagation delay in ms
       serviceDelayExpr.add(processingDelayExpr(s, p, d)); // adds processing delay in ms
       if (initialPlacement != null)
-         serviceDelayExpr.add(migrationDelayExpr(initialPlacement, s, p)); // adds migration delay in ms
+         serviceDelayExpr.add(migrationDelayExpr(initialPlacement, s)); // adds migration delay in ms
       return serviceDelayExpr;
    }
 
@@ -378,7 +378,6 @@ public class ModelSpecificConstraints {
                         model.getGrbModel().addConstr(vars.dSVXD[s][v][x][d1], GRB.LESS_EQUAL, processConstraintExpr2, FUNCTION_PROCESS_TRAFFIC_DELAY);
                      }
                   processDelayGlobalExpr.addTerm(1.0, vars.dSVXD[s][v][x][d]);
-                  model.getGrbModel().addConstr(processDelayExpr, GRB.EQUAL, vars.dSVX[s][v][x], FUNCTION_PROCESS_TRAFFIC_DELAY);
                }
       return processDelayGlobalExpr;
    }
@@ -392,23 +391,16 @@ public class ModelSpecificConstraints {
       return linkDelayExpr;
    }
 
-   private GRBLinExpr migrationDelayExpr(GRBModel initialModel, int s, int p) throws GRBException {
+   private GRBLinExpr migrationDelayExpr(GRBModel initialModel, int s) throws GRBException {
       Service service = pm.getServices().get(s);
-      Path path = service.getTrafficFlow().getPaths().get(p);
-      for (int n = 0; n < path.getNodePath().size(); n++)
-         for (int x = 0; x < pm.getServers().size(); x++)
-            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-               for (int v = 0; v < service.getFunctions().size(); v++)
-                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
-                     GRBLinExpr linExpr = new GRBLinExpr();
-                     double delay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
-                     linExpr.addTerm(-delay, vars.fXSV[x][s][v]);
-                     linExpr.addConstant(delay);
-                     model.getGrbModel().addConstr(linExpr, GRB.LESS_EQUAL, vars.mS[s], FUNCTION_MIGRATION_DELAY);
-                  }
-      model.getGrbModel().addConstr(vars.mS[s], GRB.LESS_EQUAL, getMaxMigrationDelay(service.getFunctions()), FUNCTION_MIGRATION_DELAY);
+      double downtime = (double) service.getAttribute(SERVICE_DOWNTIME);
       GRBLinExpr linExpr = new GRBLinExpr();
-      linExpr.addTerm(1.0, vars.mS[s]);
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int v = 0; v < service.getFunctions().size(); v++)
+            if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
+               linExpr.addTerm(-downtime, vars.fXSV[x][s][v]);
+               linExpr.addConstant(downtime);
+            }
       return linExpr;
    }
 

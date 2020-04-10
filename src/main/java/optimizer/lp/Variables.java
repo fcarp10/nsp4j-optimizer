@@ -30,8 +30,6 @@ public class Variables {
    public GRBVar[][][] ySDP; // aux variable for delay qos penalty cost
 
    // service delay variables
-   public GRBVar[][][] dSVX;// processing delay of a function v in server x
-   public GRBVar[] mS; // continuous, migration delay of a service
    public GRBVar[][][][] dSVXD; // continuous, aux variable for processing delay
 
    // synchronization traffic variables
@@ -169,12 +167,6 @@ public class Variables {
          // if model is considering delay constraints
          if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
                  || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
-            dSVX = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()];
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  for (int x = 0; x < pm.getServers().size(); x++)
-                     dSVX[s][v][x] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
-                             , Definitions.dSVX + "[" + s + "][" + v + "][" + x + "]");
 
             dSVXD = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm.getDemandsTrafficFlow()];
             for (int s = 0; s < pm.getServices().size(); s++)
@@ -184,9 +176,6 @@ public class Variables {
                         dSVXD[s][v][x][d] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS
                                 , Definitions.dSVXD + "[" + s + "][" + v + "][" + x + "][" + d + "]");
 
-            mS = new GRBVar[pm.getServices().size()];
-            for (int s = 0; s < pm.getServices().size(); s++)
-               mS[s] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.CONTINUOUS, Definitions.mS + "[" + s + "]");
 
          }
          model.update();

@@ -54,8 +54,6 @@ public class LauncherHeu {
       results.setVariable(oX, firstFit.oX);
       results.setVariable(oSV, firstFit.oSV);
       results.setVariable(qSDP, firstFit.qSDP);
-      results.setVariable(dSVX, firstFit.dSVX);
-      results.setVariable(mS, firstFit.mS);
       results.setVariable(hSVP, firstFit.hSVP);
       results.initializeResults(0.0, convertInitialPlacement(pm, initialPlacement));
       return results;

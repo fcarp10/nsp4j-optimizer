@@ -34,12 +34,10 @@ public class Definitions {
    public static final String oX = "oX";
    public static final String oSV = "oSV";
    public static final String qSDP = "qSDP";
+   public static final String ySDP = "ySDP";
 
    // service delay variables
-   public static final String dSVX = "dSVX";
-   public static final String mS = "mS";
    public static final String dSVXD = "dSVXD";
-   public static final String ySDP = "ySDP";
 
    // synchronization traffic variables
    public static final String gSVXY = "gSVXY";
@@ -70,6 +68,7 @@ public class Definitions {
    // service parameters
    public static final String SERVICE_MIN_PATHS = "min_paths";
    public static final String SERVICE_MAX_PATHS = "max_paths";
+   public static final String SERVICE_DOWNTIME = "downtime";
 
    // function parameters
    public static final String FUNCTION_REPLICABLE = "replicable";
@@ -81,7 +80,7 @@ public class Definitions {
    public static final String FUNCTION_MAX_DELAY = "max_delay";
    public static final String FUNCTION_MIN_PROCESS_DELAY = "min_process_delay";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
-   public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
+   //   public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
    public static final String FUNCTION_CHARGES = "charges";
 
    // node and server parameters
@@ -89,7 +88,7 @@ public class Definitions {
    public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
    public static final String SERVER_IDLE_ENERGY_COST = "server_idle_energy_cost";
    public static final String SERVER_UTIL_ENERGY_COST = "server_util_energy_cost";
-   public static final String SERVER_OTHER_OPEX = "server_other_opex";
+   //   public static final String SERVER_OTHER_OPEX = "server_other_opex";
    public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
 
    // link parameters

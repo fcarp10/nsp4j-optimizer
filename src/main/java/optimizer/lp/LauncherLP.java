@@ -129,9 +129,7 @@ public class LauncherLP {
       // service delay variables
       if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
               || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
-         results.setVariable(dSVX, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVX));
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVXD));
-         results.setVariable(mS, Auxiliary.grbVarsToDoubles(optModel.getVars().mS));
       }
       results.initializeResults(optModel.getObjVal(), convertInitialPlacement(pm, initialModel));
       return results;

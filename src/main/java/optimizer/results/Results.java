@@ -165,8 +165,7 @@ public class Results {
          st = serviceTypes();
          setSummaryResults(sdSummary, sd);
          sdGraph(sd);
-         dSVX(); // processing delay
-         mS(); // migration delay
+//         dSVX(); // processing delay
          dSVXD();
       }
    }
@@ -271,9 +270,9 @@ public class Results {
    private List<Double> serviceDelayList(boolean[][][] initialPlacement) {
       List<Double> serviceDelayList = new ArrayList<>();
       boolean[][][] zSPDvar = (boolean[][][]) rawVariables.get(zSPD);
-      double[][][] dSVXvar = (double[][][]) rawVariables.get(dSVX);
       boolean[][][][] fXSVDvar = (boolean[][][][]) rawVariables.get(fXSVD);
       boolean[][][] fXSVvar = (boolean[][][]) rawVariables.get(fXSV);
+      double[] uXvar = (double[]) rawVariables.get(uX);
       List<String> strings = new ArrayList<>();
       for (int s = 0; s < pm.getServices().size(); s++) {
          Service service = pm.getServices().get(s);
@@ -282,45 +281,46 @@ public class Results {
             for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                   if (zSPDvar[s][p][d]) {
+                     double serviceDelay = 0;
 
                      // add processing delay
-                     double endToEndDelay = 0;
                      for (int n = 0; n < path.getNodePath().size(); n++)
                         for (int x = 0; x < pm.getServers().size(); x++)
                            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-                              for (int v = 0; v < service.getFunctions().size(); v++)
-                                 if (fXSVDvar[x][s][v][d])
-                                    endToEndDelay += dSVXvar[s][v][x]; // in ms
-                     if (endToEndDelay == 0) continue;
+                              for (int v = 0; v < service.getFunctions().size(); v++) {
+                                 if (fXSVDvar[x][s][v][d]) {
+                                    Function function = service.getFunctions().get(v);
+                                    double ratio = (double) function.getAttribute(FUNCTION_LOAD_RATIO)
+                                            * (double) function.getAttribute(FUNCTION_PROCESS_TRAFFIC_DELAY)
+                                            / (int) function.getAttribute(FUNCTION_MAX_CAP_SERVER);
+                                    double processinDelay = 0;
+                                    for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
+                                       if (service.getTrafficFlow().getAux().get(d1))
+                                          if (fXSVDvar[x][s][v][d1])
+                                             processinDelay += ratio * service.getTrafficFlow().getDemands().get(d1);
+                                    processinDelay += (double) function.getAttribute(FUNCTION_MIN_PROCESS_DELAY);
+                                    processinDelay += (double) function.getAttribute(FUNCTION_PROCESS_DELAY) * uXvar[x];
+                                    serviceDelay += processinDelay;
+                                 }
+                              }
 
                      // add propagation delay
                      for (Edge link : path.getEdgePath())
-                        endToEndDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
+                        serviceDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
 
-                     // add migration delay
-                     double maxMigrationDelay = 0;
-                     for (int q = 0; q < service.getTrafficFlow().getPaths().size(); q++) {
-                        Path pathMgr = service.getTrafficFlow().getPaths().get(q);
-                        if (initialPlacement != null)
-                           for (int n = 0; n < pathMgr.getNodePath().size(); n++)
-                              for (int x = 0; x < pm.getServers().size(); x++)
-                                 if (pm.getServers().get(x).getParent().equals(pathMgr.getNodePath().get(n)))
-                                    for (int v = 0; v < service.getFunctions().size(); v++)
-                                       if (initialPlacement[x][s][v] && !fXSVvar[x][s][v]) {
-                                          double migrationDelay = (double) service.getFunctions().get(v).getAttribute(FUNCTION_MIGRATION_DELAY);
-                                          if (migrationDelay > maxMigrationDelay)
-                                             maxMigrationDelay = migrationDelay;
-                                       }
-                     }
-                     endToEndDelay += maxMigrationDelay; // in ms
+                     // add service downtime
+                     for (int x = 0; x < pm.getServers().size(); x++)
+                        for (int v = 0; v < service.getFunctions().size(); v++)
+                           if (initialPlacement[x][s][v] && !fXSVvar[x][s][v])
+                              serviceDelay += (double) service.getAttribute(SERVICE_DOWNTIME); // in ms
 
                      // print total end to end delay
-                     endToEndDelay = Auxiliary.roundDouble(endToEndDelay, 3);
+                     serviceDelay = Auxiliary.roundDouble(serviceDelay, 3);
                      strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
                              + pm.getServices().get(s).getId() + "]"
                              + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                             + "[" + endToEndDelay + "]");
-                     serviceDelayList.add(endToEndDelay);
+                             + "[" + serviceDelay + "]");
+                     serviceDelayList.add(serviceDelay);
                   }
          }
       }
@@ -654,42 +654,6 @@ public class Results {
    /**********************************************************************************************/
 
    /*********************************** SERVICE DELAY VARIABLES **********************************/
-   private void dSVX() {
-      try {
-         double[][][] processDelayVar = (double[][][]) rawVariables.get(dSVX);
-         boolean[][][][] placementVar = (boolean[][][][]) rawVariables.get(fXSVD);
-         List<String> strings = new ArrayList<>();
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               for (int x = 0; x < pm.getServers().size(); x++) {
-                  boolean isUsed = false;
-                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                     if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
-                        if (placementVar[x][s][v][d]) isUsed = true;
-                  if (processDelayVar[s][v][x] > 0 && isUsed)
-                     strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (x + this.offset) + "): ["
-                             + pm.getServers().get(x).getId() + "]["
-                             + Auxiliary.roundDouble(processDelayVar[s][v][x], 2) + "]");
-               }
-         variables.put(dSVX, strings);
-      } catch (Exception e) {
-         printLog(log, WARNING, dSVX + " var results: " + e.getMessage());
-      }
-   }
-
-   private void mS() {
-      try {
-         double[] migrationDelayVar = (double[]) rawVariables.get(mS);
-         List<String> strings = new ArrayList<>();
-         for (int s = 0; s < pm.getServices().size(); s++)
-            if (migrationDelayVar[s] > 0)
-               strings.add("(" + (s + this.offset) + "): " + "[" + migrationDelayVar[s] + "]");
-         variables.put(mS, strings);
-      } catch (Exception e) {
-         printLog(log, WARNING, mS + " var results: " + e.getMessage());
-      }
-   }
-
    private void dSVXD() {
       try {
          double[][][][] var = (double[][][][]) rawVariables.get(dSVXD);
