@@ -28,7 +28,7 @@ public class ModelSpecificConstraints {
    private Variables vars;
    private Parameters pm;
 
-   public ModelSpecificConstraints(Parameters pm, Model model, Scenario sc, GRBModel initialPlacement) {
+   public ModelSpecificConstraints(Parameters pm, Model model, Scenario sc, boolean[][][] initialPlacement) {
       try {
          this.pm = pm;
          this.model = model;
@@ -193,7 +193,7 @@ public class ModelSpecificConstraints {
                }
    }
 
-   private void qosPenalties(GRBModel initialPlacement) throws GRBException {
+   private void qosPenalties(boolean[][][] initialPlacement) throws GRBException {
 
       for (int s = 0; s < pm.getServices().size(); s++) {
          Service service = pm.getServices().get(s);
@@ -313,7 +313,7 @@ public class ModelSpecificConstraints {
       }
    }
 
-   private void constraintMaxServiceDelay(GRBModel initialPlacement) throws GRBException {
+   private void constraintMaxServiceDelay(boolean[][][] initialPlacement) throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++) {
          double bigM = 0;
          bigM += getMaxPathDelay(pm.getServices().get(s).getTrafficFlow().getPaths()); // in ms
@@ -333,7 +333,7 @@ public class ModelSpecificConstraints {
       }
    }
 
-   private GRBLinExpr serviceDelayExpr(int s, int p, int d, GRBModel initialPlacement) throws GRBException {
+   private GRBLinExpr serviceDelayExpr(int s, int p, int d, boolean[][][] initialPlacement) throws GRBException {
       GRBLinExpr serviceDelayExpr = new GRBLinExpr();
       serviceDelayExpr.add(propagationDelayExpr(s, p)); // adds propagation delay in ms
       serviceDelayExpr.add(processingDelayExpr(s, p, d)); // adds processing delay in ms
@@ -391,13 +391,13 @@ public class ModelSpecificConstraints {
       return linkDelayExpr;
    }
 
-   private GRBLinExpr migrationDelayExpr(GRBModel initialModel, int s) throws GRBException {
+   private GRBLinExpr migrationDelayExpr(boolean[][][] initialModel, int s) {
       Service service = pm.getServices().get(s);
       double downtime = (double) service.getAttribute(SERVICE_DOWNTIME);
       GRBLinExpr linExpr = new GRBLinExpr();
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int v = 0; v < service.getFunctions().size(); v++)
-            if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
+            if (initialModel[x][s][v]) {
                linExpr.addTerm(-downtime, vars.fXSV[x][s][v]);
                linExpr.addConstant(downtime);
             }
@@ -429,13 +429,12 @@ public class ModelSpecificConstraints {
    }
 
    // Initial placement as constraints (rep-only)
-   private void setInitPlc(GRBModel initialModel) throws GRBException {
-      if (initialModel != null) {
+   private void setInitPlc(boolean[][][] initialPlacement) throws GRBException {
+      if (initialPlacement != null) {
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]")
-                          .get(GRB.DoubleAttr.X) == 1.0)
+                  if (initialPlacement[x][s][v])
                      model.getGrbModel().addConstr(vars.fXSV[x][s][v], GRB.EQUAL, 1, SET_INIT_PLC);
       }
    }

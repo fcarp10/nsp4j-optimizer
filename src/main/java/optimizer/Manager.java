@@ -16,7 +16,6 @@ import utils.ConfigFiles;
 import utils.GraphManager;
 import utils.KShortestPathGenerator;
 
-import java.io.File;
 import java.util.Random;
 
 import static optimizer.Definitions.*;
@@ -29,34 +28,16 @@ public class Manager {
    private static Parameters pm;
 
    public static void readInputParameters(String fileName) {
-      String path = getResourcePath(fileName);
-      if (path != null)
-         try {
-            pm = ConfigFiles.readParameters(path, fileName + ".yml");
-            pm.initialize(path);
-            checkTopologyScale(pm);
-            ResultsGUI.initialize(pm);
-            printLog(log, INFO, "topology loaded");
-
-         } catch (Exception e) {
-            printLog(log, ERROR, "input parameters");
-         }
-   }
-
-   private static String getResourcePath(String fileName) {
       try {
-         File file = new File(Manager.class.getClassLoader()
-                 .getResource("scenarios/" + fileName + ".yml").getFile());
-         String absolutePath = file.getAbsolutePath();
-         String path = absolutePath.substring(0, absolutePath.lastIndexOf(File.separator));
-         if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
-            path = path + "/";
-         else
-            path = path + "\\";
-         return path;
+         String path = ResultsManager.getResourcePath(fileName + ".yml");
+         pm = ConfigFiles.readParameters(path, fileName + ".yml");
+         pm.initialize(path);
+         checkTopologyScale(pm);
+         ResultsGUI.initialize(pm);
+         printLog(log, INFO, "topology loaded");
+
       } catch (Exception e) {
-         printLog(log, ERROR, "input file not found");
-         return null;
+         printLog(log, ERROR, "error loading input parameters");
       }
    }
 
@@ -101,19 +82,35 @@ public class Manager {
 
    public static void main(Scenario sce) {
       try {
+         // load initial placement for migrations
          interrupted = false;
-         GRBModel initialPlacement = ResultsManager.importModel(getResourcePath(sce.getInputFileName()), sce.getInputFileName(), pm);
-         ResultsManager resultsManager = new ResultsManager(pm.getScenario());
-         printLog(log, INFO, "initializing " + sce.getModel());
+         String initialPlacementFile = pm.getScenario() + "_" + INITIAL_PLACEMENT;
+         boolean[][][] initialPlacement = ResultsManager.loadInitialPlacement(initialPlacementFile, pm, sce);
 
+         // prepare results
+         ResultsManager resultsManager = new ResultsManager(pm.getScenario());
+
+         // select traffic demands
          specifyUsedTrafficDemands(pm, sce);
 
-         if (sce.getModel().equals(INITIAL_PLACEMENT))
-            LauncherLP.run(pm, sce, resultsManager, null);
-         else if (sce.getModel().equals(HEURISTIC))
+         // launch heuristic
+         if (sce.getModel().equals(HEURISTIC))
             LauncherHeu.run(pm, sce, resultsManager, initialPlacement);
-         else
-            LauncherLP.run(pm, sce, resultsManager, initialPlacement);
+         else {
+
+            // load initial model for initial solution
+            String initialSolutionFile = pm.getScenario() + "_" + sce.getObjFunc();
+            GRBModel initialSolution = ResultsManager.loadModel(initialSolutionFile, pm, sce);
+            if (initialSolution == null)
+               printLog(log, WARNING, "no initial solution found");
+
+            // make sure than no initial placement is loaded when launching initial placement
+            if (sce.getModel().equals(INITIAL_PLACEMENT))
+               initialPlacement = null;
+
+            // launch lp model
+            LauncherLP.run(pm, sce, resultsManager, initialPlacement, initialSolution);
+         }
 
          printLog(log, INFO, "backend is ready");
       } catch (Exception e) {
@@ -126,14 +123,14 @@ public class Manager {
       interrupted = true;
    }
 
-   public static void generatePaths(Scenario scenario) {
-      String path = getResourcePath(scenario.getInputFileName());
+   public static void generatePaths(Scenario sce) {
+      String path = ResultsManager.getResourcePath(sce.getInputFileName() + ".yml");
       if (path != null)
          try {
-            Graph graph = GraphManager.importTopology(path, scenario.getInputFileName());
+            Graph graph = GraphManager.importTopology(path, sce.getInputFileName());
             printLog(log, INFO, "generating paths");
             KShortestPathGenerator k = new KShortestPathGenerator(graph, 10
-                    , 5, path, scenario.getInputFileName());
+                    , 5, path, sce.getInputFileName());
             k.run();
             printLog(log, INFO, "paths generated");
          } catch (Exception e) {

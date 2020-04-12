@@ -309,10 +309,11 @@ public class Results {
                         serviceDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
 
                      // add service downtime
-                     for (int x = 0; x < pm.getServers().size(); x++)
-                        for (int v = 0; v < service.getFunctions().size(); v++)
-                           if (initialPlacement[x][s][v] && !fXSVvar[x][s][v])
-                              serviceDelay += (double) service.getAttribute(SERVICE_DOWNTIME); // in ms
+                     if (initialPlacement != null)
+                        for (int x = 0; x < pm.getServers().size(); x++)
+                           for (int v = 0; v < service.getFunctions().size(); v++)
+                              if (initialPlacement[x][s][v] && !fXSVvar[x][s][v])
+                                 serviceDelay += (double) service.getAttribute(SERVICE_DOWNTIME); // in ms
 
                      // print total end to end delay
                      serviceDelay = Auxiliary.roundDouble(serviceDelay, 3);

@@ -77,4 +77,4 @@ traffic_flows:
     min_bw: 1
     max_bw: 20 # change "max_cap_server" accordingly
     services: [2]
-    service_length_mult: [1]
+    service_length_mult: [2]

@@ -18,14 +18,15 @@ public class Model {
    private Parameters pm;
    private double objVal;
 
-   public Model(Parameters pm) {
+   public Model(Parameters pm, GRBModel initialSolution) {
       this.pm = pm;
       try {
          GRBEnv grbEnv = new GRBEnv();
-//         grbEnv.set(GRB.IntParam.LogToConsole, 0);
-         grbModel = new GRBModel(grbEnv);
+         if (initialSolution == null)
+            grbModel = new GRBModel(grbEnv);
+         else
+            grbModel = initialSolution;
          Callback cb = new Callback();
-//         grbModel.set(GRB.IntParam.Method, 3);
          grbModel.setCallback(cb);
          grbModel.getEnv().set(GRB.DoubleParam.MIPGap, (double) pm.getAux().get("gap"));
       } catch (GRBException e) {

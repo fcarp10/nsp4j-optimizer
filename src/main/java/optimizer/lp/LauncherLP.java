@@ -14,21 +14,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static optimizer.Definitions.*;
-import static optimizer.results.Auxiliary.convertInitialPlacement;
 import static optimizer.results.Auxiliary.printLog;
 
 public class LauncherLP {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherLP.class);
 
-   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, GRBModel initialModel) throws GRBException {
-      Model model = new Model(pm);
+   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, boolean[][][] initialPlacement, GRBModel initialSolution) throws GRBException {
+      Model model = new Model(pm, initialSolution);
       printLog(log, INFO, "setting variables");
-      Variables variables = new Variables(pm, model.getGrbModel());
-      variables.initializeAdditionalVariables(pm, model.getGrbModel(), sce);
+      Variables variables = new Variables(pm, model.getGrbModel(), sce, initialSolution);
       model.setVars(variables);
       printLog(log, INFO, "setting constraints");
-      new GeneralConstraints(pm, model, sce, initialModel);
+      new GeneralConstraints(pm, model, sce, initialPlacement);
       GRBLinExpr expr = generateExprForObjectiveFunction(pm, model, sce.getObjFunc());
       model.setObjectiveFunction(expr, sce.isMaximization());
       printLog(log, INFO, "running model");
@@ -37,11 +35,11 @@ public class LauncherLP {
       long elapsedTime = System.nanoTime() - startTime;
       Results results;
       if (objVal != null) {
-         results = generateResults(pm, model, sce, initialModel);
+         results = generateResults(pm, model, sce, initialPlacement);
          results.setComputationTime((double) elapsedTime / 1000000000);
-         resultsManager.exportJsonFile(generateFileName(pm, sce.getModel(), sce), results);
-         if (sce.getModel().equals(INITIAL_PLACEMENT))
-            resultsManager.exportModel(model.getGrbModel(), sce.getInputFileName());
+         String outputFileName = generateFileName(pm, sce.getModel(), sce);
+         resultsManager.exportJsonFile(outputFileName, results);
+         resultsManager.exportModel(model.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);
       }
    }
@@ -98,7 +96,7 @@ public class LauncherLP {
       return expr;
    }
 
-   private static Results generateResults(Parameters pm, Model optModel, Scenario sc, GRBModel initialModel) throws GRBException {
+   private static Results generateResults(Parameters pm, Model optModel, Scenario sc, boolean[][][] initialPlacement) throws GRBException {
       Results results = new Results(pm, sc);
       // general variables
       results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optModel.getVars().zSP));
@@ -131,14 +129,16 @@ public class LauncherLP {
               || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVXD));
       }
-      results.initializeResults(optModel.getObjVal(), convertInitialPlacement(pm, initialModel));
+      results.initializeResults(optModel.getObjVal(), initialPlacement);
       return results;
    }
 
    private static String generateFileName(Parameters pm, String model, Scenario sc) {
       String fileName = pm.getScenario();
-      if (model.equals(INITIAL_PLACEMENT))
+      if (model.equals(INITIAL_PLACEMENT)) {
          fileName += "_" + model;
+         return fileName;
+      }
       fileName += "_" + sc.getObjFunc();
       return fileName;
    }

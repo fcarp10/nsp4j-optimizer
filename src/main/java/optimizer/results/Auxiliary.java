@@ -3,9 +3,7 @@ package optimizer.results;
 
 import gurobi.GRB;
 import gurobi.GRBException;
-import gurobi.GRBModel;
 import gurobi.GRBVar;
-import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Service;
 import optimizer.gui.ResultsGUI;
@@ -71,24 +69,6 @@ public class Auxiliary {
             break;
       }
       ResultsGUI.log(status + message);
-   }
-
-   public static boolean[][][] convertInitialPlacement(Parameters pm, GRBModel initialModel) {
-      boolean[][][] initialPlacement = null;
-      if (initialModel != null) {
-         initialPlacement = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
-         for (int x = 0; x < pm.getServers().size(); x++)
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                  try {
-                     if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
-                        initialPlacement[x][s][v] = true;
-                  } catch (GRBException e) {
-                     e.printStackTrace();
-                  }
-               }
-      }
-      return initialPlacement;
    }
 
    public static double getMaxServiceDowntime(Service service) {

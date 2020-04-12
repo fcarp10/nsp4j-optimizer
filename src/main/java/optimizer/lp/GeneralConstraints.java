@@ -3,7 +3,6 @@ package optimizer.lp;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
-import gurobi.GRBModel;
 import manager.elements.Service;
 import optimizer.gui.Scenario;
 import org.graphstream.graph.Node;
@@ -16,7 +15,7 @@ public class GeneralConstraints {
    private Variables vars;
    private manager.Parameters pm;
 
-   public GeneralConstraints(manager.Parameters pm, Model model, Scenario scenario, GRBModel initialPlacement) {
+   public GeneralConstraints(manager.Parameters pm, Model model, Scenario scenario, boolean[][][] initialPlacement) {
       try {
          this.pm = pm;
          this.model = model;
