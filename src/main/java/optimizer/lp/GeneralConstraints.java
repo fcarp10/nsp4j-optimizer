@@ -149,7 +149,7 @@ public class GeneralConstraints {
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                      model.getGrbModel().addConstr(vars.fXSVD[x][s][v][d], GRB.LESS_EQUAL, vars.fXSV[x][s][v], FD2
-                             + "[s][v][x][d] --> " + "[" + s + "][" + v + "][" + x + "][" + d + "]");
+                             + "_1[s][v][x][d] --> " + "[" + s + "][" + v + "][" + x + "][" + d + "]");
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++) {
@@ -157,7 +157,7 @@ public class GeneralConstraints {
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                      expr.addTerm(1.0, vars.fXSVD[x][s][v][d]);
-               model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.fXSV[x][s][v], FD2 + "[s][v][x] --> "
+               model.getGrbModel().addConstr(expr, GRB.GREATER_EQUAL, vars.fXSV[x][s][v], FD2 + "_2[s][v][x] --> "
                        + "[" + s + "][" + v + "][" + x + "]");
             }
    }

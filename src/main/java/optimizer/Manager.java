@@ -100,7 +100,7 @@ public class Manager {
 
             // load initial model for initial solution
             String initialSolutionFile = pm.getScenario() + "_" + sce.getObjFunc();
-            GRBModel initialSolution = ResultsManager.loadModel(initialSolutionFile, pm, sce);
+            GRBModel initialSolution = ResultsManager.loadModel(initialSolutionFile, pm, sce, false);
             if (initialSolution == null)
                printLog(log, WARNING, "no initial solution found");
 

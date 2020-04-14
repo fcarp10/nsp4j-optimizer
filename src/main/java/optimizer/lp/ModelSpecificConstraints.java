@@ -255,13 +255,13 @@ public class ModelSpecificConstraints {
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int y = 0; y < pm.getServers().size(); y++) {
                   if (pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent())) continue;
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[x][s][v], SYNC_TRAFFIC);
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[y][s][v], SYNC_TRAFFIC);
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[x][s][v], gSVXY + "_1[s][v][x][y] --> " + "[" + s + "][" + v + "][" + x + "][" + y + "]");
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, vars.fXSV[y][s][v], gSVXY + "_2[s][v][x][y] --> " + "[" + s + "][" + v + "][" + x + "][" + y + "]");
                   GRBLinExpr expr = new GRBLinExpr();
                   expr.addTerm(1.0, vars.fXSV[x][s][v]);
                   expr.addTerm(1.0, vars.fXSV[y][s][v]);
                   expr.addConstant(-1.0);
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, SYNC_TRAFFIC);
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.GREATER_EQUAL, expr, gSVXY + "_3[s][v][x][y] --> " + "[" + s + "][" + v + "][" + x + "][" + y + "]");
                   expr = new GRBLinExpr();
                   for (int p = 0; p < pm.getPaths().size(); p++) {
                      Path pa = pm.getPaths().get(p);
@@ -270,8 +270,8 @@ public class ModelSpecificConstraints {
                              .equals(pm.getServers().get(y).getParent()))
                         expr.addTerm(1.0, vars.hSVP[s][v][p]);
                   }
-                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, expr, SYNC_TRAFFIC);
-                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, SYNC_TRAFFIC);
+                  model.getGrbModel().addConstr(vars.gSVXY[s][v][x][y], GRB.LESS_EQUAL, expr, gSVXY + "_4[s][v][x][y] --> " + "[" + s + "][" + v + "][" + x + "][" + y + "]");
+                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, 1.0, gSVXY + "_3[s][v][x][y] --> " + "[" + s + "][" + v + "][" + x + "][" + y + "]");
                }
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -288,10 +288,9 @@ public class ModelSpecificConstraints {
                   GRBLinExpr expr2 = new GRBLinExpr();
                   for (int x = 0; x < pm.getServers().size(); x++)
                      for (int y = 0; y < pm.getServers().size(); y++)
-                        if (pm.getServers().get(x).getParent().equals(pm.getNodes().get(n))
-                                && pm.getServers().get(y).getParent().equals(pm.getNodes().get(m)))
+                        if (pm.getServers().get(x).getParent().equals(pm.getNodes().get(n)) && pm.getServers().get(y).getParent().equals(pm.getNodes().get(m)))
                            expr2.addTerm(1.0, vars.gSVXY[s][v][x][y]);
-                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, SYNC_TRAFFIC);
+                  model.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, expr2, SYNC_TRAFFIC + "[s][v][n][m] --> " + "[" + s + "][" + v + "][" + n + "][" + m + "]");
                }
       for (int l = 0; l < pm.getLinks().size(); l++) {
          GRBLinExpr expr = new GRBLinExpr();

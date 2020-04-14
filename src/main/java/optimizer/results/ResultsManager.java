@@ -59,7 +59,7 @@ public class ResultsManager {
    }
 
    public static boolean[][][] loadInitialPlacement(String filename, Parameters pm, Scenario sce) throws GRBException {
-      GRBModel model = loadModel(filename, pm, sce);
+      GRBModel model = loadModel(filename, pm, sce, true);
       if (model != null) {
          Auxiliary.printLog(log, INFO, "initial placement loaded");
          boolean[][][] fXSVvar = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
@@ -75,17 +75,19 @@ public class ResultsManager {
       }
    }
 
-   public static GRBModel loadModel(String filename, Parameters pm, Scenario sce) {
+   public static GRBModel loadModel(String filename, Parameters pm, Scenario sce, boolean isInitialPlacement) {
       String path = getResourcePath(filename + ".mst");
       GRBModel model;
       try {
          GRBEnv grbEnv = new GRBEnv();
-         grbEnv.set(GRB.IntParam.LogToConsole, 0);
+         if (isInitialPlacement)
+            grbEnv.set(GRB.IntParam.LogToConsole, 0);
          model = new GRBModel(grbEnv);
          new Variables(pm, model, sce, null);
          model.read(path + filename + ".mst");
          model.optimize();
-         Auxiliary.printLog(log, INFO, "initial model loaded");
+         if (!isInitialPlacement)
+            Auxiliary.printLog(log, INFO, "initial model loaded");
          return model;
       } catch (Exception e) {
          return null;
