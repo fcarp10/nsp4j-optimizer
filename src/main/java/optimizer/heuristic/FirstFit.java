@@ -31,9 +31,6 @@ public class FirstFit {
 
    public void run(String objFunc) {
 
-      final boolean requiresOrdering = objFunc.equals(OPEX_SERVERS_OBJ) || objFunc.equals(FUNCTIONS_CHARGES_OBJ) || objFunc.equals(QOS_PENALTIES_OBJ);
-
-
       assignFunctionsToServersFromInitialPlacement(); // add overhead of functions from initial placement
 
       for (int s = 0; s < pm.getServices().size(); s++) { // for every service
@@ -59,26 +56,21 @@ public class FirstFit {
 
             List<Integer> paths = new ArrayList<>(admissiblePaths.keySet());
 
-            if (requiresOrdering) { // order set of admissible paths depending on the objective function
-               boolean cloudPathsFirst = false;
-               if (objFunc.equals(OPEX_SERVERS_OBJ))
-                  cloudPathsFirst = true;
-               paths = orderPaths(paths, cloudPathsFirst, tf);
-            }
-
-            Integer path = paths.get(0); // get first path
+            boolean cloudPathsFirst = false;
+            if (objFunc.equals(OPEX_SERVERS_OBJ)) // order set of admissible paths depending on the objective function
+               cloudPathsFirst = true;
+            paths = orderPaths(paths, cloudPathsFirst, tf);
+            Integer path = paths.get(0); // and take the first path
 
             int lastPathNodeUsed = 0;
             List<List<Integer>> listAvailableServersPerFunction = admissiblePaths.get(path);
             for (int v = 0; v < service.getFunctions().size(); v++) { // assign traffic to servers
                List<Integer> availableServers = listAvailableServersPerFunction.get(v);
 
-               if (requiresOrdering) { // order set of available servers depending on the objective function
-                  boolean cloudServersFirst = false;
-                  if (objFunc.equals(OPEX_SERVERS_OBJ))
-                     cloudServersFirst = true;
-                  availableServers = selectServers(availableServers, cloudServersFirst);
-               }
+               boolean cloudServersFirst = false;
+               if (objFunc.equals(OPEX_SERVERS_OBJ)) // order set of available servers depending on the objective function
+                  cloudServersFirst = true;
+               availableServers = selectServers(availableServers, cloudServersFirst);
 
                availableServers = removePreviousServersFromNodeIndec(availableServers, lastPathNodeUsed, s, path);
 
