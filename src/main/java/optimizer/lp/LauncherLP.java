@@ -23,8 +23,8 @@ public class LauncherLP {
    public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, boolean[][][] initialPlacement, GRBModel initialSolution) throws GRBException {
       Model model = new Model(pm, initialSolution);
       printLog(log, INFO, "setting variables");
-      Variables variables = new Variables(pm, model.getGrbModel(), sce, initialSolution);
-      model.setVars(variables);
+      VariablesLP variablesLP = new VariablesLP(pm, model.getGrbModel(), sce, initialSolution);
+      model.setVars(variablesLP);
       printLog(log, INFO, "setting constraints");
       new GeneralConstraints(pm, model, sce, initialPlacement);
       GRBLinExpr expr = generateExprForObjectiveFunction(pm, model, sce.getObjFunc());
@@ -37,7 +37,7 @@ public class LauncherLP {
       if (objVal != null) {
          results = generateResults(pm, model, sce, initialPlacement);
          results.setComputationTime((double) elapsedTime / 1000000000);
-         String outputFileName = generateFileName(pm, sce.getModel(), sce);
+         String outputFileName = generateFileName(pm, sce.getAlgorithm(), sce);
          resultsManager.exportJsonFile(outputFileName, results);
          resultsManager.exportModel(model.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);

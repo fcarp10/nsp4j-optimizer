@@ -16,30 +16,30 @@ import java.io.File;
 import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.printLog;
 
-public class LauncherHeu {
+public class LauncherHEU {
 
-   private static final Logger log = LoggerFactory.getLogger(LauncherHeu.class);
+   private static final Logger log = LoggerFactory.getLogger(LauncherHEU.class);
 
    public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager, boolean[][][] initialPlacement) {
 
       printLog(log, INFO, "running heuristic");
-      Heuristic heuristic = new Heuristic(pm, initialPlacement);
+      VariablesHEU variablesHEU = new VariablesHEU(pm, initialPlacement);
 
-      FirstFit firstFit = new FirstFit(pm, heuristic);
+      Heuristic heuristic = new Heuristic(pm, variablesHEU);
       long startTime = System.nanoTime();
-      firstFit.run(scenario.getObjFunc());
+      heuristic.run(scenario.getObjFunc(), scenario.getAlgorithm());
       long elapsedTime = System.nanoTime() - startTime;
 
-      heuristic.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
-      Results results = generateResults(pm, scenario, heuristic, initialPlacement);
+      variablesHEU.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
+      Results results = generateResults(pm, scenario, variablesHEU, initialPlacement);
       results.setComputationTime((double) elapsedTime / 1000000000);
       String fileName = generateFileName(pm, scenario.getObjFunc());
       resultsManager.exportJsonFile(fileName, results);
-      exportResultsToMST(pm, resultsManager, fileName, heuristic);
+      exportResultsToMST(pm, resultsManager, fileName, variablesHEU);
       ResultsGUI.updateResults(results);
    }
 
-   private static Results generateResults(Parameters pm, Scenario sc, Heuristic heu, boolean[][][] initialPlacement) {
+   private static Results generateResults(Parameters pm, Scenario sc, VariablesHEU heu, boolean[][][] initialPlacement) {
       Results results = new Results(pm, sc);
 
       results.setVariable(uL, heu.lu);
@@ -58,7 +58,7 @@ public class LauncherHeu {
       return results;
    }
 
-   private static void exportResultsToMST(Parameters pm, ResultsManager rm, String fileName, Heuristic heu) {
+   private static void exportResultsToMST(Parameters pm, ResultsManager rm, String fileName, VariablesHEU heu) {
 
       Auxiliary.printLog(log, INFO, "exporting results...");
       File file = rm.createPlainTextFile(fileName, ".mst");

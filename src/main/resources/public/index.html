@@ -172,11 +172,13 @@
             </div>
             <div class="form-group">
                 <label>Scenario</label>
-                <select class="form-control custom-select my-1 mr-sm-2" id="model" onChange="checkScenario(this);">
-                    <option value="dimensioning">dimensioning</option>
-                    <option value="init">initial placement</option>
-                    <option value="place">placement</option>
-                    <option value="heu">heuristic</option>
+                <select class="form-control custom-select my-1 mr-sm-2" id="algorithm" onChange="checkScenario(this);">
+                    <option value="dimensioning-lp">dimensioning LP</option>
+                    <option value="init-lp">initial placement LP</option>
+                    <option value="lp">LP</option>
+                    <option value="first-fit">first fit</option>
+                    <option value="random-fit">random fit</option>
+                    <option value="drl">DRL</option>
                 </select>
             </div>
             <div class="btn-group">

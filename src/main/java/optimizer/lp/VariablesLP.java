@@ -8,7 +8,7 @@ import optimizer.gui.Scenario;
 
 import static optimizer.Definitions.*;
 
-public class Variables {
+public class VariablesLP {
 
    // general variables
    public GRBVar[][] zSP; // binary, routing per path
@@ -36,7 +36,7 @@ public class Variables {
    public GRBVar[][][][] gSVXY; //binary, aux synchronization traffic
    public GRBVar[][][] hSVP; // binary, traffic synchronization
 
-   public Variables(manager.Parameters pm, GRBModel model, Scenario sc, GRBModel initialSolution) {
+   public VariablesLP(manager.Parameters pm, GRBModel model, Scenario sc, GRBModel initialSolution) {
       try {
          zSP = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()];
          for (int s = 0; s < pm.getServices().size(); s++)

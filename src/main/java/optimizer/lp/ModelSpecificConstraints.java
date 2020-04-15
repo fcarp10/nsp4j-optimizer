@@ -25,7 +25,7 @@ public class ModelSpecificConstraints {
 
    private static final Logger log = LoggerFactory.getLogger(ModelSpecificConstraints.class);
    private Model model;
-   private Variables vars;
+   private VariablesLP vars;
    private Parameters pm;
 
    public ModelSpecificConstraints(Parameters pm, Model model, Scenario sc, boolean[][][] initialPlacement) {

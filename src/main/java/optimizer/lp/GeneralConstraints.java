@@ -12,7 +12,7 @@ import static optimizer.Definitions.*;
 public class GeneralConstraints {
 
    private Model model;
-   private Variables vars;
+   private VariablesLP vars;
    private manager.Parameters pm;
 
    public GeneralConstraints(manager.Parameters pm, Model model, Scenario scenario, boolean[][][] initialPlacement) {

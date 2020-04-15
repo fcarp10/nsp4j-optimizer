@@ -142,7 +142,7 @@ public class Results {
       uL(); // server utilization
 
       // model specific variables
-      if (sc.getModel().equals(SERVER_DIMENSIONING))
+      if (sc.getAlgorithm().equals(SERVER_DIMENSIONING))
          xN(); // integer, num servers per node
       if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
               || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {

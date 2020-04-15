@@ -156,12 +156,12 @@ function generatePaths() {
 
 function checkScenario(elem) {
     var model = document.getElementById("model").value;
-    if (model === "dimensioning") {
+    if (model === "dimensioning-lp") {
         document.getElementById("PF3").checked = false;
     } else {
         document.getElementById("PF3").checked = true;
     }
-    if (model === "dimensioning" || model === "init") {
+    if (model === "dimensioning-lp" || model === "init-lp") {
         document.getElementById("single-path").checked = true;
         document.getElementById("set-init-plc").checked = false;
         document.getElementById("sync-traffic").checked = false;
@@ -181,7 +181,7 @@ function generateScenario() {
     var inputFileName = document.getElementById("inputFileName").value;
     var objFunc = document.getElementById("objFunc").value;
     var maximization = $("#max").is(":checked");
-    var model = document.getElementById("model").value;
+    var algorithm = document.getElementById("algorithm").value;
     // general
     var RP1 = $("#RP1").is(":checked");
     var RP2 = $("#RP2").is(":checked");
@@ -206,7 +206,7 @@ function generateScenario() {
         inputFileName: inputFileName,
         objFunc: objFunc,
         maximization: maximization,
-        model: model,
+        algorithm: algorithm,
         constraints: {
             // general
             RP1: RP1,

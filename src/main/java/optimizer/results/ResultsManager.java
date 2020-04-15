@@ -11,7 +11,7 @@ import gurobi.GRBModel;
 import manager.Parameters;
 import optimizer.Manager;
 import optimizer.gui.Scenario;
-import optimizer.lp.Variables;
+import optimizer.lp.VariablesLP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class ResultsManager {
          if (isInitialPlacement)
             grbEnv.set(GRB.IntParam.LogToConsole, 0);
          model = new GRBModel(grbEnv);
-         new Variables(pm, model, sce, null);
+         new VariablesLP(pm, model, sce, null);
          model.read(path + filename + ".mst");
          model.optimize();
          if (!isInitialPlacement)

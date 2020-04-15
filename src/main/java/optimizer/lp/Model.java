@@ -14,7 +14,7 @@ public class Model {
 
    private static final Logger log = LoggerFactory.getLogger(Model.class);
    private GRBModel grbModel;
-   private Variables vars;
+   private VariablesLP vars;
    private Parameters pm;
    private double objVal;
 
@@ -165,11 +165,11 @@ public class Model {
       return grbModel;
    }
 
-   public Variables getVars() {
+   public VariablesLP getVars() {
       return vars;
    }
 
-   public void setVars(Variables vars) {
+   public void setVars(VariablesLP vars) {
       this.vars = vars;
    }
 

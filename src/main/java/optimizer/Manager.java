@@ -5,7 +5,7 @@ import manager.Parameters;
 import manager.elements.TrafficFlow;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
-import optimizer.heuristic.LauncherHeu;
+import optimizer.heuristic.LauncherHEU;
 import optimizer.lp.LauncherLP;
 import optimizer.results.ResultsManager;
 import org.graphstream.graph.Graph;
@@ -62,7 +62,7 @@ public class Manager {
          trafficFlow.getAux().clear();
          for (int d = 0; d < trafficFlow.getDemands().size(); d++)
             trafficFlow.getAux().add(true);
-         if (sce.getModel().equals(INITIAL_PLACEMENT)) {
+         if (sce.getAlgorithm().equals(INITIAL_PLACEMENT)) {
             double initialTrafficLoad = (double) pm.getAux().get(INITIAL_TRAFFIC_LOAD);
             double value;
             for (int d = 0; d < trafficFlow.getDemands().size(); d++) {
@@ -93,11 +93,10 @@ public class Manager {
          // select traffic demands
          specifyUsedTrafficDemands(pm, sce);
 
-         // launch heuristic
-         if (sce.getModel().equals(HEURISTIC))
-            LauncherHeu.run(pm, sce, resultsManager, initialPlacement);
-         else {
 
+         if (sce.getAlgorithm().equals(FIRST_FIT) || sce.getAlgorithm().equals(RANDOM_FIT) || sce.getAlgorithm().equals(DRL))
+            LauncherHEU.run(pm, sce, resultsManager, initialPlacement);
+         else {
             // load initial model for initial solution
             String initialSolutionFile = pm.getScenario() + "_" + sce.getObjFunc();
             GRBModel initialSolution = ResultsManager.loadModel(initialSolutionFile, pm, sce, false);
@@ -105,7 +104,7 @@ public class Manager {
                printLog(log, WARNING, "no initial solution found");
 
             // make sure than no initial placement is loaded when launching initial placement
-            if (sce.getModel().equals(INITIAL_PLACEMENT))
+            if (sce.getAlgorithm().equals(INITIAL_PLACEMENT))
                initialPlacement = null;
 
             // launch lp model
