@@ -60,7 +60,7 @@ public class LauncherHeu {
 
    private static void exportResultsToMST(Parameters pm, ResultsManager rm, String fileName, Heuristic heu) {
 
-      Auxiliary.printLog(log, INFO, "exporting results... ");
+      Auxiliary.printLog(log, INFO, "exporting results...");
       File file = rm.createPlainTextFile(fileName, ".mst");
       rm.appendToPlainText(file, "# MIP start");
 

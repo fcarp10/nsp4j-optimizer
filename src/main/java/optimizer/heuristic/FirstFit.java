@@ -33,9 +33,13 @@ public class FirstFit {
 
       final boolean requiresOrdering = objFunc.equals(OPEX_SERVERS_OBJ) || objFunc.equals(FUNCTIONS_CHARGES_OBJ) || objFunc.equals(QOS_PENALTIES_OBJ);
 
+
+      assignFunctionsToServersFromInitialPlacement(); // add overhead of functions from initial placement
+
       for (int s = 0; s < pm.getServices().size(); s++) { // for every service
          Service service = pm.getServices().get(s);
          TrafficFlow tf = service.getTrafficFlow();
+
          for (int d = 0; d < tf.getDemands().size(); d++) { // for every traffic demand
             List<Integer> availablePaths = new ArrayList<>();
             int trafficDemand = tf.getDemands().get(d);
@@ -44,14 +48,14 @@ public class FirstFit {
                   availablePaths.add(p);
             if (availablePaths.isEmpty()) { // if no path found, block
                // TO-DO blocking !!
-               Auxiliary.printLog(log, ERROR, "No available path found for [s][d] = [" + s + "][" + d + "]");
+               Auxiliary.printLog(log, ERROR, "no available path found for [s][d] = [" + s + "][" + d + "]");
                continue;
             }
 
             Map<Integer, List<List<Integer>>> admissiblePaths = findAdmissiblePaths(availablePaths, s, d);
             if (admissiblePaths.isEmpty())
                // TO-DO blocking
-               Auxiliary.printLog(log, ERROR, "No path available");
+               Auxiliary.printLog(log, ERROR, "no admissible path available for [s][d] = [" + s + "][" + d + "]");
 
             List<Integer> paths = new ArrayList<>(admissiblePaths.keySet());
 
@@ -62,51 +66,51 @@ public class FirstFit {
                paths = orderPaths(paths, cloudPathsFirst, tf);
             }
 
-            boolean trafficDemandAllocated = false;
-            for (Integer p : paths) {
+            Integer path = paths.get(0); // get first path
 
-               int lastPathNodeUsed = 0;
-               List<List<Integer>> listAvailableServersPerFunction = admissiblePaths.get(p);
+            int lastPathNodeUsed = 0;
+            List<List<Integer>> listAvailableServersPerFunction = admissiblePaths.get(path);
+            for (int v = 0; v < service.getFunctions().size(); v++) { // assign traffic to servers
+               List<Integer> availableServers = listAvailableServersPerFunction.get(v);
 
-               for (int v = 0; v < service.getFunctions().size(); v++) { // assign traffic to servers
-                  List<Integer> availableServers = listAvailableServersPerFunction.get(v);
-
-                  if (requiresOrdering) { // order set of available servers depending on the objective function
-                     boolean cloudServersFirst = false;
-                     if (objFunc.equals(OPEX_SERVERS_OBJ))
-                        cloudServersFirst = true;
-                     availableServers = selectServers(availableServers, cloudServersFirst);
-                  }
-
-                  availableServers = removePreviousServersFromNodeIndec(availableServers, lastPathNodeUsed, s, p);
-
-                  boolean isFunctionAllocated = false;
-                  for (Integer xAvailable : availableServers)
-                     if (checkIfFreeServerResources(s, xAvailable, v, d, 0)) {
-                        assignFunctionAndTrafficToServer(s, xAvailable, v, d);
-                        isFunctionAllocated = true;
-                        lastPathNodeUsed = getNodePathIndexFromServer(s, p, xAvailable); // save last node path used for ordering
-                        break;
-                     }
-                  if (!isFunctionAllocated)
-                     Auxiliary.printLog(log, ERROR, "function not allocated");
+               if (requiresOrdering) { // order set of available servers depending on the objective function
+                  boolean cloudServersFirst = false;
+                  if (objFunc.equals(OPEX_SERVERS_OBJ))
+                     cloudServersFirst = true;
+                  availableServers = selectServers(availableServers, cloudServersFirst);
                }
-               assignTrafficDemandToPath(s, p, d);
-               trafficDemandAllocated = true;
-               break; // go to the next traffic demand
+
+               availableServers = removePreviousServersFromNodeIndec(availableServers, lastPathNodeUsed, s, path);
+
+               boolean isFunctionAllocated = false;
+               for (Integer xAvailable : availableServers)
+                  if (checkIfFreeServerResources(s, xAvailable, v, d, 1)) {
+                     assignDemandToFunctionToServer(s, xAvailable, v, d);
+                     isFunctionAllocated = true;
+                     lastPathNodeUsed = getNodePathIndexFromServer(s, path, xAvailable); // save last node path used for ordering
+                     break;
+                  }
+               if (!isFunctionAllocated)
+                  Auxiliary.printLog(log, ERROR, "function could not be allocated [s][d][p][v] = [" + s + "][" + d + "][" + path + "][" + v + "]");
             }
-            if (!trafficDemandAllocated)
-               Auxiliary.printLog(log, ERROR, "traffic demand not allocated");
+
+            assignTrafficDemandToPath(s, path, d);
          }
 
-         // remove unused servers from initial placement
-         removeUnusedServersFromInitialPlacement(s);
-         // add synchronization traffic
-         addSynchronizationTraffic(s);
+         removeUnusedFunctionsFromInitialPlacement(s); // remove unused servers from initial placement
+         addSynchronizationTraffic(s); // add synchronization traffic
       }
    }
 
-   private void removeUnusedServersFromInitialPlacement(int s) {
+   private void assignFunctionsToServersFromInitialPlacement() {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               if (heu.fXSV[x][s][v])
+                  assignFunctionToServer(s, x, v);
+   }
+
+   private void removeUnusedFunctionsFromInitialPlacement(int s) {
 
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
@@ -117,7 +121,7 @@ public class FirstFit {
                   break;
                }
             if (!usedServer && heu.fXSV[x][s][v])
-               heu.fXSV[x][s][v] = false;
+               removeFunctionFromServer(s, x, v);
          }
    }
 
@@ -133,13 +137,15 @@ public class FirstFit {
 
          for (int v = 0; v < service.getFunctions().size(); v++) { // for every function
 
-            List<Integer> alreadyUsedServers = getUsedServersForFunction(s, v, pathFound); // get list of server where function already exists for the path
-
             List<Integer> chosenServers = new ArrayList<>();
+
+//            if (!checkIfPathTraversesCloudNode(s, p)) {
+            List<Integer> alreadyUsedServers = getUsedServersForFunction(s, v, pathFound); // get list of server where function already exists for the path
             if (!alreadyUsedServers.isEmpty()) // if function already exist, with enough resources, add it
                for (int server : alreadyUsedServers)
                   if (checkIfFreeServerResources(s, server, v, d, service.getFunctions().size()))
                      chosenServers.add(server);
+//            }
 
             int nInitial = -1;
             if (chosenServers.isEmpty())
@@ -218,6 +224,15 @@ public class FirstFit {
       return nodeIndex;
    }
 
+   private boolean checkIfPathTraversesCloudNode(int s, int p) {
+      Service service = pm.getServices().get(s);
+      Path path = service.getTrafficFlow().getPaths().get(p);
+      for (int n = 0; n < path.getNodePath().size(); n++)
+         if (path.getNodePath().get(n).hasAttribute(NODE_CLOUD))
+            return true;
+      return false;
+   }
+
    private List<Integer> removePreviousServersFromNodeIndec(List<Integer> servers, int nodeIndex, int s, int p) {
 
       Service service = pm.getServices().get(s);
@@ -286,16 +301,6 @@ public class FirstFit {
       return orderedPaths;
    }
 
-   private boolean checkIfFreePathResources(Path path, double trafficDemand) {
-      boolean isAvailable = true;
-      for (Edge pathLink : path.getEdgePath())
-         if (heu.uL.get(pathLink.getId()) + (trafficDemand / (int) pathLink.getAttribute(LINK_CAPACITY)) >= 1.0) {
-            isAvailable = false;
-            break;
-         }
-      return isAvailable;
-   }
-
    private List<Integer> getUsedServersForFunction(int s, int v, Path path) {
       List<Integer> foundServers = new ArrayList<>();
       for (int n = 0; n < path.getNodePath().size(); n++)
@@ -315,21 +320,29 @@ public class FirstFit {
       for (int n = nInitial; n < path.getNodePath().size(); n++)
          for (int x = 0; x < pm.getServers().size(); x++)
             if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-               if (checkIfFreeServerResources(s, x, v, d, 0))
+               if (checkIfFreeServerResources(s, x, v, d, service.getFunctions().size()))
                   availableServers.add(x);
       return availableServers;
    }
 
-   private boolean checkIfFreeServerResources(int s, int x, int v, int d, int serverRepetitions) {
+   private boolean checkIfFreePathResources(Path path, double trafficDemand) {
+      boolean isAvailable = true;
+      for (Edge pathLink : path.getEdgePath())
+         if (heu.uL.get(pathLink.getId()) + (trafficDemand / (int) pathLink.getAttribute(LINK_CAPACITY)) >= 1.0) {
+            isAvailable = false;
+            break;
+         }
+      return isAvailable;
+   }
+
+   private boolean checkIfFreeServerResources(int s, int x, int v, int d, int numOfFunctions) {
       Service service = pm.getServices().get(s);
       Server server = pm.getServers().get(x);
       double trafficDemand = service.getTrafficFlow().getDemands().get(d);
       Function function = service.getFunctions().get(v);
-      int functionOverhead = 0;
-      if (!heu.fXSV[x][s][v])
-         functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
-      double resourcesToAdd = functionOverhead + (trafficDemand * (double) function.getAttribute(FUNCTION_LOAD_RATIO));
-      resourcesToAdd = (resourcesToAdd * serverRepetitions) + resourcesToAdd;
+      int functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
+      double trafficLoad = trafficDemand * (double) function.getAttribute(FUNCTION_LOAD_RATIO);
+      double resourcesToAdd = (trafficLoad + functionOverhead) * numOfFunctions;
       return heu.uX.get(server.getId()) + (resourcesToAdd / server.getCapacity()) <= 1.0;
    }
 
@@ -341,18 +354,33 @@ public class FirstFit {
       heu.zSPD[s][p][d] = true;
    }
 
-   private void assignFunctionAndTrafficToServer(int s, int x, int v, int d) {
+   private void assignDemandToFunctionToServer(int s, int x, int v, int d) {
       Service service = pm.getServices().get(s);
       Server server = pm.getServers().get(x);
       Function function = service.getFunctions().get(v);
       double trafficDemand = service.getTrafficFlow().getDemands().get(d) * (double) function.getAttribute(FUNCTION_LOAD_RATIO);
-      int functionOverhead = 0;
       heu.fXSVD[x][s][v][d] = true;
-      if (!heu.fXSV[x][s][v]) {
-         heu.fXSV[x][s][v] = true;
-         functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
-      }
-      heu.uX.put(server.getId(), heu.uX.get(server.getId()) + ((trafficDemand + functionOverhead) / server.getCapacity()));
+      if (!heu.fXSV[x][s][v])
+         assignFunctionToServer(s, x, v);
+      heu.uX.put(server.getId(), heu.uX.get(server.getId()) + (trafficDemand / server.getCapacity()));
+   }
+
+   private void assignFunctionToServer(int s, int x, int v) {
+      Service service = pm.getServices().get(s);
+      Server server = pm.getServers().get(x);
+      Function function = service.getFunctions().get(v);
+      heu.fXSV[x][s][v] = true;
+      double functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
+      heu.uX.put(server.getId(), heu.uX.get(server.getId()) + (functionOverhead / server.getCapacity()));
+   }
+
+   private void removeFunctionFromServer(int s, int x, int v) {
+      Service service = pm.getServices().get(s);
+      Server server = pm.getServers().get(x);
+      Function function = service.getFunctions().get(v);
+      heu.fXSV[x][s][v] = false;
+      double functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
+      heu.uX.put(server.getId(), heu.uX.get(server.getId()) - (functionOverhead / server.getCapacity()));
    }
 
    private void addSyncTraffic(Path path, double trafficDemand, int s, int v, int p) {

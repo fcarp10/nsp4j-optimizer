@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import static optimizer.Definitions.*;
 
@@ -40,7 +39,9 @@ public class Heuristic {
 
    public Heuristic(Parameters pm, boolean[][][] initialPlacement) {
       this.pm = pm;
-      fXSV = Objects.requireNonNullElseGet(initialPlacement, () -> new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()]);
+      fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+      if (initialPlacement != null)
+         copyInitialPlacement(initialPlacement);
       zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
       fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm.getDemandsTrafficFlow()];
       hSVP = new boolean[pm.getServices().size()][pm.getServiceLength()][pm.getPaths().size()];
@@ -51,6 +52,13 @@ public class Heuristic {
       uX = new HashMap<>();
       for (Server server : pm.getServers())
          uX.put(server.getId(), 0.0);
+   }
+
+   private void copyInitialPlacement(boolean[][][] initialPlacement) {
+
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            System.arraycopy(initialPlacement[x][s], 0, fXSV[x][s], 0, pm.getServices().get(s).getFunctions().size());
    }
 
    protected void generateRestOfVariablesForResults(boolean[][][] initialPlacement, String objFunc) {
