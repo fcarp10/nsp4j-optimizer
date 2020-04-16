@@ -97,8 +97,6 @@ public class Manager {
             // load initial model for initial solution
             String initialSolutionFile = pm.getScenario() + "_" + sce.getObjFunc();
             GRBModel initialSolution = ResultsManager.loadModel(initialSolutionFile, pm, sce, false);
-            if (initialSolution == null)
-               printLog(log, WARNING, "no initial solution found");
 
             // make sure than no initial placement is loaded when launching initial placement
             if (sce.getAlgorithm().equals(INITIAL_PLACEMENT))

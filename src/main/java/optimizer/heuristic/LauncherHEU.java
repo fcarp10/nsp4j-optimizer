@@ -99,6 +99,7 @@ public class LauncherHEU {
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int p = 0; p < pm.getPaths().size(); p++)
                writeVarToFile(pw, Definitions.hSVP + "[" + s + "][" + v + "][" + p + "] ", heu.gethSVP()[s][v][p]);
+      pw.close();
    }
 
    private static void writeVarToFile(PrintWriter pw, String line, boolean var) {

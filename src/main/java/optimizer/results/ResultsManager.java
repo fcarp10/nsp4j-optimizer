@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import static optimizer.Definitions.*;
+import static optimizer.results.Auxiliary.printLog;
 
 
 public class ResultsManager {
@@ -84,9 +85,11 @@ public class ResultsManager {
          model.read(path + filename + ".mst");
          model.optimize();
          if (!isInitialPlacement)
-            Auxiliary.printLog(log, INFO, "initial model loaded");
+            Auxiliary.printLog(log, INFO, "initial solution loaded");
          return model;
       } catch (Exception e) {
+         if (!isInitialPlacement)
+            printLog(log, WARNING, "no initial solution found");
          return null;
       }
    }
