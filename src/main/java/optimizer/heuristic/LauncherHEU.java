@@ -11,7 +11,7 @@ import optimizer.results.ResultsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.io.PrintWriter;
 
 import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.printLog;
@@ -61,52 +61,52 @@ public class LauncherHEU {
    private static void exportResultsToMST(Parameters pm, ResultsManager rm, String fileName, VariablesHEU heu) {
 
       Auxiliary.printLog(log, INFO, "exporting results...");
-      File file = rm.createPlainTextFile(fileName, ".mst");
-      rm.appendToPlainText(file, "# MIP start");
+      PrintWriter pw = rm.getPrinterFromPlainTextFile(fileName, ".mst");
+      pw.println("# MIP start");
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            writeVarToFile(rm, file, Definitions.zSP + "[" + s + "][" + p + "] ", heu.getzSP()[s][p]);
+            writeVarToFile(pw, Definitions.zSP + "[" + s + "][" + p + "] ", heu.getzSP()[s][p]);
 
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               writeVarToFile(rm, file, Definitions.zSPD + "[" + s + "][" + p + "][" + d + "] ", heu.getzSPD()[s][p][d]);
+               writeVarToFile(pw, Definitions.zSPD + "[" + s + "][" + p + "][" + d + "] ", heu.getzSPD()[s][p][d]);
 
       for (int x = 0; x < pm.getServers().size(); x++)
-         writeVarToFile(rm, file, Definitions.fX + "[" + x + "] ", heu.getfX()[x]);
+         writeVarToFile(pw, Definitions.fX + "[" + x + "] ", heu.getfX()[x]);
 
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               writeVarToFile(rm, file, Definitions.fXSV + "[" + x + "][" + s + "][" + v + "] ", heu.getfXSV()[x][s][v]);
+               writeVarToFile(pw, Definitions.fXSV + "[" + x + "][" + s + "][" + v + "] ", heu.getfXSV()[x][s][v]);
 
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  writeVarToFile(rm, file, Definitions.fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "] ", heu.getfXSVD()[x][s][v][d]);
+                  writeVarToFile(pw, Definitions.fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "] ", heu.getfXSVD()[x][s][v][d]);
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int y = 0; y < pm.getServers().size(); y++)
                   if (!pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent()))
-                     writeVarToFile(rm, file, Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "] ", heu.getgSVXY()[s][v][x][y]);
+                     writeVarToFile(pw, Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "] ", heu.getgSVXY()[s][v][x][y]);
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int p = 0; p < pm.getPaths().size(); p++)
-               writeVarToFile(rm, file, Definitions.hSVP + "[" + s + "][" + v + "][" + p + "] ", heu.gethSVP()[s][v][p]);
+               writeVarToFile(pw, Definitions.hSVP + "[" + s + "][" + v + "][" + p + "] ", heu.gethSVP()[s][v][p]);
    }
 
-   private static void writeVarToFile(ResultsManager rm, File file, String line, boolean var) {
+   private static void writeVarToFile(PrintWriter pw, String line, boolean var) {
       if (var)
          line += "1";
       else
          line += "0";
-      rm.appendToPlainText(file, line);
+      pw.println(line);
    }
 
    private static String generateFileName(Parameters pm, String objFunc) {

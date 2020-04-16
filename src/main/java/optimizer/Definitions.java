@@ -16,8 +16,10 @@ public class Definitions {
    public static final String SERVER_DIMENSIONING = "dimensioning-lp";
    public static final String INITIAL_PLACEMENT = "init-lp";
    public static final String LP_PLACEMENT = "lp";
-   public static final String FIRST_FIT = "first-fit";
-   public static final String RANDOM_FIT = "random-fit";
+   public static final String FIRST_FIT = "ff";
+   public static final String FFP_RFX = "ffp-rfx";
+   public static final String RFP_FFX = "rfp-ffx";
+   public static final String RANDOM_FIT = "rf";
    public static final String DRL = "drl";
 
    // general variables

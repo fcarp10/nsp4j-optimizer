@@ -93,10 +93,7 @@ public class Manager {
          // select traffic demands
          specifyUsedTrafficDemands(pm, sce);
 
-
-         if (sce.getAlgorithm().equals(FIRST_FIT) || sce.getAlgorithm().equals(RANDOM_FIT) || sce.getAlgorithm().equals(DRL))
-            LauncherHEU.run(pm, sce, resultsManager, initialPlacement);
-         else {
+         if (sce.getAlgorithm().equals(INITIAL_PLACEMENT) || sce.getAlgorithm().equals(SERVER_DIMENSIONING) || sce.getAlgorithm().equals(LP_PLACEMENT)) {
             // load initial model for initial solution
             String initialSolutionFile = pm.getScenario() + "_" + sce.getObjFunc();
             GRBModel initialSolution = ResultsManager.loadModel(initialSolutionFile, pm, sce, false);
@@ -109,7 +106,8 @@ public class Manager {
 
             // launch lp model
             LauncherLP.run(pm, sce, resultsManager, initialPlacement, initialSolution);
-         }
+         } else
+            LauncherHEU.run(pm, sce, resultsManager, initialPlacement);
 
          printLog(log, INFO, "backend is ready");
       } catch (Exception e) {

@@ -155,13 +155,13 @@ function generatePaths() {
 }
 
 function checkScenario(elem) {
-    var model = document.getElementById("model").value;
-    if (model === "dimensioning-lp") {
+    var algorithm = document.getElementById("algorithm").value;
+    if (algorithm === "dimensioning-lp") {
         document.getElementById("PF3").checked = false;
     } else {
         document.getElementById("PF3").checked = true;
     }
-    if (model === "dimensioning-lp" || model === "init-lp") {
+    if (algorithm === "dimensioning-lp" || algorithm === "init-lp") {
         document.getElementById("single-path").checked = true;
         document.getElementById("set-init-plc").checked = false;
         document.getElementById("sync-traffic").checked = false;

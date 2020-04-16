@@ -58,33 +58,21 @@ public class Heuristic {
 
             List<Integer> paths = new ArrayList<>(admissiblePaths.keySet());
 
-            int path = choosePath(objFunc, algorithm, paths, tf);
+            int pChosen = choosePath(objFunc, algorithm, paths, tf);
 
             int lastPathNodeUsed = 0;
-            List<List<Integer>> listAvailableServersPerFunction = admissiblePaths.get(path);
+            List<List<Integer>> listAvailableServersPerFunction = admissiblePaths.get(pChosen);
             for (int v = 0; v < service.getFunctions().size(); v++) { // assign traffic to servers
                List<Integer> availableServers = listAvailableServersPerFunction.get(v);
 
-               boolean cloudServersFirst = false;
-               if (objFunc.equals(OPEX_SERVERS_OBJ)) // order set of available servers depending on the objective function
-                  cloudServersFirst = true;
-               availableServers = selectServers(availableServers, cloudServersFirst);
-
-               availableServers = removePreviousServersFromNodeIndec(availableServers, lastPathNodeUsed, s, path);
-
-               boolean isFunctionAllocated = false;
-               for (Integer xAvailable : availableServers)
-                  if (checkIfFreeServerResources(s, xAvailable, v, d, 1)) {
-                     assignDemandToFunctionToServer(s, xAvailable, v, d);
-                     isFunctionAllocated = true;
-                     lastPathNodeUsed = getNodePathIndexFromServer(s, path, xAvailable); // save last node path used for ordering
-                     break;
-                  }
-               if (!isFunctionAllocated)
-                  Auxiliary.printLog(log, ERROR, "function could not be allocated [s][d][p][v] = [" + s + "][" + d + "][" + path + "][" + v + "]");
+               int xChosen = chooseServerForFunction(objFunc, algorithm, availableServers, lastPathNodeUsed, s, pChosen, v, d);
+               if (xChosen != -1) {
+                  assignDemandToFunctionToServer(s, xChosen, v, d);
+                  lastPathNodeUsed = getNodePathIndexFromServer(s, pChosen, xChosen); // save last node path used for ordering
+               } else
+                  Auxiliary.printLog(log, ERROR, "function could not be allocated [s][d][p][v] = [" + s + "][" + d + "][" + pChosen + "][" + v + "]");
             }
-
-            assignTrafficDemandToPath(s, path, d);
+            assignTrafficDemandToPath(s, pChosen, d);
          }
 
          removeUnusedFunctionsFromInitialPlacement(s); // remove unused servers from initial placement
@@ -96,17 +84,41 @@ public class Heuristic {
 
       int chosenPath = 0;
 
-      if (algorithm.equals(FIRST_FIT)) {
+      if (algorithm.equals(FIRST_FIT) || algorithm.equals(FFP_RFX)) {
          boolean cloudPathsFirst = false;
          if (objFunc.equals(OPEX_SERVERS_OBJ)) // order set of admissible paths depending on the objective function
             cloudPathsFirst = true;
          paths = orderPaths(paths, cloudPathsFirst, tf);
          chosenPath = paths.get(0); // and take the first path
-      } else if (algorithm.equals(RANDOM_FIT)) {
+      } else if (algorithm.equals(RANDOM_FIT) || algorithm.equals(RFP_FFX)) {
          chosenPath = paths.get(rnd.nextInt(paths.size())); // and take the first path
       }
 
       return chosenPath;
+   }
+
+   private Integer chooseServerForFunction(String objFunc, String algorithm, List<Integer> availableServers, int lastPathNodeUsed, int s, int p, int v, int d) {
+      int chosenServer = -1;
+
+      if (algorithm.equals(FIRST_FIT) || algorithm.equals(RFP_FFX)) {
+
+         boolean cloudServersFirst = false;
+         if (objFunc.equals(OPEX_SERVERS_OBJ)) // order set of available servers depending on the objective function
+            cloudServersFirst = true;
+         availableServers = selectServers(availableServers, cloudServersFirst);
+         availableServers = removePreviousServersFromNodeIndec(availableServers, lastPathNodeUsed, s, p);
+
+         for (Integer xAvailable : availableServers)
+            if (checkIfFreeServerResources(s, xAvailable, v, d, 1)) {
+               chosenServer = xAvailable;
+               break;
+            }
+
+      } else if (algorithm.equals(RANDOM_FIT) || algorithm.equals(FFP_RFX)) {
+         chosenServer = availableServers.get(rnd.nextInt(availableServers.size()));
+      }
+
+      return chosenServer;
    }
 
    private void assignFunctionsToServersFromInitialPlacement() {

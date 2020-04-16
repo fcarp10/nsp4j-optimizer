@@ -15,10 +15,7 @@ import optimizer.lp.VariablesLP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -118,25 +115,14 @@ public class ResultsManager {
       }
    }
 
-   public File createPlainTextFile(String fileName, String extension) {
-      File file = new File(resultsFolder + "/" + fileName + extension);
+   public PrintWriter getPrinterFromPlainTextFile(String fileName, String extension) {
       try {
-         new FileWriter(file, false);
-         return file;
+         FileWriter fw = new FileWriter(resultsFolder + "/" + fileName + extension, true);
+         BufferedWriter bw = new BufferedWriter(fw);
+         return new PrintWriter(bw);
       } catch (IOException e) {
          e.printStackTrace();
       }
       return null;
-   }
-
-   public void appendToPlainText(File file, String data) {
-      try {
-         FileWriter fileWriter = new FileWriter(file, true);
-         PrintWriter printer = new PrintWriter(fileWriter);
-         printer.write(data + "\n");
-         printer.close();
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
    }
 }
