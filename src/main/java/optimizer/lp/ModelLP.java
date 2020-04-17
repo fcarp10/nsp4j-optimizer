@@ -10,15 +10,15 @@ import org.slf4j.LoggerFactory;
 import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.printLog;
 
-public class Model {
+public class ModelLP {
 
-   private static final Logger log = LoggerFactory.getLogger(Model.class);
+   private static final Logger log = LoggerFactory.getLogger(ModelLP.class);
    private GRBModel grbModel;
    private VariablesLP vars;
    private Parameters pm;
    private double objVal;
 
-   public Model(Parameters pm, GRBModel initialSolution) {
+   public ModelLP(Parameters pm, GRBModel initialSolution) {
       this.pm = pm;
       try {
          GRBEnv grbEnv = new GRBEnv();

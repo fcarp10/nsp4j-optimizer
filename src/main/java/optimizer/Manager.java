@@ -5,7 +5,7 @@ import manager.Parameters;
 import manager.elements.TrafficFlow;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
-import optimizer.heuristic.LauncherHEU;
+import optimizer.algorithms.LauncherAlg;
 import optimizer.lp.LauncherLP;
 import optimizer.results.ResultsManager;
 import org.graphstream.graph.Graph;
@@ -105,7 +105,7 @@ public class Manager {
             // launch lp model
             LauncherLP.run(pm, sce, resultsManager, initialPlacement, initialSolution);
          } else
-            LauncherHEU.run(pm, sce, resultsManager, initialPlacement);
+            LauncherAlg.run(pm, sce, resultsManager, initialPlacement);
 
          printLog(log, INFO, "backend is ready");
       } catch (Exception e) {

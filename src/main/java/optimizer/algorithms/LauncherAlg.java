@@ -1,8 +1,9 @@
-package optimizer.heuristic;
+package optimizer.algorithms;
 
 
 import manager.Parameters;
 import optimizer.Definitions;
+import optimizer.algorithms.learning.DeepRL;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
 import optimizer.results.Auxiliary;
@@ -16,30 +17,39 @@ import java.io.PrintWriter;
 import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.printLog;
 
-public class LauncherHEU {
+public class LauncherAlg {
 
-   private static final Logger log = LoggerFactory.getLogger(LauncherHEU.class);
+   private static final Logger log = LoggerFactory.getLogger(LauncherAlg.class);
 
    public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager, boolean[][][] initialPlacement) {
 
       printLog(log, INFO, "running heuristic");
-      VariablesHEU variablesHEU = new VariablesHEU(pm, initialPlacement);
+      VariablesAlg variablesAlg = new VariablesAlg(pm, initialPlacement);
 
-      Heuristic heuristic = new Heuristic(pm, variablesHEU);
       long startTime = System.nanoTime();
-      heuristic.run(scenario.getObjFunc(), scenario.getAlgorithm());
+      if (scenario.getAlgorithm().equals(DRL)) {
+         // run heuristic first
+         Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), scenario.getAlgorithm());
+         heuristic.allocateAllServices();
+         // run DRL
+         DeepRL deepRL = new DeepRL(pm, variablesAlg, initialPlacement, scenario.getObjFunc());
+         deepRL.run();
+      } else {
+         Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), scenario.getAlgorithm());
+         heuristic.allocateAllServices();
+      }
       long elapsedTime = System.nanoTime() - startTime;
 
-      variablesHEU.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
-      Results results = generateResults(pm, scenario, variablesHEU, initialPlacement);
+      variablesAlg.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
+      Results results = generateResults(pm, scenario, variablesAlg, initialPlacement);
       results.setComputationTime((double) elapsedTime / 1000000000);
       String fileName = generateFileName(pm, scenario.getObjFunc());
       resultsManager.exportJsonFile(fileName, results);
-      exportResultsToMST(pm, resultsManager, fileName, variablesHEU);
+      exportResultsToMST(pm, resultsManager, fileName, variablesAlg);
       ResultsGUI.updateResults(results);
    }
 
-   private static Results generateResults(Parameters pm, Scenario sc, VariablesHEU heu, boolean[][][] initialPlacement) {
+   private static Results generateResults(Parameters pm, Scenario sc, VariablesAlg heu, boolean[][][] initialPlacement) {
       Results results = new Results(pm, sc);
 
       results.setVariable(uL, heu.lu);
@@ -58,7 +68,7 @@ public class LauncherHEU {
       return results;
    }
 
-   private static void exportResultsToMST(Parameters pm, ResultsManager rm, String fileName, VariablesHEU heu) {
+   private static void exportResultsToMST(Parameters pm, ResultsManager rm, String fileName, VariablesAlg heu) {
 
       Auxiliary.printLog(log, INFO, "exporting results...");
       PrintWriter pw = rm.getPrinterFromPlainTextFile(fileName, ".mst");

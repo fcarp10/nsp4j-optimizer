@@ -21,115 +21,115 @@ public class LauncherLP {
    private static final Logger log = LoggerFactory.getLogger(LauncherLP.class);
 
    public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, boolean[][][] initialPlacement, GRBModel initialSolution) throws GRBException {
-      Model model = new Model(pm, initialSolution);
+      ModelLP modelLP = new ModelLP(pm, initialSolution);
       printLog(log, INFO, "setting variables");
-      VariablesLP variablesLP = new VariablesLP(pm, model.getGrbModel(), sce, initialSolution);
-      model.setVars(variablesLP);
+      VariablesLP variablesLP = new VariablesLP(pm, modelLP.getGrbModel(), sce, initialSolution);
+      modelLP.setVars(variablesLP);
       printLog(log, INFO, "setting constraints");
-      new GeneralConstraints(pm, model, sce, initialPlacement);
-      GRBLinExpr expr = generateExprForObjectiveFunction(pm, model, sce.getObjFunc());
-      model.setObjectiveFunction(expr, sce.isMaximization());
+      new GeneralConstraints(pm, modelLP, sce, initialPlacement);
+      GRBLinExpr expr = generateExprForObjectiveFunction(pm, modelLP, sce.getObjFunc());
+      modelLP.setObjectiveFunction(expr, sce.isMaximization());
       printLog(log, INFO, "running model");
       long startTime = System.nanoTime();
-      Double objVal = model.run();
+      Double objVal = modelLP.run();
       long elapsedTime = System.nanoTime() - startTime;
       Results results;
       if (objVal != null) {
-         results = generateResults(pm, model, sce, initialPlacement);
+         results = generateResults(pm, modelLP, sce, initialPlacement);
          results.setComputationTime((double) elapsedTime / 1000000000);
          String outputFileName = generateFileName(pm, sce.getAlgorithm(), sce);
          resultsManager.exportJsonFile(outputFileName, results);
-         resultsManager.exportModel(model.getGrbModel(), outputFileName);
+         resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);
       }
    }
 
-   private static GRBLinExpr generateExprForObjectiveFunction(Parameters pm, Model model, String objectiveFunction) throws GRBException {
+   private static GRBLinExpr generateExprForObjectiveFunction(Parameters pm, ModelLP modelLP, String objectiveFunction) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       double serversWeight, linksWeight;
       switch (objectiveFunction) {
          case SERVER_DIMENSIONING:
-            expr.add(model.dimensioningExpr());
+            expr.add(modelLP.dimensioningExpr());
             break;
          case NUM_SERVERS_OBJ:
-            expr.add(model.numUsedServersExpr());
+            expr.add(modelLP.numUsedServersExpr());
             break;
          case NUM_SERVERS_UTIL_COSTS_OBJ:
-            expr.add(model.numUsedServersExpr());
+            expr.add(modelLP.numUsedServersExpr());
             serversWeight = 1.0 / pm.getServers().size();
-            expr.add(model.serverCostsExpr(serversWeight));
+            expr.add(modelLP.serverCostsExpr(serversWeight));
             break;
          case UTIL_COSTS_OBJ:
             linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
             serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
-            expr.add(model.linkCostsExpr(linksWeight));
-            expr.add(model.serverCostsExpr(serversWeight));
+            expr.add(modelLP.linkCostsExpr(linksWeight));
+            expr.add(modelLP.serverCostsExpr(serversWeight));
             break;
          case UTIL_COSTS_MAX_UTIL_OBJ:
             linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
             serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
-            expr.add(model.linkUtilizationExpr(linksWeight));
-            expr.add(model.serverUtilizationExpr(serversWeight));
-            expr.add(model.maxUtilizationExpr((double) pm.getAux().get(MAXU_WEIGHT)));
+            expr.add(modelLP.linkUtilizationExpr(linksWeight));
+            expr.add(modelLP.serverUtilizationExpr(serversWeight));
+            expr.add(modelLP.maxUtilizationExpr((double) pm.getAux().get(MAXU_WEIGHT)));
             break;
          case UTILIZATION_OBJ:
             linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
             serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
-            expr.add(model.linkUtilizationExpr(linksWeight));
-            expr.add(model.serverUtilizationExpr(serversWeight));
+            expr.add(modelLP.linkUtilizationExpr(linksWeight));
+            expr.add(modelLP.serverUtilizationExpr(serversWeight));
             break;
          case OPEX_SERVERS_OBJ:
-            expr.add(model.opexServersExpr());
+            expr.add(modelLP.opexServersExpr());
             break;
          case FUNCTIONS_CHARGES_OBJ:
-            expr.add(model.functionsChargesExpr());
+            expr.add(modelLP.functionsChargesExpr());
             break;
          case QOS_PENALTIES_OBJ:
-            expr.add(model.qosPenaltiesExpr());
+            expr.add(modelLP.qosPenaltiesExpr());
             break;
          case ALL_MONETARY_COSTS_OBJ:
-            expr.add(model.opexServersExpr());
-            expr.add(model.functionsChargesExpr());
-            expr.add(model.qosPenaltiesExpr());
+            expr.add(modelLP.opexServersExpr());
+            expr.add(modelLP.functionsChargesExpr());
+            expr.add(modelLP.qosPenaltiesExpr());
             break;
       }
       return expr;
    }
 
-   private static Results generateResults(Parameters pm, Model optModel, Scenario sc, boolean[][][] initialPlacement) throws GRBException {
+   private static Results generateResults(Parameters pm, ModelLP optModelLP, Scenario sc, boolean[][][] initialPlacement) throws GRBException {
       Results results = new Results(pm, sc);
       // general variables
-      results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optModel.getVars().zSP));
-      results.setVariable(zSPD, Auxiliary.grbVarsToBooleans(optModel.getVars().zSPD));
-      results.setVariable(fX, Auxiliary.grbVarsToBooleans(optModel.getVars().fX));
-      results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optModel.getVars().fXSV));
-      results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optModel.getVars().fXSVD));
-      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModel.getVars().uL));
-      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModel.getVars().uX));
+      results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optModelLP.getVars().zSP));
+      results.setVariable(zSPD, Auxiliary.grbVarsToBooleans(optModelLP.getVars().zSPD));
+      results.setVariable(fX, Auxiliary.grbVarsToBooleans(optModelLP.getVars().fX));
+      results.setVariable(fXSV, Auxiliary.grbVarsToBooleans(optModelLP.getVars().fXSV));
+      results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optModelLP.getVars().fXSVD));
+      results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModelLP.getVars().uL));
+      results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModelLP.getVars().uX));
 
       // model specific variables
       if (sc.getObjFunc().equals(SERVER_DIMENSIONING))
-         results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModel.getVars().xN));
+         results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModelLP.getVars().xN));
       if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
               || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
-         results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModel.getVars().oX));
-         results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModel.getVars().oSV));
-         results.setVariable(qSDP, Auxiliary.grbVarsToDoubles(optModel.getVars().qSDP));
-         results.setVariable(ySDP, Auxiliary.grbVarsToDoubles(optModel.getVars().ySDP));
+         results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModelLP.getVars().oX));
+         results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModelLP.getVars().oSV));
+         results.setVariable(qSDP, Auxiliary.grbVarsToDoubles(optModelLP.getVars().qSDP));
+         results.setVariable(ySDP, Auxiliary.grbVarsToDoubles(optModelLP.getVars().ySDP));
       }
 
       // traffic sync variables
       if (sc.getConstraints().get(SYNC_TRAFFIC)) {
-         results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optModel.getVars().gSVXY));
-         results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optModel.getVars().hSVP));
+         results.setVariable(gSVXY, Auxiliary.grbVarsToBooleans(optModelLP.getVars().gSVXY));
+         results.setVariable(hSVP, Auxiliary.grbVarsToBooleans(optModelLP.getVars().hSVP));
       }
 
       // service delay variables
       if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
               || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
-         results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModel.getVars().dSVXD));
+         results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModelLP.getVars().dSVXD));
       }
-      results.initializeResults(optModel.getObjVal(), initialPlacement);
+      results.initializeResults(optModelLP.getObjVal(), initialPlacement);
       return results;
    }
 

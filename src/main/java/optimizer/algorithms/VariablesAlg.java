@@ -1,4 +1,4 @@
-package optimizer.heuristic;
+package optimizer.algorithms;
 
 
 import manager.Parameters;
@@ -16,28 +16,28 @@ import java.util.Map;
 
 import static optimizer.Definitions.*;
 
-public class VariablesHEU {
+public class VariablesAlg {
 
-   private static final Logger log = LoggerFactory.getLogger(VariablesHEU.class);
+   private static final Logger log = LoggerFactory.getLogger(VariablesAlg.class);
 
-   protected boolean[][][] zSPD;
-   protected boolean[][][][] fXSVD;
-   protected boolean[] fX;
-   protected boolean[][][] fXSV;
-   protected boolean[][] zSP;
-   protected double[] lu;
-   protected double[] xu;
-   protected double[] oX;
-   protected double[][] oSV;
-   protected double[][][] qSDP;
-   protected boolean[][][] hSVP;
-   protected boolean[][][][] gSVXY;
-   protected double objVal;
-   protected Parameters pm;
-   protected Map<String, Double> uL;
-   protected Map<String, Double> uX;
+   public boolean[][][] zSPD;
+   public boolean[][][][] fXSVD;
+   public boolean[] fX;
+   public boolean[][][] fXSV;
+   public boolean[][] zSP;
+   public double[] lu;
+   public double[] xu;
+   public double[] oX;
+   public double[][] oSV;
+   public double[][][] qSDP;
+   public boolean[][][] hSVP;
+   public boolean[][][][] gSVXY;
+   public double objVal;
+   public Parameters pm;
+   public Map<String, Double> uL;
+   public Map<String, Double> uX;
 
-   public VariablesHEU(Parameters pm, boolean[][][] initialPlacement) {
+   public VariablesAlg(Parameters pm, boolean[][][] initialPlacement) {
       this.pm = pm;
       fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       if (initialPlacement != null)
@@ -61,7 +61,7 @@ public class VariablesHEU {
             System.arraycopy(initialPlacement[x][s], 0, fXSV[x][s], 0, pm.getServices().get(s).getFunctions().size());
    }
 
-   protected void generateRestOfVariablesForResults(boolean[][][] initialPlacement, String objFunc) {
+   public void generateRestOfVariablesForResults(boolean[][][] initialPlacement, String objFunc) {
 
       lu = new double[pm.getLinks().size()];
       for (int l = 0; l < pm.getLinks().size(); l++)
