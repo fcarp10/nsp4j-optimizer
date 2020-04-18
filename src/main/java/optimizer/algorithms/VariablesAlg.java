@@ -5,7 +5,6 @@ import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Server;
 import manager.elements.Service;
-import optimizer.results.Auxiliary;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Path;
 import org.slf4j.Logger;
@@ -83,7 +82,6 @@ public class VariablesAlg {
       oSVgenerate();
       qSDPgenerate(initialPlacement);
       generateObjValue(objFunc);
-      Auxiliary.printLog(log, INFO, "finished [" + objVal + "]");
    }
 
    private void fXgenerate() {
@@ -219,54 +217,6 @@ public class VariablesAlg {
             objVal = opex + charges + penalties;
             break;
       }
-   }
-
-   public boolean[][] getzSP() {
-      return zSP;
-   }
-
-   public boolean[][][] getzSPD() {
-      return zSPD;
-   }
-
-   public boolean[][][][] getfXSVD() {
-      return fXSVD;
-   }
-
-   public boolean[] getfX() {
-      return fX;
-   }
-
-   public boolean[][][] getfXSV() {
-      return fXSV;
-   }
-
-   public double[] getoX() {
-      return oX;
-   }
-
-   public double[][] getoSV() {
-      return oSV;
-   }
-
-   public double[][][] getqSDP() {
-      return qSDP;
-   }
-
-   public boolean[][][] gethSVP() {
-      return hSVP;
-   }
-
-   public boolean[][][][] getgSVXY() {
-      return gSVXY;
-   }
-
-   public double[] getLu() {
-      return lu;
-   }
-
-   public double[] getXu() {
-      return xu;
    }
 
    public double getObjVal() {

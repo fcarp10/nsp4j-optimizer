@@ -41,32 +41,42 @@ public class Heuristic {
 
       for (int s = 0; s < pm.getServices().size(); s++) { // for every service
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) { // for every traffic demand
+
             List<Integer> availablePaths = getAvailablePaths(s, d); // get paths with enough path link resources
+            Map<Integer, List<List<Integer>>> pathsMappingServers = findAdmissiblePaths(availablePaths, s, d); // get paths with enough servers resources
+            List<Integer> paths = new ArrayList<>(pathsMappingServers.keySet());
 
-            Map<Integer, List<List<Integer>>> PathsMappingServers = findAdmissiblePaths(availablePaths, s, d); // get paths with enough servers resources
-
-            List<Integer> paths = new ArrayList<>(PathsMappingServers.keySet());
             int pChosen = choosePath(paths, pm.getServices().get(s).getTrafficFlow());
-            List<List<Integer>> listAvailableServersPerFunction = PathsMappingServers.get(pChosen);
+            List<List<Integer>> listAvailableServersPerFunction = pathsMappingServers.get(pChosen);
 
             makeAssignmentOfFunctions(s, d, pChosen, listAvailableServersPerFunction);
-
          }
          removeUnusedFunctions(s); // remove unused servers from initial placement
-         addSynchronizationTraffic(s); // add synchronization traffic
+         addSyncTraffic(s); // add synchronization traffic
       }
    }
 
-   public void reallocateSpecificDemand(int s, int d, int pOld, int pNew, List<List<Integer>> listAvailableServersPerFunction) {
+   public boolean checkPathForReallocation(int s, int d, int p) {
+      List<Integer> availablePaths = getAvailablePaths(s, d); // get paths with enough path link resources
+      Map<Integer, List<List<Integer>>> pathsMappingServers = findAdmissiblePaths(availablePaths, s, d); // get paths with enough servers resources
+      return pathsMappingServers.containsKey(p);
+   }
+
+   public void reallocateSpecificDemand(int s, int d, int pOld, int pNew) {
 
       undoAssignment(s, d, pOld);
+
+      List<Integer> availablePaths = getAvailablePaths(s, d); // get paths with enough path link resources
+      Map<Integer, List<List<Integer>>> pathsMappingServers = findAdmissiblePaths(availablePaths, s, d); // get paths with enough servers resources
+      List<List<Integer>> listAvailableServersPerFunction = pathsMappingServers.get(pNew);
 
       makeAssignmentOfFunctions(s, d, pNew, listAvailableServersPerFunction);
 
       removeUnusedFunctions(s);
 
-      // add and remove traffic TO-DO
+      removeSyncTraffic(s);
 
+      addSyncTraffic(s);
    }
 
    private List<Integer> getUsedServersByDemand(int s, int d) {
@@ -270,10 +280,9 @@ public class Heuristic {
       return admissiblePaths;
    }
 
-   private void addSynchronizationTraffic(int s) {
+   private void addSyncTraffic(int s) {
 
-      Service service = pm.getServices().get(s);
-      for (int v = 0; v < service.getFunctions().size(); v++) {
+      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int y = 0; y < pm.getServers().size(); y++) {
                if (pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent())) continue;
@@ -281,30 +290,61 @@ public class Heuristic {
 
                   vars.gSVXY[s][v][x][y] = true;
                   // calculate the sync traffic
-                  double traffic = 0;
-                  for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
-                     traffic += service.getTrafficFlow().getDemands().get(d);
-                  double syncTraffic = traffic * (double) service.getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO);
+                  double syncTraffic = calculateSyncTraffic(s, v);
 
                   // search an available path for the sync traffic
                   boolean foundSyncPath = false;
                   for (int p = 0; p < pm.getPaths().size(); p++) {
                      Path path = pm.getPaths().get(p);
-                     if (path.getNodePath().get(0).equals(pm.getServers().get(x).getParent()) & path.getNodePath().get(path.getNodePath().size() - 1)
-                             .equals(pm.getServers().get(y).getParent()))
+                     if (path.getNodePath().get(0).equals(pm.getServers().get(x).getParent()) & path.getNodePath().get(path.getNodePath().size() - 1).equals(pm.getServers().get(y).getParent()))
                         if (checkIfFreePathResources(path, syncTraffic)) {
-                           addSyncTraffic(path, syncTraffic, s, v, p);
+                           assignSyncTraffic(s, v, p, syncTraffic);
                            foundSyncPath = true;
                            break;
                         }
                   }
-                  if (!foundSyncPath) {
-                     // TO-DO implement blocking
-                     Auxiliary.printLog(log, ERROR, "No available path found for sync traffic");
-                  }
+                  if (!foundSyncPath)
+                     Auxiliary.printLog(log, ERROR, "No available path found for sync traffic"); // TO-DO implement blocking
                }
             }
-      }
+   }
+
+   private void removeSyncTraffic(int s) {
+      Service service = pm.getServices().get(s);
+      for (int v = 0; v < service.getFunctions().size(); v++)
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int y = 0; y < pm.getServers().size(); y++) {
+               if (pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent())) continue;
+               if (vars.gSVXY[s][v][x][y]) {
+                  // calculate the sync traffic
+                  double syncTraffic = calculateSyncTraffic(s, v);
+                  for (int p = 0; p < pm.getPaths().size(); p++)
+                     if (vars.hSVP[s][v][p]) {
+                        unAssignSyncTraffic(s, v, p, syncTraffic);
+                        break;
+                     }
+               }
+            }
+   }
+
+   private double calculateSyncTraffic(int s, int v) {
+      Service service = pm.getServices().get(s);
+      double syncTraffic = 0;
+      for (int d = 0; d < service.getTrafficFlow().getDemands().size(); d++)
+         syncTraffic += service.getTrafficFlow().getDemands().get(d);
+      return syncTraffic * (double) service.getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO);
+   }
+
+   private void assignSyncTraffic(int s, int v, int p, double syncTraffic) {
+      for (Edge pathLink : pm.getPaths().get(p).getEdgePath())
+         vars.uL.put(pathLink.getId(), vars.uL.get(pathLink.getId()) + (syncTraffic / (int) pathLink.getAttribute(LINK_CAPACITY)));
+      vars.hSVP[s][v][p] = true;
+   }
+
+   private void unAssignSyncTraffic(int s, int v, int p, double syncTraffic) {
+      for (Edge pathLink : pm.getPaths().get(p).getEdgePath())
+         vars.uL.put(pathLink.getId(), vars.uL.get(pathLink.getId()) - (syncTraffic / (int) pathLink.getAttribute(LINK_CAPACITY)));
+      vars.hSVP[s][v][p] = false;
    }
 
    private int getNodePathIndexFromServer(int s, int p, int x) {
@@ -463,11 +503,4 @@ public class Heuristic {
       double functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
       vars.uX.put(server.getId(), vars.uX.get(server.getId()) - (functionOverhead / server.getCapacity()));
    }
-
-   private void addSyncTraffic(Path path, double trafficDemand, int s, int v, int p) {
-      for (Edge pathLink : path.getEdgePath())
-         vars.uL.put(pathLink.getId(), vars.uL.get(pathLink.getId()) + (trafficDemand / (int) pathLink.getAttribute(LINK_CAPACITY)));
-      vars.hSVP[s][v][p] = true;
-   }
-
 }

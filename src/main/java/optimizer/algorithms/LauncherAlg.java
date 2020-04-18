@@ -3,7 +3,7 @@ package optimizer.algorithms;
 
 import manager.Parameters;
 import optimizer.Definitions;
-import optimizer.algorithms.learning.DeepRL;
+import optimizer.algorithms.learning.ModelLearning;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
 import optimizer.results.Auxiliary;
@@ -23,24 +23,26 @@ public class LauncherAlg {
 
    public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager, boolean[][][] initialPlacement) {
 
-      printLog(log, INFO, "running heuristic");
       VariablesAlg variablesAlg = new VariablesAlg(pm, initialPlacement);
 
       long startTime = System.nanoTime();
       if (scenario.getAlgorithm().equals(DRL)) {
-         // run heuristic first
+         printLog(log, INFO, "first placement using first-fit");
          Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), scenario.getAlgorithm());
          heuristic.allocateAllServices();
-         // run DRL
-         DeepRL deepRL = new DeepRL(pm, variablesAlg, initialPlacement, scenario.getObjFunc());
-         deepRL.run();
+         variablesAlg.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
+         printLog(log, INFO, "starting reallocation using DRL");
+         ModelLearning modelLearning = new ModelLearning(null, pm, variablesAlg, initialPlacement, scenario.getObjFunc(), heuristic);
+         modelLearning.run();
       } else {
+         printLog(log, INFO, "running heuristics...");
          Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), scenario.getAlgorithm());
          heuristic.allocateAllServices();
       }
       long elapsedTime = System.nanoTime() - startTime;
 
       variablesAlg.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
+      Auxiliary.printLog(log, INFO, "finished [" + variablesAlg.objVal + "]");
       Results results = generateResults(pm, scenario, variablesAlg, initialPlacement);
       results.setComputationTime((double) elapsedTime / 1000000000);
       String fileName = generateFileName(pm, scenario.getObjFunc());
@@ -76,39 +78,39 @@ public class LauncherAlg {
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            writeVarToFile(pw, Definitions.zSP + "[" + s + "][" + p + "] ", heu.getzSP()[s][p]);
+            writeVarToFile(pw, Definitions.zSP + "[" + s + "][" + p + "] ", heu.zSP[s][p]);
 
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               writeVarToFile(pw, Definitions.zSPD + "[" + s + "][" + p + "][" + d + "] ", heu.getzSPD()[s][p][d]);
+               writeVarToFile(pw, Definitions.zSPD + "[" + s + "][" + p + "][" + d + "] ", heu.zSPD[s][p][d]);
 
       for (int x = 0; x < pm.getServers().size(); x++)
-         writeVarToFile(pw, Definitions.fX + "[" + x + "] ", heu.getfX()[x]);
+         writeVarToFile(pw, Definitions.fX + "[" + x + "] ", heu.fX[x]);
 
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               writeVarToFile(pw, Definitions.fXSV + "[" + x + "][" + s + "][" + v + "] ", heu.getfXSV()[x][s][v]);
+               writeVarToFile(pw, Definitions.fXSV + "[" + x + "][" + s + "][" + v + "] ", heu.fXSV[x][s][v]);
 
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  writeVarToFile(pw, Definitions.fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "] ", heu.getfXSVD()[x][s][v][d]);
+                  writeVarToFile(pw, Definitions.fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "] ", heu.fXSVD[x][s][v][d]);
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int y = 0; y < pm.getServers().size(); y++)
                   if (!pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent()))
-                     writeVarToFile(pw, Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "] ", heu.getgSVXY()[s][v][x][y]);
+                     writeVarToFile(pw, Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "] ", heu.gSVXY[s][v][x][y]);
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int p = 0; p < pm.getPaths().size(); p++)
-               writeVarToFile(pw, Definitions.hSVP + "[" + s + "][" + v + "][" + p + "] ", heu.gethSVP()[s][v][p]);
+               writeVarToFile(pw, Definitions.hSVP + "[" + s + "][" + v + "][" + p + "] ", heu.hSVP[s][v][p]);
       pw.close();
    }
 

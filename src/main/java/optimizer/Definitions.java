@@ -125,12 +125,12 @@ public class Definitions {
    // DRL parameters
    public static final int NUM_HIDDEN_LAYERS = 150;
    public static final int MEMORY_CAPACITY = 100000;
-   public static final float DISCOUNT_FACTOR = 0.1f;
+   public static final float DISCOUNT_FACTOR = 1.0f;
    public static final int BATCH_SIZE = 10;
    public static final int START_SIZE = 10;
    public static final int FREQUENCY = 100;
    public static final double EPSILON = 0;
-   public static final int ITERATIONS = 100;
+   public static final int ITERATIONS = 10000;
 
    // logs and messages
    public static final String ERROR = "ERROR - ";

@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static optimizer.Definitions.EPSILON;
+
 class DeepQ {
 
    private MultiLayerNetwork multiLayerNetwork, targetMultiLayerNetwork;
@@ -36,10 +38,10 @@ class DeepQ {
       this.rnd = new Random();
    }
 
-   int getAction(INDArray input, int[] actionMask, double epsilon) {
+   int getAction(INDArray input, int[] actionMask) {
       INDArray indArrayOutput = multiLayerNetwork.output(input);
       boolean isValid = false;
-      if (epsilon > rnd.nextDouble()) {
+      if (EPSILON > rnd.nextDouble()) {
          while (!isValid) {
             lastAction = rnd.nextInt((int) indArrayOutput.size(1));
             if (actionMask[lastAction] == 1)
@@ -124,9 +126,5 @@ class DeepQ {
          if (actionArray[i].getNextInputIndArray() != null)
             combinedNextInputs.putRow(i, actionArray[i].getNextInputIndArray());
       return combinedNextInputs;
-   }
-
-   int getLastAction() {
-      return lastAction;
    }
 }
