@@ -28,10 +28,10 @@ public class LauncherAlg {
       long startTime = System.nanoTime();
       if (scenario.getAlgorithm().equals(DRL)) {
          printLog(log, INFO, "first placement using first-fit");
-         Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), scenario.getAlgorithm());
+         Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), RANDOM_FIT); // <--- TO BE MODIFIED !!!!!
          heuristic.allocateAllServices();
          variablesAlg.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
-         printLog(log, INFO, "starting reallocation using DRL");
+         printLog(log, INFO, "running reallocation using DRL...");
          ModelLearning modelLearning = new ModelLearning(null, pm, variablesAlg, initialPlacement, scenario.getObjFunc(), heuristic);
          modelLearning.run();
       } else {

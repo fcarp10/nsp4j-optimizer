@@ -26,6 +26,7 @@ public class Manager {
    private static final Logger log = LoggerFactory.getLogger(Manager.class);
    private static boolean interrupted;
    private static Parameters pm;
+   private static Long seed;
 
    public static void readInputParameters(String fileName) {
       try {
@@ -35,7 +36,7 @@ public class Manager {
          checkTopologyScale(pm);
          ResultsGUI.initialize(pm);
          printLog(log, INFO, "topology loaded");
-
+         seed = pm.getSeed();
       } catch (Exception e) {
          printLog(log, ERROR, "error loading input parameters");
       }
@@ -57,7 +58,7 @@ public class Manager {
    }
 
    private static void specifyUsedTrafficDemands(Parameters pm, Scenario sce) {
-      Random rnd = new Random(pm.getSeed());
+      Random rnd = new Random(seed);
       for (TrafficFlow trafficFlow : pm.getTrafficFlows()) {
          trafficFlow.getAux().clear();
          for (int d = 0; d < trafficFlow.getDemands().size(); d++)

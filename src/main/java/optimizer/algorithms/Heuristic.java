@@ -49,7 +49,10 @@ public class Heuristic {
             int pChosen = choosePath(paths, pm.getServices().get(s).getTrafficFlow());
             List<List<Integer>> listAvailableServersPerFunction = pathsMappingServers.get(pChosen);
 
-            makeAssignmentOfFunctions(s, d, pChosen, listAvailableServersPerFunction);
+            List<Integer> chosenServers = chooseServersForFunctionAllocation(s, d, pChosen, listAvailableServersPerFunction);
+            addTrafficDemandToFunctionsToSpecificServers(s, d, chosenServers);
+
+            addTrafficDemandToPath(s, pChosen, d);
          }
          removeUnusedFunctions(s); // remove unused servers from initial placement
          addSyncTraffic(s); // add synchronization traffic
@@ -57,23 +60,21 @@ public class Heuristic {
    }
 
    public boolean checkPathForReallocation(int s, int d, int p) {
-      List<Integer> availablePaths = getAvailablePaths(s, d); // get paths with enough path link resources
-      Map<Integer, List<List<Integer>>> pathsMappingServers = findAdmissiblePaths(availablePaths, s, d); // get paths with enough servers resources
-      return pathsMappingServers.containsKey(p);
+      List<List<Integer>> availableServersPerFunction = findServersForFunctionsInPath(s, d, p);
+      return availableServersPerFunction != null;
    }
 
    public void reallocateSpecificDemand(int s, int d, int pOld, int pNew) {
 
-      undoAssignment(s, d, pOld);
+      removeTrafficDemandFromFunctions(s, d);
+      removeTrafficDemandFromPath(s, pOld, d);
 
-      List<Integer> availablePaths = getAvailablePaths(s, d); // get paths with enough path link resources
-      Map<Integer, List<List<Integer>>> pathsMappingServers = findAdmissiblePaths(availablePaths, s, d); // get paths with enough servers resources
-      List<List<Integer>> listAvailableServersPerFunction = pathsMappingServers.get(pNew);
-
-      makeAssignmentOfFunctions(s, d, pNew, listAvailableServersPerFunction);
+      List<List<Integer>> availableServersPerFunction = findServersForFunctionsInPath(s, d, pNew);
+      List<Integer> chosenServers = chooseServersForFunctionAllocation(s, d, pNew, availableServersPerFunction);
+      addTrafficDemandToFunctionsToSpecificServers(s, d, chosenServers);
+      addTrafficDemandToPath(s, pNew, d);
 
       removeUnusedFunctions(s);
-
       removeSyncTraffic(s);
 
       addSyncTraffic(s);
@@ -88,30 +89,31 @@ public class Heuristic {
       return listOfUsedServers;
    }
 
-   private void undoAssignment(int s, int d, int pOld) {
+   private void removeTrafficDemandFromFunctions(int s, int d) {
       List<Integer> listOfOldUsedServers = getUsedServersByDemand(s, d);
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
          int x = listOfOldUsedServers.get(v);
          unAssignDemandToFunctionToServer(s, x, v, d);
       }
-      unAssignTrafficDemandFromPath(s, pOld, d);
    }
 
-   private void makeAssignmentOfFunctions(int s, int d, int pChosen, List<List<Integer>> listAvailableServersPerFunction) {
-
+   private List<Integer> chooseServersForFunctionAllocation(int s, int d, int pChosen, List<List<Integer>> listAvailableServersPerFunction) {
+      List<Integer> specificServers = new ArrayList<>();
       int lastPathNodeUsed = 0;
-
-      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) { // assign traffic to servers
+      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
          List<Integer> availableServers = listAvailableServersPerFunction.get(v);
-
          int xChosen = chooseServerForFunction(availableServers, lastPathNodeUsed, s, pChosen, v, d);
-         if (xChosen != -1) {
-            assignDemandToFunctionToServer(s, xChosen, v, d);
-            lastPathNodeUsed = getNodePathIndexFromServer(s, pChosen, xChosen); // save last node path used for ordering
-         } else
-            Auxiliary.printLog(log, ERROR, "function could not be allocated [s][d][p][v] = [" + s + "][" + d + "][" + pChosen + "][" + v + "]");
+         specificServers.add(xChosen);
+         lastPathNodeUsed = getNodePathIndexFromServer(s, pChosen, xChosen); // save last node path used for ordering
       }
-      assignTrafficDemandToPath(s, pChosen, d);
+      return specificServers;
+   }
+
+   private void addTrafficDemandToFunctionsToSpecificServers(int s, int d, List<Integer> specificServers) {
+      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+         int xChosen = specificServers.get(v);
+         assignDemandToFunctionToServer(s, xChosen, v, d);
+      }
    }
 
    public void unAssignDemandToFunctionToServer(int s, int x, int v, int d) {
@@ -205,6 +207,10 @@ public class Heuristic {
       else if (alg.equals(RANDOM_FIT) || alg.equals(FFP_RFX))
          chosenServer = availableServers.get(rnd.nextInt(availableServers.size()));
 
+      if (chosenServer == -1) {
+         Auxiliary.printLog(log, ERROR, "function could not be allocated [s][d][p][v] = [" + s + "][" + d + "][" + p + "][" + v + "]");
+         System.exit(-1);
+      }
       return chosenServer;
    }
 
@@ -224,51 +230,47 @@ public class Heuristic {
          }
    }
 
+   private List<List<Integer>> findServersForFunctionsInPath(int s, int d, int p) {
+
+      List<List<Integer>> availableServersPerFunction = new ArrayList<>(); // find available servers for every function
+      Path availablePath = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
+      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) { // for every function
+         List<Integer> chosenServers = new ArrayList<>();
+         List<Integer> alreadyUsedServers = getUsedServersForFunction(s, v, availablePath); // get list of server where function already exists for the path
+         if (!alreadyUsedServers.isEmpty()) // if function already exist, with enough resources, add it
+            for (int server : alreadyUsedServers)
+               if (checkIfFreeServerResources(s, server, v, d, pm.getServices().get(s).getFunctions().size()))
+                  chosenServers.add(server);
+         int nInitial = -1;
+         if (chosenServers.isEmpty())
+            nInitial = 0; // if no already existing function, get all available servers in the path
+         else  // if existing function, get only the next servers in the path
+            for (int n = 0; n < availablePath.getNodePath().size(); n++) {
+               int lastServer = chosenServers.get(chosenServers.size() - 1);
+               if (pm.getServers().get(lastServer).getParent().equals(availablePath.getNodePath().get(n))) {
+                  nInitial = n + 1;
+                  break;
+               }
+            }
+         List<Integer> availableServers = getAvailableServers(s, p, d, v, nInitial); // get rest of available servers
+         chosenServers.addAll(availableServers);
+         availableServersPerFunction.add(chosenServers);
+      }
+
+      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) // check if all functions have at least one available server
+         if (availableServersPerFunction.get(v).isEmpty())
+            return null;
+
+      return availableServersPerFunction;
+   }
+
    private Map<Integer, List<List<Integer>>> findAdmissiblePaths(List<Integer> availablePaths, int s, int d) {
 
-      Service service = pm.getServices().get(s);
-      TrafficFlow tf = service.getTrafficFlow();
       Map<Integer, List<List<Integer>>> admissiblePaths = new HashMap<>();
       for (Integer p : availablePaths) {
-
-         Path pathFound = tf.getPaths().get(p);
-         List<List<Integer>> listAvailableServersPerFunction = new ArrayList<>(); // find available servers for every function
-
-         for (int v = 0; v < service.getFunctions().size(); v++) { // for every function
-
-            List<Integer> chosenServers = new ArrayList<>();
-
-            List<Integer> alreadyUsedServers = getUsedServersForFunction(s, v, pathFound); // get list of server where function already exists for the path
-            if (!alreadyUsedServers.isEmpty()) // if function already exist, with enough resources, add it
-               for (int server : alreadyUsedServers)
-                  if (checkIfFreeServerResources(s, server, v, d, service.getFunctions().size()))
-                     chosenServers.add(server);
-
-            int nInitial = -1;
-            if (chosenServers.isEmpty())
-               nInitial = 0; // if no already existing function, get all available servers in the path
-            else  // if existing function, get only the next servers in the path
-               for (int n = 0; n < pathFound.getNodePath().size(); n++) {
-                  int lastServer = chosenServers.get(chosenServers.size() - 1);
-                  if (pm.getServers().get(lastServer).getParent().equals(pathFound.getNodePath().get(n))) {
-                     nInitial = n + 1;
-                     break;
-                  }
-               }
-
-            List<Integer> availableServers = getAvailableServers(s, p, d, v, nInitial); // get rest of available servers
-            chosenServers.addAll(availableServers);
-            listAvailableServersPerFunction.add(chosenServers);
-         }
-
-         boolean noServerForFunctions = false;
-         for (int v = 0; v < service.getFunctions().size(); v++) // check if all functions have at least one available server
-            if (listAvailableServersPerFunction.get(v).isEmpty())
-               noServerForFunctions = true;
-
-         if (!noServerForFunctions)// if there are servers, add path
-            admissiblePaths.put(p, listAvailableServersPerFunction);
-
+         List<List<Integer>> availableServersPerFunction = findServersForFunctionsInPath(s, d, p);
+         if (availableServersPerFunction != null)// if there are servers, add path
+            admissiblePaths.put(p, availableServersPerFunction);
       }
 
       if (admissiblePaths.isEmpty()) {
@@ -276,7 +278,6 @@ public class Heuristic {
          Auxiliary.printLog(log, ERROR, "no admissible path available for [s][d] = [" + s + "][" + d + "]");
          System.exit(-1);
       }
-
       return admissiblePaths;
    }
 
@@ -479,7 +480,7 @@ public class Heuristic {
       return vars.uX.get(server.getId()) + (resourcesToAdd / server.getCapacity()) <= 1.0;
    }
 
-   private void unAssignTrafficDemandFromPath(int s, int p, int d) {
+   private void removeTrafficDemandFromPath(int s, int p, int d) {
       Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
       double trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
       for (Edge pathLink : path.getEdgePath())
@@ -487,7 +488,7 @@ public class Heuristic {
       vars.zSPD[s][p][d] = false;
    }
 
-   private void assignTrafficDemandToPath(int s, int p, int d) {
+   private void addTrafficDemandToPath(int s, int p, int d) {
       Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
       double trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
       for (Edge pathLink : path.getEdgePath())

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Random;
 
 import static optimizer.Definitions.*;
-import static optimizer.results.Auxiliary.printLog;
 
 public class ModelLearning {
    protected Parameters pm;
@@ -29,10 +28,10 @@ public class ModelLearning {
    protected Random rnd;
    protected boolean[][][] initialPlacement;
    protected String objFunc;
-   protected int environmentSize;
    private DeepQ deepQ;
    private MultiLayerConfiguration conf;
    private final int offsetInput;
+   protected int environmentSize;
    private float bestObjVal;
    private Heuristic heuristic;
 
@@ -110,8 +109,7 @@ public class ModelLearning {
          if (vars.objVal < bestObjVal)
             bestObjVal = (float) vars.objVal;
 
-         printLog(log, INFO, "iteration " + i + ": [" + vars.objVal + "][" + reward + "]");
-
+         log.info("iteration " + i + ": [" + vars.objVal + "][" + reward + "]");
       }
    }
 
@@ -127,8 +125,8 @@ public class ModelLearning {
 
       for (int i = 0; i < environmentList.size(); i++) environment[i] = environmentList.get(i);
 
-      environment[environmentSize - 2] = (float) vars.objVal;
-      environment[environmentSize - 1] = 0f;
+      environment[environment.length - 2] = (float) vars.objVal;
+      environment[environment.length - 1] = 0f;
       return environment;
    }
 
@@ -172,7 +170,7 @@ public class ModelLearning {
             }
             initialServiceDemandIndex += pm.getServices().get(s).getTrafficFlow().getPaths().size();
          }
-
+      
       int pOld = 0, pNew = 0;
       for (int p = 0; p < pm.getPathsTrafficFlow(); p++) {
          if (initialServiceDemandIndex + p != action) {
@@ -205,9 +203,10 @@ public class ModelLearning {
    }
 
    private float computeReward() {
-      if (vars.getObjVal() < bestObjVal)
+      float newObjVal = (float) vars.getObjVal();
+      if (newObjVal < bestObjVal)
          return 100;
-      else if (vars.getObjVal() == bestObjVal)
+      else if (newObjVal == bestObjVal)
          return 0;
       else
          return -100;
