@@ -3,7 +3,8 @@ package optimizer.algorithms;
 
 import manager.Parameters;
 import optimizer.Definitions;
-import optimizer.algorithms.learning.ModelLearning;
+import optimizer.algorithms.learning.PlacementModel;
+import optimizer.algorithms.learning.RoutingModel;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
 import optimizer.results.Auxiliary;
@@ -32,8 +33,9 @@ public class LauncherAlg {
          heuristic.allocateAllServices();
          variablesAlg.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
          printLog(log, INFO, "running reallocation using DRL...");
-         ModelLearning modelLearning = new ModelLearning(null, pm, variablesAlg, initialPlacement, scenario.getObjFunc(), heuristic);
-         modelLearning.run();
+         PlacementModel placementModel = new PlacementModel(null, pm, variablesAlg, initialPlacement, scenario.getObjFunc(), heuristic);
+         RoutingModel routingModel = new RoutingModel(null, pm, variablesAlg, initialPlacement, scenario.getObjFunc(), heuristic, placementModel);
+         routingModel.run();
       } else {
          printLog(log, INFO, "running heuristics...");
          Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), scenario.getAlgorithm());

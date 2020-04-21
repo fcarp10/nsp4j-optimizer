@@ -130,7 +130,8 @@ public class Definitions {
    public static final int START_SIZE = 10;
    public static final int FREQUENCY = 100;
    public static final double EPSILON = 0;
-   public static final int ITERATIONS = 10000;
+   public static final String ROUTING_ITERATIONS = "routing_iterations";
+   public static final String PLACEMENT_ITERATIONS = "placement_iterations";
 
    // logs and messages
    public static final String ERROR = "ERROR - ";

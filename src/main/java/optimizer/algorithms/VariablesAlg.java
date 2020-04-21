@@ -217,6 +217,8 @@ public class VariablesAlg {
             objVal = opex + charges + penalties;
             break;
       }
+      if (objVal <= 0)
+         log.error("");
    }
 
    public double getObjVal() {

@@ -50,34 +50,13 @@ public class Heuristic {
             List<List<Integer>> listAvailableServersPerFunction = pathsMappingServers.get(pChosen);
 
             List<Integer> chosenServers = chooseServersForFunctionAllocation(s, d, pChosen, listAvailableServersPerFunction);
-            addTrafficDemandToFunctionsToSpecificServers(s, d, chosenServers);
+            addDemandToFunctionsToSpecificServers(s, d, chosenServers);
 
-            addTrafficDemandToPath(s, pChosen, d);
+            addDemandToPath(s, pChosen, d);
          }
          removeUnusedFunctions(s); // remove unused servers from initial placement
          addSyncTraffic(s); // add synchronization traffic
       }
-   }
-
-   public boolean checkPathForReallocation(int s, int d, int p) {
-      List<List<Integer>> availableServersPerFunction = findServersForFunctionsInPath(s, d, p);
-      return availableServersPerFunction != null;
-   }
-
-   public void reallocateSpecificDemand(int s, int d, int pOld, int pNew) {
-
-      removeTrafficDemandFromFunctions(s, d);
-      removeTrafficDemandFromPath(s, pOld, d);
-
-      List<List<Integer>> availableServersPerFunction = findServersForFunctionsInPath(s, d, pNew);
-      List<Integer> chosenServers = chooseServersForFunctionAllocation(s, d, pNew, availableServersPerFunction);
-      addTrafficDemandToFunctionsToSpecificServers(s, d, chosenServers);
-      addTrafficDemandToPath(s, pNew, d);
-
-      removeUnusedFunctions(s);
-      removeSyncTraffic(s);
-
-      addSyncTraffic(s);
    }
 
    private List<Integer> getUsedServersByDemand(int s, int d) {
@@ -89,15 +68,15 @@ public class Heuristic {
       return listOfUsedServers;
    }
 
-   private void removeTrafficDemandFromFunctions(int s, int d) {
+   public void removeDemandFromFunctions(int s, int d) {
       List<Integer> listOfOldUsedServers = getUsedServersByDemand(s, d);
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
          int x = listOfOldUsedServers.get(v);
-         unAssignDemandToFunctionToServer(s, x, v, d);
+         removeDemandToFunctionToServer(s, x, v, d);
       }
    }
 
-   private List<Integer> chooseServersForFunctionAllocation(int s, int d, int pChosen, List<List<Integer>> listAvailableServersPerFunction) {
+   public List<Integer> chooseServersForFunctionAllocation(int s, int d, int pChosen, List<List<Integer>> listAvailableServersPerFunction) {
       List<Integer> specificServers = new ArrayList<>();
       int lastPathNodeUsed = 0;
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
@@ -109,21 +88,21 @@ public class Heuristic {
       return specificServers;
    }
 
-   private void addTrafficDemandToFunctionsToSpecificServers(int s, int d, List<Integer> specificServers) {
+   public void addDemandToFunctionsToSpecificServers(int s, int d, List<Integer> specificServers) {
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
          int xChosen = specificServers.get(v);
-         assignDemandToFunctionToServer(s, xChosen, v, d);
+         addDemandToFunctionToServer(s, xChosen, v, d);
       }
    }
 
-   public void unAssignDemandToFunctionToServer(int s, int x, int v, int d) {
+   public void removeDemandToFunctionToServer(int s, int x, int v, int d) {
       Server server = pm.getServers().get(x);
       double trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d) * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
       vars.fXSVD[x][s][v][d] = false;
       vars.uX.put(server.getId(), vars.uX.get(server.getId()) - (trafficDemand / server.getCapacity()));
    }
 
-   public void assignDemandToFunctionToServer(int s, int x, int v, int d) {
+   public void addDemandToFunctionToServer(int s, int x, int v, int d) {
       Server server = pm.getServers().get(x);
       double trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d) * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
       vars.fXSVD[x][s][v][d] = true;
@@ -215,7 +194,7 @@ public class Heuristic {
    }
 
 
-   private void removeUnusedFunctions(int s) {
+   public void removeUnusedFunctions(int s) {
 
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
@@ -230,7 +209,7 @@ public class Heuristic {
          }
    }
 
-   private List<List<Integer>> findServersForFunctionsInPath(int s, int d, int p) {
+   public List<List<Integer>> findServersForFunctionsInPath(int s, int d, int p) {
 
       List<List<Integer>> availableServersPerFunction = new ArrayList<>(); // find available servers for every function
       Path availablePath = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
@@ -281,7 +260,7 @@ public class Heuristic {
       return admissiblePaths;
    }
 
-   private void addSyncTraffic(int s) {
+   public void addSyncTraffic(int s) {
 
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
          for (int x = 0; x < pm.getServers().size(); x++)
@@ -310,7 +289,7 @@ public class Heuristic {
             }
    }
 
-   private void removeSyncTraffic(int s) {
+   public void removeSyncTraffic(int s) {
       Service service = pm.getServices().get(s);
       for (int v = 0; v < service.getFunctions().size(); v++)
          for (int x = 0; x < pm.getServers().size(); x++)
@@ -480,7 +459,7 @@ public class Heuristic {
       return vars.uX.get(server.getId()) + (resourcesToAdd / server.getCapacity()) <= 1.0;
    }
 
-   private void removeTrafficDemandFromPath(int s, int p, int d) {
+   public void removeDemandFromPath(int s, int p, int d) {
       Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
       double trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
       for (Edge pathLink : path.getEdgePath())
@@ -488,7 +467,7 @@ public class Heuristic {
       vars.zSPD[s][p][d] = false;
    }
 
-   private void addTrafficDemandToPath(int s, int p, int d) {
+   public void addDemandToPath(int s, int p, int d) {
       Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
       double trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
       for (Edge pathLink : path.getEdgePath())

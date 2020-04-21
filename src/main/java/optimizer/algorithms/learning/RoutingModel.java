@@ -18,14 +18,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static optimizer.Definitions.*;
 
-public class ModelLearning {
+public class RoutingModel {
    protected Parameters pm;
    protected VariablesAlg vars;
-   protected Random rnd;
    protected boolean[][][] initialPlacement;
    protected String objFunc;
    private DeepQ deepQ;
@@ -33,18 +31,19 @@ public class ModelLearning {
    private final int offsetInput;
    protected int environmentSize;
    private float bestObjVal;
-   private Heuristic heuristic;
+   private Heuristic heu;
+   private PlacementModel placementModel;
 
-   private static final Logger log = LoggerFactory.getLogger(ModelLearning.class);
+   private static final Logger log = LoggerFactory.getLogger(RoutingModel.class);
 
 
-   public ModelLearning(MultiLayerConfiguration conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement, String objFunc, Heuristic heuristic) {
+   public RoutingModel(MultiLayerConfiguration conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement, String objFunc, Heuristic heu, PlacementModel placementModel) {
       this.pm = pm;
       this.vars = variablesAlg;
       this.initialPlacement = initialPlacement;
       this.objFunc = objFunc;
-      rnd = new Random();
-      this.heuristic = heuristic;
+      this.heu = heu;
+      this.placementModel = placementModel;
       environmentSize = calculateEnvironmentLength();
       offsetInput = 2;
       int inputLength = environmentSize + offsetInput;
@@ -85,11 +84,12 @@ public class ModelLearning {
       float[] environment = createEnvironment();
       float[] nextEnvironment;
 
-      for (int i = 0; i < ITERATIONS; i++) {
+      for (int i = 0; i < (int) pm.getAux(ROUTING_ITERATIONS); i++) {
 
          // switch one traffic demand to a different path
          INDArray inputIndArray = Nd4j.create(environment);
          int[] actionMask = generateActionMask(environment);
+
          int action = deepQ.getAction(inputIndArray, actionMask);
 
          // generate next environment of on the new chosen path
@@ -102,15 +102,25 @@ public class ModelLearning {
          nextEnvironment[nextEnvironment.length - 2] = (float) vars.objVal;
 
          // calculate the reward and create a new experience
-         float reward = observeReward(environment, nextEnvironment);
+         float reward = computeReward();
+         int[] nextActionMask = generateActionMask(nextEnvironment);
+         deepQ.observeReward(Nd4j.create(environment), Nd4j.create(nextEnvironment), reward, nextActionMask);
 
          environment = nextEnvironment;
 
          if (vars.objVal < bestObjVal)
             bestObjVal = (float) vars.objVal;
 
-         log.info("iteration " + i + ": [" + vars.objVal + "][" + reward + "]");
+         log.info("routing iteration " + i + ": [" + vars.objVal + "][" + reward + "]");
       }
+   }
+
+   private int calculateEnvironmentLength() {
+      int inputSize = 0;
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+            inputSize += pm.getServices().get(s).getTrafficFlow().getPaths().size();
+      return inputSize;
    }
 
    private float[] createEnvironment() {
@@ -130,14 +140,6 @@ public class ModelLearning {
       return environment;
    }
 
-   private int calculateEnvironmentLength() {
-      int inputSize = 0;
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-            inputSize += pm.getServices().get(s).getTrafficFlow().getPaths().size();
-      return inputSize;
-   }
-
    private int[] generateActionMask(float[] environment) {
       int[] actionMask = new int[environment.length - offsetInput];
 
@@ -145,11 +147,18 @@ public class ModelLearning {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
-               if (heuristic.checkPathForReallocation(s, d, p) && environment[index] == 0)
+               if (checkPathForRerouting(s, d, p) && environment[index] == 0)
                   actionMask[index] = 1;
                index++;
             }
+      boolean allFalse = true;
+      for (int i = 0; i < actionMask.length; i++) {
+         if (actionMask[i] == 1)
+            allFalse = false;
+      }
 
+      if (allFalse)
+         log.error("");
       return actionMask;
    }
 
@@ -170,7 +179,7 @@ public class ModelLearning {
             }
             initialServiceDemandIndex += pm.getServices().get(s).getTrafficFlow().getPaths().size();
          }
-      
+
       int pOld = 0, pNew = 0;
       for (int p = 0; p < pm.getPathsTrafficFlow(); p++) {
          if (initialServiceDemandIndex + p != action) {
@@ -187,19 +196,9 @@ public class ModelLearning {
       nextEnvironment[nextEnvironment.length - 1] = timeStep;
 
       // modify variables based on the taken action
-      heuristic.reallocateSpecificDemand(sChosen, dChosen, pOld, pNew);
+      rerouteSpecificDemand(sChosen, dChosen, pOld, pNew, timeStep);
 
       return nextEnvironment;
-   }
-
-   private float observeReward(float[] environment, float[] nextEnvironment) {
-      float reward = computeReward();
-      int[] nextActionMask = generateActionMask(nextEnvironment);
-      if (nextEnvironment[nextEnvironment.length - 1] == 0)
-         deepQ.observeReward(Nd4j.create(environment), null, reward, nextActionMask);
-      else
-         deepQ.observeReward(Nd4j.create(environment), Nd4j.create(nextEnvironment), reward, nextActionMask);
-      return reward;
    }
 
    private float computeReward() {
@@ -210,6 +209,23 @@ public class ModelLearning {
          return 0;
       else
          return -100;
+   }
+
+   public boolean checkPathForRerouting(int s, int d, int p) {
+      List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
+      return availableServersPerFunction != null;
+   }
+
+   public void rerouteSpecificDemand(int s, int d, int pOld, int pNew, int timeStep) {
+
+      boolean successfulPlacement = placementModel.run(s, d, pNew, timeStep); // run drl for function placement
+      if (successfulPlacement) {
+         heu.removeDemandFromPath(s, pOld, d); // remove demand from path
+         heu.addDemandToPath(s, pNew, d); // add demand to path
+         heu.removeUnusedFunctions(s);
+         heu.removeSyncTraffic(s);
+         heu.addSyncTraffic(s);
+      }
    }
 
    MultiLayerConfiguration getConf() {
