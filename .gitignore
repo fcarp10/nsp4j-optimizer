@@ -109,3 +109,12 @@ modules.xml
 # End of https://www.gitignore.io/api/intellij+all
 
 _build/
+.classpath
+.DS_Store
+.factorypath
+.gitignore
+.project
+.settings/org.eclipse.core.resources.prefs
+.settings/org.eclipse.jdt.apt.core.prefs
+.settings/org.eclipse.jdt.core.prefs
+.settings/org.eclipse.m2e.core.prefs
