@@ -59,23 +59,6 @@ public class Heuristic {
       }
    }
 
-   private List<Integer> getUsedServersByDemand(int s, int d) {
-      List<Integer> listOfUsedServers = new ArrayList<>();
-      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-         for (int x = 0; x < pm.getServers().size(); x++)
-            if (vars.fXSVD[x][s][v][d])
-               listOfUsedServers.add(x);
-      return listOfUsedServers;
-   }
-
-   public void removeDemandFromFunctions(int s, int d) {
-      List<Integer> listOfOldUsedServers = getUsedServersByDemand(s, d);
-      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-         int x = listOfOldUsedServers.get(v);
-         removeDemandToFunctionToServer(s, x, v, d);
-      }
-   }
-
    public List<Integer> chooseServersForFunctionAllocation(int s, int d, int pChosen, List<List<Integer>> listAvailableServersPerFunction) {
       List<Integer> specificServers = new ArrayList<>();
       int lastPathNodeUsed = 0;

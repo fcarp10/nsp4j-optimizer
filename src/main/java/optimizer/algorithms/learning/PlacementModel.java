@@ -169,18 +169,20 @@ public class PlacementModel {
          initialFunctionServerIndex += pm.getServers().size();
       }
 
-      int xOld = 0, xNew = 0;
-      for (int x = 0; x < pm.getServers().size(); x++) {
-         if (initialFunctionServerIndex + x != action) {
+      int xOld = -1, xNew = -1;
+      for (int x = 0; x < pm.getServers().size(); x++)
+         if (initialFunctionServerIndex + x == action) {
+            if (nextEnvironment[initialFunctionServerIndex + x] == 0)
+               nextEnvironment[initialFunctionServerIndex + x] = 1;
+            else
+               xOld = x;
+            xNew = x;
+         } else {
             if (nextEnvironment[initialFunctionServerIndex + x] == 1) {
                nextEnvironment[initialFunctionServerIndex + x] = 0;
                xOld = x;
             }
-         } else {
-            nextEnvironment[initialFunctionServerIndex + x] = 1;
-            xNew = x;
          }
-      }
 
       nextEnvironment[nextEnvironment.length - 1] = timeStep;
 

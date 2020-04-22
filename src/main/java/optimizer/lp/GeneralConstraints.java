@@ -22,7 +22,7 @@ public class GeneralConstraints {
          this.vars = modelLP.getVars();
 
          // model specific constraints
-         new ModelSpecificConstraints(pm, modelLP, scenario, initialPlacement);
+         new SpecificConstraints(pm, modelLP, scenario, initialPlacement);
 
          // general constraints
          if (scenario.getConstraints().get(RP1)) RP1();

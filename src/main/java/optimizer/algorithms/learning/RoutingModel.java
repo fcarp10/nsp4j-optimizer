@@ -84,6 +84,8 @@ public class RoutingModel {
       float[] environment = createEnvironment();
       float[] nextEnvironment;
 
+      log.info("initial solution: [" + bestObjVal + "]");
+
       for (int i = 0; i < (int) pm.getAux(ROUTING_ITERATIONS); i++) {
 
          // switch one traffic demand to a different path

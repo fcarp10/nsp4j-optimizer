@@ -21,14 +21,14 @@ import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.*;
 
 
-public class ModelSpecificConstraints {
+public class SpecificConstraints {
 
-   private static final Logger log = LoggerFactory.getLogger(ModelSpecificConstraints.class);
+   private static final Logger log = LoggerFactory.getLogger(SpecificConstraints.class);
    private ModelLP modelLP;
    private VariablesLP vars;
    private Parameters pm;
 
-   public ModelSpecificConstraints(Parameters pm, ModelLP modelLP, Scenario sc, boolean[][][] initialPlacement) {
+   public SpecificConstraints(Parameters pm, ModelLP modelLP, Scenario sc, boolean[][][] initialPlacement) {
       try {
          this.pm = pm;
          this.modelLP = modelLP;

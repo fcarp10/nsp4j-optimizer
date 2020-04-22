@@ -70,6 +70,7 @@ public class VariablesAlg {
       for (int x = 0; x < pm.getServers().size(); x++)
          xu[x] = uX.get(pm.getServers().get(x).getId());
 
+
       fX = new boolean[pm.getServers().size()];
       zSP = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
       oX = new double[pm.getServers().size()];
@@ -217,8 +218,6 @@ public class VariablesAlg {
             objVal = opex + charges + penalties;
             break;
       }
-      if (objVal <= 0)
-         log.error("");
    }
 
    public double getObjVal() {
