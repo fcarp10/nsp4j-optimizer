@@ -1,5 +1,18 @@
 package optimizer.results;
 
+import static optimizer.Definitions.ERROR;
+import static optimizer.Definitions.FUNCTION_MAX_DELAY;
+import static optimizer.Definitions.INFO;
+import static optimizer.Definitions.LINK_DELAY;
+import static optimizer.Definitions.SERVICE_DOWNTIME;
+import static optimizer.Definitions.WARNING;
+
+import java.util.List;
+
+import org.decimal4j.util.DoubleRounder;
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Path;
+import org.slf4j.Logger;
 
 import gurobi.GRB;
 import gurobi.GRBException;
@@ -7,35 +20,32 @@ import gurobi.GRBVar;
 import manager.elements.Function;
 import manager.elements.Service;
 import optimizer.gui.ResultsGUI;
-import org.decimal4j.util.DoubleRounder;
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Path;
-import org.slf4j.Logger;
-
-import java.util.List;
-
-import static optimizer.Definitions.*;
 
 public class Auxiliary {
 
-   static double avg(List<Object> list) {
-      if (list.size() == 0) return 0;
+   static double avg(List<Double> list) {
+      if (list.size() == 0)
+         return 0;
       double average = 0;
-      for (Object aList : list) average += Double.parseDouble(aList.toString());
+      for (Object aList : list)
+         average += Double.parseDouble(aList.toString());
       average = average / list.size();
       return roundDouble(average, 2);
    }
 
    static double vrc(List<Object> list, double avg) {
-      if (list.size() == 0) return 0;
+      if (list.size() == 0)
+         return 0;
       double variance = 0;
-      for (Object aList : list) variance += Math.pow(Double.parseDouble(aList.toString()) - avg, 2);
+      for (Object aList : list)
+         variance += Math.pow(Double.parseDouble(aList.toString()) - avg, 2);
       variance = variance / list.size();
       return roundDouble(variance, 2);
    }
 
    public static double max(List<Object> list) {
-      if (list.size() == 0) return 0;
+      if (list.size() == 0)
+         return 0;
       double max = 0;
       for (Object aList : list)
          if (Double.parseDouble(aList.toString()) > max)
@@ -44,7 +54,8 @@ public class Auxiliary {
    }
 
    public static double min(List<Object> list) {
-      if (list.size() == 0) return 0;
+      if (list.size() == 0)
+         return 0;
       double min = Double.MAX_VALUE;
       for (Object aList : list)
          if (Double.parseDouble(aList.toString()) < min)
@@ -99,7 +110,8 @@ public class Auxiliary {
    public static boolean[] grbVarsToBooleans(GRBVar[] var) throws GRBException {
       boolean[] convertedVar = new boolean[var.length];
       for (int i = 0; i < var.length; i++) {
-         if (var[i] == null) continue;
+         if (var[i] == null)
+            continue;
          if (var[i].get(GRB.DoubleAttr.X) == 1.0)
             convertedVar[i] = true;
       }
@@ -114,7 +126,8 @@ public class Auxiliary {
          convertedVar = new boolean[0][0];
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++) {
-            if (var[i][j] == null) continue;
+            if (var[i][j] == null)
+               continue;
             if (var[i][j].get(GRB.DoubleAttr.X) == 1.0)
                convertedVar[i][j] = true;
          }
@@ -130,7 +143,8 @@ public class Auxiliary {
       for (int i = 0; i < var.length; i++)
          for (int j = 0; j < var[i].length; j++)
             for (int k = 0; k < var[i][j].length; k++) {
-               if (var[i][j][k] == null) continue;
+               if (var[i][j][k] == null)
+                  continue;
                if (var[i][j][k].get(GRB.DoubleAttr.X) == 1.0)
                   convertedVar[i][j][k] = true;
             }
@@ -147,7 +161,8 @@ public class Auxiliary {
          for (int j = 0; j < var[i].length; j++)
             for (int k = 0; k < var[i][j].length; k++)
                for (int l = 0; l < var[i][j][k].length; l++) {
-                  if (var[i][j][k][l] == null) continue;
+                  if (var[i][j][k][l] == null)
+                     continue;
                   if (var[i][j][k][l].get(GRB.DoubleAttr.X) == 1.0)
                      convertedVar[i][j][k][l] = true;
                }

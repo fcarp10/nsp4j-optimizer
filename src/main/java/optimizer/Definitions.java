@@ -125,11 +125,13 @@ public class Definitions {
    // DRL parameters
    public static final int NUM_HIDDEN_LAYERS = 150;
    public static final int MEMORY_CAPACITY = 100000;
-   public static final float DISCOUNT_FACTOR = 1.0f;
+   public static final float DISCOUNT_FACTOR_ROUTING = 1.0f;
+   public static final float DISCOUNT_FACTOR_PLACEMENT = 0.1f;
    public static final int BATCH_SIZE = 10;
    public static final int START_SIZE = 10;
    public static final int FREQUENCY = 100;
-   public static final double EPSILON = 0;
+   public static final double EPSILON_ROUTING = 0;
+   public static final double EPSILON_PLACEMENT = 0;
    public static final String ROUTING_ITERATIONS = "routing_iterations";
    public static final String PLACEMENT_ITERATIONS = "placement_iterations";
 

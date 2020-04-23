@@ -1,21 +1,37 @@
 package optimizer.algorithms;
 
 
-import manager.Parameters;
-import manager.elements.Function;
-import manager.elements.Server;
-import manager.elements.Service;
-import manager.elements.TrafficFlow;
-import optimizer.results.Auxiliary;
+import static optimizer.Definitions.DRL;
+import static optimizer.Definitions.ERROR;
+import static optimizer.Definitions.FFP_RFX;
+import static optimizer.Definitions.FIRST_FIT;
+import static optimizer.Definitions.FUNCTION_LOAD_RATIO;
+import static optimizer.Definitions.FUNCTION_OVERHEAD;
+import static optimizer.Definitions.FUNCTION_SYNC_LOAD_RATIO;
+import static optimizer.Definitions.LINK_CAPACITY;
+import static optimizer.Definitions.NODE_CLOUD;
+import static optimizer.Definitions.OPEX_SERVERS_OBJ;
+import static optimizer.Definitions.RANDOM_FIT;
+import static optimizer.Definitions.RFP_FFX;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
-import static optimizer.Definitions.*;
+import manager.Parameters;
+import manager.elements.Function;
+import manager.elements.Server;
+import manager.elements.Service;
+import manager.elements.TrafficFlow;
+import optimizer.results.Auxiliary;
 
 public class Heuristic {
 
@@ -318,15 +334,6 @@ public class Heuristic {
          if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
             nodeIndex = n;
       return nodeIndex;
-   }
-
-   private boolean checkIfPathTraversesCloudNode(int s, int p) {
-      Service service = pm.getServices().get(s);
-      Path path = service.getTrafficFlow().getPaths().get(p);
-      for (int n = 0; n < path.getNodePath().size(); n++)
-         if (path.getNodePath().get(n).hasAttribute(NODE_CLOUD))
-            return true;
-      return false;
    }
 
    private List<Integer> removePreviousServersFromNodeIndec(List<Integer> servers, int nodeIndex, int s, int p) {

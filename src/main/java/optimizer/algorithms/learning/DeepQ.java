@@ -1,6 +1,5 @@
 package optimizer.algorithms.learning;
 
-
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -10,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static optimizer.Definitions.EPSILON;
-
 class DeepQ {
 
    private MultiLayerNetwork multiLayerNetwork, targetMultiLayerNetwork;
@@ -20,7 +17,8 @@ class DeepQ {
    private float discount;
    private Random rnd;
 
-   DeepQ(MultiLayerConfiguration conf, int memoryCapacity, float discount, int batchSize, int freq, int startSize, int inputLength) {
+   DeepQ(MultiLayerConfiguration conf, int memoryCapacity, float discount, int batchSize, int freq, int startSize,
+         int inputLength) {
       this.multiLayerNetwork = new MultiLayerNetwork(conf);
       this.multiLayerNetwork.init();
       this.targetMultiLayerNetwork = new MultiLayerNetwork(conf);
@@ -38,10 +36,10 @@ class DeepQ {
       this.rnd = new Random();
    }
 
-   int getAction(INDArray input, int[] actionMask) {
+   int getAction(INDArray input, int[] actionMask, double epsilon) {
       INDArray indArrayOutput = multiLayerNetwork.output(input);
       boolean isValid = false;
-      if (EPSILON > rnd.nextDouble()) {
+      if (epsilon > rnd.nextDouble()) {
          while (!isValid) {
             lastAction = rnd.nextInt((int) indArrayOutput.size(1));
             if (actionMask[lastAction] == 1)
@@ -56,7 +54,8 @@ class DeepQ {
       float maxValue = Float.NEGATIVE_INFINITY;
       int actionMax = -1;
       for (int i = 0; i < outputs.size(1); i++) {
-         if (actionMask[i] != 1) continue;
+         if (actionMask[i] != 1)
+            continue;
          if (outputs.getFloat(i) > maxValue) {
             maxValue = outputs.getFloat(i);
             actionMax = i;
@@ -68,7 +67,8 @@ class DeepQ {
    private float findMaxValue(INDArray outputs, int[] actionMask) {
       float maxValue = Float.NEGATIVE_INFINITY;
       for (int i = 0; i < outputs.size(1); i++) {
-         if (actionMask[i] != 1) continue;
+         if (actionMask[i] != 1)
+            continue;
          if (outputs.getFloat(i) > maxValue)
             maxValue = outputs.getFloat(i);
       }
@@ -99,7 +99,7 @@ class DeepQ {
          if (experiences[i].getNextInputIndArray() != null)
             futureReward = findMaxValue(targetOutput.getRow(i), experiences[i].getNextActionMask());
          float targetReward = experiences[i].getReward() + discount * futureReward;
-         int[] actionScalar = {i, experiences[i].getAction()};
+         int[] actionScalar = { i, experiences[i].getAction() };
          currentOutput.putScalar(actionScalar, targetReward);
       }
       multiLayerNetwork.fit(combinedLastInputs, currentOutput);

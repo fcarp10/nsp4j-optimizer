@@ -1,8 +1,10 @@
 package optimizer.algorithms.learning;
 
-import manager.Parameters;
-import optimizer.algorithms.Heuristic;
-import optimizer.algorithms.VariablesAlg;
+import static optimizer.Definitions.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -16,10 +18,9 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static optimizer.Definitions.*;
+import manager.Parameters;
+import optimizer.algorithms.Heuristic;
+import optimizer.algorithms.VariablesAlg;
 
 public class PlacementModel {
    protected Parameters pm;
@@ -30,13 +31,13 @@ public class PlacementModel {
    private MultiLayerConfiguration conf;
    private final int offsetInput;
    protected int environmentSize;
-   private float bestObjVal;
+   private float bestGlobalObjVal;
    private Heuristic heu;
 
    private static final Logger log = LoggerFactory.getLogger(PlacementModel.class);
 
-
-   public PlacementModel(MultiLayerConfiguration conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement, String objFunc, Heuristic heu) {
+   public PlacementModel(MultiLayerConfiguration conf, Parameters pm, VariablesAlg variablesAlg,
+         boolean[][][] initialPlacement, String objFunc, Heuristic heu) {
       this.pm = pm;
       this.vars = variablesAlg;
       this.initialPlacement = initialPlacement;
@@ -46,39 +47,34 @@ public class PlacementModel {
       offsetInput = 5;
       int inputLength = environmentSize + offsetInput;
       int outputLength = environmentSize;
-      if (conf == null) initializeModel(inputLength, outputLength);
-      else initializeModel(conf, inputLength);
+      if (conf == null)
+         initializeModel(inputLength, outputLength);
+      else
+         initializeModel(conf, inputLength);
    }
 
    private void initializeModel(int inputLength, int outputLength) {
-      conf = new NeuralNetConfiguration.Builder()
-              .seed(123)
-              .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-              .list()
-              .layer(0, new DenseLayer.Builder()
-                      .nIn(inputLength)
-                      .nOut(NUM_HIDDEN_LAYERS)
-                      .weightInit(WeightInit.XAVIER)
-                      .activation(Activation.RELU)
-                      .build())
-              .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
-                      .nIn(NUM_HIDDEN_LAYERS)
-                      .nOut(outputLength)
-                      .weightInit(WeightInit.XAVIER)
-                      .activation(Activation.IDENTITY)
-                      .build())
-              .build();
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
+      conf = new NeuralNetConfiguration.Builder().seed(123)
+            .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT).list()
+            .layer(0,
+                  new DenseLayer.Builder().nIn(inputLength).nOut(NUM_HIDDEN_LAYERS).weightInit(WeightInit.XAVIER)
+                        .activation(Activation.RELU).build())
+            .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE).nIn(NUM_HIDDEN_LAYERS).nOut(outputLength)
+                  .weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY).build())
+            .build();
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_PLACEMENT, BATCH_SIZE, FREQUENCY, START_SIZE,
+            inputLength);
    }
 
    private void initializeModel(MultiLayerConfiguration conf, int inputLength) {
       this.conf = conf;
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_PLACEMENT, BATCH_SIZE, FREQUENCY, START_SIZE,
+            inputLength);
    }
 
-   public boolean run(int s, int d, int p, int timeStep) {
+   public boolean run(int s, int d, int p, int timeStep, float bestGlobalObjVal) {
 
-      bestObjVal = (float) vars.getObjVal();
+      this.bestGlobalObjVal = bestGlobalObjVal;
       float[] environment = createEnvironment(s, d, p);
       float[] nextEnvironment;
 
@@ -91,7 +87,7 @@ public class PlacementModel {
             // switch one traffic demand to a different path
             INDArray inputIndArray = Nd4j.create(environment);
             int[] actionMask = generateActionMask(environment, s, availableServersPerFunction);
-            int action = deepQ.getAction(inputIndArray, actionMask);
+            int action = deepQ.getAction(inputIndArray, actionMask, EPSILON_PLACEMENT);
 
             // generate next environment of on the new chosen path
             nextEnvironment = modifyEnvironment(environment, action, i, s, d);
@@ -108,10 +104,11 @@ public class PlacementModel {
             deepQ.observeReward(Nd4j.create(environment), Nd4j.create(nextEnvironment), reward, nextActionMask);
 
             environment = nextEnvironment;
-            if (vars.objVal < bestObjVal)
-               bestObjVal = (float) vars.objVal;
-            log.info("placement iteration " + timeStep + "." + i + ": [" + vars.objVal + "][" + reward + "]");
+
+            log.info("placement iteration " + timeStep + "." + i + ": [" + vars.objVal + "][" + reward + "][" + action
+                  + "]");
          }
+         log.info("placement finished for [s][d][p]: [" + s + "][" + d + "][" + p + "]");
          return true;
       }
    }
@@ -126,7 +123,8 @@ public class PlacementModel {
             environmentList.add(value);
          }
 
-      for (int i = 0; i < environmentList.size(); i++) environment[i] = environmentList.get(i);
+      for (int i = 0; i < environmentList.size(); i++)
+         environment[i] = environmentList.get(i);
 
       environment[environment.length - 5] = s;
       environment[environment.length - 4] = d;
@@ -136,10 +134,9 @@ public class PlacementModel {
       return environment;
    }
 
-
    private int[] generateActionMask(float[] environment, int s, List<List<Integer>> availableServersPerFunction) {
 
-      int[] actionMask = new int[environment.length - offsetInput];
+      int[] actionMask = new int[environment.length + 1 - offsetInput];
       int index = 0;
 
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -149,6 +146,7 @@ public class PlacementModel {
             index++;
          }
 
+      actionMask[actionMask.length - 1] = 1; // last action to not perform any action
       return actionMask;
    }
 
@@ -156,9 +154,14 @@ public class PlacementModel {
 
       float[] nextEnvironment = environment.clone();
       int initialFunctionServerIndex = 0, index = 0, vChosen = 0;
+      int notActionIndex = (environment.length - 1) + 1 - offsetInput;
 
-      outerLoop:
-      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+      nextEnvironment[nextEnvironment.length - 1] = timeStep;
+
+      if (action == notActionIndex)
+         return nextEnvironment;
+
+      outerLoop: for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
          for (int x = 0; x < pm.getServers().size(); x++) {
             if (action == index) {
                vChosen = v;
@@ -184,8 +187,6 @@ public class PlacementModel {
             }
          }
 
-      nextEnvironment[nextEnvironment.length - 1] = timeStep;
-
       // modify variables based on the taken action
       heu.removeDemandToFunctionToServer(s, xOld, vChosen, d);
       heu.addDemandToFunctionToServer(s, xNew, vChosen, d);
@@ -195,12 +196,12 @@ public class PlacementModel {
 
    private float computeReward() {
       float newObjVal = (float) vars.getObjVal();
-      if (newObjVal < bestObjVal)
+      if (newObjVal < bestGlobalObjVal)
          return 100;
-      else if (newObjVal == bestObjVal)
+      else if (newObjVal == bestGlobalObjVal)
          return 0;
       else
-         return -100;
+         return -1;
    }
 
    MultiLayerConfiguration getConf() {

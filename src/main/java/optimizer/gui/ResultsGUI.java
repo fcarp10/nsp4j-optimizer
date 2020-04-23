@@ -1,15 +1,27 @@
 package optimizer.gui;
 
-import manager.Parameters;
-import manager.elements.Server;
-import optimizer.results.Results;
+import static optimizer.Definitions.LINK_CLOUD_COLOR;
+import static optimizer.Definitions.LINK_COLOR;
+import static optimizer.Definitions.NODE_CLOUD;
+import static optimizer.Definitions.NODE_COLOR;
+import static optimizer.Definitions.NODE_SHAPE;
+import static optimizer.Definitions.SERVER_COLOR;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 
-import java.text.DecimalFormat;
-import java.util.*;
-
-import static optimizer.Definitions.*;
+import manager.Parameters;
+import manager.elements.Server;
+import optimizer.results.Results;
 
 public class ResultsGUI {
 
@@ -36,8 +48,8 @@ public class ResultsGUI {
             xAttr = "x_gui";
             yAttr = "y_gui";
          }
-         nodeList.add(new NodeJson(n.getId(), n.getAttribute(xAttr), n.getAttribute(yAttr)
-                 , NODE_COLOR, n.getId(), NODE_SHAPE));
+         nodeList.add(new NodeJson(n.getId(), n.getAttribute(xAttr), n.getAttribute(yAttr), NODE_COLOR, n.getId(),
+               NODE_SHAPE));
       }
       for (Server s : parameters.getServers()) {
          String xAttr = "x", yAttr = "y";
@@ -45,15 +57,15 @@ public class ResultsGUI {
             xAttr = "x_gui";
             yAttr = "y_gui";
          }
-         serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute(xAttr)
-                 , s.getParent().getAttribute(yAttr), SERVER_COLOR, s.getId()));
+         serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute(xAttr),
+               s.getParent().getAttribute(yAttr), SERVER_COLOR, s.getId()));
       }
       for (Edge e : parameters.getLinks()) {
          String color = LINK_COLOR;
          if (e.getSourceNode().getAttribute(NODE_CLOUD) != null || e.getTargetNode().getAttribute(NODE_CLOUD) != null)
             color = LINK_CLOUD_COLOR;
-         linkJsonMap.put(e.getId(), new LinkJson(e.getId(), e.getSourceNode().getId(), e.getTargetNode().getId()
-                 , "", color));
+         linkJsonMap.put(e.getId(),
+               new LinkJson(e.getId(), e.getSourceNode().getId(), e.getTargetNode().getId(), "", color));
       }
    }
 
@@ -87,10 +99,10 @@ public class ResultsGUI {
    static List<ServerJson> getServerJsonResults(Results results) {
       Map<Server, String> functions = generateFunctionsPerServerStringMap(results);
       List<ServerJson> serverJsonList = new ArrayList<>();
-      Iterator entries = results.serverUtilizationMap().entrySet().iterator();
+      Iterator<Entry<Server, Double>> entries = results.serverUtilizationMap().entrySet().iterator();
       DecimalFormat df = new DecimalFormat("#.##");
       while (entries.hasNext()) {
-         Map.Entry thisEntry = (Map.Entry) entries.next();
+         Map.Entry<Server, Double> thisEntry = (Map.Entry<Server, Double>) entries.next();
          Double utilization = (Double) thisEntry.getValue();
          Server server = (Server) thisEntry.getKey();
          StringBuilder u = new StringBuilder();
@@ -108,10 +120,10 @@ public class ResultsGUI {
 
    static List<LinkJson> getLinkJsonResults(Results results) {
       List<LinkJson> linkJsonList = new ArrayList<>();
-      Iterator entries = results.linkUtilizationMap().entrySet().iterator();
+      Iterator<Entry<Edge, Double>> entries = results.linkUtilizationMap().entrySet().iterator();
       DecimalFormat df = new DecimalFormat("#.##");
       while (entries.hasNext()) {
-         Map.Entry thisEntry = (Map.Entry) entries.next();
+         Map.Entry<Edge, Double> thisEntry = (Map.Entry<Edge, Double>) entries.next();
          Double value = (Double) thisEntry.getValue();
          Edge edge = (Edge) thisEntry.getKey();
          String label = "";

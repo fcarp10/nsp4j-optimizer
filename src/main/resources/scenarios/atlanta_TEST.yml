@@ -16,7 +16,7 @@ aux: {
   "initial_traffic_load": 0.3,
   "qos_penalty_ratio": 0.1,
   "routing_iterations": 50,
-  "placement_iterations": 30
+  "placement_iterations": 20
 }
 # service definitions
 service_chains:

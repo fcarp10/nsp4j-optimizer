@@ -22,7 +22,8 @@ import static optimizer.results.Auxiliary.printLog;
 public class Results {
    private transient static final Logger log = LoggerFactory.getLogger(Results.class);
    // @JsonIgnore tag -> ignores specific variable for json result file
-   // transient modifier -> ignores specific variable for posting optimizer.results to web UI.
+   // transient modifier -> ignores specific variable for posting optimizer.results
+   // to web UI.
    @JsonIgnore
    private transient Parameters pm;
    @JsonIgnore
@@ -63,7 +64,7 @@ public class Results {
    @JsonProperty("lu")
    private transient List<Double> lu;
    @JsonProperty("fp")
-   private transient List<Integer> fp;
+   private transient List<Double> fp;
    @JsonProperty("sd")
    private transient List<Double> sd;
    @JsonProperty("st")
@@ -101,7 +102,7 @@ public class Results {
       this.luGraph = new ArrayList<>();
       this.xuGraph = new ArrayList<>();
       this.sdGraph = new ArrayList<>();
-      this.rawVariables = new LinkedHashMap();
+      this.rawVariables = new LinkedHashMap<>();
       this.variables = new LinkedHashMap<>();
       this.lu = new ArrayList<>();
       this.xu = new ArrayList<>();
@@ -145,7 +146,7 @@ public class Results {
       if (sc.getAlgorithm().equals(SERVER_DIMENSIONING))
          xN(); // integer, num servers per node
       if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
-              || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+            || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          oX(); // opex per server
          oSV(); // function charges
          qSDP(); // qos penalties
@@ -159,13 +160,14 @@ public class Results {
       }
 
       // service delay variables
-      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
-              || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ)
+            || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ) || sc.getObjFunc().equals(QOS_PENALTIES_OBJ)
+            || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          sd = serviceDelayList(initialPlacement);
          st = serviceTypes();
          setSummaryResults(sdSummary, sd);
          sdGraph(sd);
-//         dSVX(); // processing delay
+         // dSVX(); // processing delay
          dSVXD();
       }
    }
@@ -247,8 +249,8 @@ public class Results {
       return serverMapResults;
    }
 
-   private List<Integer> numOfFunctionsPerServer() {
-      List<Integer> numOfFunctionsPerServer = new ArrayList<>();
+   private List<Double> numOfFunctionsPerServer() {
+      List<Double> numOfFunctionsPerServer = new ArrayList<>();
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
          for (int x = 0; x < pm.getServers().size(); x++) {
@@ -258,8 +260,9 @@ public class Results {
                   if (var[x][s][v]) {
                      numOfFunctions++;
                      fxsv.add(1.0);
-                  } else fxsv.add(0.0);
-            numOfFunctionsPerServer.add(numOfFunctions);
+                  } else
+                     fxsv.add(0.0);
+            numOfFunctionsPerServer.add((double) numOfFunctions);
          }
       } catch (Exception e) {
          printLog(log, ERROR, "counting number of functions per server: " + e.getMessage());
@@ -291,16 +294,17 @@ public class Results {
                                  if (fXSVDvar[x][s][v][d]) {
                                     Function function = service.getFunctions().get(v);
                                     double ratio = (double) function.getAttribute(FUNCTION_LOAD_RATIO)
-                                            * (double) function.getAttribute(FUNCTION_PROCESS_TRAFFIC_DELAY)
-                                            / (int) function.getAttribute(FUNCTION_MAX_CAP_SERVER);
-                                    double processinDelay = 0;
+                                          * (double) function.getAttribute(FUNCTION_PROCESS_TRAFFIC_DELAY)
+                                          / (int) function.getAttribute(FUNCTION_MAX_CAP_SERVER);
+                                    double processingDelay = 0;
                                     for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
                                        if (service.getTrafficFlow().getAux().get(d1))
                                           if (fXSVDvar[x][s][v][d1])
-                                             processinDelay += ratio * service.getTrafficFlow().getDemands().get(d1);
-                                    processinDelay += (double) function.getAttribute(FUNCTION_MIN_PROCESS_DELAY);
-                                    processinDelay += (double) function.getAttribute(FUNCTION_PROCESS_DELAY) * uXvar[x];
-                                    serviceDelay += processinDelay;
+                                             processingDelay += ratio * service.getTrafficFlow().getDemands().get(d1);
+                                    processingDelay += (double) function.getAttribute(FUNCTION_MIN_PROCESS_DELAY);
+                                    processingDelay += (double) function.getAttribute(FUNCTION_PROCESS_DELAY)
+                                          * uXvar[x];
+                                    serviceDelay += processingDelay;
                                  }
                               }
 
@@ -318,9 +322,9 @@ public class Results {
                      // print total end to end delay
                      serviceDelay = Auxiliary.roundDouble(serviceDelay, 3);
                      strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
-                             + pm.getServices().get(s).getId() + "]"
-                             + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath()
-                             + "[" + serviceDelay + "]");
+                           + pm.getServices().get(s).getId() + "]"
+                           + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
+                           + serviceDelay + "]");
                      serviceDelayList.add(serviceDelay);
                   }
          }
@@ -390,7 +394,8 @@ public class Results {
                      if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                         traffic += pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
                   for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                     double trafficScaled = traffic * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_SYNC_LOAD_RATIO);
+                     double trafficScaled = traffic * (double) pm.getServices().get(s).getFunctions().get(v)
+                           .getAttribute(FUNCTION_SYNC_LOAD_RATIO);
                      if (var[s][v][p])
                         synchronizationTraffic += trafficScaled;
                   }
@@ -403,8 +408,9 @@ public class Results {
       return synchronizationTraffic;
    }
 
-
-   /***************************************** GENERAL VARIABLES ************************************/
+   /*****************************************
+    * GENERAL VARIABLES
+    ************************************/
    private void zSP() {
       try {
          boolean[][] var = (boolean[][]) rawVariables.get(zSP);
@@ -412,9 +418,9 @@ public class Results {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
                if (var[s][p])
-                  strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "): ["
-                          + pm.getServices().get(s).getId() + "]"
-                          + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
+                  strings.add(
+                        "(" + (s + this.offset) + "," + (p + this.offset) + "): [" + pm.getServices().get(s).getId()
+                              + "]" + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath());
          variables.put(zSP, strings);
       } catch (Exception e) {
          printLog(log, ERROR, zSP + " var results: " + e.getMessage());
@@ -430,11 +436,10 @@ public class Results {
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                   if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                      if (var[s][p][d])
-                        strings.add("(" + (s + this.offset) + "," + (p + this.offset) + ","
-                                + (d + this.offset) + "): ["
-                                + pm.getServices().get(s).getId() + "]"
-                                + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
-                                + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
+                        strings.add("(" + (s + this.offset) + "," + (p + this.offset) + "," + (d + this.offset) + "): ["
+                              + pm.getServices().get(s).getId() + "]"
+                              + pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath() + "["
+                              + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
          variables.put(zSPD, strings);
       } catch (Exception e) {
          printLog(log, ERROR, zSPD + " var results: " + e.getMessage());
@@ -462,11 +467,9 @@ public class Results {
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   if (var[x][s][v])
-                     strings.add("(" + (x + this.offset) + "," + (s + this.offset) + ","
-                             + (v + this.offset) + "): ["
-                             + pm.getServers().get(x).getId() + "]["
-                             + pm.getServices().get(s).getId() + "]["
-                             + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
+                     strings.add("(" + (x + this.offset) + "," + (s + this.offset) + "," + (v + this.offset) + "): ["
+                           + pm.getServers().get(x).getId() + "][" + pm.getServices().get(s).getId() + "]["
+                           + pm.getServices().get(s).getFunctions().get(v).getType() + "]");
          variables.put(fXSV, strings);
       } catch (Exception e) {
          printLog(log, ERROR, fXSV + " var results: " + e.getMessage());
@@ -483,12 +486,11 @@ public class Results {
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                      if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                         if (var[x][s][v][d])
-                           strings.add("(" + (x + this.offset) + "," + (s + this.offset)
-                                   + "," + (v + this.offset) + "," + (d + this.offset) + "): ["
-                                   + pm.getServers().get(x).getId() + "]["
-                                   + pm.getServices().get(s).getId() + "]["
-                                   + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
-                                   + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
+                           strings.add("(" + (x + this.offset) + "," + (s + this.offset) + "," + (v + this.offset) + ","
+                                 + (d + this.offset) + "): [" + pm.getServers().get(x).getId() + "]["
+                                 + pm.getServices().get(s).getId() + "]["
+                                 + pm.getServices().get(s).getFunctions().get(v).getType() + "]["
+                                 + pm.getServices().get(s).getTrafficFlow().getDemands().get(d) + "]");
          variables.put(fXSVD, strings);
       } catch (Exception e) {
          printLog(log, ERROR, fXSVD + " var results: " + e.getMessage());
@@ -500,9 +502,8 @@ public class Results {
          double[] var = (double[]) rawVariables.get(uX);
          List<String> strings = new ArrayList<>();
          for (int x = 0; x < pm.getServers().size(); x++)
-            strings.add("(" + (x + this.offset) + "): ["
-                    + pm.getServers().get(x).getId() + "]["
-                    + Auxiliary.roundDouble(var[x], 3) + "]");
+            strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "]["
+                  + Auxiliary.roundDouble(var[x], 3) + "]");
          variables.put(uX, strings);
       } catch (Exception e) {
          printLog(log, ERROR, uX + " var results: " + e.getMessage());
@@ -514,13 +515,10 @@ public class Results {
          double[] var = (double[]) rawVariables.get(uL);
          List<String> strings = new ArrayList<>();
          for (int l = 0; l < pm.getLinks().size(); l++)
-            strings.add("(" + (l + this.offset) + "): ["
-                    + pm.getLinks().get(l).getId() + "]["
-                    + pm.getLinks().get(l).getAttribute(LINK_DISTANCE) + "]["
-                    + pm.getLinks().get(l).getAttribute(LINK_DELAY) + "]["
-                    + Auxiliary.roundDouble(var[l], 3) + "]["
-                    + Auxiliary.roundDouble(var[l], 3)
-                    * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY) + "]");
+            strings.add("(" + (l + this.offset) + "): [" + pm.getLinks().get(l).getId() + "]["
+                  + pm.getLinks().get(l).getAttribute(LINK_DISTANCE) + "]["
+                  + pm.getLinks().get(l).getAttribute(LINK_DELAY) + "][" + Auxiliary.roundDouble(var[l], 3) + "]["
+                  + Auxiliary.roundDouble(var[l], 3) * (int) pm.getLinks().get(l).getAttribute(LINK_CAPACITY) + "]");
          variables.put(uL, strings);
       } catch (Exception e) {
          printLog(log, ERROR, uL + " var results: " + e.getMessage());
@@ -529,7 +527,9 @@ public class Results {
 
    /**********************************************************************************************/
 
-   /********************************** MODEL SPECIFIC VARIABLES **********************************/
+   /**********************************
+    * MODEL SPECIFIC VARIABLES
+    **********************************/
    private void xN() {
       try {
          double[] var = (double[]) rawVariables.get(xN);
@@ -599,14 +599,16 @@ public class Results {
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                   for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
                      if (var[s][d][p] != 0) {
-                        strings.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
-                                + "): [" + var[s][d][p] + "]");
+                        strings.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset) + "): ["
+                              + var[s][d][p] + "]");
                         qsdp.add(var[s][d][p]);
                      }
                      if (varAux != null)
                         if (varAux[s][d][p] != 0)
                            stringsAux.add("(" + (s + this.offset) + "," + (d + this.offset) + "," + (p + this.offset)
-                                   + "): [" + (varAux[s][d][p]) + "][" + ((varAux[s][d][p] / (maxServiceDelay) - 1) * qosPenalty) + "][" + maxServiceDelay + "]");
+                                 + "): [" + (varAux[s][d][p]) + "]["
+                                 + ((varAux[s][d][p] / (maxServiceDelay) - 1) * qosPenalty) + "][" + maxServiceDelay
+                                 + "]");
                   }
          }
          variables.put(qSDP, strings);
@@ -616,8 +618,9 @@ public class Results {
       }
    }
 
-
-   /************************************* TRAFFIC SYNC VARIABLES **********************************/
+   /*************************************
+    * TRAFFIC SYNC VARIABLES
+    **********************************/
    private void gSVXY() {
       try {
          boolean[][][][] var = (boolean[][][][]) rawVariables.get(gSVXY);
@@ -628,9 +631,9 @@ public class Results {
                   for (int y = 0; y < pm.getServers().size(); y++)
                      if (!pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent()))
                         if (var[s][v][x][y])
-                           strings.add("(" + (s + this.offset) + "," + (v + this.offset)
-                                   + "," + (x + this.offset) + "," + (y + this.offset) + "): ["
-                                   + pm.getServers().get(x).getId() + "][" + pm.getServers().get(y).getId() + "]");
+                           strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (x + this.offset) + ","
+                                 + (y + this.offset) + "): [" + pm.getServers().get(x).getId() + "]["
+                                 + pm.getServers().get(y).getId() + "]");
          variables.put(gSVXY, strings);
       } catch (Exception e) {
          printLog(log, WARNING, gSVXY + " var results: " + e.getMessage());
@@ -646,15 +649,18 @@ public class Results {
                for (int p = 0; p < pm.getPaths().size(); p++)
                   if (var[s][v][p])
                      strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (p + this.offset) + "): "
-                             + pm.getPaths().get(p).getNodePath());
+                           + pm.getPaths().get(p).getNodePath());
          variables.put(hSVP, strings);
       } catch (Exception e) {
          printLog(log, WARNING, hSVP + " var results: " + e.getMessage());
       }
    }
+
    /**********************************************************************************************/
 
-   /*********************************** SERVICE DELAY VARIABLES **********************************/
+   /***********************************
+    * SERVICE DELAY VARIABLES
+    **********************************/
    private void dSVXD() {
       try {
          double[][][][] var = (double[][][][]) rawVariables.get(dSVXD);
@@ -665,7 +671,7 @@ public class Results {
                   for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                      if (var[s][v][x][d] > 0)
                         strings.add("(" + (s + this.offset) + "," + (v + this.offset) + "," + (x + this.offset) + ","
-                                + (d + this.offset) + "): " + "[" + var[s][v][x][d] + "]");
+                              + (d + this.offset) + "): " + "[" + var[s][v][x][d] + "]");
          variables.put(dSVXD, strings);
       } catch (Exception e) {
          printLog(log, WARNING, dSVXD + " var results: " + e.getMessage());
@@ -674,7 +680,7 @@ public class Results {
 
    /**********************************************************************************************/
 
-   private void setSummaryResults(double[] array, List var) {
+   private void setSummaryResults(double[] array, List<Double> var) {
       array[0] = Auxiliary.avg(new ArrayList<>(var));
       array[1] = Auxiliary.min(new ArrayList<>(var));
       array[2] = Auxiliary.max(new ArrayList<>(var));
@@ -712,16 +718,16 @@ public class Results {
       double step = Auxiliary.roundDouble((max - min) / xPoints, 4);
       if (max != min) {
          for (int i = 0; i < xPoints + 1; i++)
-            sdGraph.add(new GraphData(String.valueOf(
-                    Auxiliary.roundDouble((step * i) + min, 4)), 0));
+            sdGraph.add(new GraphData(String.valueOf(Auxiliary.roundDouble((step * i) + min, 4)), 0));
          for (Double anSd : sd)
             for (int j = 0; j < xPoints + 1; j++)
                if (anSd < Double.parseDouble(sdGraph.get(j).getYear()) + step
-                       && anSd >= Double.parseDouble(sdGraph.get(j).getYear())) {
+                     && anSd >= Double.parseDouble(sdGraph.get(j).getYear())) {
                   sdGraph.get(j).setValue(sdGraph.get(j).getValue() + 1);
                   break;
                }
-      } else sdGraph.add(new GraphData(String.valueOf(max), sd.size()));
+      } else
+         sdGraph.add(new GraphData(String.valueOf(max), sd.size()));
    }
 
    public Parameters getPm() {
@@ -816,7 +822,7 @@ public class Results {
       return xu;
    }
 
-   public List<Integer> getFp() {
+   public List<Double> getFp() {
       return fp;
    }
 

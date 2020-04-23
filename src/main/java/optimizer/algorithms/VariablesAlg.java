@@ -1,23 +1,34 @@
 package optimizer.algorithms;
 
+import static optimizer.Definitions.FUNCTIONS_CHARGES_OBJ;
+import static optimizer.Definitions.FUNCTION_CHARGES;
+import static optimizer.Definitions.FUNCTION_LOAD_RATIO;
+import static optimizer.Definitions.FUNCTION_MAX_CAP_SERVER;
+import static optimizer.Definitions.FUNCTION_MAX_DELAY;
+import static optimizer.Definitions.FUNCTION_MIN_PROCESS_DELAY;
+import static optimizer.Definitions.FUNCTION_PROCESS_DELAY;
+import static optimizer.Definitions.FUNCTION_PROCESS_TRAFFIC_DELAY;
+import static optimizer.Definitions.LINK_DELAY;
+import static optimizer.Definitions.NODE_CLOUD;
+import static optimizer.Definitions.OPEX_SERVERS_OBJ;
+import static optimizer.Definitions.QOS_PENALTIES_OBJ;
+import static optimizer.Definitions.QOS_PENALTY_RATIO;
+import static optimizer.Definitions.SERVER_IDLE_ENERGY_COST;
+import static optimizer.Definitions.SERVER_UTIL_ENERGY_COST;
+import static optimizer.Definitions.SERVICE_DOWNTIME;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Path;
 
 import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Server;
 import manager.elements.Service;
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static optimizer.Definitions.*;
 
 public class VariablesAlg {
-
-   private static final Logger log = LoggerFactory.getLogger(VariablesAlg.class);
 
    public boolean[][][] zSPD;
    public boolean[][][][] fXSVD;
