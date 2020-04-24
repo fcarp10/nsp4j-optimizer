@@ -1,6 +1,5 @@
 package optimizer.algorithms;
 
-
 import manager.Parameters;
 import optimizer.Definitions;
 import optimizer.algorithms.learning.PlacementModel;
@@ -22,20 +21,28 @@ public class LauncherAlg {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherAlg.class);
 
-   public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager, boolean[][][] initialPlacement) {
+   public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager,
+         boolean[][][] initialPlacement) {
 
       VariablesAlg variablesAlg = new VariablesAlg(pm, initialPlacement);
 
       long startTime = System.nanoTime();
       if (scenario.getAlgorithm().equals(DRL)) {
          printLog(log, INFO, "first placement using first-fit");
-         Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), RANDOM_FIT); // <--- TO BE MODIFIED !!!!!
+         Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), FIRST_FIT);
          heuristic.allocateAllServices();
          variablesAlg.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
          printLog(log, INFO, "running reallocation using DRL...");
-         PlacementModel placementModel = new PlacementModel(null, pm, variablesAlg, initialPlacement, scenario.getObjFunc(), heuristic);
-         RoutingModel routingModel = new RoutingModel(null, pm, variablesAlg, initialPlacement, scenario.getObjFunc(), heuristic, placementModel);
+         
+         String routingModelConf = resultsManager.importConfDrlFile(ROUTING_DRL_CONF_FILE);
+         String placementModelConf = resultsManager.importConfDrlFile(PLACEMENT_DRL_CONF_FILE);
+         PlacementModel placementModel = new PlacementModel(placementModelConf, pm, variablesAlg, initialPlacement,
+               scenario.getObjFunc(), heuristic);
+         RoutingModel routingModel = new RoutingModel(routingModelConf, pm, variablesAlg, initialPlacement, scenario.getObjFunc(),
+               heuristic, placementModel);
          routingModel.run();
+         resultsManager.exportJsonObject(ROUTING_DRL_CONF_FILE, routingModel.getConf().toJson());
+         resultsManager.exportJsonObject(PLACEMENT_DRL_CONF_FILE, placementModel.getConf().toJson());
       } else {
          printLog(log, INFO, "running heuristics...");
          Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), scenario.getAlgorithm());
@@ -48,12 +55,13 @@ public class LauncherAlg {
       Results results = generateResults(pm, scenario, variablesAlg, initialPlacement);
       results.setComputationTime((double) elapsedTime / 1000000000);
       String fileName = generateFileName(pm, scenario.getObjFunc());
-      resultsManager.exportJsonFile(fileName, results);
+      resultsManager.exportJsonObject(fileName, results);
       exportResultsToMST(pm, resultsManager, fileName, variablesAlg);
       ResultsGUI.updateResults(results);
    }
 
-   private static Results generateResults(Parameters pm, Scenario sc, VariablesAlg heu, boolean[][][] initialPlacement) {
+   private static Results generateResults(Parameters pm, Scenario sc, VariablesAlg heu,
+         boolean[][][] initialPlacement) {
       Results results = new Results(pm, sc);
 
       results.setVariable(uL, heu.lu);
@@ -82,7 +90,6 @@ public class LauncherAlg {
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             writeVarToFile(pw, Definitions.zSP + "[" + s + "][" + p + "] ", heu.zSP[s][p]);
 
-
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
@@ -100,14 +107,16 @@ public class LauncherAlg {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  writeVarToFile(pw, Definitions.fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "] ", heu.fXSVD[x][s][v][d]);
+                  writeVarToFile(pw, Definitions.fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "] ",
+                        heu.fXSVD[x][s][v][d]);
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
                for (int y = 0; y < pm.getServers().size(); y++)
                   if (!pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent()))
-                     writeVarToFile(pw, Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "] ", heu.gSVXY[s][v][x][y]);
+                     writeVarToFile(pw, Definitions.gSVXY + "[" + s + "][" + v + "][" + x + "][" + y + "] ",
+                           heu.gSVXY[s][v][x][y]);
 
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)

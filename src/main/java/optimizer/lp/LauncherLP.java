@@ -38,7 +38,7 @@ public class LauncherLP {
          results = generateResults(pm, modelLP, sce, initialPlacement);
          results.setComputationTime((double) elapsedTime / 1000000000);
          String outputFileName = generateFileName(pm, sce.getAlgorithm(), sce);
-         resultsManager.exportJsonFile(outputFileName, results);
+         resultsManager.exportJsonObject(outputFileName, results);
          resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);
       }

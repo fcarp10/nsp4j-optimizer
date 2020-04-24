@@ -36,8 +36,8 @@ public class PlacementModel {
 
    private static final Logger log = LoggerFactory.getLogger(PlacementModel.class);
 
-   public PlacementModel(MultiLayerConfiguration conf, Parameters pm, VariablesAlg variablesAlg,
-         boolean[][][] initialPlacement, String objFunc, Heuristic heu) {
+   public PlacementModel(String conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement,
+         String objFunc, Heuristic heu) {
       this.pm = pm;
       this.vars = variablesAlg;
       this.initialPlacement = initialPlacement;
@@ -66,7 +66,8 @@ public class PlacementModel {
             inputLength);
    }
 
-   private void initializeModel(MultiLayerConfiguration conf, int inputLength) {
+   private void initializeModel(String confString, int inputLength) {
+      MultiLayerConfiguration conf = MultiLayerConfiguration.fromJson(confString);
       this.conf = conf;
       deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_PLACEMENT, BATCH_SIZE, FREQUENCY, START_SIZE,
             inputLength);
@@ -75,7 +76,7 @@ public class PlacementModel {
    public boolean run(int s, int d, int p, int timeStep, float bestGlobalObjVal) {
 
       this.bestGlobalObjVal = bestGlobalObjVal;
-      float[] environment = createEnvironment(s, d, p);
+      float[] environment = createEnvironment(s, d, p, timeStep);
       float[] nextEnvironment;
 
       List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
@@ -83,11 +84,11 @@ public class PlacementModel {
          log.info("no available servers for function placement");
          return false;
       } else {
-         for (int i = 0; i < (int) pm.getAux(PLACEMENT_ITERATIONS); i++) {
+         for (int i = timeStep; i < ((int) pm.getAux(PLACEMENT_ITERATIONS) + timeStep); i++) {
             // switch one traffic demand to a different path
             INDArray inputIndArray = Nd4j.create(environment);
             int[] actionMask = generateActionMask(environment, s, availableServersPerFunction);
-            int action = deepQ.getAction(inputIndArray, actionMask, EPSILON_PLACEMENT);
+            int action = deepQ.getAction(inputIndArray, actionMask, (double) pm.getAux(EPSILON_PLACEMENT));
 
             // generate next environment of on the new chosen path
             nextEnvironment = modifyEnvironment(environment, action, i, s, d);
@@ -105,15 +106,14 @@ public class PlacementModel {
 
             environment = nextEnvironment;
 
-            log.info("placement iteration " + timeStep + "." + i + ": [" + vars.objVal + "][" + reward + "][" + action
-                  + "]");
+            log.info("placement iteration " + i + ": [" + vars.objVal + "][" + reward + "][" + action + "]");
          }
          log.info("placement finished for [s][d][p]: [" + s + "][" + d + "][" + p + "]");
          return true;
       }
    }
 
-   private float[] createEnvironment(int s, int d, int p) {
+   private float[] createEnvironment(int s, int d, int p, int timeStep) {
       float[] environment = new float[environmentSize + offsetInput];
       List<Float> environmentList = new ArrayList<>();
 
@@ -130,7 +130,7 @@ public class PlacementModel {
       environment[environment.length - 4] = d;
       environment[environment.length - 3] = p;
       environment[environment.length - 2] = (float) vars.objVal;
-      environment[environment.length - 1] = 0f;
+      environment[environment.length - 1] = timeStep;
       return environment;
    }
 
@@ -199,12 +199,12 @@ public class PlacementModel {
       if (newObjVal < bestGlobalObjVal)
          return 100;
       else if (newObjVal == bestGlobalObjVal)
-         return 0;
+         return 50;
       else
          return -1;
    }
 
-   MultiLayerConfiguration getConf() {
+   public MultiLayerConfiguration getConf() {
       return conf;
    }
 }

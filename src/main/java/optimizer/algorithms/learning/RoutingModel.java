@@ -36,12 +36,11 @@ public class RoutingModel {
    private float initialObjVal;
    private Heuristic heu;
    private PlacementModel placementModel;
-   private int sPrevious;
-   private int dPrevious;
+   private int timeStep;
 
    private static final Logger log = LoggerFactory.getLogger(RoutingModel.class);
 
-   public RoutingModel(MultiLayerConfiguration conf, Parameters pm, VariablesAlg variablesAlg,
+   public RoutingModel(String conf, Parameters pm, VariablesAlg variablesAlg,
          boolean[][][] initialPlacement, String objFunc, Heuristic heu, PlacementModel placementModel) {
       this.pm = pm;
       this.vars = variablesAlg;
@@ -49,8 +48,6 @@ public class RoutingModel {
       this.objFunc = objFunc;
       this.heu = heu;
       this.placementModel = placementModel;
-      this.sPrevious = -1;
-      this.dPrevious = -1;
       environmentSize = calculateEnvironmentLength();
       offsetInput = 2;
       int inputLength = environmentSize + offsetInput;
@@ -73,7 +70,8 @@ public class RoutingModel {
       deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_ROUTING, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
 
-   private void initializeModel(MultiLayerConfiguration conf, int inputLength) {
+   private void initializeModel(String confString, int inputLength) {
+      MultiLayerConfiguration conf = MultiLayerConfiguration.fromJson(confString);
       this.conf = conf;
       deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_ROUTING, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
@@ -85,6 +83,7 @@ public class RoutingModel {
       float[] environment = createEnvironment();
       float[] nextEnvironment;
       Auxiliary.printLog(log, INFO, "initial solution: [" + initialObjVal + "]");
+      timeStep = 0;
 
       for (int i = 0; i < (int) pm.getAux(ROUTING_ITERATIONS); i++) {
 
@@ -92,14 +91,14 @@ public class RoutingModel {
          INDArray inputIndArray = Nd4j.create(environment);
          int[] actionMask = generateActionMask(environment);
 
-         int action = deepQ.getAction(inputIndArray, actionMask, EPSILON_ROUTING);
+         int action = deepQ.getAction(inputIndArray, actionMask, (double) pm.getAux(EPSILON_ROUTING));
          if (action == -1) {
             log.info("no more possible actions");
             break;
          }
 
          // generate next environment of on the new chosen path
-         nextEnvironment = modifyEnvironment(environment, action, i);
+         nextEnvironment = modifyEnvironment(environment, action);
 
          // calculate new objective value
          vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
@@ -113,11 +112,12 @@ public class RoutingModel {
          deepQ.observeReward(Nd4j.create(environment), Nd4j.create(nextEnvironment), reward, nextActionMask);
 
          environment = nextEnvironment;
+         timeStep++;
 
          if (vars.objVal < bestObjVal)
             bestObjVal = (float) vars.objVal;
 
-         log.info("routing iteration " + i + ": [" + vars.objVal + "][" + reward + "][" + action + "]");
+         log.info("routing iteration " + timeStep + ": [" + vars.objVal + "][" + reward + "][" + action + "]");
       }
    }
 
@@ -148,26 +148,28 @@ public class RoutingModel {
    }
 
    private int[] generateActionMask(float[] environment) {
-      int[] actionMask = new int[environment.length - offsetInput];
+      int[] actionMask = new int[environment.length + 1 - offsetInput];
 
       int index = 0;
       for (int s = 0; s < pm.getServices().size(); s++)
-         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            if (s == sPrevious && d == dPrevious) {
-               index += pm.getServices().get(s).getTrafficFlow().getPaths().size();
-               continue;
-            }
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
             for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
                if (checkPathForRerouting(s, d, p))
                   actionMask[index] = 1;
                index++;
             }
-         }
+      actionMask[actionMask.length - 1] = 1;
       return actionMask;
    }
 
-   float[] modifyEnvironment(float[] environment, int action, int timeStep) {
+   float[] modifyEnvironment(float[] environment, int action) {
       float[] nextEnvironment = environment.clone();
+      int notActionIndex = (environment.length - 1) + 1 - offsetInput;
+
+      nextEnvironment[nextEnvironment.length - 1] = timeStep;
+
+      if (action == notActionIndex)
+         return nextEnvironment;
 
       int initialServiceDemandIndex = 0, index = 0, sChosen = 0, dChosen = 0;
       outerLoop: for (int s = 0; s < pm.getServices().size(); s++)
@@ -199,13 +201,8 @@ public class RoutingModel {
          }
       }
 
-      nextEnvironment[nextEnvironment.length - 1] = timeStep;
-
       // modify variables based on the taken action
-      rerouteSpecificDemand(sChosen, dChosen, pOld, pNew, timeStep);
-
-      sPrevious = sChosen;
-      dPrevious = dChosen;
+      rerouteSpecificDemand(sChosen, dChosen, pOld, pNew);
 
       return nextEnvironment;
    }
@@ -215,7 +212,7 @@ public class RoutingModel {
       if (newObjVal < bestObjVal)
          return 100;
       else if (newObjVal == bestObjVal)
-         return 0;
+         return 50;
       else
          return -1;
    }
@@ -225,7 +222,7 @@ public class RoutingModel {
       return availableServersPerFunction != null;
    }
 
-   public void rerouteSpecificDemand(int s, int d, int pOld, int pNew, int timeStep) {
+   public void rerouteSpecificDemand(int s, int d, int pOld, int pNew) {
 
       if (placementModel.run(s, d, pNew, timeStep, bestObjVal)) { // run drl for function placement
          heu.removeDemandFromPath(s, pOld, d); // remove demand from path
@@ -233,10 +230,11 @@ public class RoutingModel {
          heu.removeUnusedFunctions(s);
          heu.removeSyncTraffic(s);
          heu.addSyncTraffic(s);
+         timeStep = timeStep + (int) pm.getAux(PLACEMENT_ITERATIONS) - 1;
       }
    }
 
-   MultiLayerConfiguration getConf() {
+   public MultiLayerConfiguration getConf() {
       return conf;
    }
 }

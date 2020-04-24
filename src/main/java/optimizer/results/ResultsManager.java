@@ -23,15 +23,13 @@ import java.util.Locale;
 import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.printLog;
 
-
 public class ResultsManager {
 
    private static final Logger log = LoggerFactory.getLogger(ResultsManager.class);
    private String resultsFolder;
 
    public ResultsManager(String folderName) {
-      SimpleDateFormat MY_FORMAT = new SimpleDateFormat(
-              "dd-MM-yy_HH-mm-ss_", Locale.getDefault());
+      SimpleDateFormat MY_FORMAT = new SimpleDateFormat("dd-MM-yy_HH-mm-ss_", Locale.getDefault());
       Date date = new Date();
       String path = ResultsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
       path = path.replaceAll("%20", " ");
@@ -42,7 +40,7 @@ public class ResultsManager {
       new File(resultsFolder).mkdir();
    }
 
-   public void exportJsonFile(String fileName, Object object) {
+   public void exportJsonObject(String fileName, Object object) {
       File jsonFile = new File(resultsFolder + "/" + fileName + ".json");
       ObjectMapper mapper = new ObjectMapper(new JsonFactory());
       DefaultPrettyPrinter.Indenter indenter = new DefaultIndenter("  ", DefaultIndenter.SYS_LF);
@@ -54,6 +52,19 @@ public class ResultsManager {
       } catch (IOException e) {
          e.printStackTrace();
       }
+   }
+
+   public String importConfDrlFile(String fileName) {
+      String path = getResourcePath(fileName + ".json");
+      ObjectMapper objectMapper = new ObjectMapper();
+      String conf = null;
+      try {
+         File file = new File(path + fileName + ".json");
+         conf = objectMapper.readValue(file, String.class);
+      } catch (Exception e) {
+         Auxiliary.printLog(log, WARNING, "no drl conf. file found");
+      }
+      return conf;
    }
 
    public static boolean[][][] loadInitialPlacement(String filename, Parameters pm, Scenario sce) throws GRBException {

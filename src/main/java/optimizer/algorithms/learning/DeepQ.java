@@ -38,8 +38,8 @@ class DeepQ {
 
    int getAction(INDArray input, int[] actionMask, double epsilon) {
       INDArray indArrayOutput = multiLayerNetwork.output(input);
-      boolean isValid = false;
       if (epsilon > rnd.nextDouble()) {
+         boolean isValid = false;
          while (!isValid) {
             lastAction = rnd.nextInt((int) indArrayOutput.size(1));
             if (actionMask[lastAction] == 1)
