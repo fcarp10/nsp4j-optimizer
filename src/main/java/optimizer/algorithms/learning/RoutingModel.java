@@ -36,7 +36,6 @@ public class RoutingModel {
    private float initialObjVal;
    private Heuristic heu;
    private PlacementModel placementModel;
-   private int timeStep;
 
    private static final Logger log = LoggerFactory.getLogger(RoutingModel.class);
 
@@ -83,7 +82,7 @@ public class RoutingModel {
       float[] environment = createEnvironment();
       float[] nextEnvironment;
       Auxiliary.printLog(log, INFO, "initial solution: [" + initialObjVal + "]");
-      timeStep = 0;
+      int timeStep = 0;
 
       for (int i = 0; i < (int) pm.getAux(ROUTING_ITERATIONS); i++) {
 
@@ -98,7 +97,7 @@ public class RoutingModel {
          }
 
          // generate next environment of on the new chosen path
-         nextEnvironment = modifyEnvironment(environment, action);
+         nextEnvironment = modifyEnvironment(environment, action, timeStep);
 
          // calculate new objective value
          vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
@@ -162,7 +161,7 @@ public class RoutingModel {
       return actionMask;
    }
 
-   float[] modifyEnvironment(float[] environment, int action) {
+   float[] modifyEnvironment(float[] environment, int action, int timeStep) {
       float[] nextEnvironment = environment.clone();
       int notActionIndex = (environment.length - 1) + 1 - offsetInput;
 
@@ -212,7 +211,7 @@ public class RoutingModel {
       if (newObjVal < bestObjVal)
          return 100;
       else if (newObjVal == bestObjVal)
-         return 50;
+         return 0;
       else
          return -1;
    }
@@ -224,13 +223,12 @@ public class RoutingModel {
 
    public void rerouteSpecificDemand(int s, int d, int pOld, int pNew) {
 
-      if (placementModel.run(s, d, pNew, timeStep, bestObjVal)) { // run drl for function placement
+      if (placementModel.run(s, d, pNew, bestObjVal)) { // run drl for function placement
          heu.removeDemandFromPath(s, pOld, d); // remove demand from path
          heu.addDemandToPath(s, pNew, d); // add demand to path
          heu.removeUnusedFunctions(s);
          heu.removeSyncTraffic(s);
          heu.addSyncTraffic(s);
-         timeStep = timeStep + (int) pm.getAux(PLACEMENT_ITERATIONS) - 1;
       }
    }
 

@@ -3,7 +3,9 @@ package optimizer.algorithms.learning;
 import static optimizer.Definitions.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import manager.Parameters;
 import optimizer.algorithms.Heuristic;
 import optimizer.algorithms.VariablesAlg;
+import optimizer.results.Auxiliary;
 
 public class PlacementModel {
    protected Parameters pm;
@@ -32,6 +35,7 @@ public class PlacementModel {
    private final int offsetInput;
    protected int environmentSize;
    private float bestGlobalObjVal;
+   private Map<String, Double> epsilons;
    private Heuristic heu;
 
    private static final Logger log = LoggerFactory.getLogger(PlacementModel.class);
@@ -43,6 +47,7 @@ public class PlacementModel {
       this.initialPlacement = initialPlacement;
       this.objFunc = objFunc;
       this.heu = heu;
+      epsilons = new HashMap<>();
       environmentSize = pm.getServiceLength() * pm.getServers().size();
       offsetInput = 5;
       int inputLength = environmentSize + offsetInput;
@@ -73,22 +78,25 @@ public class PlacementModel {
             inputLength);
    }
 
-   public boolean run(int s, int d, int p, int timeStep, float bestGlobalObjVal) {
+   public boolean run(int s, int d, int p, float bestGlobalObjVal) {
 
       this.bestGlobalObjVal = bestGlobalObjVal;
-      float[] environment = createEnvironment(s, d, p, timeStep);
+      float[] environment = createEnvironment(s, d, p);
       float[] nextEnvironment;
+      String epsilonKey = String.valueOf(s) + String.valueOf(d) + String.valueOf(p);
+      if (!epsilons.containsKey(epsilonKey))
+         epsilons.put(epsilonKey, 1.0);
 
       List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
-      if (availableServersPerFunction == null) {
-         log.info("no available servers for function placement");
-         return false;
-      } else {
-         for (int i = timeStep; i < ((int) pm.getAux(PLACEMENT_ITERATIONS) + timeStep); i++) {
+      if (availableServersPerFunction != null) {
+         int i = 0;
+         int repetitionsWithSameValue = 0;
+         int maxRepetitionsWithSameValue = 5;
+         while (true) {
             // switch one traffic demand to a different path
             INDArray inputIndArray = Nd4j.create(environment);
             int[] actionMask = generateActionMask(environment, s, availableServersPerFunction);
-            int action = deepQ.getAction(inputIndArray, actionMask, (double) pm.getAux(EPSILON_PLACEMENT));
+            int action = deepQ.getAction(inputIndArray, actionMask, epsilons.get(epsilonKey));
 
             // generate next environment of on the new chosen path
             nextEnvironment = modifyEnvironment(environment, action, i, s, d);
@@ -106,14 +114,29 @@ public class PlacementModel {
 
             environment = nextEnvironment;
 
+            i++;
             log.info("placement iteration " + i + ": [" + vars.objVal + "][" + reward + "][" + action + "]");
+
+            if (epsilons.get(epsilonKey) > 0) {
+               if ((float) vars.getObjVal() < bestGlobalObjVal) {
+                  epsilons.put(epsilonKey, Auxiliary.roundDouble(epsilons.get(epsilonKey) - 0.1, 1));
+               } else if ((float) vars.getObjVal() >= bestGlobalObjVal) {
+                  repetitionsWithSameValue++;
+                  if (repetitionsWithSameValue == maxRepetitionsWithSameValue)
+                     break;
+               }
+            } else
+               break;
          }
          log.info("placement finished for [s][d][p]: [" + s + "][" + d + "][" + p + "]");
          return true;
+      } else {
+         log.info("no available servers for function placement");
+         return false;
       }
    }
 
-   private float[] createEnvironment(int s, int d, int p, int timeStep) {
+   private float[] createEnvironment(int s, int d, int p) {
       float[] environment = new float[environmentSize + offsetInput];
       List<Float> environmentList = new ArrayList<>();
 
@@ -130,7 +153,7 @@ public class PlacementModel {
       environment[environment.length - 4] = d;
       environment[environment.length - 3] = p;
       environment[environment.length - 2] = (float) vars.objVal;
-      environment[environment.length - 1] = timeStep;
+      environment[environment.length - 1] = 0;
       return environment;
    }
 
@@ -199,7 +222,7 @@ public class PlacementModel {
       if (newObjVal < bestGlobalObjVal)
          return 100;
       else if (newObjVal == bestGlobalObjVal)
-         return 50;
+         return 0;
       else
          return -1;
    }
