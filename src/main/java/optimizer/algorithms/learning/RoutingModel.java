@@ -33,14 +33,14 @@ public class RoutingModel {
    private final int offsetInput;
    protected int environmentSize;
    private float bestObjVal;
-   private float initialObjVal;
    private Heuristic heu;
    private PlacementModel placementModel;
+   private double epsilon;
 
    private static final Logger log = LoggerFactory.getLogger(RoutingModel.class);
 
-   public RoutingModel(String conf, Parameters pm, VariablesAlg variablesAlg,
-         boolean[][][] initialPlacement, String objFunc, Heuristic heu, PlacementModel placementModel) {
+   public RoutingModel(String conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement,
+         String objFunc, Heuristic heu, PlacementModel placementModel) {
       this.pm = pm;
       this.vars = variablesAlg;
       this.initialPlacement = initialPlacement;
@@ -75,49 +75,57 @@ public class RoutingModel {
       deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_ROUTING, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
 
-   public void run() {
+   public double run(double epsilonStarting) {
 
-      initialObjVal = (float) vars.getObjVal();
-      bestObjVal = initialObjVal;
+      bestObjVal = (float) vars.getObjVal();
       float[] environment = createEnvironment();
       float[] nextEnvironment;
-      Auxiliary.printLog(log, INFO, "initial solution: [" + initialObjVal + "]");
       int timeStep = 0;
+      int repetitionsWithSameValue = 0;
+      epsilon = epsilonStarting;
 
-      for (int i = 0; i < (int) pm.getAux(ROUTING_ITERATIONS); i++) {
-
-         // switch one traffic demand to a different path
+      while (true) {
          INDArray inputIndArray = Nd4j.create(environment);
          int[] actionMask = generateActionMask(environment);
-
-         int action = deepQ.getAction(inputIndArray, actionMask, (double) pm.getAux(EPSILON_ROUTING));
-         if (action == -1) {
-            log.info("no more possible actions");
-            break;
-         }
-
-         // generate next environment of on the new chosen path
+         int action = deepQ.getAction(inputIndArray, actionMask, epsilon);
+         // generate next environment for the new chosen path
          nextEnvironment = modifyEnvironment(environment, action, timeStep);
-
          // calculate new objective value
          vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
-
          // update new objective value to the next environment
          nextEnvironment[nextEnvironment.length - 2] = (float) vars.objVal;
-
          // calculate the reward and create a new experience
          float reward = computeReward();
          int[] nextActionMask = generateActionMask(nextEnvironment);
          deepQ.observeReward(Nd4j.create(environment), Nd4j.create(nextEnvironment), reward, nextActionMask);
-
          environment = nextEnvironment;
          timeStep++;
+         log.info("routing iteration " + timeStep + ": [" + vars.objVal + "][" + reward + "][" + action + "]");
+         if (epsilonStarting != 0) {
+            if (epsilon > 0) {
+               // reduce epsilon when new incumbent solution is found
+               if ((float) vars.getObjVal() < bestObjVal) {
+                  epsilon = Auxiliary.roundDouble(epsilon - (double) pm.getAux(ROUTING_EPSILON_DECREMENT), 1);
+               } else if ((float) vars.getObjVal() >= bestObjVal) {
+                  repetitionsWithSameValue++;
+                  if (repetitionsWithSameValue == (int) pm.getAux(ROUTING_MAX_REPETITIONS))
+                     break;
+               }
+            } else
+               break;
 
+         } else {
+            if ((float) vars.getObjVal() == bestObjVal) {
+               repetitionsWithSameValue++;
+               if (repetitionsWithSameValue == (int) pm.getAux(ROUTING_MAX_REPETITIONS))
+                  break;
+            } else if ((float) vars.getObjVal() < bestObjVal)
+               repetitionsWithSameValue = 0;
+         }
          if (vars.objVal < bestObjVal)
             bestObjVal = (float) vars.objVal;
-
-         log.info("routing iteration " + timeStep + ": [" + vars.objVal + "][" + reward + "][" + action + "]");
       }
+      return bestObjVal;
    }
 
    private int calculateEnvironmentLength() {

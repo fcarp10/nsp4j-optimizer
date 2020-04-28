@@ -91,38 +91,30 @@ public class PlacementModel {
       if (availableServersPerFunction != null) {
          int i = 0;
          int repetitionsWithSameValue = 0;
-         int maxRepetitionsWithSameValue = 5;
+
          while (true) {
-            // switch one traffic demand to a different path
             INDArray inputIndArray = Nd4j.create(environment);
             int[] actionMask = generateActionMask(environment, s, availableServersPerFunction);
             int action = deepQ.getAction(inputIndArray, actionMask, epsilons.get(epsilonKey));
-
             // generate next environment of on the new chosen path
             nextEnvironment = modifyEnvironment(environment, action, i, s, d);
-
             // calculate new objective value
             vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
-
             // update new objective value to the next environment
             nextEnvironment[nextEnvironment.length - 2] = (float) vars.objVal;
-
             // calculate the reward and create a new experience
             float reward = computeReward();
             int[] nextActionMask = generateActionMask(nextEnvironment, s, availableServersPerFunction);
             deepQ.observeReward(Nd4j.create(environment), Nd4j.create(nextEnvironment), reward, nextActionMask);
-
             environment = nextEnvironment;
-
             i++;
             log.info("placement iteration " + i + ": [" + vars.objVal + "][" + reward + "][" + action + "]");
-
             if (epsilons.get(epsilonKey) > 0) {
                if ((float) vars.getObjVal() < bestGlobalObjVal) {
-                  epsilons.put(epsilonKey, Auxiliary.roundDouble(epsilons.get(epsilonKey) - 0.1, 1));
+                  epsilons.put(epsilonKey, Auxiliary.roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(PLACEMENT_EPSILON_DECREMENT), 1));
                } else if ((float) vars.getObjVal() >= bestGlobalObjVal) {
                   repetitionsWithSameValue++;
-                  if (repetitionsWithSameValue == maxRepetitionsWithSameValue)
+                  if (repetitionsWithSameValue == (int) pm.getAux(PLACEMENT_MAX_REPETITIONS))
                      break;
                }
             } else

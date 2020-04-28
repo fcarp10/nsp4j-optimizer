@@ -15,10 +15,10 @@ aux: {
   #  "server_other_opex": 0.14787654, # ($/h) // 0.8 utilization (PowerEdge R410)
   "initial_traffic_load": 0.3,
   "qos_penalty_ratio": 0.1,
-  "routing_iterations": 50,
-  # "placement_iterations": 15,
-  "epsilon_routing": 0.5 # 1 for only training
-  # "epsilon_placement": 1.0 # 0 for only prediction
+  "routing_max_repetitions": 1000,
+  "placement_max_repetitions": 10,
+  "routing_epsilon_decrement": 0.1,
+  "placement_epsilon_decrement": 0.1
 }
 # service definitions
 service_chains:
@@ -76,11 +76,11 @@ function_types: # type: 0 reserved for end-point functions
     }
 # traffic flow definitions
 traffic_flows:
-  - min_dem: 1
-    max_dem: 1
-    min_bw: 500
-    max_bw: 500 # change "max_cap_server" accordingly
+  - min_dem: 2
+    max_dem: 2
+    min_bw: 300
+    max_bw: 300 # change "max_cap_server" accordingly
     services: [1]
-    service_length_mult: [1]
+    service_length_mult: [2]
     src: "n10"
     dst: "n3"

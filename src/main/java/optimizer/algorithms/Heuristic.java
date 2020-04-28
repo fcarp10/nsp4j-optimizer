@@ -1,6 +1,5 @@
 package optimizer.algorithms;
 
-import static optimizer.Definitions.DRL;
 import static optimizer.Definitions.ERROR;
 import static optimizer.Definitions.FFP_RFX;
 import static optimizer.Definitions.FIRST_FIT;
@@ -55,16 +54,11 @@ public class Heuristic {
       assignFunctionsToServersFromInitialPlacement(); // add overhead of functions from initial placement
 
       for (int s = 0; s < pm.getServices().size(); s++) { // for every service
-         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) { // for every traffic
-                                                                                                  // demand
-
-            List<Integer> availablePaths = getAvailablePaths(s, d); // get paths with enough path link resources
-            Map<Integer, List<List<Integer>>> pathsMappingServers = findAdmissiblePaths(availablePaths, s, d); // get
-                                                                                                               // paths
-                                                                                                               // with
-                                                                                                               // enough
-                                                                                                               // servers
-                                                                                                               // resources
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+            // get paths with enough path link resources
+            List<Integer> availablePaths = getAvailablePaths(s, d);
+            // get paths with enough servers resources
+            Map<Integer, List<List<Integer>>> pathsMappingServers = findAdmissiblePaths(availablePaths, s, d);
             List<Integer> paths = new ArrayList<>(pathsMappingServers.keySet());
 
             int pChosen = choosePath(paths, pm.getServices().get(s).getTrafficFlow());
@@ -163,7 +157,7 @@ public class Heuristic {
    private Integer choosePath(List<Integer> paths, TrafficFlow tf) {
 
       int chosenPath = -1;
-      if (alg.equals(FIRST_FIT) || alg.equals(FFP_RFX) || alg.equals(DRL))
+      if (alg.equals(FIRST_FIT) || alg.equals(FFP_RFX))
          chosenPath = chooseFirstFitPath(paths, tf);
       else if (alg.equals(RANDOM_FIT) || alg.equals(RFP_FFX))
          chosenPath = paths.get(rnd.nextInt(paths.size()));
@@ -181,7 +175,7 @@ public class Heuristic {
       availableServers = removePreviousServersFromNodeIndex(availableServers, lastPathNodeUsed, s, p);
 
       for (Integer xAvailable : availableServers)
-         if (checkIfFreeServerResources(s, xAvailable, v, d, 1)){
+         if (checkIfFreeServerResources(s, xAvailable, v, d, 1)) {
             chosenServer = xAvailable;
             break;
          }
@@ -192,10 +186,16 @@ public class Heuristic {
          int d) {
       int chosenServer = -1;
 
-      if (alg.equals(FIRST_FIT) || alg.equals(RFP_FFX) || alg.equals(DRL))
+      if (alg.equals(FIRST_FIT) || alg.equals(RFP_FFX))
          chosenServer = chooseFirstFitServerForFunction(availableServers, lastPathNodeUsed, s, p, v, d);
-      else if (alg.equals(RANDOM_FIT) || alg.equals(FFP_RFX))
-         chosenServer = availableServers.get(rnd.nextInt(availableServers.size()));
+      else if (alg.equals(RANDOM_FIT) || alg.equals(FFP_RFX)) {
+         while (true) {
+            chosenServer = availableServers.get(rnd.nextInt(availableServers.size()));
+            int nodeIndex = getNodePathIndexFromServer(s, p, chosenServer);
+            if (nodeIndex >= lastPathNodeUsed)
+               break;
+         }
+      }
 
       if (chosenServer == -1) {
          Auxiliary.printLog(log, ERROR,
@@ -223,8 +223,8 @@ public class Heuristic {
    public List<List<Integer>> findServersForFunctionsInPath(int s, int d, int p) {
 
       // find available servers for every function
-      List<List<Integer>> availableServersPerFunction = new ArrayList<>(); 
-      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) { 
+      List<List<Integer>> availableServersPerFunction = new ArrayList<>();
+      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
          List<Integer> availableServers = getAvailableServers(s, p, d, v, 0);
          availableServersPerFunction.add(availableServers);
       }

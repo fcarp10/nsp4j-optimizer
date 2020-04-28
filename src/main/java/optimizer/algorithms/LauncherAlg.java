@@ -24,39 +24,46 @@ public class LauncherAlg {
    public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager,
          boolean[][][] initialPlacement) {
 
-      VariablesAlg variablesAlg = new VariablesAlg(pm, initialPlacement);
+      VariablesAlg vars = new VariablesAlg(pm, initialPlacement);
 
       long startTime = System.nanoTime();
       if (scenario.getAlgorithm().equals(DRL)) {
          printLog(log, INFO, "first placement using first-fit");
-         Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), FIRST_FIT);
+         Heuristic heuristic = new Heuristic(pm, vars, scenario.getObjFunc(), FIRST_FIT);
          heuristic.allocateAllServices();
-         variablesAlg.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
-         printLog(log, INFO, "running reallocation using DRL...");
-         
+         vars.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
+         float initialObjVal = (float) vars.getObjVal();
+         printLog(log, INFO, "starting DRL [" + initialObjVal + "]");
          String routingModelConf = resultsManager.importConfDrlFile(ROUTING_DRL_CONF_FILE);
          String placementModelConf = resultsManager.importConfDrlFile(PLACEMENT_DRL_CONF_FILE);
-         PlacementModel placementModel = new PlacementModel(placementModelConf, pm, variablesAlg, initialPlacement,
+         PlacementModel placementModel = new PlacementModel(placementModelConf, pm, vars, initialPlacement,
                scenario.getObjFunc(), heuristic);
-         RoutingModel routingModel = new RoutingModel(routingModelConf, pm, variablesAlg, initialPlacement, scenario.getObjFunc(),
-               heuristic, placementModel);
-         routingModel.run();
-         resultsManager.exportJsonObject(ROUTING_DRL_CONF_FILE, routingModel.getConf().toJson());
-         resultsManager.exportJsonObject(PLACEMENT_DRL_CONF_FILE, placementModel.getConf().toJson());
+         RoutingModel routingModel = new RoutingModel(routingModelConf, pm, vars, initialPlacement,
+               scenario.getObjFunc(), heuristic, placementModel);
+         Auxiliary.printLog(log, INFO, "running discovery DRL phase...");
+         double bestFoundObjVal = routingModel.run(1);
+         if (bestFoundObjVal == initialObjVal)
+            Auxiliary.printLog(log, INFO, "no new solutions found");
+         else {
+            Auxiliary.printLog(log, INFO, "finding optimal DRL solution");
+            routingModel.run(0);
+            resultsManager.exportJsonObject(ROUTING_DRL_CONF_FILE, routingModel.getConf().toJson());
+            resultsManager.exportJsonObject(PLACEMENT_DRL_CONF_FILE, placementModel.getConf().toJson());
+         }
       } else {
          printLog(log, INFO, "running heuristics...");
-         Heuristic heuristic = new Heuristic(pm, variablesAlg, scenario.getObjFunc(), scenario.getAlgorithm());
+         Heuristic heuristic = new Heuristic(pm, vars, scenario.getObjFunc(), scenario.getAlgorithm());
          heuristic.allocateAllServices();
       }
       long elapsedTime = System.nanoTime() - startTime;
 
-      variablesAlg.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
-      Auxiliary.printLog(log, INFO, "finished [" + variablesAlg.objVal + "]");
-      Results results = generateResults(pm, scenario, variablesAlg, initialPlacement);
+      vars.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
+      Auxiliary.printLog(log, INFO, "finished [" + vars.objVal + "]");
+      Results results = generateResults(pm, scenario, vars, initialPlacement);
       results.setComputationTime((double) elapsedTime / 1000000000);
       String fileName = generateFileName(pm, scenario.getObjFunc());
       resultsManager.exportJsonObject(fileName, results);
-      exportResultsToMST(pm, resultsManager, fileName, variablesAlg);
+      exportResultsToMST(pm, resultsManager, fileName, vars);
       ResultsGUI.updateResults(results);
    }
 

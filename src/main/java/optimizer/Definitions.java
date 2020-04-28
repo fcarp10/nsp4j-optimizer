@@ -93,7 +93,6 @@ public class Definitions {
    public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
    public static final String SERVER_IDLE_ENERGY_COST = "server_idle_energy_cost";
    public static final String SERVER_UTIL_ENERGY_COST = "server_util_energy_cost";
-   //   public static final String SERVER_OTHER_OPEX = "server_other_opex";
    public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
 
    // link parameters
@@ -130,10 +129,10 @@ public class Definitions {
    public static final int BATCH_SIZE = 10;
    public static final int START_SIZE = 10;
    public static final int FREQUENCY = 100;
-   public static final String EPSILON_ROUTING = "epsilon_routing";
-   public static final String EPSILON_PLACEMENT = "epsilon_placement";
-   public static final String ROUTING_ITERATIONS = "routing_iterations";
-   public static final String PLACEMENT_ITERATIONS = "placement_iterations";
+   public static final String ROUTING_MAX_REPETITIONS = "routing_max_repetitions";
+   public static final String PLACEMENT_MAX_REPETITIONS = "placement_max_repetitions";
+   public static final String ROUTING_EPSILON_DECREMENT = "routing_epsilon_decrement";
+   public static final String PLACEMENT_EPSILON_DECREMENT = "placement_epsilon_decrement";
    public static final String ROUTING_DRL_CONF_FILE = "routing_drl_conf";
    public static final String PLACEMENT_DRL_CONF_FILE = "placement_drl_conf";
 
