@@ -81,43 +81,54 @@ public class PlacementModel2 {
       bestObjVal = (float) vars.objVal;
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            // initialize epsilons
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                  String epsilonKey = String.valueOf(s) + String.valueOf(d) + String.valueOf(p) + String.valueOf(v);
-                  epsilons.put(epsilonKey, 1.0);
-               }
+            initializeEpsilons(s, d);
             // get paths with enough path link resources
             List<Integer> availablePaths = heu.getAvailablePaths(s, d);
             int pBest = 0;
-            float bestObjValPath = bestObjVal;
             for (Integer p : availablePaths) {
+               // before placing in a new path remove previous ones
+               heu.removeDemandFromAllFunctionsToServer(s, d);
+               // and place them on servers in the path
+               List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
+               List<Integer> chosenServers = heu.chooseServersForFunctionAllocation(s, d, p,
+                     availableServersPerFunction);
+               heu.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
+               // then, try to optimize the locations
                for (int i = 0; i < 10; i++) {
-                  List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
-                  float bestLocalObjPath = functionPlacement(s, d, p, availableServersPerFunction);
-                  if (bestLocalObjPath < bestObjValPath) {
-                     bestObjValPath = bestLocalObjPath;
+                  availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
+                  float newBestObjVal = functionPlacement(s, d, p, availableServersPerFunction);
+                  if (newBestObjVal < bestObjVal)
                      pBest = p;
-                  }
                }
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  for (int x = 0; x < pm.getServers().size(); x++) {
-                     if (vars.fXSVD[x][s][v][d]) {
-                        heu.removeDemandToFunctionToServer(s, x, v, d);
-                        break;
-                     }
-                  }
             }
-            // perform placement using the best path
+            // before placing in the best path remove previous ones
+            heu.removeDemandFromAllFunctionsToServer(s, d);
+            // and place them on servers in the best path
             List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, pBest);
+            List<Integer> chosenServers = heu.chooseServersForFunctionAllocation(s, d, pBest,
+                  availableServersPerFunction);
+            heu.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
+            // then, try to optimize the locations
+            availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, pBest);
             functionPlacement(s, d, pBest, availableServersPerFunction);
+            float currentObjVal = (float) vars.getObjVal();
+            if (currentObjVal > bestObjVal)
+               System.exit(-1);
             // reroute traffic to the best path
             rerouteSpecificDemand(s, d, pBest);
          }
    }
 
+   private void initializeEpsilons(int s, int d) {
+      for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            String epsilonKey = String.valueOf(s) + String.valueOf(d) + String.valueOf(p) + String.valueOf(v);
+            epsilons.put(epsilonKey, 1.0);
+         }
+   }
+
    private float functionPlacement(int s, int d, int p, List<List<Integer>> availableServersPerFunction) {
-      float bestLocalObjPath = Float.MAX_VALUE;
+      float newBestObjVal = bestObjVal;
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
          String epsilonKey = String.valueOf(s) + String.valueOf(d) + String.valueOf(p) + String.valueOf(v);
          float[] environment = createEnvironment(s, d, v, p);
@@ -135,16 +146,16 @@ public class PlacementModel2 {
             environment = nextEnvironment;
             log.info("[s][d][p][v] - [" + s + "][" + d + "][" + p + "][" + v + "] placement iteration " + i + ": ["
                   + vars.objVal + "][" + reward + "][" + action + "]");
-            if ((float) vars.getObjVal() <= bestLocalObjPath && epsilons.get(epsilonKey) > 0)
+            float currentObjVal = (float) vars.getObjVal();
+            if ((currentObjVal < newBestObjVal && epsilons.get(epsilonKey) > 0)
+                  || (currentObjVal == newBestObjVal && epsilons.get(epsilonKey) > 0.5))
                epsilons.put(epsilonKey, Auxiliary
                      .roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(PLACEMENT_EPSILON_DECREMENT), 1));
-            if ((float) vars.getObjVal() < bestLocalObjPath) {
-               bestLocalObjPath = (float) vars.getObjVal();
-               break;
-            }
+            if (currentObjVal < newBestObjVal)
+               newBestObjVal = currentObjVal;
          }
       }
-      return bestLocalObjPath;
+      return newBestObjVal;
    }
 
    private float[] createEnvironment(int s, int d, int v, int p) {

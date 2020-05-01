@@ -103,6 +103,16 @@ public class Heuristic {
       vars.uX.put(server.getId(), vars.uX.get(server.getId()) - (trafficDemand / server.getCapacity()));
    }
 
+   public void removeDemandFromAllFunctionsToServer(int s, int d) {
+      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+         for (int x = 0; x < pm.getServers().size(); x++) {
+            if (vars.fXSVD[x][s][v][d]) {
+               removeDemandToFunctionToServer(s, x, v, d);
+               break;
+            }
+         }
+   }
+
    public void addDemandToFunctionToServer(int s, int x, int v, int d) {
       Server server = pm.getServers().get(x);
       double trafficDemand = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
