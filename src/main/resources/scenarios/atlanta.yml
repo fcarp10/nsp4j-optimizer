@@ -15,8 +15,10 @@ aux: {
   #  "server_other_opex": 0.14787654, # ($/h) // 0.8 utilization (PowerEdge R410)
   "initial_traffic_load": 0.3,
   "qos_penalty_ratio": 0.1,
-  "routing_iterations": 50,
-  "placement_iterations": 20
+  "routing_max_repetitions": 1000,
+  "placement_max_repetitions": 10,
+  "routing_epsilon_decrement": 0.1,
+  "placement_epsilon_decrement": 0.1
 }
 # service definitions
 service_chains:

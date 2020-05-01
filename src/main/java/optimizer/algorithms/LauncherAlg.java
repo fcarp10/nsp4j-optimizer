@@ -3,6 +3,7 @@ package optimizer.algorithms;
 import manager.Parameters;
 import optimizer.Definitions;
 import optimizer.algorithms.learning.PlacementModel;
+import optimizer.algorithms.learning.PlacementModel2;
 import optimizer.algorithms.learning.RoutingModel;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
@@ -34,22 +35,24 @@ public class LauncherAlg {
          vars.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
          float initialObjVal = (float) vars.getObjVal();
          printLog(log, INFO, "starting DRL [" + initialObjVal + "]");
-         String routingModelConf = resultsManager.importConfDrlFile(ROUTING_DRL_CONF_FILE);
-         String placementModelConf = resultsManager.importConfDrlFile(PLACEMENT_DRL_CONF_FILE);
-         PlacementModel placementModel = new PlacementModel(placementModelConf, pm, vars, initialPlacement,
-               scenario.getObjFunc(), heuristic);
-         RoutingModel routingModel = new RoutingModel(routingModelConf, pm, vars, initialPlacement,
-               scenario.getObjFunc(), heuristic, placementModel);
-         Auxiliary.printLog(log, INFO, "running discovery DRL phase...");
-         double bestFoundObjVal = routingModel.run(1);
-         if (bestFoundObjVal == initialObjVal)
-            Auxiliary.printLog(log, INFO, "no new solutions found");
-         else {
-            Auxiliary.printLog(log, INFO, "finding optimal DRL solution");
-            routingModel.run(0);
-            resultsManager.exportJsonObject(ROUTING_DRL_CONF_FILE, routingModel.getConf().toJson());
-            resultsManager.exportJsonObject(PLACEMENT_DRL_CONF_FILE, placementModel.getConf().toJson());
-         }
+         PlacementModel2 placementModel2 = new PlacementModel2(null, pm, vars, initialPlacement, scenario.getObjFunc(), heuristic);
+         placementModel2.run();
+         // String routingModelConf = resultsManager.importConfDrlFile(ROUTING_DRL_CONF_FILE);
+         // String placementModelConf = resultsManager.importConfDrlFile(PLACEMENT_DRL_CONF_FILE);
+         // PlacementModel placementModel = new PlacementModel(placementModelConf, pm, vars, initialPlacement,
+         //       scenario.getObjFunc(), heuristic);
+         // RoutingModel routingModel = new RoutingModel(routingModelConf, pm, vars, initialPlacement,
+         //       scenario.getObjFunc(), heuristic, placementModel);
+         // Auxiliary.printLog(log, INFO, "running discovery DRL phase...");
+         // double bestFoundObjVal = routingModel.run(1);
+         // if (bestFoundObjVal == initialObjVal)
+         //    Auxiliary.printLog(log, INFO, "no new solutions found");
+         // else {
+         //    Auxiliary.printLog(log, INFO, "finding optimal DRL solution");
+         //    routingModel.run(0);
+         //    resultsManager.exportJsonObject(ROUTING_DRL_CONF_FILE, routingModel.getConf().toJson());
+         //    resultsManager.exportJsonObject(PLACEMENT_DRL_CONF_FILE, placementModel.getConf().toJson());
+         // }
       } else {
          printLog(log, INFO, "running heuristics...");
          Heuristic heuristic = new Heuristic(pm, vars, scenario.getObjFunc(), scenario.getAlgorithm());

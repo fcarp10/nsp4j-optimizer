@@ -53,7 +53,7 @@ public class Heuristic {
 
       assignFunctionsToServersFromInitialPlacement(); // add overhead of functions from initial placement
 
-      for (int s = 0; s < pm.getServices().size(); s++) { // for every service
+      for (int s = 0; s < pm.getServices().size(); s++) {
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
             // get paths with enough path link resources
             List<Integer> availablePaths = getAvailablePaths(s, d);
@@ -130,7 +130,7 @@ public class Heuristic {
       vars.uX.put(server.getId(), vars.uX.get(server.getId()) + (functionOverhead / server.getCapacity()));
    }
 
-   private List<Integer> getAvailablePaths(int s, int d) {
+   public List<Integer> getAvailablePaths(int s, int d) {
       Service service = pm.getServices().get(s);
       TrafficFlow tf = service.getTrafficFlow();
       List<Integer> availablePaths = new ArrayList<>();
@@ -222,10 +222,19 @@ public class Heuristic {
 
    public List<List<Integer>> findServersForFunctionsInPath(int s, int d, int p) {
 
-      // find available servers for every function
       List<List<Integer>> availableServersPerFunction = new ArrayList<>();
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-         List<Integer> availableServers = getAvailableServers(s, p, d, v, 0);
+         int nStartLimit = 0;
+         int nEndLimit = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size() - 1;
+         int index;
+         if (v > 0)
+            if ((index = getNodeIndexFromFunction(s, d, p, v - 1)) != -1)
+               nStartLimit = index;
+         if (v < pm.getServices().get(s).getFunctions().size() - 1)
+            if ((index = getNodeIndexFromFunction(s, d, p, v + 1)) != -1)
+               nEndLimit = index;
+
+         List<Integer> availableServers = getAvailableServers(s, p, d, v, nStartLimit, nEndLimit);
          availableServersPerFunction.add(availableServers);
       }
 
@@ -237,7 +246,18 @@ public class Heuristic {
       return availableServersPerFunction;
    }
 
-   private Map<Integer, List<List<Integer>>> findAdmissiblePaths(List<Integer> availablePaths, int s, int d) {
+   private int getNodeIndexFromFunction(int s, int d, int p, int v) {
+      int nodeIndex = -1;
+      Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
+      for (int n = 0; n < path.getNodePath().size(); n++)
+         for (int x = 0; x < pm.getServers().size(); x++)
+            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
+               if (vars.fXSVD[x][s][v][d])
+                  nodeIndex = n;
+      return nodeIndex;
+   }
+
+   public Map<Integer, List<List<Integer>>> findAdmissiblePaths(List<Integer> availablePaths, int s, int d) {
 
       Map<Integer, List<List<Integer>>> admissiblePaths = new HashMap<>();
       for (Integer p : availablePaths) {
@@ -406,27 +426,20 @@ public class Heuristic {
       return orderedPaths;
    }
 
-   private List<Integer> getUsedServersForFunction(int s, int v, Path path) {
-      List<Integer> foundServers = new ArrayList<>();
-      for (int n = 0; n < path.getNodePath().size(); n++)
-         for (int x = 0; x < pm.getServers().size(); x++)
-            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n))) {
-               if (vars.fXSV[x][s][v])
-                  foundServers.add(x);
-               break;
-            }
-      return foundServers;
-   }
-
-   private List<Integer> getAvailableServers(int s, int p, int d, int v, int nInitial) {
+   private List<Integer> getAvailableServers(int s, int p, int d, int v, int nStartLimit, int nEndLimit) {
       Service service = pm.getServices().get(s);
       Path path = service.getTrafficFlow().getPaths().get(p);
       List<Integer> availableServers = new ArrayList<>();
-      for (int n = nInitial; n < path.getNodePath().size(); n++)
+      for (int n = nStartLimit; n <= nEndLimit; n++)
          for (int x = 0; x < pm.getServers().size(); x++)
-            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-               if (checkIfFreeServerResources(s, x, v, d, service.getFunctions().size()))
+            if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n))) {
+               if (!vars.fXSVD[x][s][v][d]) {
+                  if (checkIfFreeServerResources(s, x, v, d, service.getFunctions().size()))
+                     availableServers.add(x);
+               } else
                   availableServers.add(x);
+               break;
+            }
       return availableServers;
    }
 

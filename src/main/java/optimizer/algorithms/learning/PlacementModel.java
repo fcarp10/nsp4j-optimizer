@@ -35,6 +35,7 @@ public class PlacementModel {
    private final int offsetInput;
    protected int environmentSize;
    private float bestGlobalObjVal;
+   private float previousObjVal;
    private Map<String, Double> epsilons;
    private Heuristic heu;
 
@@ -81,6 +82,7 @@ public class PlacementModel {
    public boolean run(int s, int d, int p, float bestGlobalObjVal) {
 
       this.bestGlobalObjVal = bestGlobalObjVal;
+      previousObjVal = bestGlobalObjVal;
       float[] environment = createEnvironment(s, d, p);
       float[] nextEnvironment;
       String epsilonKey = String.valueOf(s) + String.valueOf(d) + String.valueOf(p);
@@ -90,7 +92,7 @@ public class PlacementModel {
       List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
       if (availableServersPerFunction != null) {
          int i = 0;
-         int repetitionsWithSameValue = 0;
+         int repetitions = 0;
 
          while (true) {
             INDArray inputIndArray = Nd4j.create(environment);
@@ -109,12 +111,15 @@ public class PlacementModel {
             environment = nextEnvironment;
             i++;
             log.info("placement iteration " + i + ": [" + vars.objVal + "][" + reward + "][" + action + "]");
+            previousObjVal = (float) vars.objVal;
             if (epsilons.get(epsilonKey) > 0) {
                if ((float) vars.getObjVal() < bestGlobalObjVal) {
-                  epsilons.put(epsilonKey, Auxiliary.roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(PLACEMENT_EPSILON_DECREMENT), 1));
+                  epsilons.put(epsilonKey, Auxiliary
+                        .roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(PLACEMENT_EPSILON_DECREMENT), 1));
+                  repetitions = 0;
                } else if ((float) vars.getObjVal() >= bestGlobalObjVal) {
-                  repetitionsWithSameValue++;
-                  if (repetitionsWithSameValue == (int) pm.getAux(PLACEMENT_MAX_REPETITIONS))
+                  repetitions++;
+                  if (repetitions == (int) pm.getAux(PLACEMENT_MAX_REPETITIONS))
                      break;
                }
             } else
@@ -215,6 +220,8 @@ public class PlacementModel {
          return 100;
       else if (newObjVal == bestGlobalObjVal)
          return 0;
+      else if (newObjVal > previousObjVal)
+         return -10;
       else
          return -1;
    }
