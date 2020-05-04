@@ -310,8 +310,7 @@ public class Heuristic {
                         }
                   }
                   if (!foundSyncPath)
-                     Auxiliary.printLog(log, ERROR, "No available path found for sync traffic"); // TO-DO implement
-                                                                                                 // blocking
+                     Auxiliary.printLog(log, ERROR, "No available path found for sync traffic"); // blocking
                }
             }
    }
@@ -443,11 +442,11 @@ public class Heuristic {
       for (int n = nStartLimit; n <= nEndLimit; n++)
          for (int x = 0; x < pm.getServers().size(); x++)
             if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n))) {
-               if (!vars.fXSVD[x][s][v][d]) {
+               if (vars.fXSVD[x][s][v][d])
+                  availableServers.add(x);
+               else if (vars.fXSV[x][s][v] || !vars.fXSVD[x][s][v][d])
                   if (checkIfFreeServerResources(s, x, v, d, service.getFunctions().size()))
                      availableServers.add(x);
-               } else
-                  availableServers.add(x);
                break;
             }
       return availableServers;

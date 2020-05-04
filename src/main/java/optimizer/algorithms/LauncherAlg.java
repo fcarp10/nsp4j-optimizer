@@ -2,9 +2,7 @@ package optimizer.algorithms;
 
 import manager.Parameters;
 import optimizer.Definitions;
-import optimizer.algorithms.learning.PlacementModel;
 import optimizer.algorithms.learning.PlacementModel2;
-import optimizer.algorithms.learning.RoutingModel;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
 import optimizer.results.Auxiliary;
@@ -30,7 +28,7 @@ public class LauncherAlg {
       long startTime = System.nanoTime();
       if (scenario.getAlgorithm().equals(DRL)) {
          printLog(log, INFO, "first placement using first-fit");
-         Heuristic heuristic = new Heuristic(pm, vars, scenario.getObjFunc(), FIRST_FIT);
+         Heuristic heuristic = new Heuristic(pm, vars, scenario.getObjFunc(), RANDOM_FIT);
          heuristic.allocateAllServices();
          vars.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
          float initialObjVal = (float) vars.getObjVal();

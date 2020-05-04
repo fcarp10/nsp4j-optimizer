@@ -32,10 +32,12 @@ public class PlacementModel2 {
    private DeepQ deepQ;
    private MultiLayerConfiguration conf;
    private final int offsetInput;
-   protected int environmentSize;
    private float bestObjVal;
    private Heuristic heu;
    private Map<String, Double> epsilons;
+   private Map<String, Integer> optimumPaths;
+   private int outputLength;
+   private int inputLength;
 
    private static final Logger log = LoggerFactory.getLogger(PlacementModel2.class);
 
@@ -46,11 +48,11 @@ public class PlacementModel2 {
       this.initialPlacement = initialPlacement;
       this.objFunc = objFunc;
       this.heu = heu;
-      environmentSize = pm.getServers().size();
       offsetInput = 5;
-      int inputLength = environmentSize + offsetInput;
-      int outputLength = environmentSize;
+      inputLength = pm.getServers().size() + offsetInput;
+      outputLength = pm.getServers().size() + 1;
       epsilons = new HashMap<>();
+      optimumPaths = new HashMap<>();
       if (conf == null)
          initializeModel(inputLength, outputLength);
       else
@@ -78,88 +80,124 @@ public class PlacementModel2 {
    }
 
    public void run() {
+
+      initializeEpsilons();
+      setCurrentOptimumPaths();
+
+      Auxiliary.printLog(log, INFO, "starts discovery phase");
       bestObjVal = (float) vars.objVal;
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            initializeEpsilons(s, d);
-            // get paths with enough path link resources
-            List<Integer> availablePaths = heu.getAvailablePaths(s, d);
-            int pBest = 0;
-            for (Integer p : availablePaths) {
-               // before placing in a new path remove previous ones
-               heu.removeDemandFromAllFunctionsToServer(s, d);
-               // and place them on servers in the path
-               List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
-               List<Integer> chosenServers = heu.chooseServersForFunctionAllocation(s, d, p,
-                     availableServersPerFunction);
-               heu.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
-               // then, try to optimize the locations
-               for (int i = 0; i < 10; i++) {
-                  availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
-                  float newBestObjVal = functionPlacement(s, d, p, availableServersPerFunction);
-                  if (newBestObjVal < bestObjVal)
-                     pBest = p;
+      for (int i = 0; i < pm.getServices().size() * pm.getDemandsTrafficFlow() * pm.getPathsTrafficFlow(); i++) {
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+               // get paths with enough path link resources
+               List<Integer> availablePaths = heu.getAvailablePaths(s, d);
+               for (Integer p : availablePaths) {
+                  // before placing in a new path remove previous ones
+                  heu.removeDemandFromAllFunctionsToServer(s, d);
+                  // and place them on servers in the path
+                  List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
+                  if (availableServersPerFunction == null)
+                     continue;
+                  List<Integer> chosenServers = heu.chooseServersForFunctionAllocation(s, d, p,
+                        availableServersPerFunction);
+                  heu.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
+                  // route traffic to path p
+                  rerouteSpecificDemand(s, d, p);
+                  // then, try to optimize the locations
+                  for (int j = 0; j < 10; j++) {
+                     availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
+                     float placementBestObjVal = functionPlacement(s, d, p, availableServersPerFunction);
+                     if (placementBestObjVal < bestObjVal) {
+                        Auxiliary.printLog(log, INFO, "new incumbent solution found [" + placementBestObjVal + "]");
+                        setCurrentOptimumPaths();
+                        optimizePlacementUsingCurrentOptimumPaths();
+                        bestObjVal = placementBestObjVal;
+                     }
+                  }
                }
             }
-            // before placing in the best path remove previous ones
-            heu.removeDemandFromAllFunctionsToServer(s, d);
-            // and place them on servers in the best path
-            List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, pBest);
-            List<Integer> chosenServers = heu.chooseServersForFunctionAllocation(s, d, pBest,
-                  availableServersPerFunction);
-            heu.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
-            // then, try to optimize the locations
-            availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, pBest);
-            functionPlacement(s, d, pBest, availableServersPerFunction);
-            float currentObjVal = (float) vars.getObjVal();
-            if (currentObjVal > bestObjVal)
-               System.exit(-1);
-            // reroute traffic to the best path
-            rerouteSpecificDemand(s, d, pBest);
-         }
+      }
+
+      Auxiliary.printLog(log, INFO, "starts optimization phase");
+      optimizePlacementUsingCurrentOptimumPaths();
    }
 
-   private void initializeEpsilons(int s, int d) {
-      for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-            String epsilonKey = String.valueOf(s) + String.valueOf(d) + String.valueOf(p) + String.valueOf(v);
-            epsilons.put(epsilonKey, 1.0);
-         }
+   private void optimizePlacementUsingCurrentOptimumPaths() {
+      for (int i = 0; i < pm.getServices().size() * pm.getDemandsTrafficFlow() * pm.getPathsTrafficFlow(); i++) {
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+               String optPathKey = String.valueOf(s) + String.valueOf(d);
+               // before placing in the best path remove previous ones
+               heu.removeDemandFromAllFunctionsToServer(s, d);
+               // and place them on servers in the best path
+               List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d,
+                     optimumPaths.get(optPathKey));
+               List<Integer> chosenServers = heu.chooseServersForFunctionAllocation(s, d, optimumPaths.get(optPathKey),
+                     availableServersPerFunction);
+               heu.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
+               rerouteSpecificDemand(s, d, optimumPaths.get(optPathKey));
+               // then, try to optimize the locations
+               availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, optimumPaths.get(optPathKey));
+               functionPlacement(s, d, optimumPaths.get(optPathKey), availableServersPerFunction);
+            }
+      }
+   }
+
+   private void setCurrentOptimumPaths() {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               if (vars.zSPD[s][p][d])
+                  optimumPaths.put(String.valueOf(s) + String.valueOf(d), p);
+   }
+
+   private void initializeEpsilons() {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  epsilons.put(String.valueOf(s) + String.valueOf(d) + String.valueOf(p) + String.valueOf(v), 1.0);
    }
 
    private float functionPlacement(int s, int d, int p, List<List<Integer>> availableServersPerFunction) {
       float newBestObjVal = bestObjVal;
-      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-         String epsilonKey = String.valueOf(s) + String.valueOf(d) + String.valueOf(p) + String.valueOf(v);
-         float[] environment = createEnvironment(s, d, v, p);
-         float[] nextEnvironment;
-         List<Integer> availableServers = availableServersPerFunction.get(v);
-         for (int i = 0; i < 10; i++) {
-            INDArray inputIndArray = Nd4j.create(environment);
-            int[] actionMask = generateActionMask(environment, s, availableServers);
-            int action = deepQ.getAction(inputIndArray, actionMask, epsilons.get(epsilonKey));
-            nextEnvironment = modifyEnvironment(environment, action, s, d, v);
-            vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
-            float reward = computeReward();
-            int[] nextActionMask = generateActionMask(nextEnvironment, s, availableServers);
-            deepQ.observeReward(Nd4j.create(environment), Nd4j.create(nextEnvironment), reward, nextActionMask);
-            environment = nextEnvironment;
-            log.info("[s][d][p][v] - [" + s + "][" + d + "][" + p + "][" + v + "] placement iteration " + i + ": ["
-                  + vars.objVal + "][" + reward + "][" + action + "]");
-            float currentObjVal = (float) vars.getObjVal();
-            if ((currentObjVal < newBestObjVal && epsilons.get(epsilonKey) > 0)
-                  || (currentObjVal == newBestObjVal && epsilons.get(epsilonKey) > 0.5))
-               epsilons.put(epsilonKey, Auxiliary
-                     .roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(PLACEMENT_EPSILON_DECREMENT), 1));
-            if (currentObjVal < newBestObjVal)
-               newBestObjVal = currentObjVal;
+      for (int j = 0; j < pm.getServices().get(s).getFunctions().size()
+            * pm.getServices().get(s).getFunctions().size(); j++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            String epsilonKey = String.valueOf(s) + String.valueOf(d) + String.valueOf(p) + String.valueOf(v);
+            float[] environment = createEnvironment(s, d, v, p);
+            float[] nextEnvironment;
+            List<Integer> availableServers = availableServersPerFunction.get(v);
+            int possibleActions = availableServers.size() + 1;
+            for (int i = 0; i < possibleActions * possibleActions; i++) {
+               INDArray inputIndArray = Nd4j.create(environment);
+               int[] actionMask = generateActionMask(environment, s, availableServers);
+               int action = deepQ.getAction(inputIndArray, actionMask, epsilons.get(epsilonKey));
+               nextEnvironment = modifyEnvironment(environment, action, s, d, v);
+               heu.removeUnusedFunctions(s);
+               heu.removeSyncTraffic(s);
+               heu.addSyncTraffic(s);
+               vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
+               float reward = computeReward();
+               int[] nextActionMask = generateActionMask(nextEnvironment, s, availableServers);
+               deepQ.observeReward(Nd4j.create(environment), Nd4j.create(nextEnvironment), reward, nextActionMask);
+               environment = nextEnvironment;
+               log.info("[s][d][p][v] - [" + s + "][" + d + "][" + p + "][" + v + "] placement iteration " + i + ": ["
+                     + vars.objVal + "][" + reward + "][" + action + "]");
+               float currentObjVal = (float) vars.getObjVal();
+               if ((currentObjVal < newBestObjVal && epsilons.get(epsilonKey) > 0)
+                     || (currentObjVal == newBestObjVal && epsilons.get(epsilonKey) > 0.5))
+                  epsilons.put(epsilonKey, Auxiliary
+                        .roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(PLACEMENT_EPSILON_DECREMENT), 1));
+               if (currentObjVal < newBestObjVal)
+                  newBestObjVal = currentObjVal;
+            }
          }
-      }
       return newBestObjVal;
    }
 
    private float[] createEnvironment(int s, int d, int v, int p) {
-      float[] environment = new float[environmentSize + offsetInput];
+      float[] environment = new float[inputLength];
 
       int srcNode = -1, dstNode = -1;
       for (int x = 0; x < pm.getServers().size(); x++) {
@@ -180,7 +218,7 @@ public class PlacementModel2 {
 
    private int[] generateActionMask(float[] environment, int s, List<Integer> availableServers) {
 
-      int[] actionMask = new int[environment.length + 1 - offsetInput];
+      int[] actionMask = new int[outputLength];
       int index = 0;
 
       for (int x = 0; x < pm.getServers().size(); x++) {
@@ -196,9 +234,8 @@ public class PlacementModel2 {
    float[] modifyEnvironment(float[] environment, int action, int s, int d, int v) {
 
       float[] nextEnvironment = environment.clone();
-      int notActionIndex = (environment.length - 1) + 1 - offsetInput;
 
-      if (action == notActionIndex)
+      if (action == outputLength - 1)
          return nextEnvironment;
 
       int xOld = -1, xNew = -1;
@@ -220,7 +257,6 @@ public class PlacementModel2 {
       if (xOld != -1)
          heu.removeDemandToFunctionToServer(s, xOld, v, d);
       heu.addDemandToFunctionToServer(s, xNew, v, d);
-
       return nextEnvironment;
    }
 
@@ -241,9 +277,6 @@ public class PlacementModel2 {
             pOld = p;
       heu.removeDemandFromPath(s, pOld, d); // remove demand from path
       heu.addDemandToPath(s, pBest, d); // add demand to path
-      heu.removeUnusedFunctions(s);
-      heu.removeSyncTraffic(s);
-      heu.addSyncTraffic(s);
    }
 
    public MultiLayerConfiguration getConf() {
