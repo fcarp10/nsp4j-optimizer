@@ -68,14 +68,14 @@ public class PlacementModel {
             .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE).nIn(NUM_HIDDEN_LAYERS).nOut(outputLength)
                   .weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY).build())
             .build();
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_PLACEMENT, BATCH_SIZE, FREQUENCY, START_SIZE,
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE,
             inputLength);
    }
 
    private void initializeModel(String confString, int inputLength) {
       MultiLayerConfiguration conf = MultiLayerConfiguration.fromJson(confString);
       this.conf = conf;
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_PLACEMENT, BATCH_SIZE, FREQUENCY, START_SIZE,
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE,
             inputLength);
    }
 
@@ -115,7 +115,7 @@ public class PlacementModel {
             if (epsilons.get(epsilonKey) > 0) {
                if ((float) vars.getObjVal() < bestGlobalObjVal) {
                   epsilons.put(epsilonKey, Auxiliary
-                        .roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(PLACEMENT_EPSILON_DECREMENT), 1));
+                        .roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(EPSILON_STEPPER), 1));
                   repetitions = 0;
                } else if ((float) vars.getObjVal() >= bestGlobalObjVal) {
                   repetitions++;

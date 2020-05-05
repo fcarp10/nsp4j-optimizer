@@ -66,13 +66,13 @@ public class RoutingModel {
             .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE).nIn(NUM_HIDDEN_LAYERS).nOut(outputLength)
                   .weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY).build())
             .build();
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_ROUTING, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
 
    private void initializeModel(String confString, int inputLength) {
       MultiLayerConfiguration conf = MultiLayerConfiguration.fromJson(confString);
       this.conf = conf;
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_ROUTING, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
 
    public double run(double epsilonStarting) {

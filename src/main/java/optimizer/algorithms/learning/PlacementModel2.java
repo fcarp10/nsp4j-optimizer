@@ -32,7 +32,6 @@ public class PlacementModel2 {
    private DeepQ deepQ;
    private MultiLayerConfiguration conf;
    private final int offsetInput;
-   private float bestObjVal;
    private Heuristic heu;
    private Map<String, Double> epsilons;
    private Map<String, Integer> optimumPaths;
@@ -68,25 +67,22 @@ public class PlacementModel2 {
             .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE).nIn(NUM_HIDDEN_LAYERS).nOut(outputLength)
                   .weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY).build())
             .build();
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_PLACEMENT, BATCH_SIZE, FREQUENCY, START_SIZE,
-            inputLength);
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
 
    private void initializeModel(String confString, int inputLength) {
       MultiLayerConfiguration conf = MultiLayerConfiguration.fromJson(confString);
       this.conf = conf;
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR_PLACEMENT, BATCH_SIZE, FREQUENCY, START_SIZE,
-            inputLength);
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
 
    public void run() {
 
       initializeEpsilons();
       setCurrentOptimumPaths();
-
-      Auxiliary.printLog(log, INFO, "starts discovery phase");
-      bestObjVal = (float) vars.objVal;
-      for (int i = 0; i < pm.getServices().size() * pm.getDemandsTrafficFlow() * pm.getPathsTrafficFlow(); i++) {
+      Auxiliary.printLog(log, INFO, "DRL running...");
+      float bestObjVal = (float) vars.objVal;
+      for (int i = 0; i < pm.getServices().size() * pm.getDemandsTrafficFlow() * pm.getPathsTrafficFlow(); i++)
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                // get paths with enough path link resources
@@ -106,23 +102,19 @@ public class PlacementModel2 {
                   // then, try to optimize the locations
                   for (int j = 0; j < 10; j++) {
                      availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
-                     float placementBestObjVal = functionPlacement(s, d, p, availableServersPerFunction);
-                     if (placementBestObjVal < bestObjVal) {
-                        Auxiliary.printLog(log, INFO, "new incumbent solution found [" + placementBestObjVal + "]");
+                     float currentBestObjVal = functionPlacement(s, d, p, availableServersPerFunction, bestObjVal);
+                     if (currentBestObjVal < bestObjVal) {
+                        bestObjVal = currentBestObjVal;
+                        Auxiliary.printLog(log, INFO, "new incumbent solution found [" + bestObjVal + "]");
                         setCurrentOptimumPaths();
-                        optimizePlacementUsingCurrentOptimumPaths();
-                        bestObjVal = placementBestObjVal;
+                        optimizePlacementUsingCurrentOptimumPaths(bestObjVal);
                      }
                   }
                }
             }
-      }
-
-      Auxiliary.printLog(log, INFO, "starts optimization phase");
-      optimizePlacementUsingCurrentOptimumPaths();
    }
 
-   private void optimizePlacementUsingCurrentOptimumPaths() {
+   private void optimizePlacementUsingCurrentOptimumPaths(float bestObjVal) {
       for (int i = 0; i < pm.getServices().size() * pm.getDemandsTrafficFlow() * pm.getPathsTrafficFlow(); i++) {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
@@ -138,29 +130,14 @@ public class PlacementModel2 {
                rerouteSpecificDemand(s, d, optimumPaths.get(optPathKey));
                // then, try to optimize the locations
                availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, optimumPaths.get(optPathKey));
-               functionPlacement(s, d, optimumPaths.get(optPathKey), availableServersPerFunction);
+               functionPlacement(s, d, optimumPaths.get(optPathKey), availableServersPerFunction, bestObjVal);
             }
       }
    }
 
-   private void setCurrentOptimumPaths() {
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               if (vars.zSPD[s][p][d])
-                  optimumPaths.put(String.valueOf(s) + String.valueOf(d), p);
-   }
-
-   private void initializeEpsilons() {
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  epsilons.put(String.valueOf(s) + String.valueOf(d) + String.valueOf(p) + String.valueOf(v), 1.0);
-   }
-
-   private float functionPlacement(int s, int d, int p, List<List<Integer>> availableServersPerFunction) {
-      float newBestObjVal = bestObjVal;
+   private float functionPlacement(int s, int d, int p, List<List<Integer>> availableServersPerFunction,
+         float bestObjVal) {
+      float localBestObjVal = bestObjVal;
       for (int j = 0; j < pm.getServices().get(s).getFunctions().size()
             * pm.getServices().get(s).getFunctions().size(); j++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
@@ -178,22 +155,31 @@ public class PlacementModel2 {
                heu.removeSyncTraffic(s);
                heu.addSyncTraffic(s);
                vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
-               float reward = computeReward();
+               float currentObjVal = (float) vars.getObjVal();
+               float reward = computeReward(currentObjVal, localBestObjVal);
                int[] nextActionMask = generateActionMask(nextEnvironment, s, availableServers);
                deepQ.observeReward(Nd4j.create(environment), Nd4j.create(nextEnvironment), reward, nextActionMask);
                environment = nextEnvironment;
                log.info("[s][d][p][v] - [" + s + "][" + d + "][" + p + "][" + v + "] placement iteration " + i + ": ["
                      + vars.objVal + "][" + reward + "][" + action + "]");
-               float currentObjVal = (float) vars.getObjVal();
-               if ((currentObjVal < newBestObjVal && epsilons.get(epsilonKey) > 0)
-                     || (currentObjVal == newBestObjVal && epsilons.get(epsilonKey) > 0.5))
-                  epsilons.put(epsilonKey, Auxiliary
-                        .roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(PLACEMENT_EPSILON_DECREMENT), 1));
-               if (currentObjVal < newBestObjVal)
-                  newBestObjVal = currentObjVal;
+               if (currentObjVal < localBestObjVal) { // best case => reduce randomness to 0 and exit
+                  localBestObjVal = currentObjVal;
+                  epsilons.put(epsilonKey, 0.0);
+                  break;
+               } else if (currentObjVal == localBestObjVal) { // same solution => reduce randomness or exit
+                  if (epsilons.get(epsilonKey) > 0)
+                     epsilons.put(epsilonKey,
+                           Auxiliary.roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(EPSILON_STEPPER), 1));
+                  else
+                     break;
+               } else {
+                  if (epsilons.get(epsilonKey) < 1) // worse solution, increase randomness
+                     epsilons.put(epsilonKey,
+                           Auxiliary.roundDouble(epsilons.get(epsilonKey) + (double) pm.getAux(EPSILON_STEPPER), 1));
+               }
             }
          }
-      return newBestObjVal;
+      return localBestObjVal;
    }
 
    private float[] createEnvironment(int s, int d, int v, int p) {
@@ -260,14 +246,13 @@ public class PlacementModel2 {
       return nextEnvironment;
    }
 
-   private float computeReward() {
-      float newObjVal = (float) vars.getObjVal();
-      if (newObjVal < bestObjVal)
-         return 100;
-      else if (newObjVal == bestObjVal)
+   private float computeReward(float currentObjVal, float bestObjVal) {
+      if (currentObjVal < bestObjVal)
+         return 10;
+      else if (currentObjVal == bestObjVal)
          return 0;
       else
-         return -1;
+         return -10;
    }
 
    public void rerouteSpecificDemand(int s, int d, int pBest) {
@@ -277,6 +262,22 @@ public class PlacementModel2 {
             pOld = p;
       heu.removeDemandFromPath(s, pOld, d); // remove demand from path
       heu.addDemandToPath(s, pBest, d); // add demand to path
+   }
+
+   private void setCurrentOptimumPaths() {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               if (vars.zSPD[s][p][d])
+                  optimumPaths.put(String.valueOf(s) + String.valueOf(d), p);
+   }
+
+   private void initializeEpsilons() {
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  epsilons.put(String.valueOf(s) + String.valueOf(d) + String.valueOf(p) + String.valueOf(v), 1.0);
    }
 
    public MultiLayerConfiguration getConf() {
