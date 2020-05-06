@@ -1,25 +1,14 @@
 package optimizer.algorithms;
 
-import static optimizer.Definitions.ERROR;
-import static optimizer.Definitions.FFP_RFX;
-import static optimizer.Definitions.FIRST_FIT;
-import static optimizer.Definitions.FUNCTION_LOAD_RATIO;
-import static optimizer.Definitions.FUNCTION_OVERHEAD;
-import static optimizer.Definitions.FUNCTION_SYNC_LOAD_RATIO;
-import static optimizer.Definitions.LINK_CAPACITY;
-import static optimizer.Definitions.NODE_CLOUD;
-import static optimizer.Definitions.OPEX_SERVERS_OBJ;
-import static optimizer.Definitions.RANDOM_FIT;
-import static optimizer.Definitions.RFP_FFX;
+import static optimizer.Definitions.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.graphstream.graph.Edge;
-import org.graphstream.graph.Node;
+
 import org.graphstream.graph.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,61 +20,16 @@ import manager.elements.Service;
 import manager.elements.TrafficFlow;
 import optimizer.results.Auxiliary;
 
-public class Heuristic {
+public class NetworkManager {
 
-   private static final Logger log = LoggerFactory.getLogger(Heuristic.class);
+   private static final Logger log = LoggerFactory.getLogger(NetworkManager.class);
 
    protected Parameters pm;
    protected VariablesAlg vars;
-   protected Random rnd;
-   private String objFunc;
-   private String alg;
 
-   public Heuristic(Parameters pm, VariablesAlg variablesAlg, String objFunc, String algorithm) {
+   public NetworkManager(Parameters pm, VariablesAlg variablesAlg) {
       this.pm = pm;
       this.vars = variablesAlg;
-      rnd = new Random();
-      this.objFunc = objFunc;
-      this.alg = algorithm;
-   }
-
-   public void allocateAllServices() {
-
-      assignFunctionsToServersFromInitialPlacement(); // add overhead of functions from initial placement
-
-      for (int s = 0; s < pm.getServices().size(); s++) {
-         for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-            // get paths with enough path link resources
-            List<Integer> availablePaths = getAvailablePaths(s, d);
-            // get paths with enough servers resources
-            Map<Integer, List<List<Integer>>> pathsMappingServers = findAdmissiblePaths(availablePaths, s, d);
-            List<Integer> paths = new ArrayList<>(pathsMappingServers.keySet());
-
-            int pChosen = choosePath(paths, pm.getServices().get(s).getTrafficFlow());
-            List<List<Integer>> listAvailableServersPerFunction = pathsMappingServers.get(pChosen);
-
-            List<Integer> chosenServers = chooseServersForFunctionAllocation(s, d, pChosen,
-                  listAvailableServersPerFunction);
-            addDemandToFunctionsToSpecificServers(s, d, chosenServers);
-
-            addDemandToPath(s, pChosen, d);
-         }
-         removeUnusedFunctions(s); // remove unused servers from initial placement
-         addSyncTraffic(s); // add synchronization traffic
-      }
-   }
-
-   public List<Integer> chooseServersForFunctionAllocation(int s, int d, int pChosen,
-         List<List<Integer>> listAvailableServersPerFunction) {
-      List<Integer> specificServers = new ArrayList<>();
-      int lastPathNodeUsed = 0;
-      for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-         List<Integer> availableServers = listAvailableServersPerFunction.get(v);
-         int xChosen = chooseServerForFunction(availableServers, lastPathNodeUsed, s, pChosen, v, d);
-         specificServers.add(xChosen);
-         lastPathNodeUsed = getNodePathIndexFromServer(s, pChosen, xChosen); // save last node path used for ordering
-      }
-      return specificServers;
    }
 
    public void addDemandToFunctionsToSpecificServers(int s, int d, List<Integer> specificServers) {
@@ -156,67 +100,7 @@ public class Heuristic {
       return availablePaths;
    }
 
-   private Integer chooseFirstFitPath(List<Integer> paths, TrafficFlow tf) {
-      boolean cloudPathsFirst = false;
-      if (objFunc.equals(OPEX_SERVERS_OBJ)) // order set of admissible paths depending on the objective function
-         cloudPathsFirst = true;
-      paths = orderPaths(paths, cloudPathsFirst, tf);
-      return paths.get(0); // and take the first path
-   }
-
-   private Integer choosePath(List<Integer> paths, TrafficFlow tf) {
-
-      int chosenPath = -1;
-      if (alg.equals(FIRST_FIT) || alg.equals(FFP_RFX))
-         chosenPath = chooseFirstFitPath(paths, tf);
-      else if (alg.equals(RANDOM_FIT) || alg.equals(RFP_FFX))
-         chosenPath = paths.get(rnd.nextInt(paths.size()));
-
-      return chosenPath;
-   }
-
-   private Integer chooseFirstFitServerForFunction(List<Integer> availableServers, int lastPathNodeUsed, int s, int p,
-         int v, int d) {
-      int chosenServer = -1;
-      boolean cloudServersFirst = false;
-      if (objFunc.equals(OPEX_SERVERS_OBJ)) // order set of available servers depending on the objective function
-         cloudServersFirst = true;
-      availableServers = selectServers(availableServers, cloudServersFirst);
-      availableServers = removePreviousServersFromNodeIndex(availableServers, lastPathNodeUsed, s, p);
-
-      for (Integer xAvailable : availableServers)
-         if (checkIfFreeServerResources(s, xAvailable, v, d, 1)) {
-            chosenServer = xAvailable;
-            break;
-         }
-      return chosenServer;
-   }
-
-   private Integer chooseServerForFunction(List<Integer> availableServers, int lastPathNodeUsed, int s, int p, int v,
-         int d) {
-      int chosenServer = -1;
-
-      if (alg.equals(FIRST_FIT) || alg.equals(RFP_FFX))
-         chosenServer = chooseFirstFitServerForFunction(availableServers, lastPathNodeUsed, s, p, v, d);
-      else if (alg.equals(RANDOM_FIT) || alg.equals(FFP_RFX)) {
-         while (true) {
-            chosenServer = availableServers.get(rnd.nextInt(availableServers.size()));
-            int nodeIndex = getNodePathIndexFromServer(s, p, chosenServer);
-            if (nodeIndex >= lastPathNodeUsed)
-               break;
-         }
-      }
-
-      if (chosenServer == -1) {
-         Auxiliary.printLog(log, ERROR,
-               "function could not be allocated [s][d][p][v] = [" + s + "][" + d + "][" + p + "][" + v + "]");
-         System.exit(-1);
-      }
-      return chosenServer;
-   }
-
    public void removeUnusedFunctions(int s) {
-
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
             boolean usedServer = false;
@@ -231,7 +115,6 @@ public class Heuristic {
    }
 
    public List<List<Integer>> findServersForFunctionsInPath(int s, int d, int p) {
-
       List<List<Integer>> availableServersPerFunction = new ArrayList<>();
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
          int nStartLimit = 0;
@@ -243,20 +126,17 @@ public class Heuristic {
          if (v < pm.getServices().get(s).getFunctions().size() - 1)
             if ((index = getNodeIndexFromFunction(s, d, p, v + 1)) != -1)
                nEndLimit = index;
-
          List<Integer> availableServers = getAvailableServers(s, p, d, v, nStartLimit, nEndLimit);
          availableServersPerFunction.add(availableServers);
       }
-
       // check if functions have at least one server
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
          if (availableServersPerFunction.get(v).isEmpty())
             return null;
-
       return availableServersPerFunction;
    }
 
-   private int getNodeIndexFromFunction(int s, int d, int p, int v) {
+   public int getNodeIndexFromFunction(int s, int d, int p, int v) {
       int nodeIndex = -1;
       Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
       for (int n = 0; n < path.getNodePath().size(); n++)
@@ -268,14 +148,12 @@ public class Heuristic {
    }
 
    public Map<Integer, List<List<Integer>>> findAdmissiblePaths(List<Integer> availablePaths, int s, int d) {
-
       Map<Integer, List<List<Integer>>> admissiblePaths = new HashMap<>();
       for (Integer p : availablePaths) {
          List<List<Integer>> availableServersPerFunction = findServersForFunctionsInPath(s, d, p);
          if (availableServersPerFunction != null)// if there are servers, add path
             admissiblePaths.put(p, availableServersPerFunction);
       }
-
       if (admissiblePaths.isEmpty()) {
          // TO-DO blocking
          Auxiliary.printLog(log, ERROR, "no admissible path available for [s][d] = [" + s + "][" + d + "]");
@@ -285,18 +163,15 @@ public class Heuristic {
    }
 
    public void addSyncTraffic(int s) {
-
       for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int y = 0; y < pm.getServers().size(); y++) {
                if (pm.getServers().get(x).getParent().equals(pm.getServers().get(y).getParent()))
                   continue;
                if (vars.fXSV[x][s][v] && vars.fXSV[y][s][v]) {
-
                   vars.gSVXY[s][v][x][y] = true;
                   // calculate the sync traffic
                   double syncTraffic = calculateSyncTraffic(s, v);
-
                   // search an available path for the sync traffic
                   boolean foundSyncPath = false;
                   for (int p = 0; p < pm.getPaths().size(); p++) {
@@ -356,7 +231,7 @@ public class Heuristic {
       vars.hSVP[s][v][p] = false;
    }
 
-   private int getNodePathIndexFromServer(int s, int p, int x) {
+   public int getNodePathIndexFromServer(int s, int p, int x) {
       int nodeIndex = -1;
       Service service = pm.getServices().get(s);
       Path path = service.getTrafficFlow().getPaths().get(p);
@@ -366,11 +241,9 @@ public class Heuristic {
       return nodeIndex;
    }
 
-   private List<Integer> removePreviousServersFromNodeIndex(List<Integer> servers, int nodeIndex, int s, int p) {
-
+   public List<Integer> removePreviousServersFromNodeIndex(List<Integer> servers, int nodeIndex, int s, int p) {
       Service service = pm.getServices().get(s);
       Path path = service.getTrafficFlow().getPaths().get(p);
-
       int serverIndex = 0;
       for (int x = 0; x < servers.size(); x++)
          if (pm.getServers().get(servers.get(x)).getParent().equals(path.getNodePath().get(nodeIndex)))
@@ -380,59 +253,6 @@ public class Heuristic {
          return servers.subList(serverIndex, servers.size());
 
       return servers;
-   }
-
-   private List<Integer> selectServers(List<Integer> servers, boolean cloudFirst) {
-
-      List<Integer> chosenServers = new ArrayList<>();
-
-      if (cloudFirst) {
-         for (Integer x : servers)
-            if (pm.getServers().get(x).getParent().hasAttribute(NODE_CLOUD))
-               chosenServers.add(x);
-
-         int serverIndex = -1;
-         for (int i = 0; i < servers.size(); i++) {
-            if (!servers.get(i).equals(chosenServers.get(chosenServers.size() - 1)))
-               continue;
-            serverIndex = i + 1;
-         }
-
-         for (int i = serverIndex; i < servers.size(); i++)
-            chosenServers.add(servers.get(i));
-
-      } else
-         chosenServers = servers;
-
-      return chosenServers;
-   }
-
-   private List<Integer> orderPaths(List<Integer> paths, boolean connectingCloudFirst, TrafficFlow tf) {
-      List<Integer> pathsConnectingEdge = new ArrayList<>();
-      List<Integer> pathsConnectingCloud = new ArrayList<>();
-
-      for (Integer p : paths) {
-         boolean connectsCloud = false;
-         for (Node node : tf.getPaths().get(p).getNodePath())
-            if (node.hasAttribute(NODE_CLOUD))
-               connectsCloud = true;
-         if (connectsCloud)
-            pathsConnectingCloud.add(p);
-         else
-            pathsConnectingEdge.add(p);
-
-      }
-
-      List<Integer> orderedPaths = new ArrayList<>();
-      if (connectingCloudFirst) {
-         orderedPaths.addAll(pathsConnectingCloud);
-         orderedPaths.addAll(pathsConnectingEdge);
-      } else {
-         orderedPaths.addAll(pathsConnectingEdge);
-         orderedPaths.addAll(pathsConnectingCloud);
-      }
-
-      return orderedPaths;
    }
 
    private List<Integer> getAvailableServers(int s, int p, int d, int v, int nStartLimit, int nEndLimit) {
@@ -462,7 +282,7 @@ public class Heuristic {
       return isAvailable;
    }
 
-   private boolean checkIfFreeServerResources(int s, int x, int v, int d, int numOfFunctions) {
+   public boolean checkIfFreeServerResources(int s, int x, int v, int d, int numOfFunctions) {
       Service service = pm.getServices().get(s);
       Server server = pm.getServers().get(x);
       double trafficDemand = service.getTrafficFlow().getDemands().get(d);
@@ -498,5 +318,12 @@ public class Heuristic {
       vars.fXSV[x][s][v] = false;
       double functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
       vars.uX.put(server.getId(), vars.uX.get(server.getId()) - (functionOverhead / server.getCapacity()));
+   }
+
+   public int getUsedServerForFunction(int s, int d, int v) {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         if (vars.fXSVD[x][s][v][d])
+            return x;
+      return -1;
    }
 }

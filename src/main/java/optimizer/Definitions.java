@@ -20,6 +20,7 @@ public class Definitions {
    public static final String FFP_RFX = "ffp-rfx";
    public static final String RFP_FFX = "rfp-ffx";
    public static final String RANDOM_FIT = "rf";
+   public static final String HEU = "heu";
    public static final String DRL = "drl";
 
    // general variables

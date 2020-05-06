@@ -20,8 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import manager.Parameters;
-import optimizer.algorithms.Heuristic;
+import optimizer.algorithms.NetworkManager;
 import optimizer.algorithms.VariablesAlg;
+import optimizer.algorithms.heuristics.HeuristicAlgorithm;
 import optimizer.results.Auxiliary;
 
 public class PlacementModel2 {
@@ -32,7 +33,8 @@ public class PlacementModel2 {
    private DeepQ deepQ;
    private MultiLayerConfiguration conf;
    private final int offsetInput;
-   private Heuristic heu;
+   private NetworkManager networkManager;
+   private HeuristicAlgorithm heuristicAlgorithm;
    private Map<String, Double> epsilons;
    private Map<String, Integer> optimumPaths;
    private int outputLength;
@@ -41,12 +43,13 @@ public class PlacementModel2 {
    private static final Logger log = LoggerFactory.getLogger(PlacementModel2.class);
 
    public PlacementModel2(String conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement,
-         String objFunc, Heuristic heu) {
+         String objFunc, NetworkManager networkManager, HeuristicAlgorithm heuristicAlgorithm) {
       this.pm = pm;
       this.vars = variablesAlg;
       this.initialPlacement = initialPlacement;
       this.objFunc = objFunc;
-      this.heu = heu;
+      this.networkManager = networkManager;
+      this.heuristicAlgorithm = heuristicAlgorithm;
       offsetInput = 5;
       inputLength = pm.getServers().size() + offsetInput;
       outputLength = pm.getServers().size() + 1;
@@ -76,8 +79,7 @@ public class PlacementModel2 {
       deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
 
-   public void run() {
-
+   public void run(String algorithm) {
       initializeEpsilons();
       setCurrentOptimumPaths();
       Auxiliary.printLog(log, INFO, "DRL running...");
@@ -86,50 +88,52 @@ public class PlacementModel2 {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                // get paths with enough path link resources
-               List<Integer> availablePaths = heu.getAvailablePaths(s, d);
+               List<Integer> availablePaths = networkManager.getAvailablePaths(s, d);
                for (Integer p : availablePaths) {
                   // before placing in a new path remove previous ones
-                  heu.removeDemandFromAllFunctionsToServer(s, d);
+                  networkManager.removeDemandFromAllFunctionsToServer(s, d);
                   // and place them on servers in the path
-                  List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
+                  List<List<Integer>> availableServersPerFunction = networkManager.findServersForFunctionsInPath(s, d,
+                        p);
                   if (availableServersPerFunction == null)
                      continue;
-                  List<Integer> chosenServers = heu.chooseServersForFunctionAllocation(s, d, p,
-                        availableServersPerFunction);
-                  heu.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
+                  List<Integer> chosenServers = heuristicAlgorithm.chooseServersForFunctionAllocation(algorithm, s, d,
+                        p, availableServersPerFunction);
+                  networkManager.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
                   // route traffic to path p
                   rerouteSpecificDemand(s, d, p);
                   // then, try to optimize the locations
                   for (int j = 0; j < 10; j++) {
-                     availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, p);
+                     availableServersPerFunction = networkManager.findServersForFunctionsInPath(s, d, p);
                      float currentBestObjVal = functionPlacement(s, d, p, availableServersPerFunction, bestObjVal);
                      if (currentBestObjVal < bestObjVal) {
                         bestObjVal = currentBestObjVal;
                         Auxiliary.printLog(log, INFO, "new incumbent solution found [" + bestObjVal + "]");
                         setCurrentOptimumPaths();
-                        optimizePlacementUsingCurrentOptimumPaths(bestObjVal);
+                        optimizePlacementUsingCurrentOptimumPaths(algorithm, bestObjVal);
                      }
                   }
                }
             }
    }
 
-   private void optimizePlacementUsingCurrentOptimumPaths(float bestObjVal) {
+   private void optimizePlacementUsingCurrentOptimumPaths(String algorithm, float bestObjVal) {
       for (int i = 0; i < pm.getServices().size() * pm.getDemandsTrafficFlow() * pm.getPathsTrafficFlow(); i++) {
          for (int s = 0; s < pm.getServices().size(); s++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
                String optPathKey = String.valueOf(s) + String.valueOf(d);
                // before placing in the best path remove previous ones
-               heu.removeDemandFromAllFunctionsToServer(s, d);
+               networkManager.removeDemandFromAllFunctionsToServer(s, d);
                // and place them on servers in the best path
-               List<List<Integer>> availableServersPerFunction = heu.findServersForFunctionsInPath(s, d,
+               List<List<Integer>> availableServersPerFunction = networkManager.findServersForFunctionsInPath(s, d,
                      optimumPaths.get(optPathKey));
-               List<Integer> chosenServers = heu.chooseServersForFunctionAllocation(s, d, optimumPaths.get(optPathKey),
-                     availableServersPerFunction);
-               heu.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
+               List<Integer> chosenServers = heuristicAlgorithm.chooseServersForFunctionAllocation(algorithm, s, d,
+                     optimumPaths.get(optPathKey), availableServersPerFunction);
+               networkManager.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
                rerouteSpecificDemand(s, d, optimumPaths.get(optPathKey));
                // then, try to optimize the locations
-               availableServersPerFunction = heu.findServersForFunctionsInPath(s, d, optimumPaths.get(optPathKey));
+               availableServersPerFunction = networkManager.findServersForFunctionsInPath(s, d,
+                     optimumPaths.get(optPathKey));
                functionPlacement(s, d, optimumPaths.get(optPathKey), availableServersPerFunction, bestObjVal);
             }
       }
@@ -151,9 +155,9 @@ public class PlacementModel2 {
                int[] actionMask = generateActionMask(environment, s, availableServers);
                int action = deepQ.getAction(inputIndArray, actionMask, epsilons.get(epsilonKey));
                nextEnvironment = modifyEnvironment(environment, action, s, d, v);
-               heu.removeUnusedFunctions(s);
-               heu.removeSyncTraffic(s);
-               heu.addSyncTraffic(s);
+               networkManager.removeUnusedFunctions(s);
+               networkManager.removeSyncTraffic(s);
+               networkManager.addSyncTraffic(s);
                vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
                float currentObjVal = (float) vars.getObjVal();
                float reward = computeReward(currentObjVal, localBestObjVal);
@@ -241,8 +245,8 @@ public class PlacementModel2 {
 
       // modify variables based on the taken action
       if (xOld != -1)
-         heu.removeDemandToFunctionToServer(s, xOld, v, d);
-      heu.addDemandToFunctionToServer(s, xNew, v, d);
+         networkManager.removeDemandToFunctionToServer(s, xOld, v, d);
+      networkManager.addDemandToFunctionToServer(s, xNew, v, d);
       return nextEnvironment;
    }
 
@@ -260,8 +264,8 @@ public class PlacementModel2 {
       for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
          if (vars.zSPD[s][p][d])
             pOld = p;
-      heu.removeDemandFromPath(s, pOld, d); // remove demand from path
-      heu.addDemandToPath(s, pBest, d); // add demand to path
+      networkManager.removeDemandFromPath(s, pOld, d); // remove demand from path
+      networkManager.addDemandToPath(s, pBest, d); // add demand to path
    }
 
    private void setCurrentOptimumPaths() {

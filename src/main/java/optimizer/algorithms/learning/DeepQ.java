@@ -79,8 +79,8 @@ class DeepQ {
       if (experiences.size() >= memoryCapacity)
          experiences.remove(rnd.nextInt(experiences.size()));
       experiences.add(new Experience(inputIndArray, nextInputIndArray, lastAction, (float) reward, nextActionMask));
-      // if (startSize < experiences.size())
-      trainNetwork();
+      if (startSize < experiences.size())
+         trainNetwork();
       counter++;
       if (counter == freq) {
          counter = 0;

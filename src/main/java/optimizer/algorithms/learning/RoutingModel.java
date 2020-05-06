@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import manager.Parameters;
-import optimizer.algorithms.Heuristic;
+import optimizer.algorithms.NetworkManager;
 import optimizer.algorithms.VariablesAlg;
 import optimizer.results.Auxiliary;
 
@@ -33,14 +33,14 @@ public class RoutingModel {
    private final int offsetInput;
    protected int environmentSize;
    private float bestObjVal;
-   private Heuristic heu;
+   private NetworkManager heu;
    private PlacementModel placementModel;
    private double epsilon;
 
    private static final Logger log = LoggerFactory.getLogger(RoutingModel.class);
 
    public RoutingModel(String conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement,
-         String objFunc, Heuristic heu, PlacementModel placementModel) {
+         String objFunc, NetworkManager heu, PlacementModel placementModel) {
       this.pm = pm;
       this.vars = variablesAlg;
       this.initialPlacement = initialPlacement;

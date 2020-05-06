@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import manager.Parameters;
-import optimizer.algorithms.Heuristic;
+import optimizer.algorithms.NetworkManager;
 import optimizer.algorithms.VariablesAlg;
 import optimizer.results.Auxiliary;
 
@@ -37,12 +37,12 @@ public class PlacementModel {
    private float bestGlobalObjVal;
    private float previousObjVal;
    private Map<String, Double> epsilons;
-   private Heuristic heu;
+   private NetworkManager heu;
 
    private static final Logger log = LoggerFactory.getLogger(PlacementModel.class);
 
    public PlacementModel(String conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement,
-         String objFunc, Heuristic heu) {
+         String objFunc, NetworkManager heu) {
       this.pm = pm;
       this.vars = variablesAlg;
       this.initialPlacement = initialPlacement;
