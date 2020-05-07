@@ -76,11 +76,9 @@ public class NetworkManager {
    }
 
    private void assignFunctionToServer(int s, int x, int v) {
-      Service service = pm.getServices().get(s);
       Server server = pm.getServers().get(x);
-      Function function = service.getFunctions().get(v);
       vars.fXSV[x][s][v] = true;
-      double functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
+      double functionOverhead = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OVERHEAD);
       vars.uX.put(server.getId(), vars.uX.get(server.getId()) + (functionOverhead / server.getCapacity()));
    }
 
@@ -239,20 +237,6 @@ public class NetworkManager {
          if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
             nodeIndex = n;
       return nodeIndex;
-   }
-
-   public List<Integer> removePreviousServersFromNodeIndex(List<Integer> servers, int nodeIndex, int s, int p) {
-      Service service = pm.getServices().get(s);
-      Path path = service.getTrafficFlow().getPaths().get(p);
-      int serverIndex = 0;
-      for (int x = 0; x < servers.size(); x++)
-         if (pm.getServers().get(servers.get(x)).getParent().equals(path.getNodePath().get(nodeIndex)))
-            serverIndex = x;
-
-      if (serverIndex > 0)
-         return servers.subList(serverIndex, servers.size());
-
-      return servers;
    }
 
    private List<Integer> getAvailableServers(int s, int p, int d, int v, int nStartLimit, int nEndLimit) {

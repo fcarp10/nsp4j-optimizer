@@ -27,7 +27,6 @@ public class RoutingModel {
    protected Parameters pm;
    protected VariablesAlg vars;
    protected boolean[][][] initialPlacement;
-   protected String objFunc;
    private DeepQ deepQ;
    private MultiLayerConfiguration conf;
    private final int offsetInput;
@@ -40,11 +39,10 @@ public class RoutingModel {
    private static final Logger log = LoggerFactory.getLogger(RoutingModel.class);
 
    public RoutingModel(String conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement,
-         String objFunc, NetworkManager heu, PlacementModel placementModel) {
+         NetworkManager heu, PlacementModel placementModel) {
       this.pm = pm;
       this.vars = variablesAlg;
       this.initialPlacement = initialPlacement;
-      this.objFunc = objFunc;
       this.heu = heu;
       this.placementModel = placementModel;
       environmentSize = calculateEnvironmentLength();
@@ -91,7 +89,7 @@ public class RoutingModel {
          // generate next environment for the new chosen path
          nextEnvironment = modifyEnvironment(environment, action, timeStep);
          // calculate new objective value
-         vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
+         vars.generateRestOfVariablesForResults();
          // update new objective value to the next environment
          nextEnvironment[nextEnvironment.length - 2] = (float) vars.objVal;
          // calculate the reward and create a new experience

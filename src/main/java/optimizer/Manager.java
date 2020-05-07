@@ -82,32 +82,29 @@ public class Manager {
    }
 
    public static void main(Scenario sce) {
+      readInputParameters(sce.getInputFileName());
       try {
          // load initial placement for migrations
          interrupted = false;
          String initialPlacementFile = pm.getScenario() + "_" + INITIAL_PLACEMENT;
-         boolean[][][] initialPlacement = ResultsManager.loadInitialPlacement(initialPlacementFile, pm, sce);
-
+         GRBModel initialModel = ResultsManager.loadInitialPlacement(initialPlacementFile, pm, sce);
          // prepare results
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
-
          // select traffic demands
          specifyUsedTrafficDemands(pm, sce);
-
-         if (sce.getAlgorithm().equals(INITIAL_PLACEMENT) || sce.getAlgorithm().equals(SERVER_DIMENSIONING) || sce.getAlgorithm().equals(LP_PLACEMENT)) {
+         if (sce.getAlgorithm().equals(INITIAL_PLACEMENT) || sce.getAlgorithm().equals(SERVER_DIMENSIONING)
+               || sce.getAlgorithm().equals(LP_PLACEMENT)) {
             // load initial model for initial solution
             String initialSolutionFile = pm.getScenario() + "_" + sce.getObjFunc();
             GRBModel initialSolution = ResultsManager.loadModel(initialSolutionFile, pm, sce, false);
-
-            // make sure than no initial placement is loaded when launching initial placement
+            // make sure than no initial placement is loaded when launching initial
+            // placement
             if (sce.getAlgorithm().equals(INITIAL_PLACEMENT))
-               initialPlacement = null;
-
+               initialModel = null;
             // launch lp model
-            LauncherLP.run(pm, sce, resultsManager, initialPlacement, initialSolution);
+            LauncherLP.run(pm, sce, resultsManager, initialModel, initialSolution);
          } else
-            LauncherAlg.run(pm, sce, resultsManager, initialPlacement);
-
+            LauncherAlg.run(pm, sce, resultsManager, initialModel);
          printLog(log, INFO, "backend is ready");
       } catch (Exception e) {
          e.printStackTrace();
@@ -125,8 +122,7 @@ public class Manager {
          try {
             Graph graph = GraphManager.importTopology(path, sce.getInputFileName());
             printLog(log, INFO, "generating paths");
-            KShortestPathGenerator k = new KShortestPathGenerator(graph, 10
-                    , 5, path, sce.getInputFileName());
+            KShortestPathGenerator k = new KShortestPathGenerator(graph, 10, 5, path, sce.getInputFileName());
             k.run();
             printLog(log, INFO, "paths generated");
          } catch (Exception e) {

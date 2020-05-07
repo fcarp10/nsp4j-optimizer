@@ -16,10 +16,13 @@ import org.slf4j.Logger;
 
 import gurobi.GRB;
 import gurobi.GRBException;
+import gurobi.GRBModel;
 import gurobi.GRBVar;
+import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Service;
 import optimizer.gui.ResultsGUI;
+import static optimizer.Definitions.*;
 
 public class Auxiliary {
 
@@ -205,5 +208,53 @@ public class Auxiliary {
                   if (var[i][j][k][l] != null)
                      convertedVar[i][j][k][l] = var[i][j][k][l].get(GRB.DoubleAttr.X);
       return convertedVar;
+   }
+
+   public static boolean[][][] fXSVvarsFromInitialModel(Parameters pm, GRBModel initialModel) {
+      boolean[][][] fXSVvar = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+      try {
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (initialModel.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]")
+                        .get(GRB.DoubleAttr.X) == 1.0)
+                     fXSVvar[x][s][v] = true;
+      } catch (GRBException e) {
+         e.printStackTrace();
+      }
+      return fXSVvar;
+   }
+
+   public static boolean[][][][] fXSVDvarsFromInitialModel(Parameters pm, GRBModel initialModel) {
+      boolean[][][][] fXSVDvar = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm
+            .getDemandsTrafficFlow()];
+      try {
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     if (initialModel.getVarByName(fXSVD + "[" + x + "][" + s + "][" + v + "][" + d + "]")
+                           .get(GRB.DoubleAttr.X) == 1.0)
+                        fXSVDvar[x][s][v][d] = true;
+      } catch (GRBException e) {
+         e.printStackTrace();
+      }
+      return fXSVDvar;
+   }
+
+   public static boolean[][][] zSPDvarsFromInitialModel(Parameters pm, GRBModel initialModel) {
+      boolean[][][] zSPDvar = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm
+            .getDemandsTrafficFlow()];
+      try {
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (initialModel.getVarByName(zSPD + "[" + s + "][" + p + "][" + d + "]")
+                        .get(GRB.DoubleAttr.X) == 1.0)
+                     zSPDvar[s][p][d] = true;
+      } catch (GRBException e) {
+         e.printStackTrace();
+      }
+      return zSPDvar;
    }
 }

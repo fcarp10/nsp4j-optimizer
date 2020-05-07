@@ -67,17 +67,11 @@ public class ResultsManager {
       return conf;
    }
 
-   public static boolean[][][] loadInitialPlacement(String filename, Parameters pm, Scenario sce) throws GRBException {
+   public static GRBModel loadInitialPlacement(String filename, Parameters pm, Scenario sce) throws GRBException {
       GRBModel model = loadModel(filename, pm, sce, true);
       if (model != null) {
          Auxiliary.printLog(log, INFO, "initial placement loaded");
-         boolean[][][] fXSVvar = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
-         for (int x = 0; x < pm.getServers().size(); x++)
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (model.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0)
-                     fXSVvar[x][s][v] = true;
-         return fXSVvar;
+         return model;
       } else {
          Auxiliary.printLog(log, WARNING, "no initial placement");
          return null;

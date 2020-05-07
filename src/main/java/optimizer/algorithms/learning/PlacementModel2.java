@@ -28,8 +28,6 @@ import optimizer.results.Auxiliary;
 public class PlacementModel2 {
    protected Parameters pm;
    protected VariablesAlg vars;
-   protected boolean[][][] initialPlacement;
-   protected String objFunc;
    private DeepQ deepQ;
    private MultiLayerConfiguration conf;
    private final int offsetInput;
@@ -42,12 +40,10 @@ public class PlacementModel2 {
 
    private static final Logger log = LoggerFactory.getLogger(PlacementModel2.class);
 
-   public PlacementModel2(String conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement,
-         String objFunc, NetworkManager networkManager, HeuristicAlgorithm heuristicAlgorithm) {
+   public PlacementModel2(String conf, Parameters pm, VariablesAlg variablesAlg, NetworkManager networkManager,
+         HeuristicAlgorithm heuristicAlgorithm) {
       this.pm = pm;
       this.vars = variablesAlg;
-      this.initialPlacement = initialPlacement;
-      this.objFunc = objFunc;
       this.networkManager = networkManager;
       this.heuristicAlgorithm = heuristicAlgorithm;
       offsetInput = 5;
@@ -158,7 +154,7 @@ public class PlacementModel2 {
                networkManager.removeUnusedFunctions(s);
                networkManager.removeSyncTraffic(s);
                networkManager.addSyncTraffic(s);
-               vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
+               vars.generateRestOfVariablesForResults();
                float currentObjVal = (float) vars.getObjVal();
                float reward = computeReward(currentObjVal, localBestObjVal);
                int[] nextActionMask = generateActionMask(nextEnvironment, s, availableServers);

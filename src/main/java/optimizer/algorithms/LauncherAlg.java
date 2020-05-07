@@ -12,6 +12,8 @@ import optimizer.results.ResultsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gurobi.GRBModel;
+
 import java.io.PrintWriter;
 
 import static optimizer.Definitions.*;
@@ -21,36 +23,36 @@ public class LauncherAlg {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherAlg.class);
 
-   public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager,
-         boolean[][][] initialPlacement) {
-      VariablesAlg vars = new VariablesAlg(pm, initialPlacement);
+   public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager, GRBModel initialModel) {
+
+      VariablesAlg vars = new VariablesAlg(pm, initialModel, scenario.getObjFunc());
       NetworkManager networkManager = new NetworkManager(pm, vars);
-      HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, initialPlacement, networkManager,
-            scenario.getObjFunc());
+      HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
       long startTime = System.nanoTime();
       if (scenario.getAlgorithm().equals(DRL)) {
          printLog(log, INFO, "first placement using random-fit");
          heuristicAlgorithm.allocateAllServices(RANDOM_FIT);
+         vars.generateRestOfVariablesForResults();
          printLog(log, INFO, "starting DRL [" + (float) vars.getObjVal() + "]");
-         PlacementModel2 placementModel2 = new PlacementModel2(null, pm, vars, initialPlacement, scenario.getObjFunc(),
-               networkManager, heuristicAlgorithm);
+         PlacementModel2 placementModel2 = new PlacementModel2(null, pm, vars, networkManager, heuristicAlgorithm);
          placementModel2.run(RANDOM_FIT);
-      } else if (scenario.getAlgorithm().equals(HEU)) {
-         printLog(log, INFO, "running heuristics...");
-         heuristicAlgorithm.allocateAllServices(RANDOM_FIT);
-         printLog(log, INFO, "starting HEU [" + (float) vars.getObjVal() + "]");
-         heuristicAlgorithm.optimizePlacement(RANDOM_FIT);
-      } else {
+      }
+      // } else if (scenario.getAlgorithm().equals(HEU)) {
+      // printLog(log, INFO, "running heuristics...");
+      // heuristicAlgorithm.allocateAllServices(FIRST_FIT);
+      // printLog(log, INFO, "starting HEU [" + (float) vars.getObjVal() + "]");
+      // heuristicAlgorithm.optimizePlacement(RANDOM_FIT);
+      // }
+      else {
          printLog(log, INFO, "running " + scenario.getAlgorithm() + "...");
          heuristicAlgorithm.allocateAllServices(scenario.getAlgorithm());
       }
       long elapsedTime = System.nanoTime() - startTime;
-
-      vars.generateRestOfVariablesForResults(initialPlacement, scenario.getObjFunc());
+      vars.generateRestOfVariablesForResults();
       Auxiliary.printLog(log, INFO, "finished [" + vars.objVal + "]");
-      Results results = generateResults(pm, scenario, vars, initialPlacement);
+      Results results = generateResults(pm, scenario, vars, Auxiliary.fXSVvarsFromInitialModel(pm, initialModel));
       results.setComputationTime((double) elapsedTime / 1000000000);
-      String fileName = generateFileName(pm, scenario.getObjFunc());
+      String fileName = pm.getScenario() + "_" + scenario.getAlgorithm() + "_" + scenario.getObjFunc();
       resultsManager.exportJsonObject(fileName, results);
       exportResultsToMST(pm, resultsManager, fileName, vars);
       ResultsGUI.updateResults(results);
@@ -127,11 +129,5 @@ public class LauncherAlg {
       else
          line += "0";
       pw.println(line);
-   }
-
-   private static String generateFileName(Parameters pm, String objFunc) {
-      String fileName = pm.getScenario();
-      fileName += "_first-fit_" + objFunc;
-      return fileName;
    }
 }

@@ -28,8 +28,6 @@ import optimizer.results.Auxiliary;
 public class PlacementModel {
    protected Parameters pm;
    protected VariablesAlg vars;
-   protected boolean[][][] initialPlacement;
-   protected String objFunc;
    private DeepQ deepQ;
    private MultiLayerConfiguration conf;
    private final int offsetInput;
@@ -41,12 +39,9 @@ public class PlacementModel {
 
    private static final Logger log = LoggerFactory.getLogger(PlacementModel.class);
 
-   public PlacementModel(String conf, Parameters pm, VariablesAlg variablesAlg, boolean[][][] initialPlacement,
-         String objFunc, NetworkManager heu) {
+   public PlacementModel(String conf, Parameters pm, VariablesAlg variablesAlg, NetworkManager heu) {
       this.pm = pm;
       this.vars = variablesAlg;
-      this.initialPlacement = initialPlacement;
-      this.objFunc = objFunc;
       this.heu = heu;
       epsilons = new HashMap<>();
       environmentSize = pm.getServiceLength() * pm.getServers().size();
@@ -68,15 +63,13 @@ public class PlacementModel {
             .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE).nIn(NUM_HIDDEN_LAYERS).nOut(outputLength)
                   .weightInit(WeightInit.XAVIER).activation(Activation.IDENTITY).build())
             .build();
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE,
-            inputLength);
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
 
    private void initializeModel(String confString, int inputLength) {
       MultiLayerConfiguration conf = MultiLayerConfiguration.fromJson(confString);
       this.conf = conf;
-      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE,
-            inputLength);
+      deepQ = new DeepQ(conf, MEMORY_CAPACITY, DISCOUNT_FACTOR, BATCH_SIZE, FREQUENCY, START_SIZE, inputLength);
    }
 
    public boolean run(int s, int d, int p, float bestGlobalObjVal) {
@@ -101,7 +94,7 @@ public class PlacementModel {
             // generate next environment of on the new chosen path
             nextEnvironment = modifyEnvironment(environment, action, i, s, d);
             // calculate new objective value
-            vars.generateRestOfVariablesForResults(initialPlacement, objFunc);
+            vars.generateRestOfVariablesForResults();
             // update new objective value to the next environment
             nextEnvironment[nextEnvironment.length - 2] = (float) vars.objVal;
             // calculate the reward and create a new experience
@@ -114,8 +107,8 @@ public class PlacementModel {
             previousObjVal = (float) vars.objVal;
             if (epsilons.get(epsilonKey) > 0) {
                if ((float) vars.getObjVal() < bestGlobalObjVal) {
-                  epsilons.put(epsilonKey, Auxiliary
-                        .roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(EPSILON_STEPPER), 1));
+                  epsilons.put(epsilonKey,
+                        Auxiliary.roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(EPSILON_STEPPER), 1));
                   repetitions = 0;
                } else if ((float) vars.getObjVal() >= bestGlobalObjVal) {
                   repetitions++;

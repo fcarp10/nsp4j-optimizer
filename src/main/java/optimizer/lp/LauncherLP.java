@@ -1,6 +1,5 @@
 package optimizer.lp;
 
-
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBModel;
@@ -20,7 +19,9 @@ public class LauncherLP {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherLP.class);
 
-   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, boolean[][][] initialPlacement, GRBModel initialSolution) throws GRBException {
+   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, GRBModel initialModel,
+         GRBModel initialSolution) throws GRBException {
+      boolean[][][] initialPlacement = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
       ModelLP modelLP = new ModelLP(pm, initialSolution);
       printLog(log, INFO, "setting variables");
       VariablesLP variablesLP = new VariablesLP(pm, modelLP.getGrbModel(), sce, initialSolution);
@@ -44,7 +45,8 @@ public class LauncherLP {
       }
    }
 
-   private static GRBLinExpr generateExprForObjectiveFunction(Parameters pm, ModelLP modelLP, String objectiveFunction) throws GRBException {
+   private static GRBLinExpr generateExprForObjectiveFunction(Parameters pm, ModelLP modelLP, String objectiveFunction)
+         throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       double serversWeight, linksWeight;
       switch (objectiveFunction) {
@@ -96,7 +98,8 @@ public class LauncherLP {
       return expr;
    }
 
-   private static Results generateResults(Parameters pm, ModelLP optModelLP, Scenario sc, boolean[][][] initialPlacement) throws GRBException {
+   private static Results generateResults(Parameters pm, ModelLP optModelLP, Scenario sc,
+         boolean[][][] initialPlacement) throws GRBException {
       Results results = new Results(pm, sc);
       // general variables
       results.setVariable(zSP, Auxiliary.grbVarsToBooleans(optModelLP.getVars().zSP));
@@ -111,7 +114,7 @@ public class LauncherLP {
       if (sc.getObjFunc().equals(SERVER_DIMENSIONING))
          results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModelLP.getVars().xN));
       if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
-              || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+            || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModelLP.getVars().oX));
          results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModelLP.getVars().oSV));
          results.setVariable(qSDP, Auxiliary.grbVarsToDoubles(optModelLP.getVars().qSDP));
@@ -125,8 +128,9 @@ public class LauncherLP {
       }
 
       // service delay variables
-      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
-              || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ)
+            || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ) || sc.getObjFunc().equals(QOS_PENALTIES_OBJ)
+            || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModelLP.getVars().dSVXD));
       }
       results.initializeResults(optModelLP.getObjVal(), initialPlacement);
