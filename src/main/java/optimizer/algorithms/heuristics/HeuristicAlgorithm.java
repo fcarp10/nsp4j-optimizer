@@ -36,9 +36,10 @@ public class HeuristicAlgorithm {
     }
 
     public void allocateAllServices(String algorithm) {
-        networkManager.assignFunctionsToServersFromInitialPlacement(); // add functions from initial placement
         for (int s = 0; s < pm.getServices().size(); s++) {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+                if (s == 37)
+                    log.error("marker");
                 // get paths with enough path link resources
                 List<Integer> availablePaths = networkManager.getAvailablePaths(s, d);
                 // get paths with enough servers resources
@@ -52,7 +53,6 @@ public class HeuristicAlgorithm {
                 networkManager.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
                 networkManager.addDemandToPath(s, pChosen, d);
             }
-            networkManager.removeUnusedFunctions(s); // remove unused servers from initial placement
             networkManager.addSyncTraffic(s); // add synchronization traffic
         }
     }
@@ -181,7 +181,9 @@ public class HeuristicAlgorithm {
         else if (algorithm.equals(RANDOM_FIT) || algorithm.equals(RFP_FFX))
             return paths.get(rnd.nextInt(paths.size()));
         else if (algorithm.equals(HEU)) {
-            paths = putPathFromInitialPlacementFirst(s, d, paths);
+            int pChosen = getPathFromInitialPlacement(s, d, paths);
+            if (pChosen != -1)
+                return pChosen;
             return paths.get(0);
         }
         return -1;
@@ -193,7 +195,7 @@ public class HeuristicAlgorithm {
         int lastPathNodeUsed = 0;
         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
             List<Integer> availableServers = listAvailableServersPerFunction.get(v);
-            removePreviousServersFromNodeIndex(availableServers, lastPathNodeUsed, s, p);
+            availableServers = removePreviousServersFromNodeIndex(availableServers, lastPathNodeUsed, s, p);
             int xChosen = chooseServerForFunction(algorithm, availableServers, s, v, d);
             if (xChosen == -1) {
                 Auxiliary.printLog(log, ERROR,
@@ -223,7 +225,9 @@ public class HeuristicAlgorithm {
         else if (algorithm.equals(RANDOM_FIT) || algorithm.equals(FFP_RFX))
             return availableServers.get(rnd.nextInt(availableServers.size()));
         else if (algorithm.equals(HEU)) {
-            availableServers = putServerFromInitialPlacementFirst(s, v, d, availableServers);
+            int sChosen = getServerFromInitialPlacement(s, v, d, availableServers);
+            if (sChosen != -1)
+                return sChosen;
             return availableServers.get(0);
         }
         return -1;
@@ -258,29 +262,17 @@ public class HeuristicAlgorithm {
         networkManager.addDemandToPath(s, pBest, d); // add demand to path
     }
 
-    private List<Integer> putPathFromInitialPlacementFirst(int s, int d, List<Integer> paths) {
-        List<Integer> orderedPaths = new ArrayList<>();
+    private int getPathFromInitialPlacement(int s, int d, List<Integer> paths) {
         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            if (vars.zSPD[s][p][d] && paths.contains(p)) {
-                orderedPaths.add(p);
-                break;
-            }
-        for (int p = 0; p < paths.size(); p++)
-            if (!orderedPaths.contains(paths.get(p)))
-                orderedPaths.add(paths.get(p));
-        return orderedPaths;
+            if (vars.zSPDinitial[s][p][d] && paths.contains(p))
+                return p;
+        return -1;
     }
 
-    private List<Integer> putServerFromInitialPlacementFirst(int s, int v, int d, List<Integer> servers) {
-        List<Integer> orderedServers = new ArrayList<>();
+    private int getServerFromInitialPlacement(int s, int v, int d, List<Integer> servers) {
         for (int x = 0; x < pm.getServers().size(); x++)
-            if (vars.fXSVD[x][s][v][d] && servers.contains(x)) {
-                orderedServers.add(x);
-                break;
-            }
-        for (int x = 0; x < servers.size(); x++)
-            if (!orderedServers.contains(servers.get(x)))
-                orderedServers.add(servers.get(x));
-        return orderedServers;
+            if (vars.fXSVDinitial[x][s][v][d] && servers.contains(x))
+                return x;
+        return -1;
     }
 }

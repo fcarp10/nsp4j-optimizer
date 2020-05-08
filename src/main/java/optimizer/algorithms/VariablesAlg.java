@@ -49,6 +49,8 @@ public class VariablesAlg {
    public Map<String, Double> uL;
    public Map<String, Double> uX;
    private boolean[][][] fXSVinitial;
+   public boolean[][][] zSPDinitial;
+   public boolean[][][][] fXSVDinitial;
    private String objFunc;
 
    public VariablesAlg(Parameters pm, GRBModel initialModel, String objFunc) {
@@ -67,17 +69,11 @@ public class VariablesAlg {
       uX = new HashMap<>();
       for (Server server : pm.getServers())
          uX.put(server.getId(), 0.0);
-      if (initialModel != null)
-         copyVariablesFromInitialModel(initialModel);
-   }
-
-   private void copyVariablesFromInitialModel(GRBModel initialModel) {
-      fXSVinitial = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
-      for (int x = 0; x < pm.getServers().size(); x++)
-         for (int s = 0; s < pm.getServices().size(); s++)
-            System.arraycopy(fXSVinitial[x][s], 0, fXSV[x][s], 0, pm.getServices().get(s).getFunctions().size());
-      // zSPD = Auxiliary.zSPDvarsFromInitialModel(pm, initialModel);
-      // fXSVD = Auxiliary.fXSVDvarsFromInitialModel(pm, initialModel);
+      if (initialModel != null) {
+         fXSVinitial = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
+         zSPDinitial = Auxiliary.zSPDvarsFromInitialModel(pm, initialModel);
+         fXSVDinitial = Auxiliary.fXSVDvarsFromInitialModel(pm, initialModel);
+      }
    }
 
    public void generateRestOfVariablesForResults() {

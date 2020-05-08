@@ -67,14 +67,6 @@ public class NetworkManager {
       vars.uX.put(server.getId(), vars.uX.get(server.getId()) + (trafficDemand / server.getCapacity()));
    }
 
-   public void assignFunctionsToServersFromInitialPlacement() {
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int x = 0; x < pm.getServers().size(); x++)
-            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-               if (vars.fXSV[x][s][v])
-                  assignFunctionToServer(s, x, v);
-   }
-
    private void assignFunctionToServer(int s, int x, int v) {
       Server server = pm.getServers().get(x);
       vars.fXSV[x][s][v] = true;
