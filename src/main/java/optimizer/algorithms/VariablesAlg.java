@@ -48,16 +48,18 @@ public class VariablesAlg {
    public Parameters pm;
    public Map<String, Double> uL;
    public Map<String, Double> uX;
-   private boolean[][][] fXSVinitial;
+   public boolean[][] zSPinitial;
    public boolean[][][] zSPDinitial;
+   public boolean[][][] fXSVinitial;
    public boolean[][][][] fXSVDinitial;
    private String objFunc;
 
    public VariablesAlg(Parameters pm, GRBModel initialModel, String objFunc) {
       this.pm = pm;
       this.objFunc = objFunc;
-      fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+      zSP = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
       zSPD = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
+      fXSV = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       fXSVD = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm
             .getDemandsTrafficFlow()];
       hSVP = new boolean[pm.getServices().size()][pm.getServiceLength()][pm.getPaths().size()];
@@ -70,8 +72,9 @@ public class VariablesAlg {
       for (Server server : pm.getServers())
          uX.put(server.getId(), 0.0);
       if (initialModel != null) {
-         fXSVinitial = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
+         zSPinitial = Auxiliary.zSPvarsFromInitialModel(pm, initialModel);
          zSPDinitial = Auxiliary.zSPDvarsFromInitialModel(pm, initialModel);
+         fXSVinitial = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
          fXSVDinitial = Auxiliary.fXSVDvarsFromInitialModel(pm, initialModel);
       }
    }
@@ -84,12 +87,10 @@ public class VariablesAlg {
       for (int x = 0; x < pm.getServers().size(); x++)
          xu[x] = uX.get(pm.getServers().get(x).getId());
       fX = new boolean[pm.getServers().size()];
-      zSP = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
       oX = new double[pm.getServers().size()];
       oSV = new double[pm.getServices().size()][pm.getServiceLength()];
       qSDP = new double[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
       fXgenerate();
-      zSPgenerate();
       oXgenerate();
       oSVgenerate();
       qSDPgenerate();
@@ -106,16 +107,6 @@ public class VariablesAlg {
                      break outerLoop;
                   }
       }
-   }
-
-   private void zSPgenerate() {
-      for (int s = 0; s < pm.getServices().size(); s++)
-         for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-               if (zSPD[s][p][d]) {
-                  zSP[s][p] = true;
-                  break;
-               }
    }
 
    private void oXgenerate() {
@@ -157,15 +148,15 @@ public class VariablesAlg {
                                  double ratio = (double) function.getAttribute(FUNCTION_LOAD_RATIO)
                                        * (double) function.getAttribute(FUNCTION_PROCESS_TRAFFIC_DELAY)
                                        / (int) function.getAttribute(FUNCTION_MAX_CAP_SERVER);
-                                 double processinDelay = 0;
+                                 double processingDelay = 0;
                                  for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
                                     if (service.getTrafficFlow().getAux().get(d1))
                                        if (fXSVD[x][s][v][d1])
-                                          processinDelay += ratio * service.getTrafficFlow().getDemands().get(d1);
-                                 processinDelay += (double) function.getAttribute(FUNCTION_MIN_PROCESS_DELAY);
-                                 processinDelay += (double) function.getAttribute(FUNCTION_PROCESS_DELAY)
+                                          processingDelay += ratio * service.getTrafficFlow().getDemands().get(d1);
+                                 processingDelay += (double) function.getAttribute(FUNCTION_MIN_PROCESS_DELAY);
+                                 processingDelay += (double) function.getAttribute(FUNCTION_PROCESS_DELAY)
                                        * uX.get(pm.getServers().get(x).getId());
-                                 serviceDelay += processinDelay;
+                                 serviceDelay += processingDelay;
                               }
 
                   // propagation delay

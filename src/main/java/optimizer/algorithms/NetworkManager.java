@@ -232,8 +232,8 @@ public class NetworkManager {
    }
 
    private List<Integer> getAvailableServers(int s, int p, int d, int v, int nStartLimit, int nEndLimit) {
-      Service service = pm.getServices().get(s);
-      Path path = service.getTrafficFlow().getPaths().get(p);
+      Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
+      int numOfRemainingFunctions = pm.getServices().get(s).getFunctions().size() - v;
       List<Integer> availableServers = new ArrayList<>();
       for (int n = nStartLimit; n <= nEndLimit; n++)
          for (int x = 0; x < pm.getServers().size(); x++)
@@ -241,7 +241,7 @@ public class NetworkManager {
                if (vars.fXSVD[x][s][v][d])
                   availableServers.add(x);
                else if (vars.fXSV[x][s][v] || !vars.fXSVD[x][s][v][d])
-                  if (checkIfFreeServerResources(s, x, v, d, service.getFunctions().size()))
+                  if (checkIfFreeResourcesToExpandFunction(s, x, v, d, numOfRemainingFunctions))
                      availableServers.add(x);
                break;
             }
@@ -258,15 +258,13 @@ public class NetworkManager {
       return isAvailable;
    }
 
-   public boolean checkIfFreeServerResources(int s, int x, int v, int d, int numOfFunctions) {
-      Service service = pm.getServices().get(s);
-      Server server = pm.getServers().get(x);
-      double trafficDemand = service.getTrafficFlow().getDemands().get(d);
-      Function function = service.getFunctions().get(v);
-      int functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
-      double trafficLoad = trafficDemand * (double) function.getAttribute(FUNCTION_LOAD_RATIO);
-      double resourcesToAdd = (trafficLoad + functionOverhead) * numOfFunctions;
-      return vars.uX.get(server.getId()) + (resourcesToAdd / server.getCapacity()) <= 1.0;
+   public boolean checkIfFreeResourcesToExpandFunction(int s, int x, int v, int d, int numOfRemainingFunctions) {
+      int functionOverhead = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OVERHEAD);
+      double trafficLoad = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
+            * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
+      double resourcesToAdd = (trafficLoad + functionOverhead) * numOfRemainingFunctions;
+      return vars.uX.get(pm.getServers().get(x).getId())
+            + (resourcesToAdd / pm.getServers().get(x).getCapacity()) <= 1.0;
    }
 
    public void removeDemandFromPath(int s, int p, int d) {
@@ -276,6 +274,14 @@ public class NetworkManager {
          vars.uL.put(pathLink.getId(),
                vars.uL.get(pathLink.getId()) - (trafficDemand / (int) pathLink.getAttribute(LINK_CAPACITY)));
       vars.zSPD[s][p][d] = false;
+      boolean notUsedPath = true;
+      for (int d1 = 0; d1 < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d1++)
+         if (vars.zSPD[s][p][d]) {
+            notUsedPath = false;
+            break;
+         }
+      if (notUsedPath)
+         vars.zSP[s][p] = false;
    }
 
    public void addDemandToPath(int s, int p, int d) {
@@ -285,6 +291,8 @@ public class NetworkManager {
          vars.uL.put(pathLink.getId(),
                vars.uL.get(pathLink.getId()) + (trafficDemand / (int) pathLink.getAttribute(LINK_CAPACITY)));
       vars.zSPD[s][p][d] = true;
+      if (!vars.zSP[s][p])
+         vars.zSP[s][p] = true;
    }
 
    private void removeFunctionFromServer(int s, int x, int v) {

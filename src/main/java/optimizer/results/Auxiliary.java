@@ -210,6 +210,35 @@ public class Auxiliary {
       return convertedVar;
    }
 
+   public static boolean[][] zSPvarsFromInitialModel(Parameters pm, GRBModel initialModel) {
+      boolean[][] zSPvar = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
+      try {
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               if (initialModel.getVarByName(zSP + "[" + s + "][" + p + "]").get(GRB.DoubleAttr.X) == 1.0)
+                  zSPvar[s][p] = true;
+      } catch (GRBException e) {
+         e.printStackTrace();
+      }
+      return zSPvar;
+   }
+
+   public static boolean[][][] zSPDvarsFromInitialModel(Parameters pm, GRBModel initialModel) {
+      boolean[][][] zSPDvar = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm
+            .getDemandsTrafficFlow()];
+      try {
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (initialModel.getVarByName(zSPD + "[" + s + "][" + p + "][" + d + "]")
+                        .get(GRB.DoubleAttr.X) == 1.0)
+                     zSPDvar[s][p][d] = true;
+      } catch (GRBException e) {
+         e.printStackTrace();
+      }
+      return zSPDvar;
+   }
+
    public static boolean[][][] fXSVvarsFromInitialModel(Parameters pm, GRBModel initialModel) {
       boolean[][][] fXSVvar = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       try {
@@ -240,21 +269,5 @@ public class Auxiliary {
          e.printStackTrace();
       }
       return fXSVDvar;
-   }
-
-   public static boolean[][][] zSPDvarsFromInitialModel(Parameters pm, GRBModel initialModel) {
-      boolean[][][] zSPDvar = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm
-            .getDemandsTrafficFlow()];
-      try {
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (initialModel.getVarByName(zSPD + "[" + s + "][" + p + "][" + d + "]")
-                        .get(GRB.DoubleAttr.X) == 1.0)
-                     zSPDvar[s][p][d] = true;
-      } catch (GRBException e) {
-         e.printStackTrace();
-      }
-      return zSPDvar;
    }
 }
