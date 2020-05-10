@@ -21,7 +21,9 @@ public class LauncherLP {
 
    public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, GRBModel initialModel,
          GRBModel initialSolution) throws GRBException {
-      boolean[][][] initialPlacement = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
+      boolean[][][] initialPlacement = null;
+      if (initialModel != null)
+         initialPlacement = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
       ModelLP modelLP = new ModelLP(pm, initialSolution);
       printLog(log, INFO, "setting variables");
       VariablesLP variablesLP = new VariablesLP(pm, modelLP.getGrbModel(), sce, initialSolution);

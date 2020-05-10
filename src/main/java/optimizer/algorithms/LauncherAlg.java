@@ -36,14 +36,12 @@ public class LauncherAlg {
          printLog(log, INFO, "starting DRL [" + (float) vars.getObjVal() + "]");
          PlacementModel2 placementModel2 = new PlacementModel2(null, pm, vars, networkManager, heuristicAlgorithm);
          placementModel2.run(RANDOM_FIT);
-      }
-      // } else if (scenario.getAlgorithm().equals(HEU)) {
-      // printLog(log, INFO, "running heuristics...");
-      // heuristicAlgorithm.allocateAllServices(FIRST_FIT);
-      // printLog(log, INFO, "starting HEU [" + (float) vars.getObjVal() + "]");
-      // heuristicAlgorithm.optimizePlacement(RANDOM_FIT);
-      // }
-      else {
+      } else if (scenario.getAlgorithm().equals(HEU)) {
+         printLog(log, INFO, "running heuristics...");
+         heuristicAlgorithm.allocateAllServices(scenario.getAlgorithm());
+         // vars.generateRestOfVariablesForResults();
+         // heuristicAlgorithm.optimizePlacement(RANDOM_FIT);
+      } else {
          printLog(log, INFO, "running " + scenario.getAlgorithm() + "...");
          heuristicAlgorithm.allocateAllServices(scenario.getAlgorithm());
       }

@@ -1,0 +1,79 @@
+DGS004
+test 0 0
+
+an n0 x:-117.42605 y:47.65878 num_servers:1 server_capacity:2000 process_delay:0
+an n1 x:-116.78047 y:47.67768 num_servers:1 server_capacity:2000 process_delay:0
+an n2 x:-120.31035 y:47.42346 num_servers:1 server_capacity:2000 process_delay:0
+an n3 x:-119.17529 y:46.82597 num_servers:1 server_capacity:2000 process_delay:0
+an n4 x:-118.34302 y:46.06458 num_servers:1 server_capacity:2000 process_delay:0
+an n5 x:-119.10057 y:46.23958 num_servers:1 server_capacity:2000 process_delay:0
+an n6 x:-117.17962 y:46.73127 num_servers:1 server_capacity:2000 process_delay:0
+an n7 x:-117.01766 y:46.41655 num_servers:1 server_capacity:2000 process_delay:0
+an n8 x:-119.13723 y:46.21125 num_servers:1 server_capacity:2000 process_delay:0
+an n9 x:-120.5059 y:46.60207 num_servers:1 server_capacity:2000 process_delay:0
+an n10 x:-120.54785 y:46.99651 num_servers:1 server_capacity:2000 process_delay:0
+an n11 x:-123.11934 y:49.24966 num_servers:1 server_capacity:2000 process_delay:0
+an n12 x:-122.48822 y:48.75955 num_servers:1 server_capacity:2000 process_delay:0
+an n13 x:-122.33405 y:48.42122 num_servers:1 server_capacity:2000 process_delay:0
+an n14 x:-122.20208 y:47.97898 num_servers:1 server_capacity:2000 process_delay:0
+an n15 x:-122.3377 y:47.6129 num_servers:1 server_capacity:2000 process_delay:0
+an n16 x:-122.44429 y:47.25288 num_servers:1 server_capacity:2000 process_delay:0
+an n17 x:-122.9007 y:47.03787 num_servers:1 server_capacity:2000 process_delay:0
+an n18 x:-122.67621 y:45.52345 num_servers:1 server_capacity:2000 process_delay:0
+an n19 x:-122.00 y:40.67 x_gui:-122.00 y_gui:45.0 num_servers:1 server_capacity:100000 process_delay:0 node_cloud:true
+
+
+ae n0n1 n0 > n1 capacity:1000
+ae n0n2 n0 > n2 capacity:1000
+ae n0n3 n0 > n3 capacity:1000
+ae n0n6 n0 > n6 capacity:1000
+ae n1n0 n1 > n0 capacity:1000
+ae n2n0 n2 > n0 capacity:1000
+ae n2n10 n2 > n10 capacity:1000
+ae n2n15 n2 > n15 capacity:1000
+ae n3n0 n3 > n0 capacity:1000
+ae n3n9 n3 > n9 capacity:1000
+ae n4n5 n4 > n5 capacity:1000
+ae n4n8 n4 > n8 capacity:1000
+ae n5n4 n5 > n4 capacity:1000
+ae n5n8 n5 > n8 capacity:1000
+ae n5n9 n5 > n9 capacity:1000
+ae n6n0 n6 > n0 capacity:1000
+ae n6n7 n6 > n7 capacity:1000
+ae n7n6 n7 > n6 capacity:1000
+ae n8n4 n8 > n4 capacity:1000
+ae n8n5 n8 > n5 capacity:1000
+ae n8n9 n8 > n9 capacity:1000
+ae n8n18 n8 > n18 capacity:1000
+ae n9n3 n9 > n3 capacity:1000
+ae n9n5 n9 > n5 capacity:1000
+ae n9n8 n9 > n8 capacity:1000
+ae n9n10 n9 > n10 capacity:1000
+ae n9n15 n9 > n15 capacity:1000
+ae n10n2 n10 > n2 capacity:1000
+ae n10n9 n10 > n9 capacity:1000
+ae n11n12 n11 > n12 capacity:1000
+ae n11n15 n11 > n15 capacity:1000
+ae n12n11 n12 > n11 capacity:1000
+ae n12n13 n12 > n13 capacity:1000
+ae n13n12 n13 > n12 capacity:1000
+ae n13n14 n13 > n14 capacity:1000
+ae n14n13 n14 > n13 capacity:1000
+ae n14n15 n14 > n15 capacity:1000
+ae n15n2 n15 > n2 capacity:1000
+ae n15n9 n15 > n9 capacity:1000
+ae n15n11 n15 > n11 capacity:1000
+ae n15n14 n15 > n14 capacity:1000
+ae n15n16 n15 > n16 capacity:1000
+ae n15n18 n15 > n18 capacity:1000
+ae n16n15 n16 > n15 capacity:1000
+ae n16n17 n16 > n17 capacity:1000
+ae n17n16 n17 > n16 capacity:1000
+ae n17n18 n17 > n18 capacity:1000
+ae n18n8 n18 > n8 capacity:1000
+ae n18n15 n18 > n15 capacity:1000
+ae n18n17 n18 > n17 capacity:1000
+ae n18n19 n18 > n19 capacity:1000000 link_cloud:true
+ae n19n18 n19 > n18 capacity:1000000 link_cloud:true
+
+
