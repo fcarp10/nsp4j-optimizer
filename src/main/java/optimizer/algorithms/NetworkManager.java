@@ -116,7 +116,8 @@ public class NetworkManager {
          if (v < pm.getServices().get(s).getFunctions().size() - 1)
             if ((index = getNodeIndexFromFunction(s, d, p, v + 1)) != -1)
                nEndLimit = index;
-         List<Integer> availableServers = getAvailableServers(s, p, d, v, nStartLimit, nEndLimit);
+         int numOfFunctions = pm.getServices().get(s).getFunctions().size() - v;
+         List<Integer> availableServers = getAvailableServers(s, p, d, v, nStartLimit, nEndLimit, numOfFunctions, true);
          availableServersPerFunction.add(availableServers);
       }
       // check if functions have at least one server
@@ -124,6 +125,23 @@ public class NetworkManager {
          if (availableServersPerFunction.get(v).isEmpty())
             return null;
       return availableServersPerFunction;
+   }
+
+   public List<Integer> findServersForSpecificFunction(int s, int d, int p, int v, boolean considerOverhead,
+         boolean isForIndividualFunction) {
+      int numOfFunctions = pm.getServices().get(s).getFunctions().size() - v;
+      if (isForIndividualFunction)
+         numOfFunctions = 1;
+      int nStartLimit = 0;
+      int nEndLimit = pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().size() - 1;
+      int index;
+      if (v > 0)
+         if ((index = getNodeIndexFromFunction(s, d, p, v - 1)) != -1)
+            nStartLimit = index;
+      if (v < pm.getServices().get(s).getFunctions().size() - 1)
+         if ((index = getNodeIndexFromFunction(s, d, p, v + 1)) != -1)
+            nEndLimit = index;
+      return getAvailableServers(s, p, d, v, nStartLimit, nEndLimit, numOfFunctions, considerOverhead);
    }
 
    public int getNodeIndexFromFunction(int s, int d, int p, int v) {
@@ -137,12 +155,34 @@ public class NetworkManager {
       return nodeIndex;
    }
 
-   public Map<Integer, List<List<Integer>>> findAdmissiblePaths(List<Integer> availablePaths, int s, int d) {
+   public Map<Integer, List<List<Integer>>> findAdmissiblePathsServersMap(List<Integer> availablePaths, int s, int d) {
       Map<Integer, List<List<Integer>>> admissiblePaths = new HashMap<>();
       for (Integer p : availablePaths) {
          List<List<Integer>> availableServersPerFunction = findServersForFunctionsInPath(s, d, p);
          if (availableServersPerFunction != null)// if there are servers, add path
             admissiblePaths.put(p, availableServersPerFunction);
+      }
+      if (admissiblePaths.isEmpty()) {
+         // TO-DO blocking
+         Auxiliary.printLog(log, ERROR, "no admissible path available for [s][d] = [" + s + "][" + d + "]");
+         System.exit(-1);
+      }
+      return admissiblePaths;
+   }
+
+   public List<Integer> findAdmissiblePaths(List<Integer> availablePaths, int s, int d, boolean considerOverhead) {
+      List<Integer> admissiblePaths = new ArrayList<>();
+      for (Integer p : availablePaths) {
+         boolean isPathAvailable = true;
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            List<Integer> availableServers = findServersForSpecificFunction(s, d, p, v, considerOverhead, false);
+            if (availableServers.isEmpty()) {// if there are servers
+               isPathAvailable = false;
+               break;
+            }
+         }
+         if (isPathAvailable)
+            admissiblePaths.add(p);
       }
       if (admissiblePaths.isEmpty()) {
          // TO-DO blocking
@@ -231,9 +271,9 @@ public class NetworkManager {
       return nodeIndex;
    }
 
-   private List<Integer> getAvailableServers(int s, int p, int d, int v, int nStartLimit, int nEndLimit) {
+   private List<Integer> getAvailableServers(int s, int p, int d, int v, int nStartLimit, int nEndLimit,
+         int numOfFunctions, boolean considerOverhead) {
       Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
-      int numOfRemainingFunctions = pm.getServices().get(s).getFunctions().size() - v;
       List<Integer> availableServers = new ArrayList<>();
       for (int n = nStartLimit; n <= nEndLimit; n++)
          for (int x = 0; x < pm.getServers().size(); x++)
@@ -241,7 +281,7 @@ public class NetworkManager {
                if (vars.fXSVD[x][s][v][d])
                   availableServers.add(x);
                else if (vars.fXSV[x][s][v] || !vars.fXSVD[x][s][v][d])
-                  if (checkIfFreeResourcesToExpandFunction(s, x, v, d, numOfRemainingFunctions))
+                  if (checkIfFreeResourcesToExpandFunction(s, x, v, d, numOfFunctions, considerOverhead))
                      availableServers.add(x);
                break;
             }
@@ -258,11 +298,14 @@ public class NetworkManager {
       return isAvailable;
    }
 
-   public boolean checkIfFreeResourcesToExpandFunction(int s, int x, int v, int d, int numOfRemainingFunctions) {
-      int functionOverhead = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OVERHEAD);
+   public boolean checkIfFreeResourcesToExpandFunction(int s, int x, int v, int d, int numOfFunctions,
+         boolean considerOverhead) {
+      int functionOverhead = 0;
+      if (considerOverhead)
+         functionOverhead = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OVERHEAD);
       double trafficLoad = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
             * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
-      double resourcesToAdd = (trafficLoad + functionOverhead) * numOfRemainingFunctions;
+      double resourcesToAdd = (trafficLoad + functionOverhead) * numOfFunctions;
       return vars.uX.get(pm.getServers().get(x).getId())
             + (resourcesToAdd / pm.getServers().get(x).getCapacity()) <= 1.0;
    }

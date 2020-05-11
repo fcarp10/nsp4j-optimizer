@@ -93,8 +93,8 @@ public class PlacementModel2 {
                         p);
                   if (availableServersPerFunction == null)
                      continue;
-                  List<Integer> chosenServers = heuristicAlgorithm.chooseServersForFunctionAllocation(algorithm, s, d,
-                        p, availableServersPerFunction);
+                  List<Integer> chosenServers = heuristicAlgorithm.chooseServersForAllFunctions(algorithm, s, d, p,
+                        availableServersPerFunction);
                   networkManager.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
                   // route traffic to path p
                   rerouteSpecificDemand(s, d, p);
@@ -123,7 +123,7 @@ public class PlacementModel2 {
                // and place them on servers in the best path
                List<List<Integer>> availableServersPerFunction = networkManager.findServersForFunctionsInPath(s, d,
                      optimumPaths.get(optPathKey));
-               List<Integer> chosenServers = heuristicAlgorithm.chooseServersForFunctionAllocation(algorithm, s, d,
+               List<Integer> chosenServers = heuristicAlgorithm.chooseServersForAllFunctions(algorithm, s, d,
                      optimumPaths.get(optPathKey), availableServersPerFunction);
                networkManager.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
                rerouteSpecificDemand(s, d, optimumPaths.get(optPathKey));

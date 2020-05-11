@@ -39,17 +39,26 @@ public class HeuristicAlgorithm {
         this.placementIncumbent = new HashMap<>();
     }
 
-    public void allocateAllServices(String algorithm) {
+    public void allocateServices(String algorithm) {
+        // first place demands from initial placement
+        for (int s = 0; s < pm.getServices().size(); s++) {
+            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                allocateDemandFromService(algorithm, s, d);
+            networkManager.addSyncTraffic(s);
+        }
+    }
+
+    public void allocateServicesHeuristic(String algorithm) {
         // first place demands from initial placement
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                 if (checkIfDemandWasInInitialPlacement(s, d))
-                    allocateDemandFromService(algorithm, s, d);
+                    allocateDemandFromServiceHeuristics(algorithm, s, d);
         // then the rest
         for (int s = 0; s < pm.getServices().size(); s++) {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                 if (!checkIfDemandWasInInitialPlacement(s, d))
-                    allocateDemandFromService(algorithm, s, d);
+                    allocateDemandFromServiceHeuristics(algorithm, s, d);
             networkManager.addSyncTraffic(s);
         }
     }
@@ -58,16 +67,56 @@ public class HeuristicAlgorithm {
         // get paths with enough path link resources
         List<Integer> availablePaths = networkManager.getAvailablePaths(s, d);
         // get paths with enough servers resources
-        Map<Integer, List<List<Integer>>> pathsMapServers = networkManager.findAdmissiblePaths(availablePaths, s, d);
+        Map<Integer, List<List<Integer>>> pathsMapServers = networkManager.findAdmissiblePathsServersMap(availablePaths,
+                s, d);
         List<Integer> paths = new ArrayList<>(pathsMapServers.keySet());
         int pChosen = choosePath(alg, s, d, paths);
         List<List<Integer>> availableServers = pathsMapServers.get(pChosen);
-        List<Integer> chosenServers = chooseServersForFunctionAllocation(alg, s, d, pChosen, availableServers);
+        List<Integer> chosenServers = chooseServersForAllFunctions(alg, s, d, pChosen, availableServers);
         networkManager.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
         networkManager.addDemandToPath(s, pChosen, d);
     }
 
-    public void optimizePlacement(String algorithm) {
+    private void allocateDemandFromServiceHeuristics(String alg, int s, int d) {
+        // get paths with enough path link resources
+        List<Integer> availablePaths = networkManager.getAvailablePaths(s, d);
+        boolean foundPath = false;
+        for (int p = 0; p < availablePaths.size(); p++) {
+            int pChosen = choosePath(alg, s, d, availablePaths);
+            // allocate functions on that path
+            List<Integer> functionServerMapping = new ArrayList<>();
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                // find available servers for function v
+                List<Integer> availableServers = networkManager.findServersForSpecificFunction(s, d, pChosen, v, true,
+                        true);
+                if (availableServers.isEmpty())
+                    break;
+                // choose one server
+                int xChosen = chooseServerForSpecificFunction(alg, s, d, pChosen, v, availableServers);
+                // add demand to server
+                networkManager.addDemandToFunctionToServer(s, xChosen, v, d);
+                functionServerMapping.add(xChosen);
+            }
+            if (functionServerMapping.size() == pm.getServices().get(s).getFunctions().size()) {
+                // add demand to links
+                networkManager.addDemandToPath(s, pChosen, d);
+                foundPath = true;
+                break;
+            } else {
+                for (int v = 0; v < functionServerMapping.size(); v++)
+                    networkManager.removeDemandToFunctionToServer(s, functionServerMapping.get(v), v, d);
+                availablePaths.remove(p);
+                p--;
+            }
+        }
+        if (!foundPath) {
+            // TO-DO blocking
+            Auxiliary.printLog(log, ERROR, "no admissible path available for [s][d] = [" + s + "][" + d + "]");
+            System.exit(-1);
+        }
+    }
+
+    public void optimizePlacement(String alg) {
         setPathsIncumbent();
         setPlacementIncumbent();
         double bestKnownObjVal = vars.objVal;
@@ -86,12 +135,10 @@ public class HeuristicAlgorithm {
                     // before placing in a new path remove functions from previous path
                     networkManager.removeDemandFromAllFunctionsToServer(s, d);
                     // and place them on servers in the current path
-                    List<List<Integer>> availableServersPerFunction = networkManager.findServersForFunctionsInPath(s, d,
-                            p);
-                    if (availableServersPerFunction == null)
+                    List<List<Integer>> serversPerFunction = networkManager.findServersForFunctionsInPath(s, d, p);
+                    if (serversPerFunction == null)
                         continue;
-                    List<Integer> chosenServers = chooseServersForFunctionAllocation(algorithm, s, d, p,
-                            availableServersPerFunction);
+                    List<Integer> chosenServers = chooseServersForAllFunctions(alg, s, d, p, serversPerFunction);
                     networkManager.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
                     // route traffic to path p
                     rerouteSpecificDemand(s, d, p);
@@ -205,7 +252,7 @@ public class HeuristicAlgorithm {
         return -1;
     }
 
-    public List<Integer> chooseServersForFunctionAllocation(String algorithm, int s, int d, int p,
+    public List<Integer> chooseServersForAllFunctions(String algorithm, int s, int d, int p,
             List<List<Integer>> listAvailableServersPerFunction) {
         List<Integer> specificServers = new ArrayList<>();
         int lastPathNodeUsed = 0;
@@ -224,6 +271,29 @@ public class HeuristicAlgorithm {
         return specificServers;
     }
 
+    public int chooseServerForSpecificFunction(String algorithm, int s, int d, int p, int v,
+            List<Integer> availableServers) {
+        if (v > 0) {
+            int previousServer = networkManager.getUsedServerForFunction(s, d, v - 1);
+            int serverFromPreviousFunction = networkManager.getNodePathIndexFromServer(s, p, previousServer);
+            availableServers = removePreviousServersFromNodeIndex(availableServers, serverFromPreviousFunction, s, p);
+        }
+        if (v < pm.getServices().get(s).getFunctions().size() - 1) {
+            int nextServer = networkManager.getUsedServerForFunction(s, d, v + 1);
+            if (nextServer != -1) {
+                int serverFromNextFunction = networkManager.getNodePathIndexFromServer(s, p, nextServer);
+                availableServers = removeNextServersFromNodeIndex(availableServers, serverFromNextFunction, s, p);
+            }
+        }
+        int xChosen = chooseServerForFunction(algorithm, availableServers, s, v, d);
+        if (xChosen == -1) {
+            Auxiliary.printLog(log, ERROR,
+                    "function could not be allocated [s][d][p][v] = [" + s + "][" + d + "][" + p + "][" + v + "]");
+            System.exit(-1);
+        }
+        return xChosen;
+    }
+
     public List<Integer> removePreviousServersFromNodeIndex(List<Integer> servers, int nodeIndex, int s, int p) {
         int serverIndex = 0;
         for (int x = 0; x < servers.size(); x++)
@@ -235,22 +305,49 @@ public class HeuristicAlgorithm {
         return servers;
     }
 
+    public List<Integer> removeNextServersFromNodeIndex(List<Integer> servers, int nodeIndex, int s, int p) {
+        int serverIndex = 0;
+        for (int x = 0; x < servers.size(); x++)
+            if (pm.getServers().get(servers.get(x)).getParent()
+                    .equals(pm.getServices().get(s).getTrafficFlow().getPaths().get(p).getNodePath().get(nodeIndex)))
+                serverIndex = x;
+        if (serverIndex > 0)
+            return servers.subList(0, serverIndex);
+        return servers;
+    }
+
     private Integer chooseServerForFunction(String algorithm, List<Integer> availableServers, int s, int v, int d) {
         if (algorithm.equals(FIRST_FIT) || algorithm.equals(RFP_FFX))
             return availableServers.get(0);
         else if (algorithm.equals(RANDOM_FIT) || algorithm.equals(FFP_RFX))
             return availableServers.get(rnd.nextInt(availableServers.size()));
         else if (algorithm.equals(HEU)) {
-            int sChosen = getAlreadyUsedServerforDemandFromInitialPlacement(s, v, d, availableServers);
-            if (sChosen != -1)
-                return sChosen;
-            sChosen = getAlreadyUsedServerFromInitialPlacement(s, v, availableServers);
-            if (sChosen != -1)
-                return sChosen;
-            sChosen = getAlreadyUsedServerForService(s, v, availableServers);
-            if (sChosen != -1)
-                return sChosen;
-            return availableServers.get(0);
+            // to minimize migrations
+            int xChosen = getAlreadyUsedServerforDemandFromInitialPlacement(s, v, d, availableServers);
+            if (xChosen != -1)
+                return xChosen;
+            // if the cloud is one of the available servers
+            int xCloud = -1;
+            for (int x = 0; x < availableServers.size(); x++)
+                if (pm.getServers().get(availableServers.get(x)).getParent().getAttribute(NODE_CLOUD) != null)
+                    xCloud = availableServers.get(x);
+            // to minimize replications
+            int xUsedForAnotherDemand = getAlreadyUsedServerFromInitialPlacement(s, v, availableServers);
+            if (xUsedForAnotherDemand != -1)
+                if (availableServers.indexOf(xUsedForAnotherDemand) < availableServers.indexOf(xCloud))
+                    return xUsedForAnotherDemand;
+            xUsedForAnotherDemand = getAlreadyUsedServerForService(s, v, availableServers);
+            if (xUsedForAnotherDemand != -1)
+                if (availableServers.indexOf(xUsedForAnotherDemand) < availableServers.indexOf(xCloud))
+                    return xUsedForAnotherDemand;
+            if (xCloud != -1) {
+                if (availableServers.indexOf(xCloud) > 0)
+                    return availableServers.get(0);
+                else
+                    return xCloud;
+            } else
+                return availableServers.get(0);
+
         }
         return -1;
     }
@@ -330,45 +427,13 @@ public class HeuristicAlgorithm {
         int pathWithLowestDelay = 0;
         double lowestDelay = Double.MAX_VALUE;
         for (int p = 0; p < paths.size(); p++) {
-            double pathDelay = getCurrentServiceDelay(s, d, paths.get(p));
+            double pathDelay = vars.getCurrentServiceDelay(s, d, paths.get(p));
             if (pathDelay < lowestDelay) {
                 lowestDelay = pathDelay;
                 pathWithLowestDelay = paths.get(p);
             }
         }
         return pathWithLowestDelay;
-    }
-
-    private double getCurrentServiceDelay(int s, int d, int p) {
-        double serviceDelay = 0;
-        Service service = pm.getServices().get(s);
-        Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(p);
-        // processing delay
-        for (int n = 0; n < path.getNodePath().size(); n++)
-            for (int x = 0; x < pm.getServers().size(); x++)
-                if (pm.getServers().get(x).getParent().equals(path.getNodePath().get(n)))
-                    for (int v = 0; v < service.getFunctions().size(); v++)
-                        if (vars.fXSVD[x][s][v][d]) {
-                            Function function = service.getFunctions().get(v);
-                            double ratio = (double) function.getAttribute(FUNCTION_LOAD_RATIO)
-                                    * (double) function.getAttribute(FUNCTION_PROCESS_TRAFFIC_DELAY)
-                                    / (int) function.getAttribute(FUNCTION_MAX_CAP_SERVER);
-                            double processingDelay = 0;
-                            for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
-                                if (service.getTrafficFlow().getAux().get(d1))
-                                    if (vars.fXSVD[x][s][v][d1])
-                                        processingDelay += ratio * service.getTrafficFlow().getDemands().get(d1);
-                            processingDelay += (double) function.getAttribute(FUNCTION_MIN_PROCESS_DELAY);
-                            processingDelay += (double) function.getAttribute(FUNCTION_PROCESS_DELAY)
-                                    * vars.uX.get(pm.getServers().get(x).getId());
-                            serviceDelay += processingDelay;
-                        }
-        // propagation delay
-        double pathDelay = 0.0;
-        for (Edge link : path.getEdgePath())
-            pathDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
-        serviceDelay += pathDelay;
-        return serviceDelay;
     }
 
     private boolean checkIfDemandWasInInitialPlacement(int s, int d) {

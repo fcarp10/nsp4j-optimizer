@@ -31,19 +31,19 @@ public class LauncherAlg {
       long startTime = System.nanoTime();
       if (scenario.getAlgorithm().equals(DRL)) {
          printLog(log, INFO, "first placement using random-fit");
-         heuristicAlgorithm.allocateAllServices(RANDOM_FIT);
+         heuristicAlgorithm.allocateServices(RANDOM_FIT);
          vars.generateRestOfVariablesForResults();
          printLog(log, INFO, "starting DRL [" + (float) vars.getObjVal() + "]");
          PlacementModel2 placementModel2 = new PlacementModel2(null, pm, vars, networkManager, heuristicAlgorithm);
          placementModel2.run(RANDOM_FIT);
       } else if (scenario.getAlgorithm().equals(HEU)) {
          printLog(log, INFO, "running heuristics...");
-         heuristicAlgorithm.allocateAllServices(scenario.getAlgorithm());
+         heuristicAlgorithm.allocateServicesHeuristic(scenario.getAlgorithm());
          // vars.generateRestOfVariablesForResults();
          // heuristicAlgorithm.optimizePlacement(RANDOM_FIT);
       } else {
          printLog(log, INFO, "running " + scenario.getAlgorithm() + "...");
-         heuristicAlgorithm.allocateAllServices(scenario.getAlgorithm());
+         heuristicAlgorithm.allocateServices(scenario.getAlgorithm());
       }
       long elapsedTime = System.nanoTime() - startTime;
       vars.generateRestOfVariablesForResults();
