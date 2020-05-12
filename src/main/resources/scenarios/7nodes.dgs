@@ -1,0 +1,40 @@
+DGS004
+test 0 0
+
+an n1 x:10.507702 y:52.256044 num_servers:1 server_capacity:2000 process_delay:0
+an n2 x:10.502182 y:52.267949 num_servers:1 server_capacity:2000 process_delay:0
+an n3 x:10.529057 y:52.273899 num_servers:1 server_capacity:2000 process_delay:0
+an n4 x:10.550113 y:52.265386 num_servers:1 server_capacity:2000 process_delay:0
+an n5 x:10.538964 y:52.251980 num_servers:1 server_capacity:2000 process_delay:0
+an n6 x:10.512477 y:52.246374 num_servers:1 server_capacity:2000 process_delay:0
+an n7 x:10.520307 y:52.263163 num_servers:1 server_capacity:2000 process_delay:0
+an nC x:8.62 y:50.10 x_gui:10.51 y_gui:52.29 num_servers:1 server_capacity:50000 process_delay:0 node_cloud:true
+
+
+
+ae n1n2 n1 > n2 capacity:1000
+ae n1n6 n1 > n6 capacity:1000
+ae n1n7 n1 > n7 capacity:1000
+ae n2n1 n2 > n1 capacity:1000
+ae n2n3 n2 > n3 capacity:1000
+ae n2n7 n2 > n7 capacity:1000
+ae n2nC n2 > nC capacity:1000000 link_cloud:true
+ae n3n2 n3 > n2 capacity:1000
+ae n3n4 n3 > n4 capacity:1000
+ae n4n3 n4 > n3 capacity:1000
+ae n4n5 n4 > n5 capacity:1000
+ae n4n7 n4 > n7 capacity:1000
+ae n4nC n4 > nC capacity:1000000 link_cloud:true
+ae n5n4 n5 > n4 capacity:1000
+ae n5n6 n5 > n6 capacity:1000
+ae n5n7 n5 > n7 capacity:1000
+ae n6n1 n6 > n1 capacity:1000
+ae n6n5 n6 > n5 capacity:1000
+ae n6nC n6 > nC capacity:1000000 link_cloud:true
+ae n7n1 n7 > n1 capacity:1000
+ae n7n2 n7 > n2 capacity:1000
+ae n7n4 n7 > n4 capacity:1000
+ae n7n5 n7 > n5 capacity:1000
+ae nCn2 nC > n2 capacity:1000000 link_cloud:true
+ae nCn4 nC > n4 capacity:1000000 link_cloud:true
+ae nCn6 nC > n6 capacity:1000000 link_cloud:true
