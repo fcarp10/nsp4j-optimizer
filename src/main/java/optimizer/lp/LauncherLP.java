@@ -40,7 +40,7 @@ public class LauncherLP {
       if (objVal != null) {
          results = generateResults(pm, modelLP, sce, initialPlacement);
          results.setComputationTime((double) elapsedTime / 1000000000);
-         String outputFileName = generateFileName(pm, sce.getAlgorithm(), sce);
+         String outputFileName = pm.getScenario() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
          resultsManager.exportJsonObject(outputFileName, results);
          resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);
@@ -137,15 +137,5 @@ public class LauncherLP {
       }
       results.initializeResults(optModelLP.getObjVal(), initialPlacement);
       return results;
-   }
-
-   private static String generateFileName(Parameters pm, String model, Scenario sc) {
-      String fileName = pm.getScenario();
-      if (model.equals(INITIAL_PLACEMENT)) {
-         fileName += "_" + model;
-         return fileName;
-      }
-      fileName += "_" + sc.getObjFunc();
-      return fileName;
    }
 }

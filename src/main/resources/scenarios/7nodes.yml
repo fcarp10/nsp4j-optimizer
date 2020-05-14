@@ -41,6 +41,22 @@ service_chains:
       "min_paths": 1,
       "max_paths": 3
     }
+  - id: 121
+    chain: [1, 2, 1]
+    max_propagation_delay: 5.0 # ms
+    attributes: {
+      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "min_paths": 1,
+      "max_paths": 3
+    }
+  - id: 212
+    chain: [2, 1, 2]
+    max_propagation_delay: 5.0 # ms
+    attributes: {
+      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "min_paths": 1,
+      "max_paths": 3
+    }
 # function definitions
 function_types: # type: 0 reserved for end-point functions
   - type: 1 # VM function
@@ -75,5 +91,5 @@ traffic_flows:
     max_dem: 3
     min_bw: 1
     max_bw: 20 # change "max_cap_server" accordingly
-    services: [1]
-    service_length_mult: [2]
+    services: [2]
+    service_length_mult: [1]

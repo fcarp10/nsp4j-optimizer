@@ -71,12 +71,10 @@ public class VariablesAlg {
       uX = new HashMap<>();
       for (Server server : pm.getServers())
          uX.put(server.getId(), 0.0);
-      if (initialModel != null) {
-         zSPinitial = Auxiliary.zSPvarsFromInitialModel(pm, initialModel);
-         zSPDinitial = Auxiliary.zSPDvarsFromInitialModel(pm, initialModel);
-         fXSVinitial = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
-         fXSVDinitial = Auxiliary.fXSVDvarsFromInitialModel(pm, initialModel);
-      }
+      zSPinitial = Auxiliary.zSPvarsFromInitialModel(pm, initialModel);
+      zSPDinitial = Auxiliary.zSPDvarsFromInitialModel(pm, initialModel);
+      fXSVinitial = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
+      fXSVDinitial = Auxiliary.fXSVDvarsFromInitialModel(pm, initialModel);
    }
 
    public void generateRestOfVariablesForResults() {
