@@ -55,6 +55,7 @@ public class HeuristicAlgorithm {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                 if (!checkIfDemandWasInInitialPlacement(s, d))
                     allocateDemandFromServiceHeuristics(algorithm, s, d);
+            networkManager.removeUnusedFunctions(s);
             networkManager.addSyncTraffic(s);
         }
     }
