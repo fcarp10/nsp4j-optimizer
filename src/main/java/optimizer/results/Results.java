@@ -68,7 +68,7 @@ public class Results {
    @JsonProperty("sd")
    private transient List<Double> sd;
    @JsonProperty("st")
-   private transient List<Integer> st;
+   private transient List<String> st;
    @JsonProperty("ox")
    private transient List<Double> ox;
    @JsonProperty("osv")
@@ -333,8 +333,8 @@ public class Results {
       return serviceDelayList;
    }
 
-   private List<Integer> serviceTypes() {
-      List<Integer> serviceTypesList = new ArrayList<>();
+   private List<String> serviceTypes() {
+      List<String> serviceTypesList = new ArrayList<>();
       try {
          boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -830,7 +830,7 @@ public class Results {
       return sd;
    }
 
-   public List<Integer> getSt() {
+   public List<String> getSt() {
       return st;
    }
 

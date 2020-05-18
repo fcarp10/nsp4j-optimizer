@@ -120,3 +120,4 @@ _build/
 .settings/org.eclipse.m2e.core.prefs
 target/
 .vscode/launch.json
+.vscode/settings.json

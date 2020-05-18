@@ -146,8 +146,8 @@ public class Manager {
          try {
             Graph graph = GraphManager.importTopology(path, sce.getInputFileName());
             printLog(log, INFO, "generating paths");
-            KShortestPathGenerator k = new KShortestPathGenerator(graph, 10, 5, path, sce.getInputFileName());
-            k.run();
+            KShortestPathGenerator k = new KShortestPathGenerator(path, sce.getInputFileName(), graph, 10);
+            k.run(3);
             printLog(log, INFO, "paths generated");
          } catch (Exception e) {
             printLog(log, ERROR, "reading the topology file");
