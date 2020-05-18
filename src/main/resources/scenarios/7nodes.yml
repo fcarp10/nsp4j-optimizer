@@ -153,6 +153,54 @@ service_chains:
       "min_paths": 1,
       "max_paths": 3
     }
+  - id: 1111112
+    chain: [1, 1, 1, 1, 1, 1, 2]
+    max_propagation_delay: 5.0 # ms
+    attributes: {
+      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "min_paths": 1,
+      "max_paths": 3
+    }
+  - id: 1111122
+    chain: [1, 1, 1, 1, 1, 2, 2]
+    max_propagation_delay: 5.0 # ms
+    attributes: {
+      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "min_paths": 1,
+      "max_paths": 3
+    }
+  - id: 1111222
+    chain: [1, 1, 1, 1, 2, 2, 2]
+    max_propagation_delay: 5.0 # ms
+    attributes: {
+      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "min_paths": 1,
+      "max_paths": 3
+    }
+  - id: 1112222
+    chain: [1, 1, 1, 2, 2, 2, 2]
+    max_propagation_delay: 5.0 # ms
+    attributes: {
+      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "min_paths": 1,
+      "max_paths": 3
+    }
+  - id: 1122222
+    chain: [1, 1, 2, 2, 2, 2, 2]
+    max_propagation_delay: 5.0 # ms
+    attributes: {
+      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "min_paths": 1,
+      "max_paths": 3
+    }
+  - id: 1222222
+    chain: [1, 2, 2, 2, 2, 2, 2]
+    max_propagation_delay: 5.0 # ms
+    attributes: {
+      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "min_paths": 1,
+      "max_paths": 3
+    }
 # function definitions
 function_types: # type: 0 reserved for end-point functions
   - type: 1 # VM function
@@ -188,4 +236,4 @@ traffic_flows:
     min_bw: 1
     max_bw: 20 # change "max_cap_server" accordingly
     services: [1]
-    service_length_mult: [7]
+    service_length_mult: [8]
