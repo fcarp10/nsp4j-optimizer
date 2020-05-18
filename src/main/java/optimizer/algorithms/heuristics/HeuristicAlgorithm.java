@@ -230,9 +230,9 @@ public class HeuristicAlgorithm {
     }
 
     private Integer choosePath(String algorithm, int s, int d, List<Integer> paths) {
-        if (algorithm.equals(FIRST_FIT) || algorithm.equals(FFP_RFX))
+        if (algorithm.equals(FF) || algorithm.equals(FFP_RFX))
             return paths.get(0);
-        else if (algorithm.equals(RANDOM_FIT) || algorithm.equals(RFP_FFX))
+        else if (algorithm.equals(RF) || algorithm.equals(RFP_FFX))
             return paths.get(rnd.nextInt(paths.size()));
         else if (algorithm.equals(HEU)) {
             int pChosen = getAlreadyUsedPathForDemandFromInitialPlacement(s, d, paths);
@@ -314,9 +314,9 @@ public class HeuristicAlgorithm {
     }
 
     private Integer chooseServerForFunction(String algorithm, List<Integer> availableServers, int s, int v, int d) {
-        if (algorithm.equals(FIRST_FIT) || algorithm.equals(RFP_FFX))
+        if (algorithm.equals(FF) || algorithm.equals(RFP_FFX))
             return availableServers.get(0);
-        else if (algorithm.equals(RANDOM_FIT) || algorithm.equals(FFP_RFX))
+        else if (algorithm.equals(RF) || algorithm.equals(FFP_RFX))
             return availableServers.get(rnd.nextInt(availableServers.size()));
         else if (algorithm.equals(HEU)) {
             // to minimize migrations

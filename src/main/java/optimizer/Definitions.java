@@ -13,15 +13,16 @@ public class Definitions {
    public static final String ALL_MONETARY_COSTS_OBJ = "all-monetary-costs";
 
    // scenarios
-   public static final String SERVER_DIMENSIONING = "dimensioning-lp";
-   public static final String INITIAL_PLACEMENT = "init-lp";
-   public static final String LP_PLACEMENT = "lp";
-   public static final String FIRST_FIT = "ff";
+   public static final String DIMEN = "dimensioning-lp";
+   public static final String INIT = "init-lp";
+   public static final String LP = "lp";
+   public static final String FF = "ff";
    public static final String FFP_RFX = "ffp-rfx";
    public static final String RFP_FFX = "rfp-ffx";
-   public static final String RANDOM_FIT = "rf";
+   public static final String RF = "rf";
    public static final String HEU = "heu";
    public static final String DRL = "drl";
+   public static final String ALL = "all";
 
    // general variables
    public static final String zSP = "zSP";
@@ -86,7 +87,7 @@ public class Definitions {
    public static final String FUNCTION_MAX_DELAY = "max_delay";
    public static final String FUNCTION_MIN_PROCESS_DELAY = "min_process_delay";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
-   //   public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
+   // public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
    public static final String FUNCTION_CHARGES = "charges";
 
    // node and server parameters

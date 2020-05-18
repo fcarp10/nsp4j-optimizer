@@ -7,6 +7,7 @@ import static optimizer.Definitions.LINK_DELAY;
 import static optimizer.Definitions.SERVICE_DOWNTIME;
 import static optimizer.Definitions.WARNING;
 
+import java.io.File;
 import java.util.List;
 
 import org.decimal4j.util.DoubleRounder;
@@ -21,6 +22,7 @@ import gurobi.GRBVar;
 import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Service;
+import optimizer.Manager;
 import optimizer.gui.ResultsGUI;
 import static optimizer.Definitions.*;
 
@@ -83,6 +85,22 @@ public class Auxiliary {
             break;
       }
       ResultsGUI.log(status + message);
+   }
+
+   public static String getResourcePath(String fileName) {
+      try {
+         File file = new File(Manager.class.getClassLoader().getResource("scenarios/" + fileName).getFile());
+         String absolutePath = file.getAbsolutePath();
+         String path = absolutePath.substring(0, absolutePath.lastIndexOf(File.separator));
+         if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
+            path = path + "/";
+         else
+            path = path + "\\";
+         path = path.replaceAll("%20", " ");
+         return path;
+      } catch (Exception e) {
+         return null;
+      }
    }
 
    public static double getMaxServiceDowntime(Service service) {

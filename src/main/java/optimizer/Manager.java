@@ -7,6 +7,7 @@ import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
 import optimizer.algorithms.LauncherAlg;
 import optimizer.lp.LauncherLP;
+import optimizer.results.Auxiliary;
 import optimizer.results.ResultsManager;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -30,7 +31,7 @@ public class Manager {
 
    public static void readInputParameters(String fileName) {
       try {
-         String path = ResultsManager.getResourcePath(fileName + ".yml");
+         String path = Auxiliary.getResourcePath(fileName + ".yml");
          pm = ConfigFiles.readParameters(path, fileName + ".yml");
          pm.initialize(path);
          checkTopologyScale(pm);
@@ -63,7 +64,7 @@ public class Manager {
          trafficFlow.getAux().clear();
          for (int d = 0; d < trafficFlow.getDemands().size(); d++)
             trafficFlow.getAux().add(true);
-         if (sce.getAlgorithm().equals(INITIAL_PLACEMENT)) {
+         if (sce.getAlgorithm().equals(INIT)) {
             double initialTrafficLoad = (double) pm.getAux().get(INITIAL_TRAFFIC_LOAD);
             double value;
             for (int d = 0; d < trafficFlow.getDemands().size(); d++) {
@@ -84,27 +85,50 @@ public class Manager {
    public static void main(Scenario sce) {
       readInputParameters(sce.getInputFileName());
       try {
-         // load initial placement for migrations
          interrupted = false;
-         String initialPlacementFile = pm.getScenario() + "_" + INITIAL_PLACEMENT;
-         GRBModel initialModel = ResultsManager.loadInitialPlacement(initialPlacementFile, pm, sce);
-         // prepare results
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
-         // select traffic demands
-         specifyUsedTrafficDemands(pm, sce);
-         if (sce.getAlgorithm().equals(INITIAL_PLACEMENT) || sce.getAlgorithm().equals(SERVER_DIMENSIONING)
-               || sce.getAlgorithm().equals(LP_PLACEMENT)) {
-            // load initial model for initial solution
-            String initialSolutionFile = pm.getScenario() + "_" + sce.getObjFunc();
-            GRBModel initialSolution = ResultsManager.loadModel(initialSolutionFile, pm, sce, false);
-            // make sure than no initial placement is loaded when launching initial
-            // placement
-            if (sce.getAlgorithm().equals(INITIAL_PLACEMENT))
-               initialModel = null;
-            // launch lp model
-            LauncherLP.run(pm, sce, resultsManager, initialModel, initialSolution);
-         } else
-            LauncherAlg.run(pm, sce, resultsManager, initialModel);
+         if (sce.getAlgorithm().equals(ALL)) {
+            // 1. initial placement
+            sce.setAlgorithm(INIT);
+            specifyUsedTrafficDemands(pm, sce);
+            GRBModel initModel = LauncherLP.run(pm, sce, resultsManager, null, null);
+            // 2. ff
+            sce.setAlgorithm(FF);
+            specifyUsedTrafficDemands(pm, sce);
+            LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+            // 3. rf
+            sce.setAlgorithm(RF);
+            for (int i = 0; i < 10; i++)
+               LauncherAlg.run(pm, sce, resultsManager, initModel, i);
+            // 4. heu
+            sce.setAlgorithm(HEU);
+            LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+            // 5. lp
+            String pathFile = resultsManager.getResultsFolder() + "/" + pm.getScenario() + "_heu_" + sce.getObjFunc();
+            GRBModel initSol = resultsManager.loadModel(pathFile, pm, sce, false);
+            sce.setAlgorithm(LP);
+            LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
+         } else if (sce.getAlgorithm().equals(INIT) || sce.getAlgorithm().equals(DIMEN)
+               || sce.getAlgorithm().equals(LP)) {
+            specifyUsedTrafficDemands(pm, sce);
+            String pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_heu_" + sce.getObjFunc() + ".mst");
+            GRBModel initSol = resultsManager.loadModel(pathFile + pm.getScenario() + "_heu_" + sce.getObjFunc(), pm,
+                  sce, false);
+            // make sure no initial model is loaded when launching initial placement
+            GRBModel initModel;
+            if (sce.getAlgorithm().equals(INIT))
+               initModel = null;
+            else {
+               pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_" + INIT + ".mst");
+               initModel = resultsManager.loadInitialPlacement(pathFile + pm.getScenario() + "_" + INIT, pm, sce);
+            }
+            LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
+         } else {
+            specifyUsedTrafficDemands(pm, sce);
+            String pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_" + INIT + ".mst");
+            GRBModel initModel = resultsManager.loadInitialPlacement(pathFile + pm.getScenario() + "_" + INIT, pm, sce);
+            LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+         }
          printLog(log, INFO, "backend is ready");
       } catch (Exception e) {
          e.printStackTrace();
@@ -117,7 +141,7 @@ public class Manager {
    }
 
    public static void generatePaths(Scenario sce) {
-      String path = ResultsManager.getResourcePath(sce.getInputFileName() + ".yml");
+      String path = Auxiliary.getResourcePath(sce.getInputFileName() + ".yml");
       if (path != null)
          try {
             Graph graph = GraphManager.importTopology(path, sce.getInputFileName());

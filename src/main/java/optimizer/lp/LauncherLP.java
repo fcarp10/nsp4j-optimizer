@@ -19,7 +19,7 @@ public class LauncherLP {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherLP.class);
 
-   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, GRBModel initialModel,
+   public static GRBModel run(Parameters pm, Scenario sce, ResultsManager resultsManager, GRBModel initialModel,
          GRBModel initialSolution) throws GRBException {
       boolean[][][] initialPlacement = null;
       if (initialModel != null)
@@ -45,6 +45,7 @@ public class LauncherLP {
          resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);
       }
+      return modelLP.getGrbModel();
    }
 
    private static GRBLinExpr generateExprForObjectiveFunction(Parameters pm, ModelLP modelLP, String objectiveFunction)
@@ -52,7 +53,7 @@ public class LauncherLP {
       GRBLinExpr expr = new GRBLinExpr();
       double serversWeight, linksWeight;
       switch (objectiveFunction) {
-         case SERVER_DIMENSIONING:
+         case DIMEN:
             expr.add(modelLP.dimensioningExpr());
             break;
          case NUM_SERVERS_OBJ:
@@ -113,7 +114,7 @@ public class LauncherLP {
       results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModelLP.getVars().uX));
 
       // model specific variables
-      if (sc.getObjFunc().equals(SERVER_DIMENSIONING))
+      if (sc.getObjFunc().equals(DIMEN))
          results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModelLP.getVars().xN));
       if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
             || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {

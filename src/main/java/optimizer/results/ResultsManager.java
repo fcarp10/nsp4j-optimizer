@@ -33,10 +33,11 @@ public class ResultsManager {
       Date date = new Date();
       String path = ResultsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
       path = path.replaceAll("%20", " ");
-      File parentDirectory = new File(path + "/../results");
+      path = path + "../results/";
+      File parentDirectory = new File(path);
       if (!parentDirectory.exists())
          parentDirectory.mkdir();
-      resultsFolder = path + "/../results/" + MY_FORMAT.format(date) + folderName;
+      resultsFolder = path + MY_FORMAT.format(date) + folderName;
       new File(resultsFolder).mkdir();
    }
 
@@ -55,7 +56,7 @@ public class ResultsManager {
    }
 
    public String importConfDrlFile(String fileName) {
-      String path = getResourcePath(fileName + ".json");
+      String path = Auxiliary.getResourcePath(fileName + ".json");
       ObjectMapper objectMapper = new ObjectMapper();
       String conf = null;
       try {
@@ -67,7 +68,7 @@ public class ResultsManager {
       return conf;
    }
 
-   public static GRBModel loadInitialPlacement(String filename, Parameters pm, Scenario sce) throws GRBException {
+   public GRBModel loadInitialPlacement(String filename, Parameters pm, Scenario sce) throws GRBException {
       GRBModel model = loadModel(filename, pm, sce, true);
       if (model != null) {
          Auxiliary.printLog(log, INFO, "initial placement loaded");
@@ -78,8 +79,7 @@ public class ResultsManager {
       }
    }
 
-   public static GRBModel loadModel(String filename, Parameters pm, Scenario sce, boolean isInitialPlacement) {
-      String path = getResourcePath(filename + ".mst");
+   public GRBModel loadModel(String pathFile, Parameters pm, Scenario sce, boolean isInitialPlacement) {
       GRBModel model;
       try {
          GRBEnv grbEnv = new GRBEnv();
@@ -87,7 +87,7 @@ public class ResultsManager {
             grbEnv.set(GRB.IntParam.LogToConsole, 0);
          model = new GRBModel(grbEnv);
          new VariablesLP(pm, model, sce, null);
-         model.read(path + filename + ".mst");
+         model.read(pathFile + ".mst");
          model.optimize();
          if (!isInitialPlacement)
             Auxiliary.printLog(log, INFO, "initial solution loaded");
@@ -107,22 +107,6 @@ public class ResultsManager {
       }
    }
 
-   public static String getResourcePath(String fileName) {
-      try {
-         File file = new File(Manager.class.getClassLoader().getResource("scenarios/" + fileName).getFile());
-         String absolutePath = file.getAbsolutePath();
-         String path = absolutePath.substring(0, absolutePath.lastIndexOf(File.separator));
-         if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
-            path = path + "/";
-         else
-            path = path + "\\";
-         path = path.replaceAll("%20", " ");
-         return path;
-      } catch (Exception e) {
-         return null;
-      }
-   }
-
    public PrintWriter getPrinterFromPlainTextFile(String fileName, String extension) {
       try {
          FileWriter fw = new FileWriter(resultsFolder + "/" + fileName + extension, true);
@@ -132,5 +116,9 @@ public class ResultsManager {
          e.printStackTrace();
       }
       return null;
+   }
+
+   public String getResultsFolder() {
+      return resultsFolder;
    }
 }

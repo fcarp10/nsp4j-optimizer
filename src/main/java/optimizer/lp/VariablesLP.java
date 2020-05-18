@@ -33,7 +33,7 @@ public class VariablesLP {
    public GRBVar[][][][] dSVXD; // continuous, aux variable for processing delay
 
    // synchronization traffic variables
-   public GRBVar[][][][] gSVXY; //binary, aux synchronization traffic
+   public GRBVar[][][][] gSVXY; // binary, aux synchronization traffic
    public GRBVar[][][] hSVP; // binary, traffic synchronization
 
    public VariablesLP(manager.Parameters pm, GRBModel model, Scenario sc, GRBModel initialSolution) {
@@ -79,8 +79,8 @@ public class VariablesLP {
                      fXSV[x][s][v] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, varName);
                }
 
-         fXSVD = new GRBVar[pm.getServers().size()][pm.getServices().size()]
-                 [pm.getServiceLength()][pm.getDemandsTrafficFlow()];
+         fXSVD = new GRBVar[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm
+               .getDemandsTrafficFlow()];
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -110,11 +110,10 @@ public class VariablesLP {
                uX[x] = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, varName);
          }
 
-
          ///////////// additional variables //////////////
 
          // if model is dimensioning number of servers
-         if (sc.getObjFunc().equals(SERVER_DIMENSIONING)) {
+         if (sc.getObjFunc().equals(DIMEN)) {
             xN = new GRBVar[pm.getNodes().size()];
             for (int n = 0; n < pm.getNodes().size(); n++) {
                String varName = Definitions.xN + "[" + n + "]";
@@ -127,7 +126,7 @@ public class VariablesLP {
 
          // if model is optimizing with utilization costs
          if (sc.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_OBJ)
-                 || sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
+               || sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
             kL = new GRBVar[pm.getLinks().size()];
             for (int l = 0; l < pm.getLinks().size(); l++) {
                String varName = Definitions.kL + "[" + l + "]";
@@ -158,7 +157,7 @@ public class VariablesLP {
 
          // if model is optimizing with monetary costs
          if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
-                 || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+               || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
 
             oX = new GRBVar[pm.getServers().size()];
             for (int x = 0; x < pm.getServers().size(); x++) {
@@ -205,8 +204,8 @@ public class VariablesLP {
          // if model is considering synchronization traffic
          if (sc.getConstraints().get(SYNC_TRAFFIC)) {
 
-            gSVXY = new GRBVar[pm.getServices().size()][pm.getServiceLength()]
-                    [pm.getServers().size()][pm.getServers().size()];
+            gSVXY = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm.getServers()
+                  .size()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   for (int x = 0; x < pm.getServers().size(); x++)
@@ -232,10 +231,12 @@ public class VariablesLP {
          }
 
          // if model is considering delay constraints
-         if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
-                 || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+         if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ)
+               || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ) || sc.getObjFunc().equals(QOS_PENALTIES_OBJ)
+               || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
 
-            dSVXD = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm.getDemandsTrafficFlow()];
+            dSVXD = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm
+                  .getDemandsTrafficFlow()];
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   for (int x = 0; x < pm.getServers().size(); x++)

@@ -23,34 +23,37 @@ public class LauncherAlg {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherAlg.class);
 
-   public static void run(Parameters pm, Scenario scenario, ResultsManager resultsManager, GRBModel initialModel) {
+   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, GRBModel initialModel,
+         int iteration) {
 
-      VariablesAlg vars = new VariablesAlg(pm, initialModel, scenario.getObjFunc());
+      VariablesAlg vars = new VariablesAlg(pm, initialModel, sce.getObjFunc());
       NetworkManager networkManager = new NetworkManager(pm, vars);
       HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
       long startTime = System.nanoTime();
-      if (scenario.getAlgorithm().equals(DRL)) {
+      if (sce.getAlgorithm().equals(DRL)) {
          printLog(log, INFO, "first placement using random-fit");
-         heuristicAlgorithm.allocateServices(RANDOM_FIT);
+         heuristicAlgorithm.allocateServices(RF);
          vars.generateRestOfVariablesForResults();
          printLog(log, INFO, "starting DRL [" + (float) vars.getObjVal() + "]");
          PlacementModel2 placementModel2 = new PlacementModel2(null, pm, vars, networkManager, heuristicAlgorithm);
-         placementModel2.run(RANDOM_FIT);
-      } else if (scenario.getAlgorithm().equals(HEU)) {
+         placementModel2.run(RF);
+      } else if (sce.getAlgorithm().equals(HEU)) {
          printLog(log, INFO, "running heuristics...");
-         heuristicAlgorithm.allocateServicesHeuristic(scenario.getAlgorithm());
+         heuristicAlgorithm.allocateServicesHeuristic(sce.getAlgorithm());
          // vars.generateRestOfVariablesForResults();
          // heuristicAlgorithm.optimizePlacement(RANDOM_FIT);
       } else {
-         printLog(log, INFO, "running " + scenario.getAlgorithm() + "...");
-         heuristicAlgorithm.allocateServices(scenario.getAlgorithm());
+         printLog(log, INFO, "running " + sce.getAlgorithm() + "...");
+         heuristicAlgorithm.allocateServices(sce.getAlgorithm());
       }
       long elapsedTime = System.nanoTime() - startTime;
       vars.generateRestOfVariablesForResults();
       Auxiliary.printLog(log, INFO, "finished [" + vars.objVal + "]");
-      Results results = generateResults(pm, scenario, vars, Auxiliary.fXSVvarsFromInitialModel(pm, initialModel));
+      Results results = generateResults(pm, sce, vars, Auxiliary.fXSVvarsFromInitialModel(pm, initialModel));
       results.setComputationTime((double) elapsedTime / 1000000000);
-      String fileName = pm.getScenario() + "_" + scenario.getAlgorithm() + "_" + scenario.getObjFunc();
+      String fileName = pm.getScenario() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
+      if (sce.getAlgorithm().equals(RF))
+         fileName += iteration;
       resultsManager.exportJsonObject(fileName, results);
       exportResultsToMST(pm, resultsManager, fileName, vars);
       ResultsGUI.updateResults(results);
