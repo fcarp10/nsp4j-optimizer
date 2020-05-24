@@ -41,7 +41,7 @@ public class LauncherAlg {
          printLog(log, INFO, "running heuristics...");
          heuristicAlgorithm.allocateServicesHeuristic(sce.getAlgorithm());
          // vars.generateRestOfVariablesForResults();
-         // heuristicAlgorithm.optimizePlacement(RANDOM_FIT);
+         // heuristicAlgorithm.optimizePlacement();
       } else {
          printLog(log, INFO, "running " + sce.getAlgorithm() + "...");
          heuristicAlgorithm.allocateServices(sce.getAlgorithm());
