@@ -87,11 +87,15 @@ public class Manager {
       try {
          interrupted = false;
          ResultsManager resultsManager = new ResultsManager(pm.getScenario());
+         String pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_" + INIT + ".mst");
+         GRBModel initModel = resultsManager.loadInitialPlacement(pathFile + pm.getScenario() + "_" + INIT, pm, sce);
          if (sce.getAlgorithm().equals(ALL)) {
+            if (initModel == null){
             // 1. initial placement
-            sce.setAlgorithm(INIT);
-            specifyUsedTrafficDemands(pm, sce);
-            GRBModel initModel = LauncherLP.run(pm, sce, resultsManager, null, null);
+               sce.setAlgorithm(INIT);
+               specifyUsedTrafficDemands(pm, sce);
+               initModel = LauncherLP.run(pm, sce, resultsManager, null, null);
+            }
             // 2. ff
             sce.setAlgorithm(FF);
             specifyUsedTrafficDemands(pm, sce);
@@ -104,29 +108,22 @@ public class Manager {
             sce.setAlgorithm(HEU);
             LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
             // 5. lp
-            String pathFile = resultsManager.getResultsFolder() + "/" + pm.getScenario() + "_heu_" + sce.getObjFunc();
+            pathFile = resultsManager.getResultsFolder() + "/" + pm.getScenario() + "_heu_" + sce.getObjFunc();
             GRBModel initSol = resultsManager.loadModel(pathFile, pm, sce, false);
             sce.setAlgorithm(LP);
             LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
          } else if (sce.getAlgorithm().equals(INIT) || sce.getAlgorithm().equals(DIMEN)
                || sce.getAlgorithm().equals(LP)) {
             specifyUsedTrafficDemands(pm, sce);
-            String pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_heu_" + sce.getObjFunc() + ".mst");
+            pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_heu_" + sce.getObjFunc() + ".mst");
             GRBModel initSol = resultsManager.loadModel(pathFile + pm.getScenario() + "_heu_" + sce.getObjFunc(), pm,
                   sce, false);
             // make sure no initial model is loaded when launching initial placement
-            GRBModel initModel;
             if (sce.getAlgorithm().equals(INIT))
                initModel = null;
-            else {
-               pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_" + INIT + ".mst");
-               initModel = resultsManager.loadInitialPlacement(pathFile + pm.getScenario() + "_" + INIT, pm, sce);
-            }
             LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
          } else {
             specifyUsedTrafficDemands(pm, sce);
-            String pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_" + INIT + ".mst");
-            GRBModel initModel = resultsManager.loadInitialPlacement(pathFile + pm.getScenario() + "_" + INIT, pm, sce);
             LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
          }
          printLog(log, INFO, "backend is ready");
