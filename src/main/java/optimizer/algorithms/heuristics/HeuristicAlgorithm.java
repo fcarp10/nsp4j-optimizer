@@ -130,7 +130,7 @@ public class HeuristicAlgorithm {
                 boolean removePreviousAllocation = true;
                 for (Integer p : availablePaths) {
                     if (removePreviousAllocation) {
-                        networkManager.removeDemandFromAllFunctionsToServer(s, d);
+                        networkManager.removeDemandFromAllFunctionsToServer(s, d); // remove previous allocation
                         removeDemandFromOldPath(s, d);
                     }
                     List<Integer> functionServerMapping = allocateDemandInPathHeuristics(HEU, s, d, p);
@@ -153,18 +153,16 @@ public class HeuristicAlgorithm {
                 networkManager.removeDemandFromAllFunctionsToServer(s, d);
                 removeDemandFromOldPath(s, d);
                 int pBest = pathsIncumbent.get(String.valueOf(s) + String.valueOf(d));
-                List<Integer> chosenServers = new ArrayList<>();
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                    chosenServers.add(placementIncumbent
-                            .get(String.valueOf(s) + String.valueOf(d) + String.valueOf(pBest) + String.valueOf(v)));
-                networkManager.addDemandToFunctionsToSpecificServers(s, d, chosenServers);
-                networkManager.addDemandToPath(s, pBest, d);
                 for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                    int xOld = networkManager.getUsedServerForFunction(s, d, v);
-                    int xNew = chosenServers.get(v);
-                    reallocateSpecificFunction(s, d, v, xOld, xNew);
+                    int xChosen = placementIncumbent
+                            .get(String.valueOf(s) + String.valueOf(d) + String.valueOf(pBest) + String.valueOf(v));
+                    networkManager.addDemandToFunctionToServer(s, xChosen, v, d);
                 }
+                networkManager.addDemandToPath(s, pBest, d);
             }
+            networkManager.removeUnusedFunctions(s);
+            networkManager.removeSyncTraffic(s);
+            networkManager.addSyncTraffic(s);
         }
     }
 
@@ -177,10 +175,6 @@ public class HeuristicAlgorithm {
             for (int vIndex = 0; vIndex < functions.size(); vIndex++) {
                 int v = functions.get(vIndex);
                 List<Integer> availableServers = networkManager.findServersForSpecificFunction(s, d, p, v, true, true);
-                if (availableServers == null)
-                    continue;
-                if (availableServers.size() == 1)
-                    continue;
                 Collections.shuffle(availableServers);
                 for (int i = 0; i < availableServers.size(); i++) {
                     int xOld = networkManager.getUsedServerForFunction(s, d, v);
