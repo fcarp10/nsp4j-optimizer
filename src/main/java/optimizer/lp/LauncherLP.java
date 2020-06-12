@@ -40,7 +40,7 @@ public class LauncherLP {
       if (objVal != null) {
          results = generateResults(pm, modelLP, sce, initialPlacement);
          results.setComputationTime((double) elapsedTime / 1000000000);
-         String outputFileName = pm.getScenario() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
+         String outputFileName = pm.getGraphName() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
          resultsManager.exportJsonObject(outputFileName, results);
          resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);

@@ -1,6 +1,5 @@
 package optimizer.gui;
 
-
 import com.google.gson.Gson;
 import optimizer.Manager;
 
@@ -19,13 +18,6 @@ public class WebServer {
       post("/load", (request, response) -> {
          Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
          Manager.readInputParameters(scenario.getInputFileName());
-         return 201;
-      });
-
-      post("/paths", (request, response) -> {
-         Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-         Runnable runnable = () -> Manager.generatePaths(scenario);
-         executorService.submit(runnable);
          return 201;
       });
 

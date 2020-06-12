@@ -39,7 +39,8 @@ public class HeuristicAlgorithm {
         // first place demands from initial placement
         for (int s = 0; s < pm.getServices().size(); s++) {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                allocateDemandFromService(algorithm, s, d);
+                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                    allocateDemandFromService(algorithm, s, d);
             networkManager.addSyncTraffic(s);
         }
     }
@@ -133,7 +134,7 @@ public class HeuristicAlgorithm {
                         networkManager.removeDemandFromAllFunctionsToServer(s, d); // remove previous allocation
                         removeDemandFromOldPath(s, d);
                     }
-                    List<Integer> functionServerMapping = allocateDemandInPathHeuristics(HEU, s, d, p);
+                    List<Integer> functionServerMapping = allocateDemandInPathHeuristics(GRD, s, d, p);
                     if (functionServerMapping.size() == pm.getServices().get(s).getFunctions().size()) {
                         networkManager.addDemandToPath(s, p, d);
                         removePreviousAllocation = true;
@@ -217,11 +218,11 @@ public class HeuristicAlgorithm {
     }
 
     private Integer choosePath(String algorithm, int s, int d, List<Integer> paths) {
-        if (algorithm.equals(FF) || algorithm.equals(FFP_RFX))
+        if (algorithm.contains(FF))
             return paths.get(0);
-        else if (algorithm.equals(RF) || algorithm.equals(RFP_FFX))
+        else if (algorithm.contains(RF))
             return paths.get(rnd.nextInt(paths.size()));
-        else if (algorithm.equals(HEU)) {
+        else if (algorithm.equals(GRD)) {
             int pChosen = getAlreadyUsedPathForDemandFromInitialPlacement(s, d, paths);
             if (pChosen != -1)
                 return pChosen;
@@ -301,11 +302,11 @@ public class HeuristicAlgorithm {
     }
 
     private Integer chooseServerForFunction(String algorithm, List<Integer> availableServers, int s, int v, int d) {
-        if (algorithm.equals(FF) || algorithm.equals(RFP_FFX))
+        if (algorithm.contains(FF))
             return availableServers.get(0);
-        else if (algorithm.equals(RF) || algorithm.equals(FFP_RFX))
+        else if (algorithm.contains(RF))
             return availableServers.get(rnd.nextInt(availableServers.size()));
-        else if (algorithm.equals(HEU))
+        else if (algorithm.equals(GRD))
             return chooseServerForFunctionHeuristics(availableServers, s, v, d);
         return -1;
     }
@@ -318,11 +319,13 @@ public class HeuristicAlgorithm {
             return xChosen;
         // reduce replications by choosing servers from initial placement
         if ((xChosen = getAlreadyUsedServerFromInitialPlacement(s, v, availableServers)) != -1)
-            if (availableServers.indexOf(xChosen) < availableServers.indexOf(xCloud))
+            if (availableServers.indexOf(xChosen) < availableServers.indexOf(xCloud)) // TO BE CHECKED xCloud is
+                                                                                      // initialized with -1
                 return xChosen;
         // reduce replications by choosing a server already used for the function
         if ((xChosen = getAlreadyUsedServerForService(s, v, availableServers)) != -1)
-            if (availableServers.indexOf(xChosen) < availableServers.indexOf(xCloud))
+            if (availableServers.indexOf(xChosen) < availableServers.indexOf(xCloud)) // TO BE CHECKED xCloud is
+                                                                                      // initialized with -1
                 return xChosen;
         // choose the first available server
         return availableServers.get(0);

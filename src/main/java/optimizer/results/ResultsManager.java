@@ -81,6 +81,12 @@ public class ResultsManager {
    public GRBModel loadModel(String pathFile, Parameters pm, Scenario sce, boolean isInitialPlacement) {
       GRBModel model;
       try {
+         File file = new File(pathFile + ".mst");
+         if (!file.exists()) {
+            if (!isInitialPlacement)
+               printLog(log, WARNING, "no initial solution found");
+            return null;
+         }
          GRBEnv grbEnv = new GRBEnv();
          if (isInitialPlacement)
             grbEnv.set(GRB.IntParam.LogToConsole, 0);
@@ -92,8 +98,7 @@ public class ResultsManager {
             Auxiliary.printLog(log, INFO, "initial solution loaded");
          return model;
       } catch (Exception e) {
-         if (!isInitialPlacement)
-            printLog(log, WARNING, "no initial solution found");
+         printLog(log, ERROR, e.getMessage());
          return null;
       }
    }

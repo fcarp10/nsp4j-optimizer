@@ -9,13 +9,10 @@ import optimizer.algorithms.LauncherAlg;
 import optimizer.lp.LauncherLP;
 import optimizer.results.Auxiliary;
 import optimizer.results.ResultsManager;
-import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.ConfigFiles;
-import utils.GraphManager;
-import utils.KShortestPathGenerator;
 
 import java.util.Random;
 
@@ -29,11 +26,19 @@ public class Manager {
    private static Parameters pm;
    private static Long seed;
 
-   public static void readInputParameters(String fileName) {
+   public static void readInputParameters(String graphNameForm) {
+      String graphName = graphNameForm;
+      String extensionGraph = ".dgs";
+      String[] graphNameExtension = graphNameForm.split("\\.");
+      if (graphNameExtension.length > 1) {
+         graphName = graphNameExtension[0];
+         extensionGraph = "." + graphNameExtension[1];
+      }
       try {
-         String path = Auxiliary.getResourcePath(fileName + ".yml");
-         pm = ConfigFiles.readParameters(path, fileName + ".yml");
-         pm.initialize(path);
+         String path = Auxiliary.getResourcePath(graphName + ".yml");
+         pm = ConfigFiles.readParameters(path + graphName + ".yml");
+         pm.initialize(path + graphName + extensionGraph, path + graphName + ".txt",
+               (boolean) pm.getAux(DIRECTED_EDGES));
          checkTopologyScale(pm);
          ResultsGUI.initialize(pm);
          printLog(log, INFO, "topology loaded");
@@ -46,25 +51,34 @@ public class Manager {
    private static void checkTopologyScale(Parameters pm) {
       double scalingX = (double) pm.getAux(X_SCALING);
       double scalingY = (double) pm.getAux(Y_SCALING);
-      if (scalingX != 1.0 || scalingY != 1.0)
-         for (Node node : pm.getNodes()) {
-            String xAttr = "x", yAttr = "y";
-            if (node.getAttribute(NODE_CLOUD) != null) {
-               xAttr = "x_gui";
-               yAttr = "y_gui";
-            }
-            node.setAttribute(xAttr, (double) node.getAttribute(xAttr) * scalingX);
-            node.setAttribute(yAttr, (double) node.getAttribute(yAttr) * scalingY);
+      if (scalingX != 1.0 || scalingY != 1.0) {
+         String longitudeLabel, latitudeLabel;
+         if (pm.getNodes().get(0).getAttribute(LONGITUDE_LABEL_1) != null) {
+            longitudeLabel = LONGITUDE_LABEL_1;
+            latitudeLabel = LATITUDE_LABEL_1;
+         } else {
+            longitudeLabel = LONGITUDE_LABEL_2;
+            latitudeLabel = LATITUDE_LABEL_2;
          }
+         for (Node node : pm.getNodes()) {
+            if (node.getAttribute(NODE_CLOUD) != null && node.getAttribute(longitudeLabel + "_gui") != null) {
+               node.setAttribute(longitudeLabel, (double) node.getAttribute(longitudeLabel + "_gui") * scalingX);
+               node.setAttribute(latitudeLabel, (double) node.getAttribute(latitudeLabel + "_gui") * scalingY);
+            } else {
+               node.setAttribute(longitudeLabel, (double) node.getAttribute(longitudeLabel) * scalingX);
+               node.setAttribute(latitudeLabel, (double) node.getAttribute(latitudeLabel) * scalingY);
+            }
+         }
+      }
    }
 
-   private static void specifyUsedTrafficDemands(Parameters pm, Scenario sce) {
+   private static void specifyUsedTrafficDemands(Parameters pm, boolean isLowLoad) {
       Random rnd = new Random(seed);
       for (TrafficFlow trafficFlow : pm.getTrafficFlows()) {
          trafficFlow.getAux().clear();
          for (int d = 0; d < trafficFlow.getDemands().size(); d++)
             trafficFlow.getAux().add(true);
-         if (sce.getAlgorithm().equals(INIT)) {
+         if (isLowLoad) {
             double initialTrafficLoad = (double) pm.getAux().get(INITIAL_TRAFFIC_LOAD);
             double value;
             for (int d = 0; d < trafficFlow.getDemands().size(); d++) {
@@ -86,45 +100,77 @@ public class Manager {
       readInputParameters(sce.getInputFileName());
       try {
          interrupted = false;
-         ResultsManager resultsManager = new ResultsManager(pm.getScenario());
-         String pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_" + INIT + ".mst");
-         GRBModel initModel = resultsManager.loadInitialPlacement(pathFile + pm.getScenario() + "_" + INIT, pm, sce);
-         if (sce.getAlgorithm().equals(ALL)) {
-            if (initModel == null){
-            // 1. initial placement
-               sce.setAlgorithm(INIT);
-               specifyUsedTrafficDemands(pm, sce);
-               initModel = LauncherLP.run(pm, sce, resultsManager, null, null);
-            }
-            // 2. ff
-            sce.setAlgorithm(FF);
-            specifyUsedTrafficDemands(pm, sce);
-            LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
-            // 3. rf
-            sce.setAlgorithm(RF);
-            for (int i = 0; i < 10; i++)
-               LauncherAlg.run(pm, sce, resultsManager, initModel, i);
-            // 4. heu
-            sce.setAlgorithm(HEU);
-            LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
-            // 5. lp
-            pathFile = resultsManager.getResultsFolder() + "/" + pm.getScenario() + "_heu_" + sce.getObjFunc();
-            GRBModel initSol = resultsManager.loadModel(pathFile, pm, sce, false);
-            sce.setAlgorithm(LP);
-            LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
-         } else if (sce.getAlgorithm().equals(INIT) || sce.getAlgorithm().equals(DIMEN)
-               || sce.getAlgorithm().equals(LP)) {
-            specifyUsedTrafficDemands(pm, sce);
-            pathFile = Auxiliary.getResourcePath(pm.getScenario() + "_heu_" + sce.getObjFunc() + ".mst");
-            GRBModel initSol = resultsManager.loadModel(pathFile + pm.getScenario() + "_heu_" + sce.getObjFunc(), pm,
-                  sce, false);
-            // make sure no initial model is loaded when launching initial placement
-            if (sce.getAlgorithm().equals(INIT))
-               initModel = null;
-            LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
-         } else {
-            specifyUsedTrafficDemands(pm, sce);
-            LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+         ResultsManager resultsManager = new ResultsManager(pm.getGraphName());
+         String pathFile = Auxiliary.getResourcePath(pm.getGraphName() + "_" + INIT_LP + ".mst");
+         GRBModel initModel = resultsManager.loadInitialPlacement(pathFile + pm.getGraphName() + "_" + INIT_LP, pm,
+               sce);
+         boolean isLowLoad = false;
+         switch (sce.getAlgorithm()) {
+            case INITFF_FF_10RF_GRD:
+               // 1. initial placement LP
+               sce.setAlgorithm(INTI_FF);
+               specifyUsedTrafficDemands(pm, true);
+               LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+               initModel = resultsManager.loadInitialPlacement(resultsManager.getResultsFolder() + "/"
+                     + pm.getGraphName() + "_" + INTI_FF + "_" + sce.getObjFunc(), pm, sce);
+               // 2. ff
+               sce.setAlgorithm(FF);
+               specifyUsedTrafficDemands(pm, false);
+               LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+               // 3. rf
+               sce.setAlgorithm(RF);
+               for (int i = 0; i < 10; i++)
+                  LauncherAlg.run(pm, sce, resultsManager, initModel, i);
+               // 4. grd
+               sce.setAlgorithm(GRD);
+               LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+               break;
+            case INITLP_FF_10RF_GRD_LP:
+               if (initModel == null) {
+                  // 1. initial placement LP
+                  sce.setAlgorithm(INIT_LP);
+                  specifyUsedTrafficDemands(pm, true);
+                  initModel = LauncherLP.run(pm, sce, resultsManager, null, null);
+               }
+               // 2. ff
+               sce.setAlgorithm(FF);
+               specifyUsedTrafficDemands(pm, false);
+               LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+               // 3. rf
+               sce.setAlgorithm(RF);
+               for (int i = 0; i < 10; i++)
+                  LauncherAlg.run(pm, sce, resultsManager, initModel, i);
+               // 4. grd
+               sce.setAlgorithm(GRD);
+               LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+               // 5. lp
+               pathFile = resultsManager.getResultsFolder() + "/" + pm.getGraphName() + "_heu_" + sce.getObjFunc();
+               GRBModel initSol = resultsManager.loadModel(pathFile, pm, sce, false);
+               sce.setAlgorithm(LP);
+               LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
+               break;
+            case INIT_LP:
+               isLowLoad = true;
+            case DIMEN:
+            case LP:
+               specifyUsedTrafficDemands(pm, isLowLoad);
+               pathFile = Auxiliary.getResourcePath(pm.getGraphName() + "_heu_" + sce.getObjFunc() + ".mst");
+               initSol = resultsManager.loadModel(pathFile + pm.getGraphName() + "_heu_" + sce.getObjFunc(), pm, sce,
+                     false);
+               // make sure no initial model is loaded when launching initial placement
+               if (sce.getAlgorithm().equals(INIT_LP))
+                  initModel = null;
+               LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
+               break;
+            case FF:
+            case RF:
+            case GRD:
+               specifyUsedTrafficDemands(pm, false);
+               LauncherAlg.run(pm, sce, resultsManager, initModel, -1);
+               break;
+            default:
+               printLog(log, INFO, "no algorithm selected");
+               break;
          }
          printLog(log, INFO, "backend is ready");
       } catch (Exception e) {
@@ -135,20 +181,6 @@ public class Manager {
 
    public static void stop() {
       interrupted = true;
-   }
-
-   public static void generatePaths(Scenario sce) {
-      String path = Auxiliary.getResourcePath(sce.getInputFileName() + ".yml");
-      if (path != null)
-         try {
-            Graph graph = GraphManager.importTopology(path, sce.getInputFileName());
-            printLog(log, INFO, "generating paths");
-            KShortestPathGenerator k = new KShortestPathGenerator(path, sce.getInputFileName(), graph, 10);
-            k.run(3);
-            printLog(log, INFO, "paths generated");
-         } catch (Exception e) {
-            printLog(log, ERROR, "reading the topology file");
-         }
    }
 
    public static boolean isInterrupted() {

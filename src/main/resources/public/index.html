@@ -167,9 +167,6 @@
                         <button type="button" class="btn btn-dark button-width button-margin" onClick="loadTopology()">
                             Load
                         </button>
-                        <button type="button" class="btn btn-light button-width button-margin"
-                            onClick="generatePaths()">Paths
-                        </button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -180,12 +177,11 @@
                         <option value="init-lp">initial placement LP</option>
                         <option value="lp">LP</option>
                         <option value="ff">FF</option>
-                        <option value="ffp-rfx">FFp-RFx</option>
-                        <option value="rfp-ffx">RFp-FFx</option>
                         <option value="rf">RF</option>
-                        <option value="heu">HEU</option>
+                        <option value="grd">GRD</option>
                         <option value="drl">DRL</option>
-                        <option value="all">ALL</option>
+                        <option value="init-lp->ff->10rf->grd->lp">INIT-LP_FF_10RF_GRD_LP</option>
+                        <option value="init-ff->ff->10rf->grd">INIT-FF_FF_10RF_GRD</option>
                     </select>
                 </div>
                 <div class="btn-group">

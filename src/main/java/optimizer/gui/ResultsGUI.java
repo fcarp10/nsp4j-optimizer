@@ -1,11 +1,6 @@
 package optimizer.gui;
 
-import static optimizer.Definitions.LINK_CLOUD_COLOR;
-import static optimizer.Definitions.LINK_COLOR;
-import static optimizer.Definitions.NODE_CLOUD;
-import static optimizer.Definitions.NODE_COLOR;
-import static optimizer.Definitions.NODE_SHAPE;
-import static optimizer.Definitions.SERVER_COLOR;
+import static optimizer.Definitions.*;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -30,6 +25,7 @@ public class ResultsGUI {
    private static Map<String, LinkJson> linkJsonMap;
    private static Results results;
    private static LinkedList<String> messages;
+   private static String longitudeLabel, latitudeLabel;
 
    public ResultsGUI() {
       nodeList = new ArrayList<>();
@@ -38,29 +34,35 @@ public class ResultsGUI {
       messages = new LinkedList<>();
    }
 
-   public static void initialize(Parameters parameters) {
+   public static void initialize(Parameters pm) {
       nodeList = new ArrayList<>();
       serverJsonMap = new HashMap<>();
       linkJsonMap = new HashMap<>();
-      for (Node n : parameters.getNodes()) {
-         String xAttr = "x", yAttr = "y";
-         if (n.getAttribute(NODE_CLOUD) != null) {
-            xAttr = "x_gui";
-            yAttr = "y_gui";
-         }
-         nodeList.add(new NodeJson(n.getId(), n.getAttribute(xAttr), n.getAttribute(yAttr), NODE_COLOR, n.getId(),
-               NODE_SHAPE));
+      if (pm.getNodes().get(0).getAttribute(LONGITUDE_LABEL_1) != null) {
+         longitudeLabel = LONGITUDE_LABEL_1;
+         latitudeLabel = LATITUDE_LABEL_1;
+      } else {
+         longitudeLabel = LONGITUDE_LABEL_2;
+         latitudeLabel = LATITUDE_LABEL_2;
       }
-      for (Server s : parameters.getServers()) {
-         String xAttr = "x", yAttr = "y";
-         if (s.getParent().getAttribute(NODE_CLOUD) != null) {
-            xAttr = "x_gui";
-            yAttr = "y_gui";
-         }
-         serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute(xAttr),
-               s.getParent().getAttribute(yAttr), SERVER_COLOR, s.getId()));
+      for (Node n : pm.getNodes()) {
+         if (n.getAttribute(NODE_CLOUD) != null && n.getAttribute(longitudeLabel + "_gui") != null)
+            nodeList.add(new NodeJson(n.getId(), n.getAttribute(longitudeLabel + "_gui"),
+                  n.getAttribute(latitudeLabel + "_gui"), NODE_COLOR, n.getId(), NODE_SHAPE));
+         else
+            nodeList.add(new NodeJson(n.getId(), n.getAttribute(longitudeLabel), n.getAttribute(latitudeLabel),
+                  NODE_COLOR, n.getId(), NODE_SHAPE));
       }
-      for (Edge e : parameters.getLinks()) {
+      for (Server s : pm.getServers()) {
+         if (s.getParent().getAttribute(NODE_CLOUD) != null
+               && s.getParent().getAttribute(longitudeLabel + "_gui") != null)
+            serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute(longitudeLabel + "_gui"),
+                  s.getParent().getAttribute(latitudeLabel + "_gui"), SERVER_COLOR, s.getId()));
+         else
+            serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute(longitudeLabel),
+                  s.getParent().getAttribute(latitudeLabel), SERVER_COLOR, s.getId()));
+      }
+      for (Edge e : pm.getLinks()) {
          String color = LINK_COLOR;
          if (e.getSourceNode().getAttribute(NODE_CLOUD) != null || e.getTargetNode().getAttribute(NODE_CLOUD) != null)
             color = LINK_CLOUD_COLOR;
@@ -111,9 +113,8 @@ public class ResultsGUI {
             if (functions.get(server).length() < 20)
                u.append("\n").append(functions.get(server));
          }
-         serverJsonList.add(new ServerJson(server.getId(), server.getParent().getAttribute("x")
-                 , server.getParent().getAttribute("y")
-                 , getColor(utilization), u.toString()));
+         serverJsonList.add(new ServerJson(server.getId(), server.getParent().getAttribute(longitudeLabel),
+               server.getParent().getAttribute(latitudeLabel), getColor(utilization), u.toString()));
       }
       return serverJsonList;
    }
@@ -129,8 +130,8 @@ public class ResultsGUI {
          String label = "";
          if (value != 0)
             label = df.format(value);
-         linkJsonList.add(new LinkJson(edge.getId(), edge.getSourceNode().getId()
-                 , edge.getTargetNode().getId(), label, getColor(value)));
+         linkJsonList.add(new LinkJson(edge.getId(), edge.getSourceNode().getId(), edge.getTargetNode().getId(), label,
+               getColor(value)));
       }
       return linkJsonList;
    }
@@ -143,17 +144,17 @@ public class ResultsGUI {
          for (int s = 0; s < results.getPm().getServices().size(); s++)
             for (int v = 0; v < results.getPm().getServices().get(s).getFunctions().size(); v++)
                if (pXSV[x][s][v])
-                  stringBuilder.append("s").append(results.getPm().getServices().get(s).getId())
-                          .append("v").append(v)
-                          .append("\n");
+                  stringBuilder.append("s").append(results.getPm().getServices().get(s).getId()).append("v").append(v)
+                        .append("\n");
          functionsStringMap.put(results.getPm().getServers().get(x), stringBuilder.toString());
       }
       return functionsStringMap;
    }
 
    private static String getColor(Double utilization) {
-      String[] colors = {"Gray", "LightGray", "MediumSeaGreen", "ForestGreen", "Gold", "GoldenRod", "Orange", "Tomato", "OrangeRed", "Indigo"};
-      double[] gaps = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+      String[] colors = { "Gray", "LightGray", "MediumSeaGreen", "ForestGreen", "Gold", "GoldenRod", "Orange", "Tomato",
+            "OrangeRed", "Indigo" };
+      double[] gaps = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 };
 
       if (utilization <= gaps[0])
          return colors[0];

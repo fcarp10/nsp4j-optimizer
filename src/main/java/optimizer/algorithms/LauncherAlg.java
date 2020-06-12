@@ -37,7 +37,7 @@ public class LauncherAlg {
          printLog(log, INFO, "starting DRL [" + (float) vars.getObjVal() + "]");
          PlacementModel2 placementModel2 = new PlacementModel2(null, pm, vars, networkManager, heuristicAlgorithm);
          placementModel2.run(RF);
-      } else if (sce.getAlgorithm().equals(HEU)) {
+      } else if (sce.getAlgorithm().equals(GRD)) {
          printLog(log, INFO, "running heuristics...");
          heuristicAlgorithm.allocateServicesHeuristic(sce.getAlgorithm());
          // vars.generateRestOfVariablesForResults();
@@ -51,7 +51,7 @@ public class LauncherAlg {
       Auxiliary.printLog(log, INFO, "finished [" + vars.objVal + "]");
       Results results = generateResults(pm, sce, vars, Auxiliary.fXSVvarsFromInitialModel(pm, initialModel));
       results.setComputationTime((double) elapsedTime / 1000000000);
-      String fileName = pm.getScenario() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
+      String fileName = pm.getGraphName() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
       if (sce.getAlgorithm().equals(RF))
          fileName += iteration;
       resultsManager.exportJsonObject(fileName, results);

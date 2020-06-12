@@ -14,15 +14,15 @@ public class Definitions {
 
    // scenarios
    public static final String DIMEN = "dimensioning-lp";
-   public static final String INIT = "init-lp";
+   public static final String INIT_LP = "init-lp";
+   public static final String INTI_FF = "init-ff";
    public static final String LP = "lp";
    public static final String FF = "ff";
-   public static final String FFP_RFX = "ffp-rfx";
-   public static final String RFP_FFX = "rfp-ffx";
    public static final String RF = "rf";
-   public static final String HEU = "heu";
+   public static final String GRD = "grd";
    public static final String DRL = "drl";
-   public static final String ALL = "all";
+   public static final String INITLP_FF_10RF_GRD_LP = "init-lp->ff->10rf->grd->lp";
+   public static final String INITFF_FF_10RF_GRD = "init-ff->ff->10rf->grd";
 
    // general variables
    public static final String zSP = "zSP";
@@ -96,6 +96,10 @@ public class Definitions {
    public static final String SERVER_IDLE_ENERGY_COST = "server_idle_energy_cost";
    public static final String SERVER_UTIL_ENERGY_COST = "server_util_energy_cost";
    public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
+   public static final String LONGITUDE_LABEL_1 = "Longitude";
+   public static final String LATITUDE_LABEL_1 = "Latitude";
+   public static final String LONGITUDE_LABEL_2 = "x";
+   public static final String LATITUDE_LABEL_2 = "y";
 
    // link parameters
    public static final String LINK_CAPACITY = "capacity";
@@ -110,6 +114,7 @@ public class Definitions {
    public static final String LINKS_WEIGHT = "links_weight";
    public static final String SERVERS_WEIGHT = "servers_weight";
    public static final String MAXU_WEIGHT = "maxU_weight";
+   public static final String DIRECTED_EDGES = "directed_edges";
 
    // GUI parameters
    public static final String NODE_COLOR = "Gray";
