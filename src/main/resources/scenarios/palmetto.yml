@@ -8,7 +8,7 @@ aux: {
   "servers_weight": 0.0,
   "maxU_weight": 0.0,
   "server_capacity": 1000,
-  "link_capacity": 3000,
+  "link_capacity": 5000,
   "cloud_server_capacity": 1000000,
   "cloud_link_capacity": 1000000,
   "directed_edges": false,
@@ -27,7 +27,7 @@ service_chains:
     chain: [1]
     max_propagation_delay: 5.0 # ms
     attributes: {
-      "downtime": 27.5, # ms for 7nodes with RTT of ~5ms (fixed)
+      "downtime": 27.5, # ms for RTT of ~5ms (fixed)
       "min_paths": 1,
       "max_paths": 3
     }
@@ -35,7 +35,7 @@ service_chains:
     chain: [2]
     max_propagation_delay: 5.0 # ms
     attributes: {
-      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "downtime": 27.5, # ms for RTT of ~5ms (fixed)
       "min_paths": 1,
       "max_paths": 3
     }
@@ -43,7 +43,7 @@ service_chains:
     chain: [1, 2]
     max_propagation_delay: 5.0 # ms
     attributes: {
-      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
+      "downtime": 27.5, # ms for of ~5ms (fixed)
       "min_paths": 1,
       "max_paths": 3
     }
@@ -82,4 +82,4 @@ traffic_flows:
     min_bw: 1
     max_bw: 20 # change "max_cap_server" accordingly
     services: [1]
-    service_length: [10]
+    service_length: [1]

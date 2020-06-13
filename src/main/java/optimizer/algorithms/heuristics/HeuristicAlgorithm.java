@@ -124,47 +124,48 @@ public class HeuristicAlgorithm {
         Auxiliary.printLog(log, INFO, "initial incumbent [" + bestKnownObjVal + "]");
         List<Integer> services = Interval.zeroTo(pm.getServices().size() - 1).toList();
         Collections.shuffle(services);
-        for (int sIndex = 0; sIndex < pm.getServices().size(); sIndex++) {
-            int s = services.get(sIndex);
-            for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
-                List<Integer> availablePaths = networkManager.getAvailablePaths(s, d);
-                boolean removePreviousAllocation = true;
-                for (Integer p : availablePaths) {
-                    if (removePreviousAllocation) {
-                        networkManager.removeDemandFromAllFunctionsToServer(s, d); // remove previous allocation
-                        removeDemandFromOldPath(s, d);
+        for (int sIndex1 = 0; sIndex1 < pm.getServices().size(); sIndex1++)
+            for (int sIndex = 0; sIndex < pm.getServices().size(); sIndex++) {
+                int s = services.get(sIndex);
+                for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++) {
+                    List<Integer> availablePaths = networkManager.getAvailablePaths(s, d);
+                    boolean removePreviousAllocation = true;
+                    for (Integer p : availablePaths) {
+                        if (removePreviousAllocation) {
+                            networkManager.removeDemandFromAllFunctionsToServer(s, d); // remove previous allocation
+                            removeDemandFromOldPath(s, d);
+                        }
+                        List<Integer> functionServerMapping = allocateDemandInPathHeuristics(GRD, s, d, p);
+                        if (functionServerMapping.size() == pm.getServices().get(s).getFunctions().size()) {
+                            networkManager.addDemandToPath(s, p, d);
+                            removePreviousAllocation = true;
+                        } else {
+                            for (int v = 0; v < functionServerMapping.size(); v++)
+                                networkManager.removeDemandToFunctionToServer(s, functionServerMapping.get(v), v, d);
+                            removePreviousAllocation = false;
+                            continue;
+                        }
+                        // then, try to optimize the locations
+                        double currentBestKnownObjVal = reallocateFunctionsInPath(s, d, p, bestKnownObjVal);
+                        if (currentBestKnownObjVal < bestKnownObjVal) {
+                            bestKnownObjVal = currentBestKnownObjVal;
+                            pathsIncumbent.put(String.valueOf(s) + String.valueOf(d), p);
+                        }
                     }
-                    List<Integer> functionServerMapping = allocateDemandInPathHeuristics(GRD, s, d, p);
-                    if (functionServerMapping.size() == pm.getServices().get(s).getFunctions().size()) {
-                        networkManager.addDemandToPath(s, p, d);
-                        removePreviousAllocation = true;
-                    } else {
-                        for (int v = 0; v < functionServerMapping.size(); v++)
-                            networkManager.removeDemandToFunctionToServer(s, functionServerMapping.get(v), v, d);
-                        removePreviousAllocation = false;
-                        continue;
+                    networkManager.removeDemandFromAllFunctionsToServer(s, d);
+                    removeDemandFromOldPath(s, d);
+                    int pBest = pathsIncumbent.get(String.valueOf(s) + String.valueOf(d));
+                    for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                        int xChosen = placementIncumbent
+                                .get(String.valueOf(s) + String.valueOf(d) + String.valueOf(pBest) + String.valueOf(v));
+                        networkManager.addDemandToFunctionToServer(s, xChosen, v, d);
                     }
-                    // then, try to optimize the locations
-                    double currentBestKnownObjVal = reallocateFunctionsInPath(s, d, p, bestKnownObjVal);
-                    if (currentBestKnownObjVal < bestKnownObjVal) {
-                        bestKnownObjVal = currentBestKnownObjVal;
-                        pathsIncumbent.put(String.valueOf(s) + String.valueOf(d), p);
-                    }
+                    networkManager.addDemandToPath(s, pBest, d);
                 }
-                networkManager.removeDemandFromAllFunctionsToServer(s, d);
-                removeDemandFromOldPath(s, d);
-                int pBest = pathsIncumbent.get(String.valueOf(s) + String.valueOf(d));
-                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                    int xChosen = placementIncumbent
-                            .get(String.valueOf(s) + String.valueOf(d) + String.valueOf(pBest) + String.valueOf(v));
-                    networkManager.addDemandToFunctionToServer(s, xChosen, v, d);
-                }
-                networkManager.addDemandToPath(s, pBest, d);
+                networkManager.removeUnusedFunctions(s);
+                networkManager.removeSyncTraffic(s);
+                networkManager.addSyncTraffic(s);
             }
-            networkManager.removeUnusedFunctions(s);
-            networkManager.removeSyncTraffic(s);
-            networkManager.addSyncTraffic(s);
-        }
     }
 
     private double reallocateFunctionsInPath(int s, int d, int p, double bestObjVal) {
@@ -233,6 +234,7 @@ public class HeuristicAlgorithm {
             if (pChosen != -1)
                 return pChosen;
             return getPathWithLowerServiceDelay(s, d, paths);
+            // return paths.get(0);
         }
         return -1;
     }
@@ -312,20 +314,21 @@ public class HeuristicAlgorithm {
     }
 
     private Integer chooseServerForFunctionHeuristics(List<Integer> availableServers, int s, int v, int d) {
-        int xCloud = returnCloudServer(availableServers);
+        int xCloudIndex = availableServers.size() - 1;
+        for (int x = 0; x < availableServers.size(); x++)
+            if (pm.getServers().get(availableServers.get(x)).getParent().getAttribute(NODE_CLOUD) != null)
+                xCloudIndex = x;
         int xChosen = -1;
         // reduce migrations by choosing servers from initial placement
         if ((xChosen = getAlreadyUsedServerforDemandFromInitialPlacement(s, v, d, availableServers)) != -1)
             return xChosen;
         // reduce replications by choosing servers from initial placement
         if ((xChosen = getAlreadyUsedServerFromInitialPlacement(s, v, availableServers)) != -1)
-            if (availableServers.indexOf(xChosen) < availableServers.indexOf(xCloud)) // TO BE CHECKED xCloud is
-                                                                                      // initialized with -1
+            if (availableServers.indexOf(xChosen) <= xCloudIndex)
                 return xChosen;
         // reduce replications by choosing a server already used for the function
         if ((xChosen = getAlreadyUsedServerForService(s, v, availableServers)) != -1)
-            if (availableServers.indexOf(xChosen) < availableServers.indexOf(xCloud)) // TO BE CHECKED xCloud is
-                                                                                      // initialized with -1
+            if (availableServers.indexOf(xChosen) <= xCloudIndex)
                 return xChosen;
         // choose the first available server
         return availableServers.get(0);
@@ -420,13 +423,5 @@ public class HeuristicAlgorithm {
             if (vars.zSPDinitial[s][p][d])
                 return true;
         return false;
-    }
-
-    private int returnCloudServer(List<Integer> availableServers) {
-        int xCloud = -1;
-        for (int x = 0; x < availableServers.size(); x++)
-            if (pm.getServers().get(availableServers.get(x)).getParent().getAttribute(NODE_CLOUD) != null)
-                xCloud = availableServers.get(x);
-        return xCloud;
     }
 }

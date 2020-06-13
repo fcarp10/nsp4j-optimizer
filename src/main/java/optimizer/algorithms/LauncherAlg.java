@@ -12,8 +12,6 @@ import optimizer.results.ResultsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gurobi.GRBModel;
-
 import java.io.PrintWriter;
 
 import static optimizer.Definitions.*;
@@ -23,10 +21,9 @@ public class LauncherAlg {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherAlg.class);
 
-   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, GRBModel initialModel,
-         int iteration) {
-
-      VariablesAlg vars = new VariablesAlg(pm, initialModel, sce.getObjFunc());
+   public static VariablesAlg run(Parameters pm, Scenario sce, ResultsManager resultsManager,
+         VariablesAlg initialPlacementVars, int iteration, boolean exportToMST) {
+      VariablesAlg vars = new VariablesAlg(pm, initialPlacementVars, sce.getObjFunc());
       NetworkManager networkManager = new NetworkManager(pm, vars);
       HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
       long startTime = System.nanoTime();
@@ -49,14 +46,17 @@ public class LauncherAlg {
       long elapsedTime = System.nanoTime() - startTime;
       vars.generateRestOfVariablesForResults();
       Auxiliary.printLog(log, INFO, "finished [" + vars.objVal + "]");
-      Results results = generateResults(pm, sce, vars, Auxiliary.fXSVvarsFromInitialModel(pm, initialModel));
+      Auxiliary.printLog(log, INFO, "generating results...");
+      Results results = generateResults(pm, sce, vars, Auxiliary.fXSVvarsFromInitialModel(pm, initialPlacementVars));
       results.setComputationTime((double) elapsedTime / 1000000000);
       String fileName = pm.getGraphName() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
       if (sce.getAlgorithm().equals(RF))
          fileName += iteration;
       resultsManager.exportJsonObject(fileName, results);
-      exportResultsToMST(pm, resultsManager, fileName, vars);
+      if (exportToMST)
+         exportResultsToMST(pm, resultsManager, fileName, vars);
       ResultsGUI.updateResults(results);
+      return vars;
    }
 
    private static Results generateResults(Parameters pm, Scenario sc, VariablesAlg heu,
@@ -81,7 +81,6 @@ public class LauncherAlg {
 
    private static void exportResultsToMST(Parameters pm, ResultsManager rm, String fileName, VariablesAlg heu) {
 
-      Auxiliary.printLog(log, INFO, "exporting results...");
       PrintWriter pw = rm.getPrinterFromPlainTextFile(fileName, ".mst");
       pw.println("# MIP start");
 

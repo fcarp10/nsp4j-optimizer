@@ -23,6 +23,7 @@ import manager.Parameters;
 import manager.elements.Function;
 import manager.elements.Service;
 import optimizer.Manager;
+import optimizer.algorithms.VariablesAlg;
 import optimizer.gui.ResultsGUI;
 import static optimizer.Definitions.*;
 
@@ -290,6 +291,52 @@ public class Auxiliary {
          } catch (GRBException e) {
             e.printStackTrace();
          }
+      return fXSVDvar;
+   }
+
+   public static boolean[][] zSPvarsFromInitialModel(Parameters pm, VariablesAlg initialPlacementVars) {
+      boolean[][] zSPvar = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
+      if (initialPlacementVars != null)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               if (initialPlacementVars.zSP[s][p])
+                  zSPvar[s][p] = true;
+      return zSPvar;
+   }
+
+   public static boolean[][][] zSPDvarsFromInitialModel(Parameters pm, VariablesAlg initialPlacementVars) {
+      boolean[][][] zSPDvar = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()][pm
+            .getDemandsTrafficFlow()];
+      if (initialPlacementVars != null)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                  if (initialPlacementVars.zSPD[s][p][d])
+                     zSPDvar[s][p][d] = true;
+      return zSPDvar;
+   }
+
+   public static boolean[][][] fXSVvarsFromInitialModel(Parameters pm, VariablesAlg initialPlacementVars) {
+      boolean[][][] fXSVvar = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
+      if (initialPlacementVars != null)
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (initialPlacementVars.fXSV[x][s][v])
+                     fXSVvar[x][s][v] = true;
+      return fXSVvar;
+   }
+
+   public static boolean[][][][] fXSVDvarsFromInitialModel(Parameters pm, VariablesAlg initialPlacementVars) {
+      boolean[][][][] fXSVDvar = new boolean[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm
+            .getDemandsTrafficFlow()];
+      if (initialPlacementVars != null)
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     if (initialPlacementVars.fXSVD[x][s][v][d])
+                        fXSVDvar[x][s][v][d] = true;
       return fXSVDvar;
    }
 }

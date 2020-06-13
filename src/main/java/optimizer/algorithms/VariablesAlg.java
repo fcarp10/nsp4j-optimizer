@@ -23,6 +23,7 @@ import java.util.Map;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Path;
 
+import gurobi.GRB;
 import gurobi.GRBModel;
 import manager.Parameters;
 import manager.elements.Function;
@@ -54,7 +55,15 @@ public class VariablesAlg {
    public boolean[][][][] fXSVDinitial;
    private String objFunc;
 
-   public VariablesAlg(Parameters pm, GRBModel initialModel, String objFunc) {
+   public VariablesAlg(Parameters pm, GRBModel initialPlacementModel) {
+      this.pm = pm;
+      zSP = Auxiliary.zSPvarsFromInitialModel(pm, initialPlacementModel);
+      zSPD = Auxiliary.zSPDvarsFromInitialModel(pm, initialPlacementModel);
+      fXSV = Auxiliary.fXSVvarsFromInitialModel(pm, initialPlacementModel);
+      fXSVD = Auxiliary.fXSVDvarsFromInitialModel(pm, initialPlacementModel);
+   }
+
+   public VariablesAlg(Parameters pm, VariablesAlg initialPlacementVars, String objFunc) {
       this.pm = pm;
       this.objFunc = objFunc;
       zSP = new boolean[pm.getServices().size()][pm.getPathsTrafficFlow()];
@@ -71,10 +80,10 @@ public class VariablesAlg {
       uX = new HashMap<>();
       for (Server server : pm.getServers())
          uX.put(server.getId(), 0.0);
-      zSPinitial = Auxiliary.zSPvarsFromInitialModel(pm, initialModel);
-      zSPDinitial = Auxiliary.zSPDvarsFromInitialModel(pm, initialModel);
-      fXSVinitial = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
-      fXSVDinitial = Auxiliary.fXSVDvarsFromInitialModel(pm, initialModel);
+      zSPinitial = Auxiliary.zSPvarsFromInitialModel(pm, initialPlacementVars);
+      zSPDinitial = Auxiliary.zSPDvarsFromInitialModel(pm, initialPlacementVars);
+      fXSVinitial = Auxiliary.fXSVvarsFromInitialModel(pm, initialPlacementVars);
+      fXSVDinitial = Auxiliary.fXSVDvarsFromInitialModel(pm, initialPlacementVars);
    }
 
    public void generateRestOfVariablesForResults() {
