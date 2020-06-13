@@ -283,7 +283,6 @@ public class NetworkManager {
                else if (vars.fXSV[x][s][v] || !vars.fXSVD[x][s][v][d])
                   if (checkIfFreeResourcesToExpandFunction(s, x, v, d, numOfFunctions, considerOverhead))
                      availableServers.add(x);
-               break;
             }
       return availableServers;
    }
