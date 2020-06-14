@@ -17,6 +17,7 @@ public class Definitions {
    public static final String INIT_LP = "init-lp";
    public static final String INTI_FF = "init-ff";
    public static final String INTI_RF = "init-rf";
+   public static final String INTI_GRD = "init-grd";
    public static final String LP = "lp";
    public static final String FF = "ff";
    public static final String RF = "rf";

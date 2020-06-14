@@ -109,7 +109,7 @@ public class Manager {
          switch (sce.getAlgorithm()) {
             case INITHEU_FF_10RF_GRD:
                // 1. initial placement LP
-               sce.setAlgorithm(INTI_RF);
+               sce.setAlgorithm(INTI_GRD);
                specifyUsedTrafficDemands(pm, true);
                VariablesAlg vars = new VariablesAlg(pm, null, sce.getObjFunc());
                LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
@@ -119,16 +119,16 @@ public class Manager {
                specifyUsedTrafficDemands(pm, false);
                vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
                LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
-               // 3. grd
-               sce.setAlgorithm(GRD);
-               vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
-               LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
-               // 4. rf
+               // 3. rf
                sce.setAlgorithm(RF);
                for (int i = 0; i < 10; i++) {
                   vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
                   LauncherAlg.run(pm, sce, resultsManager, vars, i, false);
                }
+               // 4. grd
+               sce.setAlgorithm(GRD);
+               vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
+               LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
                break;
             case INITLP_FF_10RF_GRD_LP:
                if (initModel == null) {

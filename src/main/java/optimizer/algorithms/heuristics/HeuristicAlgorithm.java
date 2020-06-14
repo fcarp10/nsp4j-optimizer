@@ -223,7 +223,7 @@ public class HeuristicAlgorithm {
             return paths.get(0);
         else if (algorithm.contains(RF))
             return paths.get(rnd.nextInt(paths.size()));
-        else if (algorithm.equals(GRD)) {
+        else if (algorithm.contains(GRD)) {
             int pChosen = getAlreadyUsedPathForDemandFromInitialPlacement(s, d, paths);
             if (pChosen != -1)
                 return pChosen;
@@ -308,7 +308,7 @@ public class HeuristicAlgorithm {
             return availableServers.get(0);
         else if (algorithm.contains(RF))
             return availableServers.get(rnd.nextInt(availableServers.size()));
-        else if (algorithm.equals(GRD))
+        else if (algorithm.contains(GRD))
             return chooseServerForFunctionHeuristics(availableServers, s, v, d);
         return -1;
     }
