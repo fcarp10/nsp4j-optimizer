@@ -107,16 +107,16 @@ public class Manager {
                sce);
          boolean isLowLoad = false;
          switch (sce.getAlgorithm()) {
-            case INITFF_FF_10RF_GRD:
+            case INITHEU_FF_10RF_GRD:
                // 1. initial placement LP
-               sce.setAlgorithm(INTI_FF);
+               sce.setAlgorithm(INTI_RF);
                specifyUsedTrafficDemands(pm, true);
                VariablesAlg variablesAlg = LauncherAlg.run(pm, sce, resultsManager, null, -1, false);
                // 2. ff
                sce.setAlgorithm(FF);
                specifyUsedTrafficDemands(pm, false);
                LauncherAlg.run(pm, sce, resultsManager, variablesAlg, -1, false);
-               // // 3. rf
+               // 3. rf
                sce.setAlgorithm(RF);
                for (int i = 0; i < 10; i++)
                   LauncherAlg.run(pm, sce, resultsManager, variablesAlg, i, false);

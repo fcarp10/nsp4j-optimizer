@@ -38,12 +38,14 @@ public class LauncherLP {
       long elapsedTime = System.nanoTime() - startTime;
       Results results;
       if (objVal != null) {
+         Auxiliary.printLog(log, INFO, "generating results...");
          results = generateResults(pm, modelLP, sce, initialPlacement);
          results.setComputationTime((double) elapsedTime / 1000000000);
          String outputFileName = pm.getGraphName() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
          resultsManager.exportJsonObject(outputFileName, results);
          resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);
+         Auxiliary.printLog(log, INFO, "done");
       }
       return modelLP.getGrbModel();
    }

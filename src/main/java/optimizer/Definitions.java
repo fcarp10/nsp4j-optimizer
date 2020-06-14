@@ -16,13 +16,14 @@ public class Definitions {
    public static final String DIMEN = "dimensioning-lp";
    public static final String INIT_LP = "init-lp";
    public static final String INTI_FF = "init-ff";
+   public static final String INTI_RF = "init-rf";
    public static final String LP = "lp";
    public static final String FF = "ff";
    public static final String RF = "rf";
    public static final String GRD = "grd";
    public static final String DRL = "drl";
    public static final String INITLP_FF_10RF_GRD_LP = "init-lp->ff->10rf->grd->lp";
-   public static final String INITFF_FF_10RF_GRD = "init-ff->ff->10rf->grd";
+   public static final String INITHEU_FF_10RF_GRD = "init-heu->ff->10rf->grd";
 
    // general variables
    public static final String zSP = "zSP";

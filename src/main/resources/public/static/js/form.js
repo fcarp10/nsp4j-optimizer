@@ -42,6 +42,7 @@ function successConnection(message) {
             document.getElementById("run_button").removeAttribute("disabled");
             document.getElementById("stop_button").setAttribute("disabled", "true");
             longRefresh();
+        } else if (message == "INFO - done") {
             getResults();
         }
         else {
@@ -89,8 +90,6 @@ function loadTopology() {
 function runOpt() {
     shortRefresh();
     var scenario = generateScenario();
-    // document.getElementById("run_button").setAttribute("disabled", "true");
-    // document.getElementById("stop_button").removeAttribute("disabled");
     try {
         var message = null;
         $.ajax
@@ -115,8 +114,6 @@ function runOpt() {
 
 function stopOpt() {
     longRefresh();
-    // document.getElementById("stop_button").setAttribute("disabled", "true");
-    // document.getElementById("run_button").removeAttribute("disabled");
     try {
         var message = null;
         $.ajax

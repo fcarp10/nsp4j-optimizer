@@ -674,7 +674,7 @@ public class Results {
                               + (d + this.offset) + "): " + "[" + var[s][v][x][d] + "]");
          variables.put(dSVXD, strings);
       } catch (Exception e) {
-         printLog(log, WARNING, dSVXD + " var results: " + e.getMessage());
+         // printLog(log, WARNING, dSVXD + " var results: " + e.getMessage());
       }
    }
 

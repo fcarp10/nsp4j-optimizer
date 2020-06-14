@@ -422,6 +422,16 @@ graph [
     id "e26"
   ]
   edge [
+    source 1
+    target 7
+    id "e170"
+  ]
+  edge [
+    source 1
+    target 30
+    id "e171"
+  ]
+  edge [
     source 2
     target 3
     id "e21"

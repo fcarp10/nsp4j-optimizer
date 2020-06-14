@@ -45,7 +45,7 @@ public class LauncherAlg {
       }
       long elapsedTime = System.nanoTime() - startTime;
       vars.generateRestOfVariablesForResults();
-      Auxiliary.printLog(log, INFO, "finished [" + vars.objVal + "]");
+      Auxiliary.printLog(log, INFO, "finished [" + Auxiliary.roundDouble(vars.objVal, 4) + "]");
       Auxiliary.printLog(log, INFO, "generating results...");
       Results results = generateResults(pm, sce, vars, Auxiliary.fXSVvarsFromInitialModel(pm, initialPlacementVars));
       results.setComputationTime((double) elapsedTime / 1000000000);
@@ -56,6 +56,7 @@ public class LauncherAlg {
       if (exportToMST)
          exportResultsToMST(pm, resultsManager, fileName, vars);
       ResultsGUI.updateResults(results);
+      Auxiliary.printLog(log, INFO, "done");
       return vars;
    }
 
