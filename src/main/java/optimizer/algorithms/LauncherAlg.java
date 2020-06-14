@@ -21,9 +21,8 @@ public class LauncherAlg {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherAlg.class);
 
-   public static VariablesAlg run(Parameters pm, Scenario sce, ResultsManager resultsManager,
-         VariablesAlg initialPlacementVars, int iteration, boolean exportToMST) {
-      VariablesAlg vars = new VariablesAlg(pm, initialPlacementVars, sce.getObjFunc());
+   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, VariablesAlg vars, int iteration,
+         boolean exportToMST) {
       NetworkManager networkManager = new NetworkManager(pm, vars);
       HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
       long startTime = System.nanoTime();
@@ -47,7 +46,7 @@ public class LauncherAlg {
       vars.generateRestOfVariablesForResults();
       Auxiliary.printLog(log, INFO, "finished [" + Auxiliary.roundDouble(vars.objVal, 4) + "]");
       Auxiliary.printLog(log, INFO, "generating results...");
-      Results results = generateResults(pm, sce, vars, Auxiliary.fXSVvarsFromInitialModel(pm, initialPlacementVars));
+      Results results = generateResults(pm, sce, vars, vars.fXSVinitial);
       results.setComputationTime((double) elapsedTime / 1000000000);
       String fileName = pm.getGraphName() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
       if (sce.getAlgorithm().equals(RF))
@@ -57,7 +56,6 @@ public class LauncherAlg {
          exportResultsToMST(pm, resultsManager, fileName, vars);
       ResultsGUI.updateResults(results);
       Auxiliary.printLog(log, INFO, "done");
-      return vars;
    }
 
    private static Results generateResults(Parameters pm, Scenario sc, VariablesAlg heu,

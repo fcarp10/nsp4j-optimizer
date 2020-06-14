@@ -62,6 +62,14 @@ public class VariablesAlg {
       fXSVD = Auxiliary.fXSVDvarsFromInitialModel(pm, initialPlacementModel);
    }
 
+   public VariablesAlg(Parameters pm, VariablesAlg initialPlacementVars) {
+      this.pm = pm;
+      zSP = Auxiliary.zSPvarsFromInitialModel(pm, initialPlacementVars);
+      zSPD = Auxiliary.zSPDvarsFromInitialModel(pm, initialPlacementVars);
+      fXSV = Auxiliary.fXSVvarsFromInitialModel(pm, initialPlacementVars);
+      fXSVD = Auxiliary.fXSVDvarsFromInitialModel(pm, initialPlacementVars);
+   }
+
    public VariablesAlg(Parameters pm, VariablesAlg initialPlacementVars, String objFunc) {
       this.pm = pm;
       this.objFunc = objFunc;

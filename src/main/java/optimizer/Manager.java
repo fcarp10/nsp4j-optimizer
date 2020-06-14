@@ -111,18 +111,24 @@ public class Manager {
                // 1. initial placement LP
                sce.setAlgorithm(INTI_RF);
                specifyUsedTrafficDemands(pm, true);
-               VariablesAlg variablesAlg = LauncherAlg.run(pm, sce, resultsManager, null, -1, false);
+               VariablesAlg vars = new VariablesAlg(pm, null, sce.getObjFunc());
+               LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
+               VariablesAlg varsInitPlacement = new VariablesAlg(pm, vars);
                // 2. ff
                sce.setAlgorithm(FF);
                specifyUsedTrafficDemands(pm, false);
-               LauncherAlg.run(pm, sce, resultsManager, variablesAlg, -1, false);
+               vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
+               LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
                // 3. rf
                sce.setAlgorithm(RF);
-               for (int i = 0; i < 10; i++)
-                  LauncherAlg.run(pm, sce, resultsManager, variablesAlg, i, false);
+               for (int i = 0; i < 10; i++) {
+                  vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
+                  LauncherAlg.run(pm, sce, resultsManager, vars, i, false);
+               }
                // 4. grd
                sce.setAlgorithm(GRD);
-               LauncherAlg.run(pm, sce, resultsManager, variablesAlg, -1, false);
+               vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
+               LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
                break;
             case INITLP_FF_10RF_GRD_LP:
                if (initModel == null) {
@@ -131,18 +137,18 @@ public class Manager {
                   specifyUsedTrafficDemands(pm, true);
                   initModel = LauncherLP.run(pm, sce, resultsManager, null, null);
                }
+               varsInitPlacement = new VariablesAlg(pm, initModel);
                // 2. ff
                sce.setAlgorithm(FF);
                specifyUsedTrafficDemands(pm, false);
-               variablesAlg = new VariablesAlg(pm, initModel);
-               LauncherAlg.run(pm, sce, resultsManager, variablesAlg, -1, false);
+               LauncherAlg.run(pm, sce, resultsManager, varsInitPlacement, -1, false);
                // 3. rf
                sce.setAlgorithm(RF);
                for (int i = 0; i < 10; i++)
-                  LauncherAlg.run(pm, sce, resultsManager, variablesAlg, i, false);
+                  LauncherAlg.run(pm, sce, resultsManager, varsInitPlacement, i, false);
                // 4. grd
                sce.setAlgorithm(GRD);
-               LauncherAlg.run(pm, sce, resultsManager, variablesAlg, -1, true);
+               LauncherAlg.run(pm, sce, resultsManager, varsInitPlacement, -1, true);
                // 5. lp
                pathFile = resultsManager.getResultsFolder() + "/" + pm.getGraphName() + "_" + GRD + "_"
                      + sce.getObjFunc();
@@ -167,8 +173,8 @@ public class Manager {
             case RF:
             case GRD:
                specifyUsedTrafficDemands(pm, false);
-               variablesAlg = new VariablesAlg(pm, initModel);
-               LauncherAlg.run(pm, sce, resultsManager, variablesAlg, -1, false);
+               varsInitPlacement = new VariablesAlg(pm, initModel);
+               LauncherAlg.run(pm, sce, resultsManager, varsInitPlacement, -1, false);
                break;
             default:
                printLog(log, INFO, "no algorithm selected");

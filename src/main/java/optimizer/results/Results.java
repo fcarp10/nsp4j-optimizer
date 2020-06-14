@@ -63,12 +63,8 @@ public class Results {
    private transient List<Double> xu;
    @JsonProperty("lu")
    private transient List<Double> lu;
-   @JsonProperty("fp")
-   private transient List<Double> fp;
    @JsonProperty("sd")
    private transient List<Double> sd;
-   @JsonProperty("st")
-   private transient List<String> st;
    @JsonProperty("ox")
    private transient List<Double> ox;
    @JsonProperty("osv")
@@ -106,7 +102,6 @@ public class Results {
       this.variables = new LinkedHashMap<>();
       this.lu = new ArrayList<>();
       this.xu = new ArrayList<>();
-      this.fp = new ArrayList<>();
       this.sd = new ArrayList<>();
       this.fxsv = new ArrayList<>();
    }
@@ -126,10 +121,8 @@ public class Results {
       this.objVal = Auxiliary.roundDouble(objVal, 6);
       lu = new ArrayList<>(linkUtilizationMap().values());
       xu = new ArrayList<>(serverUtilizationMap().values());
-      fp = numOfFunctionsPerServer();
       setSummaryResults(luSummary, lu);
       setSummaryResults(xuSummary, xu);
-      setSummaryResults(fpSummary, fp);
       luGraph(lu);
       xuGraph(xu);
 
@@ -164,10 +157,8 @@ public class Results {
             || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ) || sc.getObjFunc().equals(QOS_PENALTIES_OBJ)
             || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
          sd = serviceDelayList(initialPlacement);
-         st = serviceTypes();
          setSummaryResults(sdSummary, sd);
          sdGraph(sd);
-         // dSVX(); // processing delay
          dSVXD();
       }
    }
@@ -249,27 +240,6 @@ public class Results {
       return serverMapResults;
    }
 
-   private List<Double> numOfFunctionsPerServer() {
-      List<Double> numOfFunctionsPerServer = new ArrayList<>();
-      try {
-         boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
-         for (int x = 0; x < pm.getServers().size(); x++) {
-            int numOfFunctions = 0;
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (var[x][s][v]) {
-                     numOfFunctions++;
-                     fxsv.add(1.0);
-                  } else
-                     fxsv.add(0.0);
-            numOfFunctionsPerServer.add((double) numOfFunctions);
-         }
-      } catch (Exception e) {
-         printLog(log, ERROR, "counting number of functions per server: " + e.getMessage());
-      }
-      return numOfFunctionsPerServer;
-   }
-
    private List<Double> serviceDelayList(boolean[][][] initialPlacement) {
       List<Double> serviceDelayList = new ArrayList<>();
       boolean[][][] zSPDvar = (boolean[][][]) rawVariables.get(zSPD);
@@ -331,22 +301,6 @@ public class Results {
       }
       variables.put(dSPD, strings);
       return serviceDelayList;
-   }
-
-   private List<String> serviceTypes() {
-      List<String> serviceTypesList = new ArrayList<>();
-      try {
-         boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
-         for (int s = 0; s < pm.getServices().size(); s++)
-            for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
-               for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                  if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
-                     if (var2[s][p][d])
-                        serviceTypesList.add(pm.getServices().get(s).getId());
-      } catch (Exception e) {
-         printLog(log, ERROR, "counting types of services: " + e.getMessage());
-      }
-      return serviceTypesList;
    }
 
    private double avgPathLength() {
@@ -822,16 +776,8 @@ public class Results {
       return xu;
    }
 
-   public List<Double> getFp() {
-      return fp;
-   }
-
    public List<Double> getSd() {
       return sd;
-   }
-
-   public List<String> getSt() {
-      return st;
    }
 
    public List<Double> getOx() {
