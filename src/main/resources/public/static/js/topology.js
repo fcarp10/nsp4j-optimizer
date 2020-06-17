@@ -3,9 +3,9 @@ var servers;
 var links;
 initializeGraph();
 
-function initializeGraph() {
+function initializeGraph(cyContainer) {
     cy = cytoscape({
-        container: document.getElementById('cy'),
+        container: document.getElementById(cyContainer),
         boxSelectionEnabled: false,
         autounselectify: true,
         style: cytoscape.stylesheet()
@@ -18,7 +18,7 @@ function initializeGraph() {
                 'shape': 'data(faveShape)',
                 'width': 'data(width)',
                 'height': 'data(height)',
-                'font-size': 6,
+                'font-size': 8,
                 'text-valign': 'center',
                 'text-halign': 'center',
                 'color': 'white',
@@ -48,7 +48,8 @@ function initializeGraph() {
     });
     servers = getServers();
     links = getLinks();
-    cy.add(getNodes());
+    nodes = getNodes()
+    cy.add(nodes);
     cy.add(servers);
     cy.add(links);
     cy.layout({

@@ -119,11 +119,11 @@ public class Definitions {
    public static final String DIRECTED_EDGES = "directed_edges";
 
    // GUI parameters
-   public static final String NODE_COLOR = "Gray";
+   public static final String NODE_COLOR = "Black";
    public static final String NODE_SHAPE = "ellipse";
-   public static final String SERVER_COLOR = "Gray";
+   public static final String SERVER_COLOR = "Black";
    public static final String SERVER_SHAPE = "rectangle";
-   public static final String LINK_COLOR = "Gray";
+   public static final String LINK_COLOR = "Black";
    public static final String LINK_CLOUD_COLOR = "LightGray";
    public static final String X_SCALING = "x_scaling";
    public static final String Y_SCALING = "y_scaling";

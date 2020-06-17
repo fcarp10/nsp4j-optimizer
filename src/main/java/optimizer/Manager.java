@@ -63,8 +63,8 @@ public class Manager {
          }
          for (Node node : pm.getNodes()) {
             if (node.getAttribute(NODE_CLOUD) != null && node.getAttribute(longitudeLabel + "_gui") != null) {
-               node.setAttribute(longitudeLabel, (double) node.getAttribute(longitudeLabel + "_gui") * scalingX);
-               node.setAttribute(latitudeLabel, (double) node.getAttribute(latitudeLabel + "_gui") * scalingY);
+               node.setAttribute(longitudeLabel+ "_gui", (double) node.getAttribute(longitudeLabel + "_gui") * scalingX);
+               node.setAttribute(latitudeLabel+ "_gui", (double) node.getAttribute(latitudeLabel + "_gui") * scalingY);
             } else {
                node.setAttribute(longitudeLabel, (double) node.getAttribute(longitudeLabel) * scalingX);
                node.setAttribute(latitudeLabel, (double) node.getAttribute(latitudeLabel) * scalingY);

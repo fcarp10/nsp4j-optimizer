@@ -1,8 +1,16 @@
-#cy {
+#cy1 {
     height: 600px;
     width: 100%;
-    background: #E9ECEF;
+    background: rgb(255, 255, 255);
+    border: 2px solid gray;
 }
+
+#cy2 {
+    height: 900px;
+    width: 100%;
+    background: rgb(255, 255, 255);
+}
+
 
 .div-output {
     margin:1px 0 7px 0;

@@ -2,8 +2,8 @@
 aux: {
   "gap": 0.0,
   "offset_results": 0,
-  "x_scaling": 150.0,
-  "y_scaling": -150.0,
+  "x_scaling": 100.0,
+  "y_scaling": -100.0,
   "links_weight": 0.0,
   "servers_weight": 0.0,
   "maxU_weight": 0.0,

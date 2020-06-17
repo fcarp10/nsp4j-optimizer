@@ -62,7 +62,6 @@ function longRefresh() {
 }
 
 function loadTopology() {
-    shortRefresh();
     var scenario = generateScenario();
     try {
         var message = null;
@@ -77,7 +76,36 @@ function loadTopology() {
                 }
             });
         if (message != null) {
-            initializeGraph();
+            initializeGraph('cy1');
+            cleanResults();
+        }
+        return message;
+    }
+    catch (e) {
+        return 0;
+    }
+}
+
+function loadTopology2(){
+    shortRefresh();
+    var inputFileName = document.getElementById("inputFileName2").value;
+    var scenario = JSON.stringify({
+        inputFileName: inputFileName
+    });
+    try {
+        var message = null;
+        $.ajax
+            ({
+                data: scenario,
+                url: "load",
+                type: "POST",
+                async: false,
+                success: function (ans) {
+                    message = ans;
+                }
+            });
+        if (message != null) {
+            initializeGraph('cy2');
             cleanResults();
         }
         return message;
@@ -237,3 +265,4 @@ function generateScenario() {
     });
     return scenario;
 }
+
