@@ -38,13 +38,13 @@ This is the installation guide for the nsp4j-optimizer tool.
 - This will launch the application on your local machine trough the port 8080. Open your browser and access to `localhost:8080`, you will access to the GUI.
 
 
-- In some Linux or Mac OS distributions you might need to specify the Java library path according to your installation path.
+- In some Linux (tested in Ubuntu, Mint and Manjaro) or Mac OS distributions you might need to specify the Java library path according to your installation path.
 
     
     -Djava.library.path=/opt/gurobi810/linux64/lib/
     
 
-- In some Linux distribution you might need to add a file named `randomLibs.conf` to the directory `/etc/ld.so.conf.d/`:
+- In some Linux distributions (tested in Ubuntu, Mint and Manjaro) you might need to add a file named `randomLibs.conf` to the directory `/etc/ld.so.conf.d/`:
 
 
     sudo nano /etc/ld.so.conf.d/randomLibs.conf
