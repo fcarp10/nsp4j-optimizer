@@ -9,7 +9,7 @@
 
     <properties>
         <java.version>11</java.version>
-        <nsp4j-api.version>0.9.6</nsp4j-api.version>
+        <nsp4j-api.version>0.9.7</nsp4j-api.version>
         <gurobi.version>9.1.0</gurobi.version>
         <sparkjava.version>2.9.1</sparkjava.version>
         <gson.version>2.8.6</gson.version>

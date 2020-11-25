@@ -75,7 +75,7 @@ function_types: # type: 0 reserved for end-point functions
       "max_delay": 10.0, # ms (fixed) !!! (INCREASE FOR TESTING)
       "charges": 0.1199988 # ($/h) // 0.000033333 ($/sec) AWS Lambda - 2GB (fixed)
     }
-# traffic flow definitions
+# traffic flow definitions [min_dem: 1, max_dem: 3, min_bw: 1, max_bw: 20 (# change "max_cap_server" accordingly)]
 traffic_flows:
   - min_dem: 1
     max_dem: 3

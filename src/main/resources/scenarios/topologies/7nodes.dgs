@@ -1,0 +1,40 @@
+DGS004
+test 0 0
+
+an 1 x:10.507702 y:52.256044
+an 2 x:10.502182 y:52.267949 
+an 3 x:10.529057 y:52.273899 
+an 4 x:10.550113 y:52.265386 
+an 5 x:10.538964 y:52.251980 
+an 6 x:10.512477 y:52.246374 
+an 7 x:10.520307 y:52.263163 
+an 8 x:8.62 y:50.10 x_gui:10.51 y_gui:52.29 node_cloud:true
+
+
+
+ae 12 1 > 2
+ae 16 1 > 6 
+ae 17 1 > 7 
+ae 21 2 > 1 
+ae 23 2 > 3 
+ae 27 2 > 7 
+ae 28 2 > 8 link_cloud:true
+ae 32 3 > 2 
+ae 34 3 > 4 
+ae 43 4 > 3 
+ae 45 4 > 5 
+ae 47 4 > 7 
+ae 48 4 > 8 link_cloud:true
+ae 54 5 > 4 
+ae 56 5 > 6 
+ae 57 5 > 7 
+ae 61 6 > 1 
+ae 65 6 > 5 
+ae 68 6 > 8 link_cloud:true
+ae 71 7 > 1 
+ae 72 7 > 2 
+ae 74 7 > 4 
+ae 75 7 > 5 
+ae 82 8 > 2 link_cloud:true
+ae 84 8 > 4 link_cloud:true
+ae 86 8 > 6 link_cloud:true

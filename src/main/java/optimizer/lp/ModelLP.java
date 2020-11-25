@@ -113,7 +113,7 @@ public class ModelLP {
       return expr;
    }
 
-   public GRBLinExpr numOfMigrations(double weight, GRBModel initialPlacement) {
+   public GRBLinExpr numMigrations(double weight, GRBModel initialPlacement) {
       GRBLinExpr expr = new GRBLinExpr();
       try {
          for (int x = 0; x < pm.getServers().size(); x++)
@@ -126,6 +126,12 @@ public class ModelLP {
       } catch (Exception e) {
          printLog(log, ERROR, e.getMessage());
       }
+      return expr;
+   }
+
+   public GRBLinExpr numReplications(double weight) {
+      GRBLinExpr expr = new GRBLinExpr();
+      
       return expr;
    }
 

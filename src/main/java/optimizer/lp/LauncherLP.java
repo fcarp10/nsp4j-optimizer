@@ -99,6 +99,10 @@ public class LauncherLP {
             expr.add(modelLP.functionsChargesExpr());
             expr.add(modelLP.qosPenaltiesExpr());
             break;
+         case NUM_MIGRATIONS:
+            break;
+         case NUM_REPLICATIONS:
+            break;
       }
       return expr;
    }

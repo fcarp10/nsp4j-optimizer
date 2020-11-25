@@ -28,17 +28,18 @@ public class Manager {
    private static Long seed;
 
    public static void readInputParameters(String graphNameForm) {
-      String graphName = graphNameForm;
+
+      String[] graphName = graphNameForm.split("_");
       String extensionGraph = ".dgs";
       String[] graphNameExtension = graphNameForm.split("\\.");
       if (graphNameExtension.length > 1) {
-         graphName = graphNameExtension[0];
+         graphName[0] = graphNameExtension[0];
          extensionGraph = "." + graphNameExtension[1];
       }
       try {
-         String path = Auxiliary.getResourcePath(graphName + ".yml");
-         pm = ConfigFiles.readParameters(path + graphName + ".yml");
-         pm.initialize(path + graphName + extensionGraph, path + graphName + ".txt",
+         String path = Auxiliary.getResourcePath(graphNameForm + ".yml");
+         pm = ConfigFiles.readParameters(path + graphNameForm + ".yml");
+         pm.initialize(path + graphName[0] + extensionGraph, path + graphName[0] + ".txt",
                (boolean) pm.getAux(DIRECTED_EDGES));
          checkTopologyScale(pm);
          ResultsGUI.initialize(pm);
