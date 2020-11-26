@@ -30,7 +30,7 @@ public class LauncherLP {
       modelLP.setVars(variablesLP);
       printLog(log, INFO, "setting constraints");
       new GeneralConstraints(pm, modelLP, sce, initialPlacement);
-      GRBLinExpr expr = generateExprForObjectiveFunction(pm, modelLP, sce.getObjFunc());
+      GRBLinExpr expr = generateExprForObjectiveFunction(pm, modelLP, sce.getObjFunc(), initialPlacement);
       modelLP.setObjectiveFunction(expr, sce.isMaximization());
       printLog(log, INFO, "running model");
       long startTime = System.nanoTime();
@@ -50,8 +50,8 @@ public class LauncherLP {
       return modelLP.getGrbModel();
    }
 
-   private static GRBLinExpr generateExprForObjectiveFunction(Parameters pm, ModelLP modelLP, String objectiveFunction)
-         throws GRBException {
+   private static GRBLinExpr generateExprForObjectiveFunction(Parameters pm, ModelLP modelLP, String objectiveFunction,
+         boolean[][][] initialPlacement) throws GRBException {
       GRBLinExpr expr = new GRBLinExpr();
       double serversWeight, linksWeight;
       switch (objectiveFunction) {
@@ -100,8 +100,14 @@ public class LauncherLP {
             expr.add(modelLP.qosPenaltiesExpr());
             break;
          case NUM_MIGRATIONS:
+            expr.add(modelLP.numMigrations(1.0, initialPlacement));
             break;
          case NUM_REPLICATIONS:
+            expr.add(modelLP.numReplications(1.0));
+            break;
+         case NUM_MGR_AND_REP:
+            expr.add(modelLP.numMigrations(1.0, initialPlacement));
+            expr.add(modelLP.numReplications(1.0));
             break;
       }
       return expr;

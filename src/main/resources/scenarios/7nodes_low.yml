@@ -4,22 +4,13 @@ aux: {
   "offset_results": 0,
   "x_scaling": 6000.0,
   "y_scaling": 6000.0,
-  "links_weight": 0.0,
-  "servers_weight": 0.0,
-  "maxU_weight": 0.0,
   "server_capacity": 1000,
   "link_capacity": 500,
   "cloud_server_capacity": 20000,
   "cloud_link_capacity": 10000,
   "directed_edges": true,
   "num_servers_node": 1,
-  "cloud_num_servers": 1,
-  "overprovisioning_server_capacity": 1.0,
-  "server_idle_energy_cost": 0.0184453, # ($/h) // b=132.7 (PowerEdge R410)
-  "server_util_energy_cost": 0.0095632, # ($/h) // a=68.8 (PowerEdge R410)
-  "server_other_opex": 0.0,
-  "initial_traffic_load": 0.3,
-  "qos_penalty_ratio": 0.1
+  "cloud_num_servers": 1
 }
 # service definitions
 service_chains:
@@ -28,22 +19,6 @@ service_chains:
     max_propagation_delay: 5.0 # ms
     attributes: {
       "downtime": 27.5, # ms for 7nodes with RTT of ~5ms (fixed)
-      "min_paths": 1,
-      "max_paths": 3
-    }
-  - id: 2
-    chain: [2]
-    max_propagation_delay: 5.0 # ms
-    attributes: {
-      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
-      "min_paths": 1,
-      "max_paths": 3
-    }
-  - id: 12
-    chain: [1, 2]
-    max_propagation_delay: 5.0 # ms
-    attributes: {
-      "downtime": 27.5, # ms for polska with RTT of ~5ms (fixed)
       "min_paths": 1,
       "max_paths": 3
     }
@@ -62,24 +37,215 @@ function_types: # type: 0 reserved for end-point functions
       "max_delay": 10.0, # ms (fixed) !!! (INCREASE FOR TESTING)
       "charges": 0.0069  # ($/h) // 0.000001917 ($/sec) VM t2.small (2GB) (fixed)
     }
-  - type: 2 # FaaS function
-    attributes: {
-      "replicable": true, # (fixed)
-      "load_ratio": 1.2,
-      "overhead": 0,
-      "sync_load": 0.1, # (fixed)
-      "max_cap_server": 72, # == "max_bw" * "max_dem" * "load_ratio" !!
-      "process_traffic_delay": 3.0, # ms (fixed)
-      "process_delay": 5.0, # ms (fixed)
-      "min_process_delay": 2.0, # ms (fixed)
-      "max_delay": 10.0, # ms (fixed) !!! (INCREASE FOR TESTING)
-      "charges": 0.1199988 # ($/h) // 0.000033333 ($/sec) AWS Lambda - 2GB (fixed)
-    }
 # traffic flow definitions [min_dem: 1, max_dem: 3, min_bw: 1, max_bw: 20 (# change "max_cap_server" accordingly)]
 traffic_flows:
-  - min_dem: 1
-    max_dem: 3
-    min_bw: 1
-    max_bw: 20 # change "max_cap_server" accordingly
-    services: [1]
-    service_length: [7]
+- demands_specific: [1, 1, 1]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '1'
+- demands_specific: [1]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '1'
+- demands_specific: [1]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '1'
+- demands_specific: [2, 1, 1]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '1'
+- demands_specific: [1, 1]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '1'
+- demands_specific: [1]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '1'
+- demands_specific: [2]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '2'
+- demands_specific: [1, 2, 1]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '2'
+- demands_specific: [4, 3, 2]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '2'
+- demands_specific: [4, 2]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '2'
+- demands_specific: [1]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '2'
+- demands_specific: [1, 2, 2]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '2'
+- demands_specific: [2]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [1, 1]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [1, 2]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [2, 1]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [3]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [1, 1, 1]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [2, 1, 1]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [2, 1, 1]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [1, 1, 1]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [1]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [2, 2]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [2, 1, 1]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [2, 2]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [1, 3, 1]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [1, 1, 3]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [2, 1]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [2]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [1]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [1]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [1, 1]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [3]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [2, 1, 3]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [2, 1]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [1, 2]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [3, 2, 1]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [2, 2, 4]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [2, 2]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [1]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [1, 1]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [1]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '7'

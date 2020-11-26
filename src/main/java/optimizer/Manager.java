@@ -27,7 +27,7 @@ public class Manager {
    private static Parameters pm;
    private static Long seed;
 
-   public static void readInputParameters(String graphNameForm) {
+   public static String readInputParameters(String graphNameForm) {
 
       String[] graphName = graphNameForm.split("_");
       String extensionGraph = ".dgs";
@@ -48,6 +48,7 @@ public class Manager {
       } catch (Exception e) {
          printLog(log, ERROR, "error loading input parameters");
       }
+      return graphName[0];
    }
 
    private static void checkTopologyScale(Parameters pm) {
@@ -64,8 +65,9 @@ public class Manager {
          }
          for (Node node : pm.getNodes()) {
             if (node.getAttribute(NODE_CLOUD) != null && node.getAttribute(longitudeLabel + "_gui") != null) {
-               node.setAttribute(longitudeLabel+ "_gui", (double) node.getAttribute(longitudeLabel + "_gui") * scalingX);
-               node.setAttribute(latitudeLabel+ "_gui", (double) node.getAttribute(latitudeLabel + "_gui") * scalingY);
+               node.setAttribute(longitudeLabel + "_gui",
+                     (double) node.getAttribute(longitudeLabel + "_gui") * scalingX);
+               node.setAttribute(latitudeLabel + "_gui", (double) node.getAttribute(latitudeLabel + "_gui") * scalingY);
             } else {
                node.setAttribute(longitudeLabel, (double) node.getAttribute(longitudeLabel) * scalingX);
                node.setAttribute(latitudeLabel, (double) node.getAttribute(latitudeLabel) * scalingY);
@@ -99,13 +101,12 @@ public class Manager {
    }
 
    public static void main(Scenario sce) {
-      readInputParameters(sce.getInputFileName());
+      String graphNameShort = readInputParameters(sce.getInputFileName());
       try {
          interrupted = false;
          ResultsManager resultsManager = new ResultsManager(pm.getGraphName());
-         String pathFile = Auxiliary.getResourcePath(pm.getGraphName() + "_" + INIT_LP + ".mst");
-         GRBModel initModel = resultsManager.loadInitialPlacement(pathFile + pm.getGraphName() + "_" + INIT_LP, pm,
-               sce);
+         String pathFile = Auxiliary.getResourcePath(graphNameShort + "_" + INIT_LP + ".mst");
+         GRBModel initModel = resultsManager.loadInitialPlacement(pathFile + graphNameShort + "_" + INIT_LP, pm, sce);
          boolean isLowLoad = false;
          switch (sce.getAlgorithm()) {
             case INITHEU_FF_10RF_GRD:

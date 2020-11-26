@@ -39,212 +39,212 @@ function_types: # type: 0 reserved for end-point functions
     }
 # traffic flow definitions [min_dem: 1, max_dem: 3, min_bw: 1, max_bw: 20 (# change "max_cap_server" accordingly)]
 traffic_flows:
-- demands_specific: [3, 1, 8]
+- demands_specific: [2, 1, 7]
   dst: '2'
   service_length: [7]
   services: [1]
   src: '1'
-- demands_specific: [7]
-  dst: '3'
-  service_length: [7]
-  services: [1]
-  src: '1'
-- demands_specific: [4]
-  dst: '4'
-  service_length: [7]
-  services: [1]
-  src: '1'
-- demands_specific: [17, 3, 19]
-  dst: '5'
-  service_length: [7]
-  services: [1]
-  src: '1'
-- demands_specific: [2, 1]
-  dst: '6'
-  service_length: [7]
-  services: [1]
-  src: '1'
-- demands_specific: [7]
-  dst: '7'
-  service_length: [7]
-  services: [1]
-  src: '1'
-- demands_specific: [16]
-  dst: '1'
-  service_length: [7]
-  services: [1]
-  src: '2'
-- demands_specific: [1, 18, 7]
-  dst: '3'
-  service_length: [7]
-  services: [1]
-  src: '2'
-- demands_specific: [17, 13, 8]
-  dst: '4'
-  service_length: [7]
-  services: [1]
-  src: '2'
-- demands_specific: [19, 9]
-  dst: '5'
-  service_length: [7]
-  services: [1]
-  src: '2'
 - demands_specific: [6]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '1'
+- demands_specific: [3]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '1'
+- demands_specific: [15, 2, 16]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '1'
+- demands_specific: [1, 1]
   dst: '6'
   service_length: [7]
   services: [1]
-  src: '2'
-- demands_specific: [13, 11, 8]
-  dst: '7'
-  service_length: [7]
-  services: [1]
-  src: '2'
+  src: '1'
 - demands_specific: [6]
-  dst: '1'
-  service_length: [7]
-  services: [1]
-  src: '3'
-- demands_specific: [4, 3]
-  dst: '2'
-  service_length: [7]
-  services: [1]
-  src: '3'
-- demands_specific: [4, 12]
-  dst: '4'
-  service_length: [7]
-  services: [1]
-  src: '3'
-- demands_specific: [19, 9]
-  dst: '5'
-  service_length: [7]
-  services: [1]
-  src: '3'
-- demands_specific: [13]
-  dst: '6'
-  service_length: [7]
-  services: [1]
-  src: '3'
-- demands_specific: [4, 12, 3]
   dst: '7'
   service_length: [7]
   services: [1]
-  src: '3'
-- demands_specific: [10, 19, 11]
+  src: '1'
+- demands_specific: [14]
   dst: '1'
   service_length: [7]
   services: [1]
-  src: '4'
-- demands_specific: [7, 3, 2]
-  dst: '2'
-  service_length: [7]
-  services: [1]
-  src: '4'
-- demands_specific: [8, 9, 3]
+  src: '2'
+- demands_specific: [1, 16, 7]
   dst: '3'
   service_length: [7]
   services: [1]
-  src: '4'
-- demands_specific: [4]
-  dst: '5'
-  service_length: [7]
-  services: [1]
-  src: '4'
-- demands_specific: [8, 14]
-  dst: '6'
-  service_length: [7]
-  services: [1]
-  src: '4'
-- demands_specific: [11, 6, 12]
-  dst: '7'
-  service_length: [7]
-  services: [1]
-  src: '4'
-- demands_specific: [6, 9]
-  dst: '1'
-  service_length: [7]
-  services: [1]
-  src: '5'
-- demands_specific: [3, 18, 6]
-  dst: '2'
-  service_length: [7]
-  services: [1]
-  src: '5'
-- demands_specific: [8, 6, 15]
-  dst: '3'
-  service_length: [7]
-  services: [1]
-  src: '5'
-- demands_specific: [8, 18]
+  src: '2'
+- demands_specific: [15, 11, 7]
   dst: '4'
   service_length: [7]
   services: [1]
-  src: '5'
-- demands_specific: [10]
-  dst: '6'
-  service_length: [7]
-  services: [1]
-  src: '5'
-- demands_specific: [7]
-  dst: '7'
-  service_length: [7]
-  services: [1]
-  src: '5'
-- demands_specific: [10]
-  dst: '1'
-  service_length: [7]
-  services: [1]
-  src: '6'
-- demands_specific: [8, 3]
-  dst: '2'
-  service_length: [7]
-  services: [1]
-  src: '6'
-- demands_specific: [15]
-  dst: '3'
-  service_length: [7]
-  services: [1]
-  src: '6'
-- demands_specific: [11, 6, 14]
-  dst: '4'
-  service_length: [7]
-  services: [1]
-  src: '6'
-- demands_specific: [14, 5]
+  src: '2'
+- demands_specific: [16, 8]
   dst: '5'
   service_length: [7]
   services: [1]
-  src: '6'
-- demands_specific: [5, 7]
-  dst: '7'
-  service_length: [7]
-  services: [1]
-  src: '6'
-- demands_specific: [16, 18, 8]
-  dst: '1'
-  service_length: [7]
-  services: [1]
-  src: '7'
-- demands_specific: [18, 14, 18]
-  dst: '2'
-  service_length: [7]
-  services: [1]
-  src: '7'
-- demands_specific: [11, 7]
-  dst: '3'
-  service_length: [7]
-  services: [1]
-  src: '7'
-- demands_specific: [15]
-  dst: '4'
-  service_length: [7]
-  services: [1]
-  src: '7'
-- demands_specific: [3, 2]
-  dst: '5'
-  service_length: [7]
-  services: [1]
-  src: '7'
+  src: '2'
 - demands_specific: [5]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '2'
+- demands_specific: [11, 9, 7]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '2'
+- demands_specific: [5]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [3, 2]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [3, 10]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [17, 8]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [12]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [3, 11, 2]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '3'
+- demands_specific: [9, 16, 10]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [6, 2, 1]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [7, 8, 2]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [3]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [7, 12]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [10, 5, 10]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '4'
+- demands_specific: [5, 8]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [2, 16, 5]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [7, 5, 13]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [7, 15]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [9]
+  dst: '6'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [6]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '5'
+- demands_specific: [9]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [8, 2]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [14]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [10, 5, 13]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [12, 4]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [4, 6]
+  dst: '7'
+  service_length: [7]
+  services: [1]
+  src: '6'
+- demands_specific: [14, 15, 7]
+  dst: '1'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [16, 12, 16]
+  dst: '2'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [10, 6]
+  dst: '3'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [13]
+  dst: '4'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [2, 1]
+  dst: '5'
+  service_length: [7]
+  services: [1]
+  src: '7'
+- demands_specific: [4]
   dst: '6'
   service_length: [7]
   services: [1]

@@ -113,13 +113,13 @@ public class ModelLP {
       return expr;
    }
 
-   public GRBLinExpr numMigrations(double weight, GRBModel initialPlacement) {
+   public GRBLinExpr numMigrations(double weight, boolean[][][] initialPlacement) {
       GRBLinExpr expr = new GRBLinExpr();
       try {
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
-                  if (initialPlacement.getVarByName(fXSV + "[" + x + "][" + s + "][" + v + "]").get(GRB.DoubleAttr.X) == 1.0) {
+                  if (initialPlacement[x][s][v]) {
                      expr.addConstant(weight);
                      expr.addTerm(-weight, vars.fXSV[x][s][v]);
                   }
@@ -131,14 +131,19 @@ public class ModelLP {
 
    public GRBLinExpr numReplications(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
-      
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            expr.addConstant(-1);
+            for (int x = 0; x < pm.getServers().size(); x++)
+               expr.addTerm(weight, vars.fXSV[x][s][v]);
+         }
       return expr;
    }
 
    public Double run() throws GRBException {
       grbModel.optimize();
       if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.OPTIMAL
-              || grbModel.get(GRB.IntAttr.Status) == GRB.Status.INTERRUPTED) {
+            || grbModel.get(GRB.IntAttr.Status) == GRB.Status.INTERRUPTED) {
          objVal = grbModel.get(GRB.DoubleAttr.ObjVal);
          double objValLog = Auxiliary.roundDouble(objVal, 4);
          printLog(log, INFO, "finished [" + objValLog + "]");

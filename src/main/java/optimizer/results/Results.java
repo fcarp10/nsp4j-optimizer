@@ -152,15 +152,11 @@ public class Results {
          synchronizationTraffic = Auxiliary.roundDouble(synchronizationTraffic(), 2);
       }
 
-      // service delay variables
-      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ)
-            || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ) || sc.getObjFunc().equals(QOS_PENALTIES_OBJ)
-            || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
-         sd = serviceDelayList(initialPlacement);
-         setSummaryResults(sdSummary, sd);
-         sdGraph(sd);
-         dSVXD();
-      }
+      sd = serviceDelayList(initialPlacement);
+      setSummaryResults(sdSummary, sd);
+      sdGraph(sd);
+      dSVXD();
+
    }
 
    private Integer[] countMigrations(boolean[][][] initialPlacement) {

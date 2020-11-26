@@ -13,6 +13,7 @@ public class Definitions {
    public static final String ALL_MONETARY_COSTS_OBJ = "all-monetary-costs";
    public static final String NUM_MIGRATIONS = "num-migrations";
    public static final String NUM_REPLICATIONS = "num-replications";
+   public static final String NUM_MGR_AND_REP = "num-mgr-and-rep";
 
    // scenarios
    public static final String DIMEN = "dimensioning-lp";

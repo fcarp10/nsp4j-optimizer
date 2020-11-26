@@ -38,14 +38,17 @@ function successConnection(message) {
         document.getElementById("message").innerText = messages.join("");
         if (messages.length >= numMessages)
             messages.shift();
-        if (message == "INFO - backend is ready") {
+        if (message == "INFO - backend is ready" || message == "INFO - topology loaded") {
             document.getElementById("run_button").removeAttribute("disabled");
             document.getElementById("stop_button").setAttribute("disabled", "true");
             longRefresh();
-        } else if (message == "INFO - done") {
+        } else if (message == "INFO - done") { // model finished
             getResults();
+            document.getElementById("run_button").removeAttribute("disabled");
+            document.getElementById("stop_button").setAttribute("disabled", "true");
         }
-        else {
+       
+        else {  // receiving logs
             shortRefresh();
         }
     }
@@ -77,35 +80,6 @@ function loadTopology() {
             });
         if (message != null) {
             initializeGraph('cy1');
-            cleanResults();
-        }
-        return message;
-    }
-    catch (e) {
-        return 0;
-    }
-}
-
-function loadTopology2(){
-    shortRefresh();
-    var inputFileName = document.getElementById("inputFileName2").value;
-    var scenario = JSON.stringify({
-        inputFileName: inputFileName
-    });
-    try {
-        var message = null;
-        $.ajax
-            ({
-                data: scenario,
-                url: "load",
-                type: "POST",
-                async: false,
-                success: function (ans) {
-                    message = ans;
-                }
-            });
-        if (message != null) {
-            initializeGraph('cy2');
             cleanResults();
         }
         return message;
@@ -156,30 +130,6 @@ function stopOpt() {
         if (message == 201) {
             document.getElementById("run_button").disabled = false;
             document.getElementById("stop_button").disabled = true;
-        }
-    }
-    catch (e) {
-        return 0;
-    }
-}
-
-function generatePaths() {
-    shortRefresh();
-    var scenario = generateScenario();
-    try {
-        var message = null;
-        $.ajax
-            ({
-                data: scenario,
-                url: "paths",
-                type: "POST",
-                async: false,
-                success: function (ans) {
-                    message = ans;
-                }
-            });
-        if (message != null) {
-            document.getElementById("message").innerText = message;
         }
     }
     catch (e) {
