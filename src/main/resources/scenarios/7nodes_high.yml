@@ -17,6 +17,7 @@ service_chains:
   - id: 1
     chain: [1]
     max_propagation_delay: 5.0 # ms for 7nodes network
+    max_delay: 250 # ms
     attributes: {
       "downtime": 27.5, # ms for 7nodes with RTT of ~5ms (fixed)
       "min_paths": 1,

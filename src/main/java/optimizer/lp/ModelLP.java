@@ -123,8 +123,6 @@ public class ModelLP {
                      expr.addConstant(1.0);
                      expr.addTerm(-1.0, vars.fXSV[x][s][v]);
                   }
-                  // if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
-                  //    expr.addTerm(weight, vars.fXSV[x][s][v]);
                }
          }
       } catch (Exception e) {
