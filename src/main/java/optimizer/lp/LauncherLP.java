@@ -20,7 +20,7 @@ public class LauncherLP {
    private static final Logger log = LoggerFactory.getLogger(LauncherLP.class);
 
    public static GRBModel run(Parameters pm, Scenario sce, ResultsManager resultsManager, GRBModel initialModel,
-         GRBModel initialSolution) throws GRBException {
+         GRBModel initialSolution, String outputFileName) throws GRBException {
       boolean[][][] initialPlacement = null;
       if (initialModel != null)
          initialPlacement = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
@@ -29,7 +29,7 @@ public class LauncherLP {
       VariablesLP variablesLP = new VariablesLP(pm, modelLP.getGrbModel(), sce, initialSolution);
       modelLP.setVars(variablesLP);
       printLog(log, INFO, "setting constraints");
-      new GeneralConstraints(pm, modelLP, sce, initialPlacement);
+      new Constraints(pm, modelLP, sce, initialPlacement);
       GRBLinExpr expr = generateExprForObjectiveFunction(pm, modelLP, sce.getObjFunc(), initialPlacement);
       modelLP.setObjectiveFunction(expr, sce.isMaximization());
       printLog(log, INFO, "running model");
@@ -41,7 +41,6 @@ public class LauncherLP {
          Auxiliary.printLog(log, INFO, "generating results...");
          results = generateResults(pm, modelLP, sce, initialPlacement);
          results.setComputationTime((double) elapsedTime / 1000000000);
-         String outputFileName = pm.getGraphName() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
          resultsManager.exportJsonObject(outputFileName, results);
          resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);
@@ -58,54 +57,54 @@ public class LauncherLP {
          case DIMEN:
             expr.add(modelLP.dimensioningExpr());
             break;
-         case NUM_SERVERS_OBJ:
+         case NUM_SERVERS:
             expr.add(modelLP.numUsedServersExpr());
             break;
-         case NUM_SERVERS_UTIL_COSTS_OBJ:
+         case NUM_SERVERS_AND_UTIL_COSTS:
             expr.add(modelLP.numUsedServersExpr());
             serversWeight = 1.0 / pm.getServers().size();
             expr.add(modelLP.serverCostsExpr(serversWeight));
             break;
-         case UTIL_COSTS_OBJ:
+         case UTIL_COSTS:
             linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
             serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
             expr.add(modelLP.linkCostsExpr(linksWeight));
             expr.add(modelLP.serverCostsExpr(serversWeight));
             break;
-         case UTIL_COSTS_MAX_UTIL_OBJ:
+         case UTIL_COSTS_AND_MAX_UTIL:
             linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
             serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
             expr.add(modelLP.linkUtilizationExpr(linksWeight));
             expr.add(modelLP.serverUtilizationExpr(serversWeight));
             expr.add(modelLP.maxUtilizationExpr((double) pm.getAux().get(MAXU_WEIGHT)));
             break;
-         case UTILIZATION_OBJ:
+         case UTILIZATION:
             linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
             serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
             expr.add(modelLP.linkUtilizationExpr(linksWeight));
             expr.add(modelLP.serverUtilizationExpr(serversWeight));
             break;
-         case OPEX_SERVERS_OBJ:
+         case OPEX_SERVERS:
             expr.add(modelLP.opexServersExpr());
             break;
-         case FUNCTIONS_CHARGES_OBJ:
+         case FUNCTIONS_CHARGES:
             expr.add(modelLP.functionsChargesExpr());
             break;
-         case QOS_PENALTIES_OBJ:
+         case QOS_PENALTIES:
             expr.add(modelLP.qosPenaltiesExpr());
             break;
-         case ALL_MONETARY_COSTS_OBJ:
+         case ALL_MONETARY_COSTS:
             expr.add(modelLP.opexServersExpr());
             expr.add(modelLP.functionsChargesExpr());
             expr.add(modelLP.qosPenaltiesExpr());
             break;
-         case NUM_MIGRATIONS:
+         case MGR:
             expr.add(modelLP.numMigrations(1.0, initialPlacement));
             break;
-         case NUM_REPLICATIONS:
+         case REP:
             expr.add(modelLP.numReplications(1.0));
             break;
-         case NUM_MGR_AND_REP:
+         case MGR_REP:
             expr.add(modelLP.numMigrations(1.0, initialPlacement));
             expr.add(modelLP.numReplications(1.0));
             break;
@@ -128,8 +127,8 @@ public class LauncherLP {
       // model specific variables
       if (sc.getObjFunc().equals(DIMEN))
          results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModelLP.getVars().xN));
-      if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
-            || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+      if (sc.getObjFunc().equals(OPEX_SERVERS) || sc.getObjFunc().equals(FUNCTIONS_CHARGES)
+            || sc.getObjFunc().equals(QOS_PENALTIES) || sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {
          results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModelLP.getVars().oX));
          results.setVariable(oSV, Auxiliary.grbVarsToDoubles(optModelLP.getVars().oSV));
          results.setVariable(qSDP, Auxiliary.grbVarsToDoubles(optModelLP.getVars().qSDP));
@@ -143,9 +142,9 @@ public class LauncherLP {
       }
 
       // service delay variables
-      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS_OBJ)
-            || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ) || sc.getObjFunc().equals(QOS_PENALTIES_OBJ)
-            || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+      if (sc.getConstraints().get(MAX_SERV_DELAY) || sc.getObjFunc().equals(OPEX_SERVERS)
+            || sc.getObjFunc().equals(FUNCTIONS_CHARGES) || sc.getObjFunc().equals(QOS_PENALTIES)
+            || sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModelLP.getVars().dSVXD));
       }
       results.initializeResults(optModelLP.getObjVal(), initialPlacement);

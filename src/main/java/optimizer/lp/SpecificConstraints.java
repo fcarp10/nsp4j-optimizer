@@ -169,7 +169,7 @@ public class SpecificConstraints {
             GRBLinExpr expr = new GRBLinExpr();
             expr.multAdd(costFunctions.getValues().get(c)[0], exprs[e]);
             expr.addConstant(costFunctions.getValues().get(c)[1]);
-            modelLP.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, grbVar[e], UTIL_COSTS_OBJ);
+            modelLP.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, grbVar[e], UTIL_COSTS);
          }
    }
 
@@ -322,7 +322,8 @@ public class SpecificConstraints {
                   Function function = service.getFunctions().get(v);
                   double ratio = (double) function.getAttribute(FUNCTION_LOAD_RATIO)
                         * (double) function.getAttribute(FUNCTION_PROCESS_TRAFFIC_DELAY)
-                        / (int) function.getAttribute(FUNCTION_MAX_CAP_SERVER);
+                        / ((int) function.getAttribute(FUNCTION_MAX_DEM) * (int) function.getAttribute(FUNCTION_MAX_BW)
+                              * (double) function.getAttribute(FUNCTION_LOAD_RATIO));
                   GRBLinExpr loadDelayExpr = new GRBLinExpr();
                   for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
                      if (service.getTrafficFlow().getAux().get(d1))
@@ -457,14 +458,14 @@ public class SpecificConstraints {
    private void useOnlyCloudServers() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null)
-            modelLP.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, DIMEN);
+            modelLP.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, CLOUD_ONLY);
    }
 
    // use only edge servers
    private void useOnlyEdgeServers() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
-            modelLP.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, DIMEN);
+            modelLP.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, EDGE_ONLY);
    }
 
    // Single path (mgr-only)

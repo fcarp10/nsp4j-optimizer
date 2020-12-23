@@ -47,20 +47,19 @@
                         <div class="form-group">
                             <h5>Objective Function</h5>
                             <select class="form-control custom-select my-1 mr-sm-2" id="objFunc">
-                                <option value="dimensioning">dimensioning</option>
-                                <option value="num-servers">num-servers</option>
-                                <option value="num-servers-util-costs">num-servers + util-costs</option>
-                                <option value="util-costs">util-costs</option>
-                                <option value="util-costs-migrations">util-costs + migrations</option>
-                                <option value="util-costs-max-utilization">util-costs + max utilization</option>
-                                <option value="utilization">utilization</option>
-                                <option value="opex-servers">opex servers</option>
-                                <option value="functions-charges">functions charges</option>
-                                <option value="qos-penalties">qos penalties</option>
-                                <option value="all-monetary-costs">all monetary costs</option>
-                                <option value="num-migrations">num-migrations</option>
-                                <option value="num-replications">num-replications</option>
-                                <option value="num-mgr-and-rep">num-mgr-and-rep</option>
+                                <option value="DIMEN">DIMEN</option>
+                                <option value="NUM_SERVERS">NUM_SERVERS</option>
+                                <option value="NUM_SERVERS_AND_UTIL_COSTS">NUM_SERVERS_AND_UTIL_COSTS</option>
+                                <option value="UTIL_COSTS">UTIL_COSTS</option>
+                                <option value="UTIL_COSTS_AND_MAX_UTIL">UTIL_COSTS_AND_MAX_UTIL</option>
+                                <option value="UTILIZATION">UTILIZATION</option>
+                                <option value="OPEX_SERVERS">OPEX_SERVERS</option>
+                                <option value="FUNCTIONS_CHARGES">FUNCTIONS_CHARGES</option>
+                                <option value="QOS_PENALTIES">QOS_PENALTIES</option>
+                                <option value="ALL_MONETARY_COSTS">ALL_MONETARY_COSTS</option>
+                                <option value="MGR">MGR</option>
+                                <option value="REP">REP</option>
+                                <option value="MGR_AND_REP">MGR_REP</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -174,17 +173,14 @@
                 </div>
                 <div class="form-group">
                     <label>Scenario</label>
-                    <select class="form-control custom-select my-1 mr-sm-2" id="algorithm"
+                    <select class="form-control custom-select my-1 mr-sm-2" id="scenario"
                         onChange="checkScenario(this);">
-                        <option value="dimensioning-lp">dimensioning LP</option>
-                        <option value="init-lp">initial placement LP</option>
-                        <option value="lp">LP</option>
-                        <option value="ff">FF</option>
-                        <option value="rf">RF</option>
-                        <option value="grd">GRD</option>
-                        <option value="drl">DRL</option>
-                        <option value="init-lp->ff->10rf->grd->lp">INIT-LP_FF_10RF_GRD_LP</option>
-                        <option value="init-heu->ff->10rf->grd">INIT-HEU_FF_10RF_GRD</option>
+                        <option value="LP">LP</option>
+                        <option value="FF">FF</option>
+                        <option value="RF">RF</option>
+                        <option value="GRD">GRD</option>
+                        <option value="CUSTOM_1">CUSTOM_1</option>
+                        <option value="CUSTOM_2">CUSTOM_2</option>
                     </select>
                 </div>
                 <div class="btn-group">

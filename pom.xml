@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.tubs</groupId>
     <artifactId>nsp4j-optimizer</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
 
     <properties>
         <java.version>11</java.version>
-        <nsp4j-api.version>0.9.8</nsp4j-api.version>
-        <gurobi.version>9.1.0</gurobi.version>
+        <nsp4j-api.version>0.9.10</nsp4j-api.version>
+        <gurobi.version>9.1.1</gurobi.version>
         <sparkjava.version>2.9.1</sparkjava.version>
         <gson.version>2.8.6</gson.version>
         <decimal4j.version>1.0.3</decimal4j.version>

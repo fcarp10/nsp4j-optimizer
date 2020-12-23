@@ -136,10 +136,10 @@ public class Results {
       uL(); // server utilization
 
       // model specific variables
-      if (sc.getAlgorithm().equals(DIMEN))
+      if (sc.getObjFunc().equals(DIMEN))
          xN(); // integer, num servers per node
-      if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ) || sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)
-            || sc.getObjFunc().equals(QOS_PENALTIES_OBJ) || sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+      if (sc.getObjFunc().equals(OPEX_SERVERS) || sc.getObjFunc().equals(FUNCTIONS_CHARGES)
+            || sc.getObjFunc().equals(QOS_PENALTIES) || sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {
          oX(); // opex per server
          oSV(); // function charges
          qSDP(); // qos penalties
@@ -261,7 +261,9 @@ public class Results {
                                     Function function = service.getFunctions().get(v);
                                     double ratio = (double) function.getAttribute(FUNCTION_LOAD_RATIO)
                                           * (double) function.getAttribute(FUNCTION_PROCESS_TRAFFIC_DELAY)
-                                          / (int) function.getAttribute(FUNCTION_MAX_CAP_SERVER);
+                                          / ((int) function.getAttribute(FUNCTION_MAX_DEM)
+                                                * (int) function.getAttribute(FUNCTION_MAX_BW)
+                                                * (double) function.getAttribute(FUNCTION_LOAD_RATIO));
                                     double processingDelay = 0;
                                     for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
                                        if (service.getTrafficFlow().getAux().get(d1))

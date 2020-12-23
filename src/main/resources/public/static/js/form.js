@@ -47,7 +47,7 @@ function successConnection(message) {
             document.getElementById("run_button").removeAttribute("disabled");
             document.getElementById("stop_button").setAttribute("disabled", "true");
         }
-       
+
         else {  // receiving logs
             shortRefresh();
         }
@@ -138,21 +138,27 @@ function stopOpt() {
 }
 
 function checkScenario(elem) {
-    var algorithm = document.getElementById("algorithm").value;
-    if (algorithm === "dimensioning-lp") {
+    var scenario = document.getElementById("scenario");
+    var objFunc = document.getElementById("objFunc");
+
+    if (objFunc.value === "DIMEN") {
         document.getElementById("PF3").checked = false;
-    } else {
-        document.getElementById("PF3").checked = true;
-    }
-    if (algorithm === "dimensioning-lp" || algorithm === "init-lp") {
         document.getElementById("single-path").checked = true;
         document.getElementById("set-init-plc").checked = false;
         document.getElementById("sync-traffic").checked = false;
     } else {
+        document.getElementById("PF3").checked = true;
         document.getElementById("single-path").checked = false;
         document.getElementById("set-init-plc").checked = false;
         document.getElementById("sync-traffic").checked = true;
     }
+
+    if (scenario.value === "CUSTOM_2") {
+        objFunc.disabled = true;
+    } else {
+        objFunc.disabled = false;
+    }
+
 }
 
 function setDecimals(value) {
@@ -164,7 +170,7 @@ function generateScenario() {
     var inputFileName = document.getElementById("inputFileName").value;
     var objFunc = document.getElementById("objFunc").value;
     var maximization = $("#max").is(":checked");
-    var algorithm = document.getElementById("algorithm").value;
+    var scenarioName = document.getElementById("scenario").value;
     // general
     var RP1 = $("#RP1").is(":checked");
     var RP2 = $("#RP2").is(":checked");
@@ -189,7 +195,7 @@ function generateScenario() {
         inputFileName: inputFileName,
         objFunc: objFunc,
         maximization: maximization,
-        algorithm: algorithm,
+        name: scenarioName,
         constraints: {
             // general
             RP1: RP1,

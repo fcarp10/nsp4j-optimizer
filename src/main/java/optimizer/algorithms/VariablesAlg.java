@@ -1,17 +1,18 @@
 package optimizer.algorithms;
 
-import static optimizer.Definitions.FUNCTIONS_CHARGES_OBJ;
+import static optimizer.Definitions.FUNCTIONS_CHARGES;
 import static optimizer.Definitions.FUNCTION_CHARGES;
 import static optimizer.Definitions.FUNCTION_LOAD_RATIO;
-import static optimizer.Definitions.FUNCTION_MAX_CAP_SERVER;
+import static optimizer.Definitions.FUNCTION_MAX_BW;
+import static optimizer.Definitions.FUNCTION_MAX_DEM;
 import static optimizer.Definitions.FUNCTION_MAX_DELAY;
 import static optimizer.Definitions.FUNCTION_MIN_PROCESS_DELAY;
 import static optimizer.Definitions.FUNCTION_PROCESS_DELAY;
 import static optimizer.Definitions.FUNCTION_PROCESS_TRAFFIC_DELAY;
 import static optimizer.Definitions.LINK_DELAY;
 import static optimizer.Definitions.NODE_CLOUD;
-import static optimizer.Definitions.OPEX_SERVERS_OBJ;
-import static optimizer.Definitions.QOS_PENALTIES_OBJ;
+import static optimizer.Definitions.OPEX_SERVERS;
+import static optimizer.Definitions.QOS_PENALTIES;
 import static optimizer.Definitions.QOS_PENALTY_RATIO;
 import static optimizer.Definitions.SERVER_IDLE_ENERGY_COST;
 import static optimizer.Definitions.SERVER_UTIL_ENERGY_COST;
@@ -176,7 +177,9 @@ public class VariablesAlg {
                      Function function = service.getFunctions().get(v);
                      double ratio = (double) function.getAttribute(FUNCTION_LOAD_RATIO)
                            * (double) function.getAttribute(FUNCTION_PROCESS_TRAFFIC_DELAY)
-                           / (int) function.getAttribute(FUNCTION_MAX_CAP_SERVER);
+                           / ((int) function.getAttribute(FUNCTION_MAX_DEM)
+                                 * (int) function.getAttribute(FUNCTION_MAX_BW)
+                                 * (double) function.getAttribute(FUNCTION_LOAD_RATIO));
                      double processingDelay = 0;
                      for (int d1 = 0; d1 < service.getTrafficFlow().getDemands().size(); d1++)
                         if (service.getTrafficFlow().getAux().get(d1))
@@ -222,13 +225,13 @@ public class VariablesAlg {
                penalties += qSDP[s][d][p];
 
       switch (objFunc) {
-         case OPEX_SERVERS_OBJ:
+         case OPEX_SERVERS:
             objVal = opex;
             break;
-         case FUNCTIONS_CHARGES_OBJ:
+         case FUNCTIONS_CHARGES:
             objVal = charges;
             break;
-         case QOS_PENALTIES_OBJ:
+         case QOS_PENALTIES:
             objVal = penalties;
             break;
          default:

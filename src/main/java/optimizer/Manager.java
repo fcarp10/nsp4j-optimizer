@@ -1,5 +1,6 @@
 package optimizer;
 
+import gurobi.GRBException;
 import gurobi.GRBModel;
 import manager.Parameters;
 import manager.elements.TrafficFlow;
@@ -27,7 +28,7 @@ public class Manager {
    private static Parameters pm;
    private static Long seed;
 
-   public static String readInputParameters(String graphNameForm) {
+   public static String readInputParameters(String graphNameForm, boolean considerSubsetOfDemands) {
 
       String[] graphName = graphNameForm.split("_");
       String extensionGraph = ".dgs";
@@ -48,6 +49,7 @@ public class Manager {
       } catch (Exception e) {
          printLog(log, ERROR, "error loading input parameters");
       }
+      considerSubsetOfDemands(pm, considerSubsetOfDemands);
       return graphName[0];
    }
 
@@ -76,13 +78,13 @@ public class Manager {
       }
    }
 
-   private static void specifyUsedTrafficDemands(Parameters pm, boolean isLowLoad) {
+   private static void considerSubsetOfDemands(Parameters pm, boolean considerSubset) {
       Random rnd = new Random(seed);
       for (TrafficFlow trafficFlow : pm.getTrafficFlows()) {
          trafficFlow.getAux().clear();
          for (int d = 0; d < trafficFlow.getDemands().size(); d++)
             trafficFlow.getAux().add(true);
-         if (isLowLoad) {
+         if (considerSubset) {
             double initialTrafficLoad = (double) pm.getAux().get(INITIAL_TRAFFIC_LOAD);
             double value;
             for (int d = 0; d < trafficFlow.getDemands().size(); d++) {
@@ -101,83 +103,126 @@ public class Manager {
    }
 
    public static void main(Scenario sce) {
-      String graphNameShort = readInputParameters(sce.getInputFileName());
+      ResultsManager resultsManager;
+      String graphNameShort;
       try {
-         interrupted = false;
-         ResultsManager resultsManager = new ResultsManager(pm.getGraphName());
-         String pathFile = Auxiliary.getResourcePath(graphNameShort + "_" + INIT_LP + ".mst");
-         GRBModel initModel = resultsManager.loadInitialPlacement(pathFile + graphNameShort + "_" + INIT_LP, pm, sce);
-         boolean isLowLoad = false;
-         switch (sce.getAlgorithm()) {
-            case INITHEU_FF_10RF_GRD:
-               // 1. initial placement LP
-               sce.setAlgorithm(INTI_GRD);
-               specifyUsedTrafficDemands(pm, true);
-               VariablesAlg vars = new VariablesAlg(pm, null, sce.getObjFunc());
-               LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
-               VariablesAlg varsInitPlacement = new VariablesAlg(pm, vars);
-               // 2. ff
-               sce.setAlgorithm(FF);
-               specifyUsedTrafficDemands(pm, false);
-               vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
-               LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
-               // 3. rf
-               sce.setAlgorithm(RF);
-               for (int i = 0; i < 10; i++) {
-                  vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
-                  LauncherAlg.run(pm, sce, resultsManager, vars, i, false);
-               }
-               // 4. grd
-               sce.setAlgorithm(GRD);
-               vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
-               LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
-               break;
-            case INITLP_FF_10RF_GRD_LP:
-               if (initModel == null) {
-                  // 1. initial placement LP
-                  sce.setAlgorithm(INIT_LP);
-                  specifyUsedTrafficDemands(pm, true);
-                  initModel = LauncherLP.run(pm, sce, resultsManager, null, null);
-               }
-               varsInitPlacement = new VariablesAlg(pm, initModel);
-               // 2. ff
-               sce.setAlgorithm(FF);
-               specifyUsedTrafficDemands(pm, false);
-               LauncherAlg.run(pm, sce, resultsManager, varsInitPlacement, -1, false);
-               // 3. rf
-               sce.setAlgorithm(RF);
-               for (int i = 0; i < 10; i++)
-                  LauncherAlg.run(pm, sce, resultsManager, varsInitPlacement, i, false);
-               // 4. grd
-               sce.setAlgorithm(GRD);
-               LauncherAlg.run(pm, sce, resultsManager, varsInitPlacement, -1, true);
-               // 5. lp
-               pathFile = resultsManager.getResultsFolder() + "/" + pm.getGraphName() + "_" + GRD + "_"
-                     + sce.getObjFunc();
-               GRBModel initSol = resultsManager.loadModel(pathFile, pm, sce, false);
-               sce.setAlgorithm(LP);
-               LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
-               break;
-            case INIT_LP:
-               isLowLoad = true;
-            case DIMEN:
+         switch (sce.getName()) {
+
             case LP:
-               specifyUsedTrafficDemands(pm, isLowLoad);
-               pathFile = Auxiliary.getResourcePath(pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc() + ".mst");
-               initSol = resultsManager.loadModel(pathFile + pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc(), pm,
-                     sce, false);
-               // make sure no initial model is loaded when launching initial placement
-               if (sce.getAlgorithm().equals(INIT_LP))
-                  initModel = null;
-               LauncherLP.run(pm, sce, resultsManager, initModel, initSol);
+               resultsManager = new ResultsManager(pm.getGraphName());
+               readInputParameters(sce.getInputFileName(), false);
+               String outputFileName = pm.getGraphName() + sce.getName() + sce.getObjFunc();
+               LauncherLP.run(pm, sce, resultsManager, null, null, outputFileName);
                break;
+
             case FF:
-            case RF:
-            case GRD:
-               specifyUsedTrafficDemands(pm, false);
-               varsInitPlacement = new VariablesAlg(pm, initModel);
-               LauncherAlg.run(pm, sce, resultsManager, varsInitPlacement, -1, false);
+               resultsManager = new ResultsManager(pm.getGraphName());
+               readInputParameters(sce.getInputFileName(), false);
+               runFirstFit(sce, resultsManager, null);
                break;
+
+            case RF:
+               resultsManager = new ResultsManager(pm.getGraphName());
+               readInputParameters(sce.getInputFileName(), false);
+               runRandomFit(sce, resultsManager, null, 10);
+               break;
+
+            case GRD:
+               resultsManager = new ResultsManager(pm.getGraphName());
+               readInputParameters(sce.getInputFileName(), false);
+               runGreedy(sce, resultsManager, null);
+               break;
+
+            case CUSTOM_1:
+               resultsManager = new ResultsManager(pm.getGraphName());
+               graphNameShort = readInputParameters(sce.getInputFileName(), false);
+               GRBModel initModel = resultsManager.loadInitialPlacement(
+                     Auxiliary.getResourcePath(graphNameShort + "_init-lp.mst") + graphNameShort + "_init-lp", pm, sce);
+               GRBModel initSol = resultsManager.loadModel(
+                     Auxiliary.getResourcePath(pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc() + ".mst")
+                           + pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc(),
+                     pm, sce, false);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               LauncherLP.run(pm, sce, resultsManager, initModel, initSol, outputFileName);
+               break;
+
+            case CUSTOM_2:
+               resultsManager = new ResultsManager(sce.getInputFileName());
+
+               /************* 1. low traffic ***************/
+               readInputParameters(sce.getInputFileName() + "_low", false);
+               sce.setObjFunc(NUM_SERVERS);
+               sce.setConstraint(EDGE_ONLY, true);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               GRBModel lowModel = LauncherLP.run(pm, sce, resultsManager, null, null, outputFileName);
+               sce.setConstraint(EDGE_ONLY, false);
+               /*******************************************/
+
+               /********** 2.1 high traffic (MGR) *********/
+               readInputParameters(sce.getInputFileName() + "_high", false);
+               sce.setObjFunc(MGR);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
+               /*******************************************/
+
+               /********* 2.2 high traffic (REP) **********/
+               readInputParameters(sce.getInputFileName() + "_high", false);
+               sce.setObjFunc(REP);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
+               /*******************************************/
+
+               /********* 2.3 high traffic (MGR-REP) **********/
+               readInputParameters(sce.getInputFileName() + "_high", false);
+               sce.setObjFunc(MGR_REP);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
+               /*******************************************/
+
+               /******* 3.1.1 high-pred traffic (MGR) *****/
+               readInputParameters(sce.getInputFileName() + "_high-pred", false);
+               sce.setObjFunc(MGR);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               GRBModel highPredMgrModel = LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
+               /*******************************************/
+
+               /******** 3.1.2 high traffic (MGR) *********/
+               readInputParameters(sce.getInputFileName() + "_high", false);
+               sce.setObjFunc(MGR);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               LauncherLP.run(pm, sce, resultsManager, highPredMgrModel, null, outputFileName);
+               /*******************************************/
+
+               /******* 3.2.1 high-pred traffic (REP) *****/
+               readInputParameters(sce.getInputFileName() + "_high-pred", false);
+               sce.setObjFunc(REP);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               GRBModel highPredRepModel = LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
+               /*******************************************/
+
+               /******** 3.2.2 high traffic (REP) *********/
+               readInputParameters(sce.getInputFileName() + "_high", false);
+               sce.setObjFunc(REP);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               LauncherLP.run(pm, sce, resultsManager, highPredRepModel, null, outputFileName);
+               /*******************************************/
+
+               /******* 3.3.1 high-pred traffic (MGR-REP) *****/
+               readInputParameters(sce.getInputFileName() + "_high-pred", false);
+               sce.setObjFunc(MGR_REP);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               GRBModel highPredMgrRepModel = LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
+               /*******************************************/
+
+               /******** 3.3.2 high traffic (MGR-REP) *********/
+               readInputParameters(sce.getInputFileName() + "_high", false);
+               sce.setObjFunc(MGR_REP);
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               LauncherLP.run(pm, sce, resultsManager, highPredMgrRepModel, null, outputFileName);
+               /*******************************************/
+
+               break;
+
             default:
                printLog(log, INFO, "no algorithm selected");
                break;
@@ -187,6 +232,39 @@ public class Manager {
          e.printStackTrace();
          printLog(log, ERROR, "something went wrong");
       }
+   }
+
+   private static GRBModel runInitLP(Scenario sce, ResultsManager resultsManager) throws GRBException {
+      considerSubsetOfDemands(pm, true);
+      String outputFileName = pm.getGraphName() + "_INIT-LP_" + sce.getObjFunc();
+      GRBModel initModel = LauncherLP.run(pm, sce, resultsManager, null, null, outputFileName);
+      return initModel;
+   }
+
+   private static VariablesAlg runInitHeuristics(Scenario sce, ResultsManager resultsManager) {
+      considerSubsetOfDemands(pm, true);
+      VariablesAlg vars = new VariablesAlg(pm, null, sce.getObjFunc());
+      LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
+      VariablesAlg varsInitPlacement = new VariablesAlg(pm, vars);
+      return varsInitPlacement;
+   }
+
+   private static void runFirstFit(Scenario sce, ResultsManager resultsManager, VariablesAlg varsInitPlacement) {
+      VariablesAlg vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
+      LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
+   }
+
+   private static void runRandomFit(Scenario sce, ResultsManager resultsManager, VariablesAlg varsInitPlacement,
+         int iterations) {
+      for (int i = 0; i < iterations; i++) {
+         VariablesAlg vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
+         LauncherAlg.run(pm, sce, resultsManager, vars, i, false);
+      }
+   }
+
+   private static void runGreedy(Scenario sce, ResultsManager resultsManager, VariablesAlg varsInitPlacement) {
+      VariablesAlg vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
+      LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
    }
 
    public static void stop() {

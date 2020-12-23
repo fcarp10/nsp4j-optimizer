@@ -26,21 +26,14 @@ public class LauncherAlg {
       NetworkManager networkManager = new NetworkManager(pm, vars);
       HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
       long startTime = System.nanoTime();
-      if (sce.getAlgorithm().equals(DRL)) {
-         printLog(log, INFO, "first placement using random-fit");
-         heuristicAlgorithm.allocateServices(RF);
-         vars.generateRestOfVariablesForResults();
-         printLog(log, INFO, "starting DRL [" + (float) vars.getObjVal() + "]");
-         PlacementModel2 placementModel2 = new PlacementModel2(null, pm, vars, networkManager, heuristicAlgorithm);
-         placementModel2.run(RF);
-      } else if (sce.getAlgorithm().equals(GRD)) {
+      if (sce.getName().equals(GRD)) {
          printLog(log, INFO, "running heuristics...");
-         heuristicAlgorithm.allocateServicesHeuristic(sce.getAlgorithm());
+         heuristicAlgorithm.allocateServicesHeuristic(sce.getName());
          // vars.generateRestOfVariablesForResults();
          // heuristicAlgorithm.optimizePlacement();
       } else {
-         printLog(log, INFO, "running " + sce.getAlgorithm() + "...");
-         heuristicAlgorithm.allocateServices(sce.getAlgorithm());
+         printLog(log, INFO, "running " + sce.getName() + "...");
+         heuristicAlgorithm.allocateServices(sce.getName());
       }
       long elapsedTime = System.nanoTime() - startTime;
       vars.generateRestOfVariablesForResults();
@@ -48,8 +41,8 @@ public class LauncherAlg {
       Auxiliary.printLog(log, INFO, "generating results...");
       Results results = generateResults(pm, sce, vars, vars.fXSVinitial);
       results.setComputationTime((double) elapsedTime / 1000000000);
-      String fileName = pm.getGraphName() + "_" + sce.getAlgorithm() + "_" + sce.getObjFunc();
-      if (sce.getAlgorithm().equals(RF))
+      String fileName = pm.getGraphName() + "_" + sce.getName() + "_" + sce.getObjFunc();
+      if (sce.getName().equals(RF))
          fileName += iteration;
       resultsManager.exportJsonObject(fileName, results);
       if (exportToMST)

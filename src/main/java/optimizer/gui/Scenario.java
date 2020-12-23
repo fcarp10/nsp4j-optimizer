@@ -8,7 +8,7 @@ public class Scenario {
    private String inputFileName;
    private String objFunc;
    private boolean maximization;
-   private String algorithm;
+   private String name;
    private Map<String, Boolean> constraints;
 
    public Scenario() {
@@ -31,16 +31,20 @@ public class Scenario {
       this.objFunc = objFunc;
    }
 
-   public String getAlgorithm() {
-      return algorithm;
+   public String getName() {
+      return name;
    }
 
-   public void setAlgorithm(String algorithm) {
-      this.algorithm = algorithm;
+   public void setName(String name) {
+      this.name = name;
    }
 
    public Map<String, Boolean> getConstraints() {
       return constraints;
+   }
+
+   public void setConstraint(String key, Boolean value) {
+      this.constraints.put(key, value);
    }
 
    public void setConstraints(Map<String, Boolean> constraints) {

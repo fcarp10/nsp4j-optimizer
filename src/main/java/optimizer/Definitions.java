@@ -2,32 +2,27 @@ package optimizer;
 
 public class Definitions {
    // objective functions
-   public static final String NUM_SERVERS_OBJ = "num-servers";
-   public static final String NUM_SERVERS_UTIL_COSTS_OBJ = "num-servers-util-costs";
-   public static final String UTIL_COSTS_OBJ = "util-costs";
-   public static final String UTIL_COSTS_MAX_UTIL_OBJ = "util-costs-max-utilization";
-   public static final String UTILIZATION_OBJ = "utilization";
-   public static final String OPEX_SERVERS_OBJ = "opex-servers";
-   public static final String FUNCTIONS_CHARGES_OBJ = "functions-charges";
-   public static final String QOS_PENALTIES_OBJ = "qos-penalties";
-   public static final String ALL_MONETARY_COSTS_OBJ = "all-monetary-costs";
-   public static final String NUM_MIGRATIONS = "num-migrations";
-   public static final String NUM_REPLICATIONS = "num-replications";
-   public static final String NUM_MGR_AND_REP = "num-mgr-and-rep";
+   public static final String DIMEN = "DIMEN";
+   public static final String NUM_SERVERS = "NUM_SERVERS";
+   public static final String NUM_SERVERS_AND_UTIL_COSTS = "NUM_SERVERS_AND_UTIL_COSTS";
+   public static final String UTIL_COSTS = "UTIL_COSTS";
+   public static final String UTIL_COSTS_AND_MAX_UTIL = "UTIL_COSTS_AND_MAX_UTIL";
+   public static final String UTILIZATION = "UTILIZATION";
+   public static final String OPEX_SERVERS = "OPEX_SERVERS";
+   public static final String FUNCTIONS_CHARGES = "FUNCTIONS_CHARGES";
+   public static final String QOS_PENALTIES = "QOS_PENALTIES";
+   public static final String ALL_MONETARY_COSTS = "ALL_MONETARY_COSTS";
+   public static final String MGR = "MGR";
+   public static final String REP = "REP";
+   public static final String MGR_REP = "MGR_REP";
 
    // scenarios
-   public static final String DIMEN = "dimensioning-lp";
-   public static final String INIT_LP = "init-lp";
-   public static final String INTI_FF = "init-ff";
-   public static final String INTI_RF = "init-rf";
-   public static final String INTI_GRD = "init-grd";
-   public static final String LP = "lp";
-   public static final String FF = "ff";
-   public static final String RF = "rf";
-   public static final String GRD = "grd";
-   public static final String DRL = "drl";
-   public static final String INITLP_FF_10RF_GRD_LP = "init-lp->ff->10rf->grd->lp";
-   public static final String INITHEU_FF_10RF_GRD = "init-heu->ff->10rf->grd";
+   public static final String LP = "LP";
+   public static final String FF = "FF";
+   public static final String RF = "RF";
+   public static final String GRD = "GRD";
+   public static final String CUSTOM_1 = "CUSTOM_1";
+   public static final String CUSTOM_2 = "CUSTOM_2";
 
    // general variables
    public static final String zSP = "zSP";
@@ -88,11 +83,11 @@ public class Definitions {
    public static final String FUNCTION_OVERHEAD = "overhead";
    public static final String FUNCTION_SYNC_LOAD_RATIO = "sync_load";
    public static final String FUNCTION_PROCESS_TRAFFIC_DELAY = "process_traffic_delay";
-   public static final String FUNCTION_MAX_CAP_SERVER = "max_cap_server";
+   public static final String FUNCTION_MAX_DEM = "max_dem";
+   public static final String FUNCTION_MAX_BW = "max_bw";
    public static final String FUNCTION_MAX_DELAY = "max_delay";
    public static final String FUNCTION_MIN_PROCESS_DELAY = "min_process_delay";
    public static final String FUNCTION_PROCESS_DELAY = "process_delay";
-   // public static final String FUNCTION_MIGRATION_DELAY = "migration_delay";
    public static final String FUNCTION_CHARGES = "charges";
 
    // node and server parameters

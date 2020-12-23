@@ -53,32 +53,32 @@ public class VariablesLP {
          if (sc.getObjFunc().equals(DIMEN))
             xN_init(pm, model, initialSolution);
          // model optimizes utilization costs
-         if (sc.getObjFunc().equals(NUM_SERVERS_UTIL_COSTS_OBJ) || sc.getObjFunc().equals(UTIL_COSTS_OBJ)
-               || sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ)) {
+         if (sc.getObjFunc().equals(NUM_SERVERS_AND_UTIL_COSTS) || sc.getObjFunc().equals(UTIL_COSTS)
+               || sc.getObjFunc().equals(UTIL_COSTS_AND_MAX_UTIL)) {
             kL_init(pm, model, initialSolution);
             kX_init(pm, model, initialSolution);
          }
          // model optimizes max utilization
-         if (sc.getObjFunc().equals(UTIL_COSTS_MAX_UTIL_OBJ))
+         if (sc.getObjFunc().equals(UTIL_COSTS_AND_MAX_UTIL))
             uMax_init(pm, model, initialSolution);
          // model optimizes opex costs
-         if (sc.getObjFunc().equals(OPEX_SERVERS_OBJ)) {
+         if (sc.getObjFunc().equals(OPEX_SERVERS)) {
             oX_init(pm, model, initialSolution);
             dSVXD_init(pm, model, initialSolution);
          }
          // model optimizes charges
-         if (sc.getObjFunc().equals(FUNCTIONS_CHARGES_OBJ)) {
+         if (sc.getObjFunc().equals(FUNCTIONS_CHARGES)) {
             oSV_init(pm, model, initialSolution);
             dSVXD_init(pm, model, initialSolution);
          }
          // model optimizes qos penalties
-         if (sc.getObjFunc().equals(QOS_PENALTIES_OBJ)) {
+         if (sc.getObjFunc().equals(QOS_PENALTIES)) {
             qSDP_init(pm, model, initialSolution);
             ySDP_init(pm, model, initialSolution);
             dSVXD_init(pm, model, initialSolution);
          }
          // model optimizes all monetary costs
-         if (sc.getObjFunc().equals(ALL_MONETARY_COSTS_OBJ)) {
+         if (sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {
             oX_init(pm, model, initialSolution);
             oSV_init(pm, model, initialSolution);
             qSDP_init(pm, model, initialSolution);
@@ -86,8 +86,7 @@ public class VariablesLP {
             dSVXD_init(pm, model, initialSolution);
          }
          // model optimizes migrations or replications
-         if (sc.getObjFunc().equals(NUM_MIGRATIONS) || sc.getObjFunc().equals(NUM_REPLICATIONS)
-               || sc.getObjFunc().equals(NUM_MGR_AND_REP)) {
+         if (sc.getObjFunc().equals(MGR) || sc.getObjFunc().equals(REP) || sc.getObjFunc().equals(MGR_REP)) {
             // qSDP_init(pm, model, initialSolution);
             // ySDP_init(pm, model, initialSolution);
             // dSVXD_init(pm, model, initialSolution);
