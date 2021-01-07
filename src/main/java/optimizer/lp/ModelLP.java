@@ -120,8 +120,8 @@ public class ModelLP {
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                   if (initialPlacement[x][s][v]) {
-                     expr.addConstant(1.0);
-                     expr.addTerm(-1.0, vars.fXSV[x][s][v]);
+                     expr.addConstant(weight);
+                     expr.addTerm(-weight, vars.fXSV[x][s][v]);
                   }
                }
          }
@@ -135,9 +135,9 @@ public class ModelLP {
       GRBLinExpr expr = new GRBLinExpr();
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-            expr.addConstant(-1);
+            expr.addConstant(-weight);
             for (int x = 0; x < pm.getServers().size(); x++)
-               expr.addTerm(1.0, vars.fXSV[x][s][v]);
+               expr.addTerm(weight, vars.fXSV[x][s][v]);
          }
       return expr;
    }
@@ -221,8 +221,10 @@ public class ModelLP {
                   }
                }
             }
-            if (Manager.isInterrupted())
+            if (Manager.isInterrupted()){
                grbModel.terminate();
+               Manager.reset();
+            }
          } catch (GRBException e) {
             e.printStackTrace();
          }

@@ -29,7 +29,7 @@ public class WebServer {
       });
 
       get("/stop", (request, response) -> {
-         Manager.stop();
+         Manager.terminate();
          return 201;
       });
 

@@ -70,8 +70,11 @@ public class NetworkManager {
    private void assignFunctionToServer(int s, int x, int v) {
       Server server = pm.getServers().get(x);
       vars.fXSV[x][s][v] = true;
-      double functionOverhead = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OVERHEAD);
-      vars.uX.put(server.getId(), vars.uX.get(server.getId()) + (functionOverhead / server.getCapacity()));
+      Function function = pm.getServices().get(s).getFunctions().get(v);
+      double overhead = (double) function.getAttribute(FUNCTION_OVERHEAD_RATIO)
+            * (int) function.getAttribute(FUNCTION_MAX_BW) * (int) function.getAttribute(FUNCTION_MAX_DEM)
+            * (double) function.getAttribute(FUNCTION_LOAD_RATIO);
+      vars.uX.put(server.getId(), vars.uX.get(server.getId()) + (overhead / server.getCapacity()));
    }
 
    public List<Integer> getAvailablePaths(int s, int d) {
@@ -299,12 +302,16 @@ public class NetworkManager {
 
    public boolean checkIfFreeResourcesToExpandFunction(int s, int x, int v, int d, int numOfFunctions,
          boolean considerOverhead) {
-      int functionOverhead = 0;
-      if (considerOverhead)
-         functionOverhead = (int) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_OVERHEAD);
+      double overhead = 0;
+      if (considerOverhead) {
+         Function function = pm.getServices().get(s).getFunctions().get(v);
+         overhead = (double) function.getAttribute(FUNCTION_OVERHEAD_RATIO)
+               * (int) function.getAttribute(FUNCTION_MAX_BW) * (int) function.getAttribute(FUNCTION_MAX_DEM)
+               * (double) function.getAttribute(FUNCTION_LOAD_RATIO);
+      }
       double trafficLoad = pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
             * (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_LOAD_RATIO);
-      double resourcesToAdd = (trafficLoad + functionOverhead) * numOfFunctions;
+      double resourcesToAdd = (trafficLoad + overhead) * numOfFunctions;
       return vars.uX.get(pm.getServers().get(x).getId())
             + (resourcesToAdd / pm.getServers().get(x).getCapacity()) <= 1.0;
    }
@@ -342,8 +349,10 @@ public class NetworkManager {
       Server server = pm.getServers().get(x);
       Function function = service.getFunctions().get(v);
       vars.fXSV[x][s][v] = false;
-      double functionOverhead = (int) function.getAttribute(FUNCTION_OVERHEAD);
-      vars.uX.put(server.getId(), vars.uX.get(server.getId()) - (functionOverhead / server.getCapacity()));
+      double overhead = (double) function.getAttribute(FUNCTION_OVERHEAD_RATIO)
+            * (int) function.getAttribute(FUNCTION_MAX_BW) * (int) function.getAttribute(FUNCTION_MAX_DEM)
+            * (double) function.getAttribute(FUNCTION_LOAD_RATIO);
+      vars.uX.put(server.getId(), vars.uX.get(server.getId()) - (overhead / server.getCapacity()));
    }
 
    public int getUsedServerForFunction(int s, int d, int v) {

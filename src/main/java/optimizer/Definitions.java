@@ -80,7 +80,7 @@ public class Definitions {
    // function parameters
    public static final String FUNCTION_REPLICABLE = "replicable";
    public static final String FUNCTION_LOAD_RATIO = "load_ratio";
-   public static final String FUNCTION_OVERHEAD = "overhead";
+   public static final String FUNCTION_OVERHEAD_RATIO = "overhead_ratio";
    public static final String FUNCTION_SYNC_LOAD_RATIO = "sync_load";
    public static final String FUNCTION_PROCESS_TRAFFIC_DELAY = "process_traffic_delay";
    public static final String FUNCTION_MAX_DEM = "max_dem";

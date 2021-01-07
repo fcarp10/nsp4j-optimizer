@@ -161,63 +161,63 @@ public class Manager {
                /********** 2.1 high traffic (MGR) *********/
                readInputParameters(sce.getInputFileName() + "_high", false);
                sce.setObjFunc(MGR);
-               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc() + "_init-low";
                LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
                /*******************************************/
 
                /********* 2.2 high traffic (REP) **********/
                readInputParameters(sce.getInputFileName() + "_high", false);
                sce.setObjFunc(REP);
-               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc() + "_init-low";
                LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
                /*******************************************/
 
                /********* 2.3 high traffic (MGR-REP) **********/
                readInputParameters(sce.getInputFileName() + "_high", false);
                sce.setObjFunc(MGR_REP);
-               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc() + "_init-low";
                LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
                /*******************************************/
 
                /******* 3.1.1 high-pred traffic (MGR) *****/
                readInputParameters(sce.getInputFileName() + "_high-pred", false);
                sce.setObjFunc(MGR);
-               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc() + "_init-low";
                GRBModel highPredMgrModel = LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
                /*******************************************/
 
                /******** 3.1.2 high traffic (MGR) *********/
                readInputParameters(sce.getInputFileName() + "_high", false);
                sce.setObjFunc(MGR);
-               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc() + "_init-high-pred";
                LauncherLP.run(pm, sce, resultsManager, highPredMgrModel, null, outputFileName);
                /*******************************************/
 
                /******* 3.2.1 high-pred traffic (REP) *****/
                readInputParameters(sce.getInputFileName() + "_high-pred", false);
                sce.setObjFunc(REP);
-               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc() + "_init-low";
                GRBModel highPredRepModel = LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
                /*******************************************/
 
                /******** 3.2.2 high traffic (REP) *********/
                readInputParameters(sce.getInputFileName() + "_high", false);
                sce.setObjFunc(REP);
-               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc() + "_init-high-pred";
                LauncherLP.run(pm, sce, resultsManager, highPredRepModel, null, outputFileName);
                /*******************************************/
 
                /******* 3.3.1 high-pred traffic (MGR-REP) *****/
                readInputParameters(sce.getInputFileName() + "_high-pred", false);
                sce.setObjFunc(MGR_REP);
-               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc() + "_init-low";
                GRBModel highPredMgrRepModel = LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
                /*******************************************/
 
                /******** 3.3.2 high traffic (MGR-REP) *********/
                readInputParameters(sce.getInputFileName() + "_high", false);
                sce.setObjFunc(MGR_REP);
-               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc();
+               outputFileName = pm.getGraphName() + "_LP_" + sce.getObjFunc() + "_init-high-pred";
                LauncherLP.run(pm, sce, resultsManager, highPredMgrRepModel, null, outputFileName);
                /*******************************************/
 
@@ -267,8 +267,12 @@ public class Manager {
       LauncherAlg.run(pm, sce, resultsManager, vars, -1, false);
    }
 
-   public static void stop() {
+   public static void terminate() {
       interrupted = true;
+   }
+
+   public static void reset() {
+      interrupted = false;
    }
 
    public static boolean isInterrupted() {

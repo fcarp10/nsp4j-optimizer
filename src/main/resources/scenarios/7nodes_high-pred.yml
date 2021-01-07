@@ -5,8 +5,8 @@ aux: {
   "x_scaling": 6000.0,
   "y_scaling": 6000.0,
   "server_capacity": 1000,
-  "link_capacity": 500,
-  "cloud_server_capacity": 1000,
+  "link_capacity": 250,
+  "cloud_server_capacity": 5000,
   "cloud_link_capacity": 10000,
   "directed_edges": true,
   "num_servers_node": 1,
@@ -31,7 +31,7 @@ function_types: # type: 0 reserved for end-point functions
     attributes: {
       "replicable": true, # (fixed)
       "load_ratio": [0.0, 2.0],
-      "overhead": 0, #  == 10%("max_bw" * "max_dem" * "load_ratio") !!
+      "overhead_ratio": [0.01, 0.1], # percentage of ("max_bw" * "max_dem" * "load_ratio")
       "sync_load": 0.1, # (fixed)
       "max_dem": 3,
       "max_bw": 20,

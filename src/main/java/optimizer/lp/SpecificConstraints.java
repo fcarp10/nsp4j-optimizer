@@ -135,7 +135,10 @@ public class SpecificConstraints {
                   if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                      expr.addTerm((pm.getServices().get(s).getTrafficFlow().getDemands().get(d)
                            * (double) function.getAttribute(FUNCTION_LOAD_RATIO)), vars.fXSVD[x][s][v][d]);
-               expr.addTerm((int) function.getAttribute(FUNCTION_OVERHEAD), vars.fXSV[x][s][v]);
+               double overhead = (double) function.getAttribute(FUNCTION_OVERHEAD_RATIO)
+                     * (int) function.getAttribute(FUNCTION_MAX_BW) * (int) function.getAttribute(FUNCTION_MAX_DEM)
+                     * (double) function.getAttribute(FUNCTION_LOAD_RATIO);
+               expr.addTerm(overhead, vars.fXSV[x][s][v]);
             }
          expressions[x] = expr;
       }

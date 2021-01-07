@@ -100,9 +100,11 @@ public class LauncherLP {
             break;
          case MGR:
             expr.add(modelLP.numMigrations(1.0, initialPlacement));
+            expr.add(modelLP.numReplications(0.001));
             break;
          case REP:
             expr.add(modelLP.numReplications(1.0));
+            expr.add(modelLP.numMigrations(0.001, initialPlacement));
             break;
          case MGR_REP:
             expr.add(modelLP.numMigrations(1.0, initialPlacement));
