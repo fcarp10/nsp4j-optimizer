@@ -23,6 +23,7 @@ public class Definitions {
    public static final String GRD = "GRD";
    public static final String CUSTOM_1 = "CUSTOM_1";
    public static final String CUSTOM_2 = "CUSTOM_2";
+   public static final String CUSTOM_3 = "CUSTOM_3";
 
    // general variables
    public static final String zSP = "zSP";

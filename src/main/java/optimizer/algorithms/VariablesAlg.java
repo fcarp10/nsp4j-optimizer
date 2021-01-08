@@ -106,9 +106,6 @@ public class VariablesAlg {
       oSV = new double[pm.getServices().size()][pm.getServiceLength()];
       qSDP = new double[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
       fXgenerate();
-      oXgenerate();
-      oSVgenerate();
-      qSDPgenerate();
       generateObjValue();
    }
 

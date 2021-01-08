@@ -3,7 +3,6 @@ package optimizer.algorithms;
 import manager.Parameters;
 import optimizer.Definitions;
 import optimizer.algorithms.heuristics.HeuristicAlgorithm;
-import optimizer.algorithms.learning.PlacementModel2;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
 import optimizer.results.Auxiliary;
@@ -21,32 +20,22 @@ public class LauncherAlg {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherAlg.class);
 
-   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, VariablesAlg vars, int iteration,
-         boolean exportToMST) {
+   public static void run(Parameters pm, Scenario sce, ResultsManager resultsManager, VariablesAlg varsInitPlacement,
+         String outputFileName) {
+      VariablesAlg vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
       NetworkManager networkManager = new NetworkManager(pm, vars);
       HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
       long startTime = System.nanoTime();
-      if (sce.getName().equals(GRD)) {
-         printLog(log, INFO, "running heuristics...");
-         heuristicAlgorithm.allocateServicesHeuristic(sce.getName());
-         // vars.generateRestOfVariablesForResults();
-         // heuristicAlgorithm.optimizePlacement();
-      } else {
-         printLog(log, INFO, "running " + sce.getName() + "...");
-         heuristicAlgorithm.allocateServices(sce.getName());
-      }
+      printLog(log, INFO, "starting " + sce.getName() + " algorithm...");
+      heuristicAlgorithm.allocateServices(sce.getName());
       long elapsedTime = System.nanoTime() - startTime;
       vars.generateRestOfVariablesForResults();
       Auxiliary.printLog(log, INFO, "finished [" + Auxiliary.roundDouble(vars.objVal, 4) + "]");
       Auxiliary.printLog(log, INFO, "generating results...");
       Results results = generateResults(pm, sce, vars, vars.fXSVinitial);
       results.setComputationTime((double) elapsedTime / 1000000000);
-      String fileName = pm.getGraphName() + "_" + sce.getName() + "_" + sce.getObjFunc();
-      if (sce.getName().equals(RF))
-         fileName += iteration;
-      resultsManager.exportJsonObject(fileName, results);
-      if (exportToMST)
-         exportResultsToMST(pm, resultsManager, fileName, vars);
+      resultsManager.exportJsonObject(outputFileName, results);
+      exportResultsToMST(pm, resultsManager, outputFileName, vars);
       ResultsGUI.updateResults(results);
       Auxiliary.printLog(log, INFO, "done");
    }

@@ -36,32 +36,35 @@ public class HeuristicAlgorithm {
     }
 
     public void allocateServices(String algorithm) {
-        // first place demands from initial placement
         for (int s = 0; s < pm.getServices().size(); s++) {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
-                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
-                    allocateDemandFromService(algorithm, s, d);
+                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d)) {
+                    if (algorithm.equals(GRD))
+                        allocateDemandGreedy(algorithm, s, d);
+                    else
+                        allocateDemand(algorithm, s, d);
+                }
             networkManager.addSyncTraffic(s);
         }
     }
 
-    public void allocateServicesHeuristic(String algorithm) {
+    public void allocateServicesGreedyConsideringInitialPlacement(String algorithm) {
         // first place demands from initial placement
         for (int s = 0; s < pm.getServices().size(); s++)
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                 if (checkIfDemandWasInInitialPlacement(s, d))
-                    allocateDemandHeuristics(algorithm, s, d);
+                    allocateDemandGreedy(algorithm, s, d);
         // then the rest
         for (int s = 0; s < pm.getServices().size(); s++) {
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                 if (!checkIfDemandWasInInitialPlacement(s, d))
-                    allocateDemandHeuristics(algorithm, s, d);
+                    allocateDemandGreedy(algorithm, s, d);
             networkManager.removeUnusedFunctions(s);
             networkManager.addSyncTraffic(s);
         }
     }
 
-    private void allocateDemandFromService(String alg, int s, int d) {
+    private void allocateDemand(String alg, int s, int d) {
         // get paths with enough path link resources
         List<Integer> availablePaths = networkManager.getAvailablePaths(s, d);
         // get paths with enough servers resources
@@ -75,12 +78,12 @@ public class HeuristicAlgorithm {
         networkManager.addDemandToPath(s, pChosen, d);
     }
 
-    private int allocateDemandHeuristics(String alg, int s, int d) {
+    private int allocateDemandGreedy(String alg, int s, int d) {
         List<Integer> availablePaths = networkManager.getAvailablePaths(s, d);
         int pChosen = -1;
         for (int p = 0; p < availablePaths.size(); p++) {
             int pTmp = choosePath(alg, s, d, availablePaths);
-            List<Integer> functionServerMapping = allocateDemandInPathHeuristics(alg, s, d, pTmp);
+            List<Integer> functionServerMapping = allocateDemandInPathGreedy(alg, s, d, pTmp);
             if (functionServerMapping.size() == pm.getServices().get(s).getFunctions().size()) {
                 pChosen = pTmp;
                 networkManager.addDemandToPath(s, pChosen, d);
@@ -100,7 +103,7 @@ public class HeuristicAlgorithm {
         return pChosen;
     }
 
-    private List<Integer> allocateDemandInPathHeuristics(String alg, int s, int d, int p) {
+    private List<Integer> allocateDemandInPathGreedy(String alg, int s, int d, int p) {
         // allocate functions on that path
         List<Integer> functionServerMapping = new ArrayList<>();
         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
@@ -117,7 +120,7 @@ public class HeuristicAlgorithm {
         return functionServerMapping;
     }
 
-    public void optimizePlacement() {
+    public void optimizePlacementGreedy() {
         setPathsIncumbent();
         setPlacementIncumbent();
         double bestKnownObjVal = vars.objVal;
@@ -135,7 +138,7 @@ public class HeuristicAlgorithm {
                             networkManager.removeDemandFromAllFunctionsToServer(s, d); // remove previous allocation
                             removeDemandFromOldPath(s, d);
                         }
-                        List<Integer> functionServerMapping = allocateDemandInPathHeuristics(GRD, s, d, p);
+                        List<Integer> functionServerMapping = allocateDemandInPathGreedy(GRD, s, d, p);
                         if (functionServerMapping.size() == pm.getServices().get(s).getFunctions().size()) {
                             networkManager.addDemandToPath(s, p, d);
                             removePreviousAllocation = true;
@@ -309,11 +312,11 @@ public class HeuristicAlgorithm {
         else if (algorithm.contains(RF))
             return availableServers.get(rnd.nextInt(availableServers.size()));
         else if (algorithm.contains(GRD))
-            return chooseServerForFunctionHeuristics(availableServers, s, v, d);
+            return chooseServerForFunctionGreedy(availableServers, s, v, d);
         return -1;
     }
 
-    private Integer chooseServerForFunctionHeuristics(List<Integer> availableServers, int s, int v, int d) {
+    private Integer chooseServerForFunctionGreedy(List<Integer> availableServers, int s, int v, int d) {
         int xCloudIndex = availableServers.size() - 1;
         for (int x = 0; x < availableServers.size(); x++)
             if (pm.getServers().get(availableServers.get(x)).getParent().getAttribute(NODE_CLOUD) != null)
