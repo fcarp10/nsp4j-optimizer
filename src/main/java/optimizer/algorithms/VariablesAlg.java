@@ -1,22 +1,6 @@
 package optimizer.algorithms;
 
-import static optimizer.Definitions.FUNCTIONS_CHARGES;
-import static optimizer.Definitions.FUNCTION_CHARGES;
-import static optimizer.Definitions.FUNCTION_LOAD_RATIO;
-import static optimizer.Definitions.FUNCTION_MAX_BW;
-import static optimizer.Definitions.FUNCTION_MAX_DEM;
-import static optimizer.Definitions.FUNCTION_MAX_DELAY;
-import static optimizer.Definitions.FUNCTION_MIN_PROCESS_DELAY;
-import static optimizer.Definitions.FUNCTION_PROCESS_DELAY;
-import static optimizer.Definitions.FUNCTION_PROCESS_TRAFFIC_DELAY;
-import static optimizer.Definitions.LINK_DELAY;
-import static optimizer.Definitions.NODE_CLOUD;
-import static optimizer.Definitions.OPEX_SERVERS;
-import static optimizer.Definitions.QOS_PENALTIES;
-import static optimizer.Definitions.QOS_PENALTY_RATIO;
-import static optimizer.Definitions.SERVER_IDLE_ENERGY_COST;
-import static optimizer.Definitions.SERVER_UTIL_ENERGY_COST;
-import static optimizer.Definitions.SERVICE_DOWNTIME;
+import static optimizer.Definitions.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,7 +90,7 @@ public class VariablesAlg {
       oSV = new double[pm.getServices().size()][pm.getServiceLength()];
       qSDP = new double[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
       fXgenerate();
-      generateObjValue();
+      generateObjValueForMigrationsReplications();
    }
 
    private void fXgenerate() {
@@ -205,7 +189,42 @@ public class VariablesAlg {
       return serviceDelay;
    }
 
-   private void generateObjValue() {
+   private void generateObjValueForMigrationsReplications() {
+      int migrations = 0;
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int s = 0; s < pm.getServices().size(); s++)
+            for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+               if (fXSVinitial[x][s][v] && !fXSV[x][s][v])
+                  migrations++;
+
+      int replications = 0;
+      for (int s = 0; s < pm.getServices().size(); s++)
+         for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+            int replicasTemp = -1;
+            for (int x = 0; x < pm.getServers().size(); x++)
+               if (fXSV[x][s][v])
+                  replicasTemp++;
+            replications += replicasTemp;
+         }
+
+      switch (objFunc) {
+         case MGR:
+            objVal = migrations + (0.001 * replications);
+            break;
+         case REP:
+            objVal = replications + (0.001 * migrations);
+            break;
+         case MGR_REP:
+            objVal = replications + migrations;
+            break;
+      }
+   }
+
+   private void generateObjValueForMonetaryValues() {
+
+      oXgenerate();
+      oSVgenerate();
+      qSDPgenerate();
 
       double opex = 0;
       double charges = 0;

@@ -317,23 +317,33 @@ public class HeuristicAlgorithm {
     }
 
     private Integer chooseServerForFunctionGreedy(List<Integer> availableServers, int s, int v, int d) {
-        int xCloudIndex = availableServers.size() - 1;
+        int xCloudIndex = -1;
         for (int x = 0; x < availableServers.size(); x++)
             if (pm.getServers().get(availableServers.get(x)).getParent().getAttribute(NODE_CLOUD) != null)
                 xCloudIndex = x;
         int xChosen = -1;
         // reduce migrations by choosing servers from initial placement
         if ((xChosen = getAlreadyUsedServerforDemandFromInitialPlacement(s, v, d, availableServers)) != -1)
-            return xChosen;
+            if (xCloudIndex > -1) {
+                if (availableServers.indexOf(xChosen) <= xCloudIndex)
+                    return xChosen;
+            } else
+                return xChosen;
         // reduce replications by choosing servers from initial placement
         if ((xChosen = getAlreadyUsedServerFromInitialPlacement(s, v, availableServers)) != -1)
-            if (availableServers.indexOf(xChosen) <= xCloudIndex)
+            if (xCloudIndex > -1) {
+                if (availableServers.indexOf(xChosen) <= xCloudIndex)
+                    return xChosen;
+            } else
                 return xChosen;
         // reduce replications by choosing a server already used for the function
         if ((xChosen = getAlreadyUsedServerForService(s, v, availableServers)) != -1)
-            if (availableServers.indexOf(xChosen) <= xCloudIndex)
+            if (xCloudIndex > -1) {
+                if (availableServers.indexOf(xChosen) <= xCloudIndex)
+                    return xChosen;
+            } else
                 return xChosen;
-        // choose the first available server
+        // choose the first available server, cloud will always be included here
         return availableServers.get(0);
     }
 
