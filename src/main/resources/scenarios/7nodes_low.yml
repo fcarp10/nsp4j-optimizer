@@ -5,7 +5,7 @@ aux: {
   "x_scaling": 6000.0,
   "y_scaling": 6000.0,
   "server_capacity": 1000,
-  "link_capacity": 250,
+  "link_capacity": 300,
   "cloud_server_capacity": 5000,
   "cloud_link_capacity": 10000,
   "directed_edges": true,

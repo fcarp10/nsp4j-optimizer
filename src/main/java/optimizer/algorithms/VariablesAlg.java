@@ -189,7 +189,7 @@ public class VariablesAlg {
       return serviceDelay;
    }
 
-   private void generateObjValueForMigrationsReplications() {
+   protected void generateObjValueForMigrationsReplications() {
       int migrations = 0;
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -210,13 +210,10 @@ public class VariablesAlg {
       switch (objFunc) {
          case MGR:
             objVal = migrations + (0.001 * replications);
-            break;
          case REP:
             objVal = replications + (0.001 * migrations);
-            break;
          case MGR_REP:
             objVal = replications + migrations;
-            break;
       }
    }
 

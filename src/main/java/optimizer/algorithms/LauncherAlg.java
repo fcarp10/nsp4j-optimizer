@@ -27,7 +27,13 @@ public class LauncherAlg {
       HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
       long startTime = System.nanoTime();
       printLog(log, INFO, "starting " + sce.getName() + " algorithm...");
-      heuristicAlgorithm.allocateServices(sce.getName());
+      if (sce.getName().equals(GRD)) {
+         heuristicAlgorithm.allocateServicesGreedy(sce.getName());
+         // vars.generateObjValueForMigrationsReplications();
+         // heuristicAlgorithm.optimizePlacementGreedy();
+      } else {
+         heuristicAlgorithm.allocateServices(sce.getName());
+      }
       long elapsedTime = System.nanoTime() - startTime;
       vars.generateRestOfVariablesForResults();
       Auxiliary.printLog(log, INFO, "finished [" + Auxiliary.roundDouble(vars.objVal, 4) + "]");
