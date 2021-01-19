@@ -214,6 +214,9 @@ public class Manager {
 
             case CUSTOM_3:
                resultsManager = new ResultsManager(sce.getInputFileName());
+               String algorithm;
+               VariablesAlg initVars;
+               VariablesAlg highPredVars;
 
                // 1 - low [LP]
                readInputParameters(sce.getInputFileName() + "_low", false);
@@ -225,10 +228,10 @@ public class Manager {
 
                // 2 - high [FF][MGR_REP][init-low]
                readInputParameters(sce.getInputFileName() + "_high", false);
-               String algorithm = FF;
+               algorithm = FF;
                sce.setName(algorithm);
                sce.setObjFunc(MGR_REP);
-               VariablesAlg initVars = new VariablesAlg(pm, lowModel);
+               initVars = new VariablesAlg(pm, lowModel);
                outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low";
                LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
                // 2 - high [RF][MGR_REP][init-low]
@@ -253,10 +256,11 @@ public class Manager {
                // 3 - high-pred [FF][MGR_REP][init-low]
                readInputParameters(sce.getInputFileName() + "_high-pred", false);
                algorithm = FF;
+               sce.setName(algorithm);
                sce.setObjFunc(MGR_REP);
                initVars = new VariablesAlg(pm, lowModel);
                outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low";
-               VariablesAlg highPredVars = LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
+               highPredVars = LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
                // 3 - high [FF][MGR_REP][init-high-pred]
                readInputParameters(sce.getInputFileName() + "_high", false);
                algorithm = FF;
@@ -269,9 +273,10 @@ public class Manager {
                   // 3 - high-pred [RF][MGR_REP][init-low]
                   readInputParameters(sce.getInputFileName() + "_high-pred", false);
                   algorithm = RF;
+                  sce.setName(algorithm);
                   sce.setObjFunc(MGR_REP);
                   initVars = new VariablesAlg(pm, lowModel);
-                  outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low" + i;
+                  outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low_" + i;
                   highPredVars = LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
                   // 3 - high [RF][MGR_REP][init-high-pred]
                   readInputParameters(sce.getInputFileName() + "_high", false);
@@ -279,12 +284,14 @@ public class Manager {
                   sce.setName(algorithm);
                   sce.setObjFunc(MGR_REP);
                   highPredVars = new VariablesAlg(pm, highPredVars);
-                  outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-high-pred";
+                  outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-high-pred_"
+                        + i;
                   LauncherAlg.run(pm, sce, resultsManager, highPredVars, outputFileName);
                }
                // 3 - high-pred [GRD][MGR_REP][init-low]
                readInputParameters(sce.getInputFileName() + "_high-pred", false);
                algorithm = GRD;
+               sce.setName(algorithm);
                sce.setObjFunc(MGR_REP);
                initVars = new VariablesAlg(pm, lowModel);
                outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low";
