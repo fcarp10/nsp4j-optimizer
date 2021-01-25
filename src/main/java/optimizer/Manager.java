@@ -29,25 +29,29 @@ public class Manager {
 
    public static String readInputParameters(String graphNameForm, boolean considerSubsetOfDemands) {
 
+      String rootPath = Auxiliary.getResourcePath(graphNameForm + ".yml");
       String[] graphName = graphNameForm.split("_");
-      String extensionGraph = ".dgs";
-      String[] graphNameExtension = graphNameForm.split("\\.");
-      if (graphNameExtension.length > 1) {
-         graphName[0] = graphNameExtension[0];
-         extensionGraph = "." + graphNameExtension[1];
-      }
       try {
-         String path = Auxiliary.getResourcePath(graphNameForm + ".yml");
-         pm = ConfigFiles.readParameters(path + graphNameForm + ".yml");
-         pm.initialize(path + graphName[0] + extensionGraph, path + graphName[0] + ".txt",
-               (boolean) pm.getAux(DIRECTED_EDGES));
-         checkTopologyScale(pm);
-         ResultsGUI.initialize(pm);
-         printLog(log, INFO, "topology loaded");
-         seed = pm.getSeed();
+         pm = ConfigFiles.readParameters(rootPath + graphNameForm + ".yml");
       } catch (Exception e) {
-         printLog(log, ERROR, "error loading input parameters");
+         printLog(log, ERROR, "error loading .yml file");
       }
+      String[] extensions = new String[] { ".dgs", ".gml" };
+      boolean isLoaded = false;
+      for (int i = 0; i < extensions.length; i++)
+         if (pm.initialize(rootPath + graphName[0] + extensions[i], rootPath + graphName[0] + ".txt",
+               (boolean) pm.getAux(DIRECTED_EDGES))) {
+            isLoaded = true;
+            break;
+         }
+      if (!isLoaded) {
+         printLog(log, ERROR, "error loading graph or paths files");
+         return null;
+      }
+      checkTopologyScale(pm);
+      ResultsGUI.initialize(pm);
+      printLog(log, INFO, "topology loaded");
+      seed = pm.getSeed();
       considerSubsetOfDemands(pm, considerSubsetOfDemands);
       return graphName[0];
    }
