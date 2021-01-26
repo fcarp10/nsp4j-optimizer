@@ -19,7 +19,7 @@ function_types:
     max_delay: 10.0
     max_dem: 3
     min_process_delay: 2.0
-    overhead: [0.01, 0.1]
+    overhead_ratio: [0.01, 0.1]
     process_delay: 5.0
     process_traffic_delay: 3.0
     replicable: true

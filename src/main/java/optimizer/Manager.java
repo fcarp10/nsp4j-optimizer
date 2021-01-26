@@ -161,6 +161,8 @@ public class Manager {
                readInputParameters(sce.getInputFileName() + "_low", false);
                sce.setObjFunc(NUM_SERVERS);
                sce.setConstraint(EDGE_ONLY, true);
+               sce.setConstraint(SYNC_TRAFFIC, false);
+               sce.setConstraint(SINGLE_PATH, true);
                outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc();
                GRBModel lowModel = LauncherLP.run(pm, sce, resultsManager, null, null, outputFileName);
                sce.setConstraint(EDGE_ONLY, false);
@@ -226,6 +228,8 @@ public class Manager {
                readInputParameters(sce.getInputFileName() + "_low", false);
                sce.setObjFunc(NUM_SERVERS);
                sce.setConstraint(EDGE_ONLY, true);
+               sce.setConstraint(SYNC_TRAFFIC, false);
+               sce.setConstraint(SINGLE_PATH, true);
                outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc();
                lowModel = LauncherLP.run(pm, sce, resultsManager, null, null, outputFileName);
                sce.setConstraint(EDGE_ONLY, false);
