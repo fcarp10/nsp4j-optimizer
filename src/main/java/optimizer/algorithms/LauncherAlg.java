@@ -29,8 +29,6 @@ public class LauncherAlg {
       printLog(log, INFO, "starting " + sce.getName() + " algorithm...");
       if (sce.getName().equals(GRD)) {
          heuristicAlgorithm.allocateServicesGreedy(sce.getName());
-         // vars.generateObjValueForMigrationsReplications();
-         // heuristicAlgorithm.optimizePlacementGreedy();
       } else {
          heuristicAlgorithm.allocateServices(sce.getName());
       }
@@ -41,7 +39,7 @@ public class LauncherAlg {
       Results results = generateResults(pm, sce, vars, vars.fXSVinitial);
       results.setComputationTime((double) elapsedTime / 1000000000);
       resultsManager.exportJsonObject(outputFileName, results);
-      exportResultsToMST(pm, resultsManager, outputFileName, vars);
+      // exportResultsToMST(pm, resultsManager, outputFileName, vars);
       ResultsGUI.updateResults(results);
       Auxiliary.printLog(log, INFO, "done");
       return vars;

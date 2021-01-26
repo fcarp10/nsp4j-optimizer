@@ -8,7 +8,7 @@ aux:
   num_servers_node: 8
   offset_results: 0
   server_capacity: 1000
-  service_length: [1]
+  service_length: [10]
   services: [1]
   x_scaling: 100.0
   y_scaling: -100.0
