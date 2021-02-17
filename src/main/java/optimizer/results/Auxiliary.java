@@ -88,9 +88,13 @@ public class Auxiliary {
       ResultsGUI.log(status + message);
    }
 
-   public static String getResourcePath(String fileName) {
+   public static String getResourcesPath(String fileName, String filePath) {
       try {
-         File file = new File(Manager.class.getClassLoader().getResource("scenarios/" + fileName).getFile());
+         File file;
+         if (filePath == null)
+            file = new File(Manager.class.getClassLoader().getResource(SCENARIOS_PATH + "/" + fileName).getFile());
+         else
+            file = new File(filePath + "/" + fileName);
          String absolutePath = file.getAbsolutePath();
          String path = absolutePath.substring(0, absolutePath.lastIndexOf(File.separator));
          if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
@@ -338,5 +342,17 @@ public class Auxiliary {
                      if (initialPlacementVars.fXSVD[x][s][v][d])
                         fXSVDvar[x][s][v][d] = true;
       return fXSVDvar;
+   }
+
+   public static void removeCapacityOfCloudServers(Parameters pm) {
+      for (int i = 0; i < pm.getServers().size(); i++)
+         if (pm.getServers().get(i).getParent().getAttribute(NODE_CLOUD) != null)
+            pm.getServers().get(i).setCapacity(1);
+   }
+
+   public static void restoreCapacityOfCloudServers(Parameters pm) {
+      for (int i = 0; i < pm.getServers().size(); i++)
+         if (pm.getServers().get(i).getParent().getAttribute(NODE_CLOUD) != null)
+            pm.getServers().get(i).setCapacity((int) pm.getAux().get(CLOUD_SERVER_CAPACITY));
    }
 }

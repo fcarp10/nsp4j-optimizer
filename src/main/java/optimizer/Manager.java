@@ -1,5 +1,6 @@
 package optimizer;
 
+import gurobi.GRBException;
 import gurobi.GRBModel;
 import manager.Parameters;
 import manager.elements.TrafficFlow;
@@ -29,7 +30,7 @@ public class Manager {
 
    public static String readInputParameters(String graphNameForm, boolean considerSubsetOfDemands) {
 
-      String rootPath = Auxiliary.getResourcePath(graphNameForm + ".yml");
+      String rootPath = Auxiliary.getResourcesPath(graphNameForm + ".yml", null);
       String[] graphName = graphNameForm.split("_");
       try {
          pm = ConfigFiles.readParameters(rootPath + graphNameForm + ".yml");
@@ -110,19 +111,19 @@ public class Manager {
       String graphNameShort;
       try {
          switch (sce.getName()) {
-
             case LP:
+               boolean exportMST = true;
                resultsManager = new ResultsManager(pm.getGraphName());
                readInputParameters(sce.getInputFileName(), false);
                String outputFileName = pm.getGraphName() + sce.getName() + sce.getObjFunc();
-               LauncherLP.run(pm, sce, resultsManager, null, null, outputFileName);
+               LauncherLP.run(pm, sce, resultsManager, null, null, outputFileName, exportMST);
                break;
 
             case FF:
                resultsManager = new ResultsManager(pm.getGraphName());
                readInputParameters(sce.getInputFileName(), false);
                outputFileName = pm.getGraphName() + "_" + FF + "_" + sce.getObjFunc();
-               LauncherAlg.run(pm, sce, resultsManager, null, outputFileName);
+               LauncherAlg.run(pm, sce, resultsManager, null, outputFileName, false);
                break;
 
             case RF:
@@ -130,7 +131,7 @@ public class Manager {
                readInputParameters(sce.getInputFileName(), false);
                for (int i = 0; i < 10; i++) {
                   outputFileName = pm.getGraphName() + "_" + RF + "_" + sce.getObjFunc() + "_" + i;
-                  LauncherAlg.run(pm, sce, resultsManager, null, outputFileName);
+                  LauncherAlg.run(pm, sce, resultsManager, null, outputFileName, false);
                }
                break;
 
@@ -138,190 +139,63 @@ public class Manager {
                resultsManager = new ResultsManager(pm.getGraphName());
                readInputParameters(sce.getInputFileName(), false);
                outputFileName = pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc();
-               LauncherAlg.run(pm, sce, resultsManager, null, outputFileName);
+               LauncherAlg.run(pm, sce, resultsManager, null, outputFileName, false);
                break;
 
             case CUSTOM_1:
+               exportMST = true;
                resultsManager = new ResultsManager(pm.getGraphName());
                graphNameShort = readInputParameters(sce.getInputFileName(), false);
                GRBModel initModel = resultsManager.loadInitialPlacement(
-                     Auxiliary.getResourcePath(graphNameShort + "_init-lp.mst") + graphNameShort + "_init-lp", pm, sce);
+                     Auxiliary.getResourcesPath(graphNameShort + "_init-lp.mst", null) + graphNameShort + "_init-lp",
+                     pm, sce);
                GRBModel initSol = resultsManager.loadModel(
-                     Auxiliary.getResourcePath(pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc() + ".mst")
+                     Auxiliary.getResourcesPath(pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc() + ".mst", null)
                            + pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc(),
                      pm, sce, false);
                outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc();
-               LauncherLP.run(pm, sce, resultsManager, initModel, initSol, outputFileName);
+               LauncherLP.run(pm, sce, resultsManager, initModel, initSol, outputFileName, exportMST);
                break;
 
             case CUSTOM_2:
                resultsManager = new ResultsManager(sce.getInputFileName());
-
-               // 1 - low [LP]
-               readInputParameters(sce.getInputFileName() + "_low", false);
-               sce.setObjFunc(NUM_SERVERS);
-               sce.setConstraint(EDGE_ONLY, true);
-               sce.setConstraint(SYNC_TRAFFIC, false);
-               sce.setConstraint(SINGLE_PATH, true);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc();
-               GRBModel lowModel = LauncherLP.run(pm, sce, resultsManager, null, null, outputFileName);
-               sce.setConstraint(EDGE_ONLY, false);
-
-               // 2 - high [LP][MGR][init-low]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               sce.setObjFunc(MGR);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_init-low";
-               LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
-               // 2 - high [LP][REP][init-low]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               sce.setObjFunc(REP);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_init-low";
-               LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
-               // 2 - high [LP][MGR-REP][init-low]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               sce.setObjFunc(MGR_REP);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_init-low";
-               LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
-
-               // 3 - high-pred [LP][MGR][init-low]
-               readInputParameters(sce.getInputFileName() + "_high-pred", false);
-               sce.setObjFunc(MGR);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_init-low";
-               GRBModel highPredMgrModel = LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
-               // 3 - high [LP][MGR][init-high-pred]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               sce.setObjFunc(MGR);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_init-high-pred";
-               LauncherLP.run(pm, sce, resultsManager, highPredMgrModel, null, outputFileName);
-
-               // 4 - high-pred [LP][REP][init-low]
-               readInputParameters(sce.getInputFileName() + "_high-pred", false);
-               sce.setObjFunc(REP);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_init-low";
-               GRBModel highPredRepModel = LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
-               // 4 - high [LP][REP][init-high-pred]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               sce.setObjFunc(REP);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_init-high-pred";
-               LauncherLP.run(pm, sce, resultsManager, highPredRepModel, null, outputFileName);
-
-               // 5 - high-pred [LP][MGR-REP][init-low]
-               readInputParameters(sce.getInputFileName() + "_high-pred", false);
-               sce.setObjFunc(MGR_REP);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_init-low";
-               GRBModel highPredMgrRepModel = LauncherLP.run(pm, sce, resultsManager, lowModel, null, outputFileName);
-               // 5 - high traffic [LP][MGR-REP][init-high-pred]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               sce.setObjFunc(MGR_REP);
-               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_init-high-pred";
-               LauncherLP.run(pm, sce, resultsManager, highPredMgrRepModel, null, outputFileName);
-
-               break;
-
-            case CUSTOM_3:
-               resultsManager = new ResultsManager(sce.getInputFileName());
                String algorithm;
                VariablesAlg initVars;
-               VariablesAlg highPredVars;
-
-               // 1 - low [LP]
-               // readInputParameters(sce.getInputFileName() + "_low", false);
-               // sce.setObjFunc(NUM_SERVERS);
-               // sce.setConstraint(EDGE_ONLY, true);
-               // sce.setConstraint(SYNC_TRAFFIC, false);
-               // sce.setConstraint(SINGLE_PATH, true);
-               // outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc();
-               // lowModel = LauncherLP.run(pm, sce, resultsManager, null, null, outputFileName);
-               // sce.setConstraint(EDGE_ONLY, false);
-
+               exportMST = true;
                // 1 - low [RF]
                readInputParameters(sce.getInputFileName() + "_low", false);
                algorithm = RF;
                sce.setName(algorithm);
                sce.setObjFunc(MGR_REP);
                outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc();
-               initVars = LauncherAlg.run(pm, sce, resultsManager, null, outputFileName);
+               Auxiliary.removeCapacityOfCloudServers(pm); // constraint to only edge
+               initVars = LauncherAlg.run(pm, sce, resultsManager, null, outputFileName, exportMST);
+               GRBModel lowModel = resultsManager
+                     .loadModel(Auxiliary.getResourcesPath(outputFileName + ".mst", resultsManager.getResultsFolder())
+                           + outputFileName, pm, sce, true); // load low model from file as GRBModel
+               Auxiliary.restoreCapacityOfCloudServers(pm); // remove constraint only edge
 
-               // 2 - high [FF][MGR_REP][init-low]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               algorithm = FF;
-               sce.setName(algorithm);
-               sce.setObjFunc(MGR_REP);
-               // initVars = new VariablesAlg(pm, lowModel);
-               outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low";
-               LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
-               // 2 - high [RF][MGR_REP][init-low]
-               readInputParameters(sce.getInputFileName() + "_high", false);
+               runCustomSequenceLP(sce, resultsManager, lowModel);
+               runCustomSequenceAlg(sce, resultsManager, initVars);
+               break;
+
+            case CUSTOM_3:
+               resultsManager = new ResultsManager(sce.getInputFileName());
+               exportMST = false;
+
+               // 1 - low [RF]
+               readInputParameters(sce.getInputFileName() + "_low", false);
                algorithm = RF;
                sce.setName(algorithm);
                sce.setObjFunc(MGR_REP);
-               // initVars = new VariablesAlg(pm, lowModel);
-               for (int i = 0; i < 10; i++) {
-                  outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low_" + i;
-                  LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
-               }
-               // 2 - high [GRD][MGR_REP][init-low]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               algorithm = GRD;
-               sce.setName(algorithm);
-               sce.setObjFunc(MGR_REP);
-               // initVars = new VariablesAlg(pm, lowModel);
-               outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low";
-               LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
+               Auxiliary.removeCapacityOfCloudServers(pm); // constraint to only edge
+               outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc();
+               initVars = LauncherAlg.run(pm, sce, resultsManager, null, outputFileName, exportMST);
+               Auxiliary.restoreCapacityOfCloudServers(pm); // remove constraint only edge
 
-               // 3 - high-pred [FF][MGR_REP][init-low]
-               readInputParameters(sce.getInputFileName() + "_high-pred", false);
-               algorithm = FF;
-               sce.setName(algorithm);
-               sce.setObjFunc(MGR_REP);
-               // initVars = new VariablesAlg(pm, lowModel);
-               outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low";
-               highPredVars = LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
-               // 3 - high [FF][MGR_REP][init-high-pred]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               algorithm = FF;
-               sce.setName(algorithm);
-               sce.setObjFunc(MGR_REP);
-               highPredVars = new VariablesAlg(pm, highPredVars);
-               outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-high-pred";
-               LauncherAlg.run(pm, sce, resultsManager, highPredVars, outputFileName);
-               for (int i = 0; i < 10; i++) {
-                  // 3 - high-pred [RF][MGR_REP][init-low]
-                  readInputParameters(sce.getInputFileName() + "_high-pred", false);
-                  algorithm = RF;
-                  sce.setName(algorithm);
-                  sce.setObjFunc(MGR_REP);
-                  // initVars = new VariablesAlg(pm, lowModel);
-                  outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low_" + i;
-                  highPredVars = LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
-                  // 3 - high [RF][MGR_REP][init-high-pred]
-                  readInputParameters(sce.getInputFileName() + "_high", false);
-                  algorithm = RF;
-                  sce.setName(algorithm);
-                  sce.setObjFunc(MGR_REP);
-                  highPredVars = new VariablesAlg(pm, highPredVars);
-                  outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-high-pred_"
-                        + i;
-                  LauncherAlg.run(pm, sce, resultsManager, highPredVars, outputFileName);
-               }
-               // 3 - high-pred [GRD][MGR_REP][init-low]
-               readInputParameters(sce.getInputFileName() + "_high-pred", false);
-               algorithm = GRD;
-               sce.setName(algorithm);
-               sce.setObjFunc(MGR_REP);
-               // initVars = new VariablesAlg(pm, lowModel);
-               outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-low";
-               highPredVars = LauncherAlg.run(pm, sce, resultsManager, initVars, outputFileName);
-               // 3 - high [GRD][MGR_REP][init-high-pred]
-               readInputParameters(sce.getInputFileName() + "_high", false);
-               algorithm = GRD;
-               sce.setName(algorithm);
-               sce.setObjFunc(MGR_REP);
-               highPredVars = new VariablesAlg(pm, highPredVars);
-               outputFileName = pm.getGraphName() + "_" + algorithm + "_" + sce.getObjFunc() + "_init-high-pred";
-               LauncherAlg.run(pm, sce, resultsManager, highPredVars, outputFileName);
-
+               runCustomSequenceAlg(sce, resultsManager, initVars);
                break;
+
             default:
                printLog(log, INFO, "no algorithm selected");
                break;
@@ -331,6 +205,86 @@ public class Manager {
          e.printStackTrace();
          printLog(log, ERROR, "something went wrong");
       }
+   }
+
+   public static void runCustomSequenceLP(Scenario sce, ResultsManager resultsManager, GRBModel initModel)
+         throws GRBException {
+
+      boolean exportMST = false;
+
+      // 2 - high [LP][MGR][init-low]
+      runCustomLP(sce, MGR, "high", "init-low", resultsManager, initModel, exportMST);
+      // 2 - high [LP][REP][init-low]
+      runCustomLP(sce, REP, "high", "init-low", resultsManager, initModel, exportMST);
+      // 2 - high [LP][MGR-REP][init-low]
+      runCustomLP(sce, MGR_REP, "high", "init-low", resultsManager, initModel, exportMST);
+
+      // 3 - high-pred [LP][MGR][init-low]
+      GRBModel highPredMgrModel = runCustomLP(sce, MGR, "high-pred", "init-low", resultsManager, initModel, exportMST);
+      // 3 - high [LP][MGR][init-high-pred]
+      runCustomLP(sce, MGR, "high", "init-high-pred", resultsManager, highPredMgrModel, exportMST);
+
+      // 4 - high-pred [LP][REP][init-low]
+      GRBModel highPredRepModel = runCustomLP(sce, REP, "high-pred", "init-low", resultsManager, initModel, exportMST);
+      // 4 - high [LP][REP][init-high-pred]
+      runCustomLP(sce, REP, "high", "init-high-pred", resultsManager, highPredRepModel, exportMST);
+
+      // 5 - high-pred [LP][MGR-REP][init-low]
+      GRBModel highPredMgrRepModel = runCustomLP(sce, MGR_REP, "high-pred", "init-low", resultsManager, initModel,
+            exportMST);
+      // 5 - high traffic [LP][MGR-REP][init-high-pred]
+      runCustomLP(sce, MGR_REP, "high", "init-high-pred", resultsManager, highPredMgrRepModel, exportMST);
+   }
+
+   public static void runCustomSequenceAlg(Scenario sce, ResultsManager resultsManager, VariablesAlg initVars) {
+
+      VariablesAlg highPredVars;
+      boolean exportMST = false;
+
+      // 2 - high [FF][MGR_REP][init-low]
+      runCustomAlg(sce, FF, MGR_REP, "high", "init-low", resultsManager, initVars, exportMST);
+      // 2 - high [RF][MGR_REP][init-low]
+      for (int i = 0; i < 10; i++)
+         runCustomAlg(sce, RF, MGR_REP, "high", "init-low_" + i, resultsManager, initVars, exportMST);
+      // 2 - high [GRD][MGR_REP][init-low]
+      runCustomAlg(sce, GRD, MGR_REP, "high", "init-low", resultsManager, initVars, exportMST);
+
+      // 3 - high-pred [FF][MGR_REP][init-low]
+      highPredVars = runCustomAlg(sce, FF, MGR_REP, "high-pred", "init-low", resultsManager, initVars, exportMST);
+      // 3 - high [FF][MGR_REP][init-high-pred]
+      highPredVars = new VariablesAlg(pm, highPredVars);
+      runCustomAlg(sce, FF, MGR_REP, "high", "init-high-pred", resultsManager, highPredVars, exportMST);
+      for (int i = 0; i < 10; i++) {
+         // 3 - high-pred [RF][MGR_REP][init-low]
+         highPredVars = runCustomAlg(sce, RF, MGR_REP, "high-pred", "init-low_" + i, resultsManager, initVars,
+               exportMST);
+         // 3 - high [RF][MGR_REP][init-high-pred]
+         highPredVars = new VariablesAlg(pm, highPredVars);
+         runCustomAlg(sce, RF, MGR_REP, "high", "init-high-pred_" + i, resultsManager, highPredVars, exportMST);
+      }
+      // 3 - high-pred [GRD][MGR_REP][init-low]
+      highPredVars = runCustomAlg(sce, GRD, MGR_REP, "high-pred", "init-low", resultsManager, initVars, exportMST);
+      // 3 - high [GRD][MGR_REP][init-high-pred]
+      highPredVars = new VariablesAlg(pm, highPredVars);
+      runCustomAlg(sce, GRD, MGR_REP, "high", "init-high-pred", resultsManager, highPredVars, exportMST);
+   }
+
+   public static GRBModel runCustomLP(Scenario sce, String objFunc, String inputFileExtension,
+         String outputFileExtension, ResultsManager resultsManager, GRBModel initPlacementModel, boolean exportMST)
+         throws GRBException {
+      readInputParameters(sce.getInputFileName() + "_" + inputFileExtension, false);
+      sce.setObjFunc(objFunc);
+      String outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_" + outputFileExtension;
+      return LauncherLP.run(pm, sce, resultsManager, initPlacementModel, null, outputFileName, exportMST);
+   }
+
+   public static VariablesAlg runCustomAlg(Scenario sce, String alg, String objFunc, String inputFileExtension,
+         String outputFileExtension, ResultsManager resultsManager, VariablesAlg initPlacementVars, boolean exportMST) {
+      readInputParameters(sce.getInputFileName() + "_" + inputFileExtension, false);
+      sce.setName(alg);
+      sce.setObjFunc(objFunc);
+      String outputFileName = pm.getGraphName() + "_" + alg + "_" + sce.getObjFunc() + "_" + outputFileExtension;
+      return LauncherAlg.run(pm, sce, resultsManager, initPlacementVars, outputFileName, exportMST);
    }
 
    public static void terminate() {

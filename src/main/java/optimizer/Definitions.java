@@ -101,6 +101,7 @@ public class Definitions {
    public static final String LATITUDE_LABEL_1 = "Latitude";
    public static final String LONGITUDE_LABEL_2 = "x";
    public static final String LATITUDE_LABEL_2 = "y";
+   public static final String CLOUD_SERVER_CAPACITY = "cloud_server_capacity";
 
    // link parameters
    public static final String LINK_CAPACITY = "capacity";
@@ -116,6 +117,7 @@ public class Definitions {
    public static final String SERVERS_WEIGHT = "servers_weight";
    public static final String MAXU_WEIGHT = "maxU_weight";
    public static final String DIRECTED_EDGES = "directed_edges";
+   public static final String SCENARIOS_PATH = "scenarios";
 
    // GUI parameters
    public static final String NODE_COLOR = "Black";

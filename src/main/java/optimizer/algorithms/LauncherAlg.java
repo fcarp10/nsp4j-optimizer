@@ -21,7 +21,7 @@ public class LauncherAlg {
    private static final Logger log = LoggerFactory.getLogger(LauncherAlg.class);
 
    public static VariablesAlg run(Parameters pm, Scenario sce, ResultsManager resultsManager,
-         VariablesAlg varsInitPlacement, String outputFileName) {
+         VariablesAlg varsInitPlacement, String outputFileName, boolean printMST) {
       VariablesAlg vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
       NetworkManager networkManager = new NetworkManager(pm, vars);
       HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
@@ -39,7 +39,8 @@ public class LauncherAlg {
       Results results = generateResults(pm, sce, vars, vars.fXSVinitial);
       results.setComputationTime((double) elapsedTime / 1000000000);
       resultsManager.exportJsonObject(outputFileName, results);
-      // exportResultsToMST(pm, resultsManager, outputFileName, vars);
+      if (printMST)
+         exportResultsToMST(pm, resultsManager, outputFileName, vars);
       ResultsGUI.updateResults(results);
       Auxiliary.printLog(log, INFO, "done");
       return vars;

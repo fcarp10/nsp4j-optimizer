@@ -55,7 +55,7 @@ public class ResultsManager {
    }
 
    public String importConfDrlFile(String fileName) {
-      String path = Auxiliary.getResourcePath(fileName + ".json");
+      String path = Auxiliary.getResourcesPath(fileName + ".json", null);
       ObjectMapper objectMapper = new ObjectMapper();
       String conf = null;
       try {

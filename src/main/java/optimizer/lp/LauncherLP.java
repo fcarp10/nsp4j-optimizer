@@ -20,7 +20,7 @@ public class LauncherLP {
    private static final Logger log = LoggerFactory.getLogger(LauncherLP.class);
 
    public static GRBModel run(Parameters pm, Scenario sce, ResultsManager resultsManager, GRBModel initialModel,
-         GRBModel initialSolution, String outputFileName) throws GRBException {
+         GRBModel initialSolution, String outputFileName, boolean exportMST) throws GRBException {
       boolean[][][] initialPlacement = null;
       if (initialModel != null)
          initialPlacement = Auxiliary.fXSVvarsFromInitialModel(pm, initialModel);
@@ -42,7 +42,8 @@ public class LauncherLP {
          results = generateResults(pm, modelLP, sce, initialPlacement);
          results.setComputationTime((double) elapsedTime / 1000000000);
          resultsManager.exportJsonObject(outputFileName, results);
-         resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
+         if (exportMST)
+            resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);
          Auxiliary.printLog(log, INFO, "done");
       }
