@@ -24,6 +24,12 @@ public class Definitions {
    public static final String CUSTOM_1 = "CUSTOM_1";
    public static final String CUSTOM_2 = "CUSTOM_2";
    public static final String CUSTOM_3 = "CUSTOM_3";
+   public static final String HIGH = "high";
+   public static final String HIGH_PRED = "high-pred";
+   public static final String LOW = "low";
+   public static final String INIT_LOW = "init-low";
+   public static final String INIT_HIGH_PRED = "init-high-pred";
+   public static final String NULL_STRING = "";
 
    // general variables
    public static final String zSP = "zSP";
