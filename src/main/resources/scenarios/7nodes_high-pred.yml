@@ -5,13 +5,13 @@ aux: {
   "x_scaling": 6000.0,
   "y_scaling": 6000.0,
   "server_capacity": 1000,
-  "link_capacity": 300,
+  "link_capacity": 200,
   "cloud_server_capacity": 5000,
   "cloud_link_capacity": 10000,
   "directed_edges": true,
   "num_servers_node": 1,
   "cloud_num_servers": 1,
-  "service_length": [7],
+  "service_length": [8],
   "services": [1]
 }
 # service definitions

@@ -157,100 +157,117 @@ public class Manager {
                LauncherLP.run(pm, sce, rm, initModel, initSol, outputFileName, exportMST);
                break;
 
+            // case CUSTOM_2:
+            //    rm = new ResultsManager(sce.getInputFileName());
+            //    exportMST = true;
+            //    // 1 - low [RF]
+            //    readInputParameters(sce.getInputFileName() + "_low", false);
+            //    sce.setObjFunc(MGR_REP);
+            //    outputFileName = pm.getGraphName() + "_" + RF + "_" + sce.getObjFunc();
+            //    Auxiliary.removeCapacityOfCloudServers(pm); // constraint to only edge
+            //    VariablesAlg initVars = LauncherAlg.run(pm, sce, rm, null, outputFileName, exportMST);
+            //    initModel = rm.loadModel(
+            //          Auxiliary.getResourcesPath(outputFileName + ".mst", rm.getResultsFolder()) + outputFileName, pm,
+            //          sce, true); // load low model from file as GRBModel
+            //    Auxiliary.restoreCapacityOfCloudServers(pm); // remove constraint only edge
+
+            //    // ******** LP ******** //
+            //    // 2 - high [LP][MGR/REP/MGR-REP][init-low]
+            //    runCustomLP(sce, MGR, "high", "init-low", rm, initModel, exportMST);
+            //    runCustomLP(sce, REP, "high", "init-low", rm, initModel, exportMST);
+            //    runCustomLP(sce, MGR_REP, "high", "init-low", rm, initModel, exportMST);
+
+            //    // 3 - high-pred [LP][MGR][init-low]
+            //    GRBModel highPredMgrModel = runCustomLP(sce, MGR, "high-pred", "init-low", rm, initModel, exportMST);
+            //    // 3 - high [LP][MGR][init-high-pred]
+            //    runCustomLP(sce, MGR, "high", "init-high-pred", rm, highPredMgrModel, exportMST);
+
+            //    // 4 - high-pred [LP][REP][init-low]
+            //    GRBModel highPredRepModel = runCustomLP(sce, REP, "high-pred", "init-low", rm, initModel, exportMST);
+            //    // 4 - high [LP][REP][init-high-pred]
+            //    runCustomLP(sce, REP, "high", "init-high-pred", rm, highPredRepModel, exportMST);
+
+            //    // 5 - high-pred [LP][MGR-REP][init-low]
+            //    GRBModel highPredMgrRepModel = runCustomLP(sce, MGR_REP, "high-pred", "init-low", rm, initModel,
+            //          exportMST);
+            //    // 5 - high traffic [LP][MGR-REP][init-high-pred]
+            //    runCustomLP(sce, MGR_REP, "high", "init-high-pred", rm, highPredMgrRepModel, exportMST);
+
+            //    // ******** ALG ******** //
+            //    // 2 - high [FF][MGR_REP][init-low]
+            //    runCustomAlg(sce, FF, MGR_REP, "high", "init-low", rm, initVars, exportMST);
+            //    // 2 - high [RF][MGR_REP][init-low]
+            //    for (int i = 0; i < 10; i++)
+            //       runCustomAlg(sce, RF, MGR_REP, "high", "init-low_" + i, rm, initVars, exportMST);
+            //    // 2 - high [GRD][MGR_REP][init-low]
+            //    runCustomAlg(sce, GRD, MGR_REP, "high", "init-low", rm, initVars, exportMST);
+
+            //    // 3 - high-pred [FF][MGR_REP][init-low]
+            //    VariablesAlg highPredVars = runCustomAlg(sce, FF, MGR_REP, "high-pred", "init-low", rm, initVars,
+            //          exportMST);
+            //    // 3 - high [FF][MGR_REP][init-high-pred]
+            //    highPredVars = new VariablesAlg(pm, highPredVars);
+            //    runCustomAlg(sce, FF, MGR_REP, "high", "init-high-pred", rm, highPredVars, exportMST);
+            //    for (int i = 0; i < 10; i++) {
+            //       // 3 - high-pred [RF][MGR_REP][init-low]
+            //       highPredVars = runCustomAlg(sce, RF, MGR_REP, "high-pred", "init-low_" + i, rm, initVars, exportMST);
+            //       // 3 - high [RF][MGR_REP][init-high-pred]
+            //       highPredVars = new VariablesAlg(pm, highPredVars);
+            //       runCustomAlg(sce, RF, MGR_REP, "high", "init-high-pred_" + i, rm, highPredVars, exportMST);
+            //    }
+            //    // 3 - high-pred [GRD][MGR_REP][init-low]
+            //    highPredVars = runCustomAlg(sce, GRD, MGR_REP, "high-pred", "init-low", rm, initVars, exportMST);
+            //    // 3 - high [GRD][MGR_REP][init-high-pred]
+            //    highPredVars = new VariablesAlg(pm, highPredVars);
+            //    runCustomAlg(sce, GRD, MGR_REP, "high", "init-high-pred", rm, highPredVars, exportMST);
+            //    break;
+
             case CUSTOM_2:
-               rm = new ResultsManager(sce.getInputFileName());
-               exportMST = true;
-               // 1 - low [RF]
-               readInputParameters(sce.getInputFileName() + "_low", false);
-               sce.setObjFunc(MGR_REP);
-               outputFileName = pm.getGraphName() + "_" + RF + "_" + sce.getObjFunc();
-               Auxiliary.removeCapacityOfCloudServers(pm); // constraint to only edge
-               VariablesAlg initVars = LauncherAlg.run(pm, sce, rm, null, outputFileName, exportMST);
-               initModel = rm.loadModel(
-                     Auxiliary.getResourcesPath(outputFileName + ".mst", rm.getResultsFolder()) + outputFileName, pm,
-                     sce, true); // load low model from file as GRBModel
-               Auxiliary.restoreCapacityOfCloudServers(pm); // remove constraint only edge
-
-               // ******** LP ******** //
-               // 2 - high [LP][MGR/REP/MGR-REP][init-low]
-               runCustomLP(sce, MGR, "high", "init-low", rm, initModel, exportMST);
-               runCustomLP(sce, REP, "high", "init-low", rm, initModel, exportMST);
-               runCustomLP(sce, MGR_REP, "high", "init-low", rm, initModel, exportMST);
-
-               // 3 - high-pred [LP][MGR][init-low]
-               GRBModel highPredMgrModel = runCustomLP(sce, MGR, "high-pred", "init-low", rm, initModel, exportMST);
-               // 3 - high [LP][MGR][init-high-pred]
-               runCustomLP(sce, MGR, "high", "init-high-pred", rm, highPredMgrModel, exportMST);
-
-               // 4 - high-pred [LP][REP][init-low]
-               GRBModel highPredRepModel = runCustomLP(sce, REP, "high-pred", "init-low", rm, initModel, exportMST);
-               // 4 - high [LP][REP][init-high-pred]
-               runCustomLP(sce, REP, "high", "init-high-pred", rm, highPredRepModel, exportMST);
-
-               // 5 - high-pred [LP][MGR-REP][init-low]
-               GRBModel highPredMgrRepModel = runCustomLP(sce, MGR_REP, "high-pred", "init-low", rm, initModel,
-                     exportMST);
-               // 5 - high traffic [LP][MGR-REP][init-high-pred]
-               runCustomLP(sce, MGR_REP, "high", "init-high-pred", rm, highPredMgrRepModel, exportMST);
-
-               // ******** ALG ******** //
-               // 2 - high [FF][MGR_REP][init-low]
-               runCustomAlg(sce, FF, MGR_REP, "high", "init-low", rm, initVars, exportMST);
-               // 2 - high [RF][MGR_REP][init-low]
-               for (int i = 0; i < 10; i++)
-                  runCustomAlg(sce, RF, MGR_REP, "high", "init-low_" + i, rm, initVars, exportMST);
-               // 2 - high [GRD][MGR_REP][init-low]
-               runCustomAlg(sce, GRD, MGR_REP, "high", "init-low", rm, initVars, exportMST);
-
-               // 3 - high-pred [FF][MGR_REP][init-low]
-               VariablesAlg highPredVars = runCustomAlg(sce, FF, MGR_REP, "high-pred", "init-low", rm, initVars,
-                     exportMST);
-               // 3 - high [FF][MGR_REP][init-high-pred]
-               highPredVars = new VariablesAlg(pm, highPredVars);
-               runCustomAlg(sce, FF, MGR_REP, "high", "init-high-pred", rm, highPredVars, exportMST);
-               for (int i = 0; i < 10; i++) {
-                  // 3 - high-pred [RF][MGR_REP][init-low]
-                  highPredVars = runCustomAlg(sce, RF, MGR_REP, "high-pred", "init-low_" + i, rm, initVars, exportMST);
-                  // 3 - high [RF][MGR_REP][init-high-pred]
-                  highPredVars = new VariablesAlg(pm, highPredVars);
-                  runCustomAlg(sce, RF, MGR_REP, "high", "init-high-pred_" + i, rm, highPredVars, exportMST);
-               }
-               // 3 - high-pred [GRD][MGR_REP][init-low]
-               highPredVars = runCustomAlg(sce, GRD, MGR_REP, "high-pred", "init-low", rm, initVars, exportMST);
-               // 3 - high [GRD][MGR_REP][init-high-pred]
-               highPredVars = new VariablesAlg(pm, highPredVars);
-               runCustomAlg(sce, GRD, MGR_REP, "high", "init-high-pred", rm, highPredVars, exportMST);
-               break;
-
-            case CUSTOM_3:
                rm = new ResultsManager(sce.getInputFileName());
                exportMST = false;
 
                // 1 - init-low [LP][MGR-REP][null]
-               GRBModel initLow = runCustomLP(sce, MGR_REP, LOW, NULL_STRING, rm, null, exportMST);
-               VariablesAlg initLowAsVarsAlg = new VariablesAlg(pm, initLow);
+               GRBModel initLowLP = runCustomLP(sce, MGR_REP, LOW, NULL_STRING, rm, null, exportMST);
                // 2 - high [LP][MGR/REP/MGR-REP][init-low]
-               runCustomLP(sce, MGR, HIGH, INIT_LOW, rm, initLow, exportMST);
-               runCustomLP(sce, REP, HIGH, INIT_LOW, rm, initLow, exportMST);
-               runCustomLP(sce, MGR_REP, HIGH, INIT_LOW, rm, initLow, exportMST);
-               // 3 - high [FF/RF/GRD][MGR-REP][init-low]
-               runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowAsVarsAlg, exportMST);
-               for (int i = 0; i < 10; i++)
-                  runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_LOW + "_" + i, rm, initLowAsVarsAlg, exportMST);
-               runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_LOW, rm, initLowAsVarsAlg, exportMST);
+               runCustomLP(sce, MGR, HIGH, INIT_LOW, rm, initLowLP, exportMST);
+               runCustomLP(sce, REP, HIGH, INIT_LOW, rm, initLowLP, exportMST);
+               runCustomLP(sce, MGR_REP, HIGH, INIT_LOW, rm, initLowLP, exportMST);
+               // 3 - init-high-pred [LP][MGR-REP][null]
+               GRBModel initHighPredLP = runCustomLP(sce, MGR_REP, HIGH_PRED, NULL_STRING, rm, null, exportMST);
+               // 4 - high [LP][MGR/REP/MGR-REP][init-high-pred]
+               runCustomLP(sce, MGR, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST);
+               runCustomLP(sce, REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST);
+               runCustomLP(sce, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST);
 
-               // 1 - init-high-pred [LP][MGR-REP][null]
-               GRBModel initHighPred = runCustomLP(sce, MGR_REP, HIGH_PRED, NULL_STRING, rm, null, exportMST);
-               VariablesAlg initHighPredAsVarsAlg = new VariablesAlg(pm, initHighPred);
-               // 2 - high [LP][MGR/REP/MGR-REP][init-high-pred]
-               runCustomLP(sce, MGR, HIGH, INIT_HIGH_PRED, rm, initHighPred, exportMST);
-               runCustomLP(sce, REP, HIGH, INIT_HIGH_PRED, rm, initHighPred, exportMST);
-               runCustomLP(sce, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPred, exportMST);
-               // 3 - high [FF/RF/GRD][MGR-REP][init-high-pred]
-               runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredAsVarsAlg, exportMST);
+               // 1 - init-low [FF][MGR-REP][null]
+               VariablesAlg initLowFF = runCustomAlg(sce, FF, MGR_REP, LOW, NULL_STRING, rm, null, exportMST);
+               // 2 - high [FF][MGR-REP][init-low]
+               runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowFF, exportMST);
+               // 3 - init-high-pred [FF][MGR-REP][null]
+               VariablesAlg initHighPredFF = runCustomAlg(sce, FF, MGR_REP, HIGH_PRED, NULL_STRING, rm, null, exportMST);
+               // 4 - high [FF][MGR-REP][init-high-pred]
+               runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredFF, exportMST);
+
+               // 1 - init-low [RF][MGR-REP][null]
+               VariablesAlg initLowRF = runCustomAlg(sce, RF, MGR_REP, LOW, NULL_STRING, rm, null, exportMST);
+               // 2 - high [RF][MGR-REP][init-low]
                for (int i = 0; i < 10; i++)
-                  runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_HIGH_PRED + "_" + i, rm, initHighPredAsVarsAlg, exportMST);
-               runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredAsVarsAlg, exportMST);
+                  runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_LOW + "_" + i, rm, initLowRF, exportMST);
+               // 3 - init-high-pred [RF][MGR-REP][null]
+               VariablesAlg initHighPredRF = runCustomAlg(sce, RF, MGR_REP, HIGH_PRED, NULL_STRING, rm, null, exportMST);
+               // 4 - high [RF][MGR-REP][init-high-pred]
+               for (int i = 0; i < 10; i++)
+                  runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_HIGH_PRED + "_" + i, rm, initHighPredRF, exportMST);
+
+               // 1 - init-low [GRD][MGR-REP][null]
+               VariablesAlg initLowGRD = runCustomAlg(sce, GRD, MGR_REP, LOW, NULL_STRING, rm, null, exportMST);
+               // 2 - high [GRD][MGR-REP][init-low]
+               runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_LOW, rm, initLowGRD, exportMST);
+               // 3 - init-high-pred [GRD][MGR-REP][null]
+               VariablesAlg initHighPredGRD = runCustomAlg(sce, GRD, MGR_REP, HIGH_PRED, NULL_STRING, rm, null, exportMST);
+               // 4 - high [GRD][MGR-REP][init-high-pred]
+               runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredGRD, exportMST);
+
                break;
 
             default:
@@ -282,6 +299,10 @@ public class Manager {
       readInputParameters(sce.getInputFileName() + "_" + inputFileExtension, false);
       sce.setName(alg);
       sce.setObjFunc(objFunc);
+      if (initPlacementVars == null)
+         Auxiliary.removeCapacityOfCloudServers(pm); // constraint to only edge
+      else
+         Auxiliary.restoreCapacityOfCloudServers(pm); // remove constraint to only edge
       String outputFileName = pm.getGraphName() + "_" + alg + "_" + sce.getObjFunc() + "_" + outputFileExtension;
       return LauncherAlg.run(pm, sce, resultsManager, initPlacementVars, outputFileName, exportMST);
    }

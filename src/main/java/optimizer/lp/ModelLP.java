@@ -115,19 +115,20 @@ public class ModelLP {
 
    public GRBLinExpr numMigrations(double weight, boolean[][][] initialPlacement) {
       GRBLinExpr expr = new GRBLinExpr();
-      try {
-         for (int x = 0; x < pm.getServers().size(); x++) {
-            for (int s = 0; s < pm.getServices().size(); s++)
-               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
-                  if (initialPlacement[x][s][v]) {
-                     expr.addConstant(weight);
-                     expr.addTerm(-weight, vars.fXSV[x][s][v]);
+      if (initialPlacement != null)
+         try {
+            for (int x = 0; x < pm.getServers().size(); x++) {
+               for (int s = 0; s < pm.getServices().size(); s++)
+                  for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                     if (initialPlacement[x][s][v]) {
+                        expr.addConstant(weight);
+                        expr.addTerm(-weight, vars.fXSV[x][s][v]);
+                     }
                   }
-               }
+            }
+         } catch (Exception e) {
+            printLog(log, ERROR, e.getMessage());
          }
-      } catch (Exception e) {
-         printLog(log, ERROR, e.getMessage());
-      }
       return expr;
    }
 
@@ -221,7 +222,7 @@ public class ModelLP {
                   }
                }
             }
-            if (Manager.isInterrupted()){
+            if (Manager.isInterrupted()) {
                grbModel.terminate();
                Manager.reset();
             }
