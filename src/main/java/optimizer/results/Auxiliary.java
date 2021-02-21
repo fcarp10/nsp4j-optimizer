@@ -355,4 +355,19 @@ public class Auxiliary {
          if (pm.getServers().get(i).getParent().getAttribute(NODE_CLOUD) != null)
             pm.getServers().get(i).setCapacity((int) pm.getAux().get(CLOUD_SERVER_CAPACITY));
    }
+
+   public static void removeCapacityOfCloudLinks(Parameters pm) {
+      for (int i = 0; i < pm.getLinks().size(); i++)
+         if (pm.getLinks().get(i).getSourceNode().getAttribute(NODE_CLOUD) != null
+               || pm.getLinks().get(i).getTargetNode().getAttribute(NODE_CLOUD) != null)
+            pm.getLinks().get(i).setAttribute(LINK_CAPACITY, 1);
+   }
+
+   public static void restoreCapacityOfCloudLinks(Parameters pm) {
+      for (int i = 0; i < pm.getLinks().size(); i++)
+         if (pm.getLinks().get(i).getSourceNode().getAttribute(NODE_CLOUD) != null
+               || pm.getLinks().get(i).getTargetNode().getAttribute(NODE_CLOUD) != null)
+            pm.getLinks().get(i).setAttribute(LINK_CAPACITY, (int) pm.getAux().get(CLOUD_LINK_CAPACITY));
+
+   }
 }

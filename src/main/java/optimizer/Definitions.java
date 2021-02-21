@@ -114,6 +114,7 @@ public class Definitions {
    public static final String LINK_DELAY = "delay";
    public static final String LINK_DISTANCE = "distance";
    public static final String LINK_CLOUD = "link_cloud";
+   public static final String CLOUD_LINK_CAPACITY = "cloud_link_capacity";
 
    // Aux parameters
    public static final String INITIAL_TRAFFIC_LOAD = "initial_traffic_load";
@@ -123,6 +124,7 @@ public class Definitions {
    public static final String SERVERS_WEIGHT = "servers_weight";
    public static final String MAXU_WEIGHT = "maxU_weight";
    public static final String DIRECTED_EDGES = "directed_edges";
+   public static final String ALL_NODES_TO_CLOUD = "all_nodes_to_cloud";
    public static final String SCENARIOS_PATH = "scenarios";
 
    // GUI parameters

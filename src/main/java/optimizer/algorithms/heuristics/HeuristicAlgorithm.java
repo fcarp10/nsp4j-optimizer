@@ -30,7 +30,7 @@ public class HeuristicAlgorithm {
     protected Map<String, Integer> pathsIncumbent;
 
     public HeuristicAlgorithm(Parameters pm, VariablesAlg vars, NetworkManager networkManager) {
-        rnd = new Random(pm.getSeed());
+        rnd = new Random();
         this.networkManager = networkManager;
         this.pm = pm;
         this.vars = vars;
