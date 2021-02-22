@@ -3,6 +3,7 @@ aux:
   cloud_num_servers: 1
   cloud_server_capacity: 1000000
   directed_edges: false
+  all_nodes_to_cloud: true
   gap: 0.0
   link_capacity: 5000
   num_servers_node: 8

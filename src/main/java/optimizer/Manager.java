@@ -170,14 +170,14 @@ public class Manager {
                VariablesAlg initHighPredLPAlg = new VariablesAlg(pm, initHighPredLP);
                edgeOnly = false;
 
-               // 3 - high [LP][MGR/REP/MGR-REP][init-low]
-               runCustomLP(sce, MGR, HIGH, INIT_LOW, rm, initLowLP, exportMST, edgeOnly);
-               runCustomLP(sce, REP, HIGH, INIT_LOW, rm, initLowLP, exportMST, edgeOnly);
-               runCustomLP(sce, MGR_REP, HIGH, INIT_LOW, rm, initLowLP, exportMST, edgeOnly);
-               // 3 - high [LP][MGR/REP/MGR-REP][init-high-pred]
-               runCustomLP(sce, MGR, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, edgeOnly);
-               runCustomLP(sce, REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, edgeOnly);
-               runCustomLP(sce, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, edgeOnly);
+               // // 3 - high [LP][MGR/REP/MGR-REP][init-low]
+               // runCustomLP(sce, MGR, HIGH, INIT_LOW, rm, initLowLP, exportMST, edgeOnly);
+               // runCustomLP(sce, REP, HIGH, INIT_LOW, rm, initLowLP, exportMST, edgeOnly);
+               // runCustomLP(sce, MGR_REP, HIGH, INIT_LOW, rm, initLowLP, exportMST, edgeOnly);
+               // // 3 - high [LP][MGR/REP/MGR-REP][init-high-pred]
+               // runCustomLP(sce, MGR, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, edgeOnly);
+               // runCustomLP(sce, REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, edgeOnly);
+               // runCustomLP(sce, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, edgeOnly);
 
                // 4 - high [FF][MGR-REP][init-low]
                runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, edgeOnly);

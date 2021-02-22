@@ -12,7 +12,7 @@ aux: {
   "all_nodes_to_cloud": true,
   "num_servers_node": 1,
   "cloud_num_servers": 1,
-  "service_length": [9],
+  "service_length": [6],
   "services": [1]
 }
 # service definitions

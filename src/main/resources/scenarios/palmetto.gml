@@ -389,7 +389,7 @@ graph [
   ]
   node [
     id 45
-    label "Wilmington"
+    label "Cloud Node"
     Country "United States"
     node_cloud true
     Longitude -77.68
@@ -745,70 +745,5 @@ graph [
     source 43
     target 44
     id "e12"
-  ]
-  edge [
-    source 42
-    target 45
-    id "e100"
-  ]
-  edge [
-    source 37
-    target 45
-    id "e101"
-  ]
-  edge [
-    source 33
-    target 45
-    id "e102"
-  ]
-  edge [
-    source 12
-    target 45
-    id "e103"
-  ]
-  edge [
-    source 34
-    target 45
-    id "e190"
-  ]
-  edge [
-    source 36
-    target 45
-    id "e104"
-  ]
-  edge [
-    source 21
-    target 45
-    id "e105"
-  ]
-  edge [
-    source 24
-    target 45
-    id "e200"
-  ]
-  edge [
-    source 17
-    target 45
-    id "e106"
-  ]
-  edge [
-    source 7
-    target 45
-    id "e107"
-  ]
-  edge [
-    source 27
-    target 45
-    id "e108"
-  ]
-  edge [
-    source 39
-    target 45
-    id "e210"
-  ]
-  edge [
-    source 5
-    target 45
-    id "e220"
   ]
 ]
