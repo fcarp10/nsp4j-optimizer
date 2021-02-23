@@ -694,7 +694,7 @@ public class Results {
       return computationTime;
    }
 
-   public void setComputationTime(double computationTime) {
+   public void setComputationTime(long computationTime) {
       this.computationTime = computationTime;
    }
 

@@ -15,6 +15,9 @@ import org.slf4j.LoggerFactory;
 import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.printLog;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class LauncherLP {
 
    private static final Logger log = LoggerFactory.getLogger(LauncherLP.class);
@@ -33,14 +36,14 @@ public class LauncherLP {
       GRBLinExpr expr = generateExprForObjectiveFunction(pm, modelLP, sce.getObjFunc(), initialPlacement);
       modelLP.setObjectiveFunction(expr, sce.isMaximization());
       printLog(log, INFO, "running model");
-      long startTime = System.nanoTime();
+      LocalDateTime startTime = LocalDateTime.now();
       Double objVal = modelLP.run();
-      long elapsedTime = System.nanoTime() - startTime;
+      Duration durationComputation = Duration.between(startTime, LocalDateTime.now());
       Results results;
       if (objVal != null) {
          Auxiliary.printLog(log, INFO, "generating results...");
          results = generateResults(pm, modelLP, sce, initialPlacement);
-         results.setComputationTime((double) elapsedTime / 1000000000);
+         results.setComputationTime((long) durationComputation.getSeconds());
          resultsManager.exportJsonObject(outputFileName, results);
          if (exportMST)
             resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
