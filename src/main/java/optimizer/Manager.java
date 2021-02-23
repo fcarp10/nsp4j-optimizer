@@ -199,6 +199,38 @@ public class Manager {
 
                break;
 
+            case CUSTOM_3:
+               rm = new ResultsManager(sce.getInputFileName());
+               exportMST = false;
+
+               edgeOnly = true;
+               // 1 - init-low [GRD][MGR-REP][null]
+               initLowLPAlg = runCustomAlg(sce, GRD, MGR_REP, LOW, NULL_STRING, rm, null, exportMST, edgeOnly);
+               // 2 - init-high-pred [GRD][MGR-REP][null]
+               initHighPredLPAlg = runCustomAlg(sce, GRD, MGR_REP, HIGH_PRED, NULL_STRING, rm, null, exportMST,
+                     edgeOnly);
+               edgeOnly = false;
+
+               // 4 - high [FF][MGR-REP][init-low]
+               runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, edgeOnly);
+               // 4 - high [FF][MGR-REP][init-high-pred]
+               runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, edgeOnly);
+
+               // 5 - high [RF][MGR-REP][init-low]
+               for (int i = 0; i < 10; i++)
+                  runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_LOW + "_" + i, rm, initLowLPAlg, exportMST, edgeOnly);
+               // 5 - high [RF][MGR-REP][init-high-pred]
+               for (int i = 0; i < 10; i++)
+                  runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_HIGH_PRED + "_" + i, rm, initHighPredLPAlg, exportMST,
+                        edgeOnly);
+
+               // 6 - high [GRD][MGR-REP][init-low]
+               runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, edgeOnly);
+               // 6 - high [GRD][MGR-REP][init-high-pred]
+               runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, edgeOnly);
+
+               break;
+
             default:
                printLog(log, INFO, "no algorithm selected");
                break;
