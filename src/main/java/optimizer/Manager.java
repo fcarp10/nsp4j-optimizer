@@ -38,12 +38,14 @@ public class Manager {
       }
       String[] extensions = new String[] { ".dgs", ".gml" };
       boolean isLoaded = false;
-      for (int i = 0; i < extensions.length; i++)
+      for (int i = 0; i < extensions.length; i++){
          if (pm.initialize(rootPath + graphName[0] + extensions[i], rootPath + graphName[0] + ".txt",
                (boolean) pm.getAux(DIRECTED_EDGES), (boolean) pm.getAux(ALL_NODES_TO_CLOUD))) {
             isLoaded = true;
             break;
          }
+         printLog(log, WARNING, graphName[0] + extensions[i] + " file not found");
+      }
       if (!isLoaded) {
          printLog(log, ERROR, "error loading graph or paths files");
          return null;
