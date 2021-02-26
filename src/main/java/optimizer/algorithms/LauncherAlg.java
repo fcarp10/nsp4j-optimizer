@@ -37,7 +37,7 @@ public class LauncherAlg {
       Auxiliary.printLog(log, INFO, "finished [" + Auxiliary.roundDouble(vars.objVal, 4) + "]");
       Auxiliary.printLog(log, INFO, "generating results...");
       Results results = generateResults(pm, sce, vars, vars.fXSVinitial);
-      results.setComputationTime((double) elapsedTime / 1000000000);
+      results.setComputationTime((long) elapsedTime / 1000000000);
       resultsManager.exportJsonObject(outputFileName, results);
       if (printMST)
          exportResultsToMST(pm, resultsManager, outputFileName, vars);
