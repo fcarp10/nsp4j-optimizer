@@ -44,6 +44,7 @@ public class HeuristicAlgorithm {
                 if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
                     allocateDemand(algorithm, s, d);
             networkManager.addSyncTraffic(s);
+            Auxiliary.showLogProgress(log, s + 1, pm.getServices().size());
         }
     }
 
@@ -65,12 +66,14 @@ public class HeuristicAlgorithm {
         }
 
         orderByValue(orderedServicesByDemands, Comparator.naturalOrder());
-
+        int i = 0;
         for (Map.Entry<Integer, Integer> entry : orderedServicesByDemands.entrySet()) {
             int s = entry.getKey();
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                 allocateDemandGreedy(algorithm, s, d);
             networkManager.addSyncTraffic(s);
+            i++;
+            Auxiliary.showLogProgress(log, i, pm.getServices().size());
         }
     }
 

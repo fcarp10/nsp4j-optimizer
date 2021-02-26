@@ -52,6 +52,7 @@ public class Manager {
       ResultsGUI.initialize(pm);
       printLog(log, INFO, "topology loaded");
       considerSubsetOfDemands(pm, considerSubsetOfDemands);
+      printLog(log, INFO, "traffic demands loaded");
       return graphName[0];
    }
 
@@ -209,8 +210,8 @@ public class Manager {
                // 2 - init-high-pred [GRD][MGR-REP][null]
                initHighPredLPAlg = runCustomAlg(sce, GRD, MGR_REP, HIGH_PRED, NULL_STRING, rm, null, exportMST,
                      edgeOnly);
-               edgeOnly = false;
 
+               edgeOnly = false;
                // 4 - high [FF][MGR-REP][init-low]
                runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, edgeOnly);
                // 4 - high [FF][MGR-REP][init-high-pred]

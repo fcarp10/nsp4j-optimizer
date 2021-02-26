@@ -370,4 +370,18 @@ public class Auxiliary {
             pm.getLinks().get(i).setAttribute(LINK_CAPACITY, (int) pm.getAux().get(CLOUD_LINK_CAPACITY));
 
    }
+
+   public static void showLogProgress(Logger log, int s, int totalServices) {
+      int threshold = Math.round(totalServices / 5);
+      if (s == threshold)
+         printLog(log, INFO, "20% completed");
+      if (s == threshold * 2)
+         printLog(log, INFO, "40% completed");
+      if (s == threshold * 3)
+         printLog(log, INFO, "60% completed");
+      if (s == threshold * 4)
+         printLog(log, INFO, "80% completed");
+      if (s == threshold * 5)
+         printLog(log, INFO, "100% completed");
+   }
 }
