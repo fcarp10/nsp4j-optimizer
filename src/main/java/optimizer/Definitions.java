@@ -30,6 +30,8 @@ public class Definitions {
    public static final String LOW = "low";
    public static final String INIT_LOW = "init-low";
    public static final String INIT_HIGH_PRED = "init-high-pred";
+   public static final String HIGH_MAN = "high-man";
+   public static final String INIT_HIGH_MAN = "init-high-man";
    public static final String NULL_STRING = "";
 
    // general variables
