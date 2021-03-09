@@ -58,62 +58,67 @@ public class LauncherLP {
       GRBLinExpr expr = new GRBLinExpr();
       double serversWeight, linksWeight;
       switch (objectiveFunction) {
-         case DIMEN:
-            expr.add(modelLP.dimensioningExpr());
-            break;
-         case NUM_SERVERS:
-            expr.add(modelLP.numUsedServersExpr());
-            break;
-         case NUM_SERVERS_AND_UTIL_COSTS:
-            expr.add(modelLP.numUsedServersExpr());
-            serversWeight = 1.0 / pm.getServers().size();
-            expr.add(modelLP.serverCostsExpr(serversWeight));
-            break;
-         case UTIL_COSTS:
-            linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
-            serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
-            expr.add(modelLP.linkCostsExpr(linksWeight));
-            expr.add(modelLP.serverCostsExpr(serversWeight));
-            break;
-         case UTIL_COSTS_AND_MAX_UTIL:
-            linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
-            serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
-            expr.add(modelLP.linkUtilizationExpr(linksWeight));
-            expr.add(modelLP.serverUtilizationExpr(serversWeight));
-            expr.add(modelLP.maxUtilizationExpr((double) pm.getAux().get(MAXU_WEIGHT)));
-            break;
-         case UTILIZATION:
-            linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
-            serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
-            expr.add(modelLP.linkUtilizationExpr(linksWeight));
-            expr.add(modelLP.serverUtilizationExpr(serversWeight));
-            break;
-         case OPEX_SERVERS:
-            expr.add(modelLP.opexServersExpr());
-            break;
-         case FUNCTIONS_CHARGES:
-            expr.add(modelLP.functionsChargesExpr());
-            break;
-         case QOS_PENALTIES:
-            expr.add(modelLP.qosPenaltiesExpr());
-            break;
-         case ALL_MONETARY_COSTS:
-            expr.add(modelLP.opexServersExpr());
-            expr.add(modelLP.functionsChargesExpr());
-            expr.add(modelLP.qosPenaltiesExpr());
-            break;
-         case MGR:
-            expr.add(modelLP.numMigrations(1.0, initialPlacement));
-            expr.add(modelLP.numReplications(0.001));
-            break;
-         case REP:
-            expr.add(modelLP.numReplications(1.0));
-            expr.add(modelLP.numMigrations(0.001, initialPlacement));
-            break;
-         case MGR_REP:
-            expr.add(modelLP.numMigrations(1.0, initialPlacement));
-            expr.add(modelLP.numReplications(1.0));
-            break;
+      case DIMEN:
+         expr.add(modelLP.dimensioningExpr());
+         break;
+      case NUM_SERVERS:
+         expr.add(modelLP.numUsedServersExpr());
+         break;
+      case NUM_SERVERS_AND_UTIL_COSTS:
+         expr.add(modelLP.numUsedServersExpr());
+         serversWeight = 1.0 / pm.getServers().size();
+         expr.add(modelLP.serverCostsExpr(serversWeight));
+         break;
+      case UTIL_COSTS:
+         linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
+         serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
+         expr.add(modelLP.linkCostsExpr(linksWeight));
+         expr.add(modelLP.serverCostsExpr(serversWeight));
+         break;
+      case UTIL_COSTS_AND_MAX_UTIL:
+         linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
+         serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
+         expr.add(modelLP.linkUtilizationExpr(linksWeight));
+         expr.add(modelLP.serverUtilizationExpr(serversWeight));
+         expr.add(modelLP.maxUtilizationExpr((double) pm.getAux().get(MAXU_WEIGHT)));
+         break;
+      case UTILIZATION:
+         linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
+         serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
+         expr.add(modelLP.linkUtilizationExpr(linksWeight));
+         expr.add(modelLP.serverUtilizationExpr(serversWeight));
+         break;
+      case OPEX_SERVERS:
+         expr.add(modelLP.opexServersExpr());
+         break;
+      case FUNCTIONS_CHARGES:
+         expr.add(modelLP.functionsChargesExpr());
+         break;
+      case QOS_PENALTIES:
+         expr.add(modelLP.qosPenaltiesExpr());
+         break;
+      case ALL_MONETARY_COSTS:
+         expr.add(modelLP.opexServersExpr());
+         expr.add(modelLP.functionsChargesExpr());
+         expr.add(modelLP.qosPenaltiesExpr());
+         break;
+      case MGR:
+         expr.add(modelLP.numMigrations(1.0, initialPlacement));
+         expr.add(modelLP.numReplications(0.001));
+         break;
+      case REP:
+         expr.add(modelLP.numReplications(1.0));
+         expr.add(modelLP.numMigrations(0.001, initialPlacement));
+         break;
+      case MGR_REP:
+         expr.add(modelLP.numMigrations(1.0, initialPlacement));
+         expr.add(modelLP.numReplications(1.0));
+         break;
+      case UTILIZATION_AND_CLOUD:
+         serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
+         expr.add(modelLP.serverUtilizationExpr(serversWeight));
+         expr.add(modelLP.numUsedServersCloudExpr());
+         break;
       }
       return expr;
    }

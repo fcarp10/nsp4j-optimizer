@@ -15,6 +15,7 @@ public class Definitions {
    public static final String MGR = "MGR";
    public static final String REP = "REP";
    public static final String MGR_REP = "MGR_REP";
+   public static final String UTILIZATION_AND_CLOUD = "UTILIZATION_AND_CLOUD";
 
    // scenarios
    public static final String LP = "LP";
