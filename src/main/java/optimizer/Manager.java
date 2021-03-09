@@ -161,59 +161,61 @@ public class Manager {
          case CUSTOM_2:
             rm = new ResultsManager(sce.getInputFileName());
             exportMST = false;
-            boolean edgeOnly;
+            boolean firstPlace;
 
-            edgeOnly = true;
+            firstPlace = true;
             // 1 - init-low [LP][MGR-REP][null]
-            GRBModel initLowLP = runCustomLP(sce, NUM_SERVERS, LOW, NULL_STRING, rm, null, exportMST, edgeOnly);
+            GRBModel initLowLP = runCustomLP(sce, UTILIZATION_AND_CLOUD, LOW, NULL_STRING, rm, null, exportMST,
+                  firstPlace);
             VariablesAlg initLowLPAlg = new VariablesAlg(pm, initLowLP);
             // 2 - init-high-pred [LP][MGR-REP][null]
-            GRBModel initHighPredLP = runCustomLP(sce, NUM_SERVERS, HIGH_PRED, NULL_STRING, rm, null, exportMST,
-                  edgeOnly);
+            GRBModel initHighPredLP = runCustomLP(sce, UTILIZATION_AND_CLOUD, HIGH_PRED, NULL_STRING, rm, null,
+                  exportMST, firstPlace);
             VariablesAlg initHighPredLPAlg = new VariablesAlg(pm, initHighPredLP);
             // 3 - init-high-pred [LP][MGR-REP][null]
-            GRBModel initHighManLP = runCustomLP(sce, NUM_SERVERS, HIGH_MAN, NULL_STRING, rm, null, exportMST,
-                  edgeOnly);
+            GRBModel initHighManLP = runCustomLP(sce, UTILIZATION_AND_CLOUD, HIGH_MAN, NULL_STRING, rm, null, exportMST,
+                  firstPlace);
             VariablesAlg initHighManLPAlg = new VariablesAlg(pm, initHighManLP);
 
-            edgeOnly = false;
+            firstPlace = false;
             // 1 - high [LP][MGR/REP/MGR-REP][init-low]
-            runCustomLP(sce, MGR, HIGH, INIT_LOW, rm, initLowLP, exportMST, edgeOnly);
-            runCustomLP(sce, REP, HIGH, INIT_LOW, rm, initLowLP, exportMST, edgeOnly);
-            runCustomLP(sce, MGR_REP, HIGH, INIT_LOW, rm, initLowLP, exportMST, edgeOnly);
+            runCustomLP(sce, MGR, HIGH, INIT_LOW, rm, initLowLP, exportMST, firstPlace);
+            runCustomLP(sce, REP, HIGH, INIT_LOW, rm, initLowLP, exportMST, firstPlace);
+            runCustomLP(sce, MGR_REP, HIGH, INIT_LOW, rm, initLowLP, exportMST, firstPlace);
             // 2 - high [LP][MGR/REP/MGR-REP][init-high-pred]
-            runCustomLP(sce, MGR, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, edgeOnly);
-            runCustomLP(sce, REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, edgeOnly);
-            runCustomLP(sce, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, edgeOnly);
+            runCustomLP(sce, MGR, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, firstPlace);
+            runCustomLP(sce, REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, firstPlace);
+            runCustomLP(sce, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLP, exportMST, firstPlace);
             // 3 - high [LP][MGR/REP/MGR-REP][init-high-man]
-            runCustomLP(sce, MGR, HIGH, INIT_HIGH_MAN, rm, initHighManLP, exportMST, edgeOnly);
-            runCustomLP(sce, REP, HIGH, INIT_HIGH_MAN, rm, initHighManLP, exportMST, edgeOnly);
-            runCustomLP(sce, MGR_REP, HIGH, INIT_HIGH_MAN, rm, initHighManLP, exportMST, edgeOnly);
+            runCustomLP(sce, MGR, HIGH, INIT_HIGH_MAN, rm, initHighManLP, exportMST, firstPlace);
+            runCustomLP(sce, REP, HIGH, INIT_HIGH_MAN, rm, initHighManLP, exportMST, firstPlace);
+            runCustomLP(sce, MGR_REP, HIGH, INIT_HIGH_MAN, rm, initHighManLP, exportMST, firstPlace);
 
             // 1 - high [FF][MGR-REP][init-low]
-            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, firstPlace);
             // 2 - high [FF][MGR-REP][init-high-pred]
-            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, firstPlace);
             // 3 - high [FF][MGR-REP][init-high-man]
-            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_MAN, rm, initHighManLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_MAN, rm, initHighManLPAlg, exportMST, firstPlace);
 
             // 1 - high [RF][MGR-REP][init-low]
             for (int i = 0; i < 10; i++)
-               runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_LOW + "_" + i, rm, initLowLPAlg, exportMST, edgeOnly);
+               runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_LOW + "_" + i, rm, initLowLPAlg, exportMST, firstPlace);
             // 2 - high [RF][MGR-REP][init-high-pred]
             for (int i = 0; i < 10; i++)
                runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_HIGH_PRED + "_" + i, rm, initHighPredLPAlg, exportMST,
-                     edgeOnly);
+                     firstPlace);
             // 3 - high [RF][MGR-REP][init-high-man]
             for (int i = 0; i < 10; i++)
-               runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_HIGH_MAN + "_" + i, rm, initHighManLPAlg, exportMST, edgeOnly);
+               runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_HIGH_MAN + "_" + i, rm, initHighManLPAlg, exportMST,
+                     firstPlace);
 
             // 1 - high [GRD][MGR-REP][init-low]
-            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, firstPlace);
             // 2 - high [GRD][MGR-REP][init-high-pred]
-            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, firstPlace);
             // 3 - high [GRD][MGR-REP][init-high-man]
-            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_MAN, rm, initHighManLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_MAN, rm, initHighManLPAlg, exportMST, firstPlace);
 
             break;
 
@@ -221,30 +223,31 @@ public class Manager {
             rm = new ResultsManager(sce.getInputFileName());
             exportMST = false;
 
-            edgeOnly = true;
+            firstPlace = true;
             // 1 - init-low [GRD][MGR-REP][null]
-            initLowLPAlg = runCustomAlg(sce, GRD, MGR_REP, LOW, NULL_STRING, rm, null, exportMST, edgeOnly);
+            initLowLPAlg = runCustomAlg(sce, GRD, MGR_REP, LOW, NULL_STRING, rm, null, exportMST, firstPlace);
             // 2 - init-high-pred [GRD][MGR-REP][null]
-            initHighPredLPAlg = runCustomAlg(sce, GRD, MGR_REP, HIGH_PRED, NULL_STRING, rm, null, exportMST, edgeOnly);
+            initHighPredLPAlg = runCustomAlg(sce, GRD, MGR_REP, HIGH_PRED, NULL_STRING, rm, null, exportMST,
+                  firstPlace);
 
-            edgeOnly = false;
+            firstPlace = false;
             // 1 - high [FF][MGR-REP][init-low]
-            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, firstPlace);
             // 2 - high [FF][MGR-REP][init-high-pred]
-            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, firstPlace);
 
             // 1 - high [RF][MGR-REP][init-low]
             for (int i = 0; i < 10; i++)
-               runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_LOW + "_" + i, rm, initLowLPAlg, exportMST, edgeOnly);
+               runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_LOW + "_" + i, rm, initLowLPAlg, exportMST, firstPlace);
             // 2 - high [RF][MGR-REP][init-high-pred]
             for (int i = 0; i < 10; i++)
                runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_HIGH_PRED + "_" + i, rm, initHighPredLPAlg, exportMST,
-                     edgeOnly);
+                     firstPlace);
 
             // 1 - high [GRD][MGR-REP][init-low]
-            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST, firstPlace);
             // 2 - high [GRD][MGR-REP][init-high-pred]
-            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, edgeOnly);
+            runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg, exportMST, firstPlace);
 
             break;
 
@@ -261,15 +264,18 @@ public class Manager {
 
    public static GRBModel runCustomLP(Scenario sce, String objFunc, String inputFileExtension,
          String outputFileExtension, ResultsManager resultsManager, GRBModel initPlacementModel, boolean exportMST,
-         boolean edgeOnly) throws GRBException {
+         boolean firstPlacement) throws GRBException {
       readInputParameters(sce.getInputFileName() + "_" + inputFileExtension, false);
       sce.setObjFunc(objFunc);
-      if (edgeOnly) {
-         sce.setConstraint(EDGE_ONLY, true);
-         Auxiliary.removeCapacityOfCloudLinks(pm);
+      sce.setConstraint(PATHS_SERVERS_CLOUD, true);
+      if (firstPlacement) {
+         sce.setConstraint(SINGLE_PATH, true);
+         // sce.setConstraint(EDGE_ONLY, true);
+         // Auxiliary.removeCapacityOfCloudLinks(pm);
       } else {
-         sce.setConstraint(EDGE_ONLY, false);
-         Auxiliary.restoreCapacityOfCloudLinks(pm);
+         sce.setConstraint(SINGLE_PATH, false);
+         // sce.setConstraint(EDGE_ONLY, false);
+         // Auxiliary.restoreCapacityOfCloudLinks(pm);
       }
       String outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_" + outputFileExtension;
       return LauncherLP.run(pm, sce, resultsManager, initPlacementModel, null, outputFileName, exportMST);

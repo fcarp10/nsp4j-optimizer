@@ -70,6 +70,8 @@ public class SpecificConstraints {
             forceSrcDst();
          if (sc.getConstraints().get(CONST_REP))
             constRep();
+         if (sc.getConstraints().get(PATHS_SERVERS_CLOUD))
+            constraintPathsServersCloud();
 
          // create link and server utilization expressions
          GRBLinExpr[] luExpr = createLinkUtilizationExpr(linkLoadExpr);
@@ -471,7 +473,7 @@ public class SpecificConstraints {
             modelLP.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, EDGE_ONLY);
    }
 
-   // Single path (mgr-only)
+   // Single path (no replicas)
    private void singlePath() throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++) {
          GRBLinExpr expr = new GRBLinExpr();
@@ -481,7 +483,7 @@ public class SpecificConstraints {
       }
    }
 
-   // Initial placement as constraints (rep-only)
+   // Initial placement as constraints (no migrations)
    private void setInitPlc(boolean[][][] initialPlacement) throws GRBException {
       if (initialPlacement != null) {
          for (int x = 0; x < pm.getServers().size(); x++)
@@ -490,6 +492,21 @@ public class SpecificConstraints {
                   if (initialPlacement[x][s][v])
                      modelLP.getGrbModel().addConstr(vars.fXSV[x][s][v], GRB.EQUAL, 1, SET_INIT_PLC);
       }
+   }
+
+   // Constraint paths servers cloud
+   private void constraintPathsServersCloud() throws GRBException {
+      for (int x = 0; x < pm.getServers().size(); x++)
+         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
+                  GRBLinExpr expr = new GRBLinExpr();
+                  for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
+                     if (pm.getServices().get(s).getTrafficFlow().getPaths().get(p)
+                           .contains(pm.getServers().get(x).getParent()))
+                        expr.addTerm(1.0, vars.zSP[s][p]);
+                  modelLP.getGrbModel().addConstr(expr, GRB.LESS_EQUAL, vars.fXSV[x][s][v], PATHS_SERVERS_CLOUD);
+               }
    }
 
    // Fix src-dst functions

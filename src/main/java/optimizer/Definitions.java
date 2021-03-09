@@ -77,6 +77,7 @@ public class Definitions {
    public static final String EDGE_ONLY = "edge_only";
    public static final String SINGLE_PATH = "single_path";
    public static final String SET_INIT_PLC = "set_init_plc";
+   public static final String PATHS_SERVERS_CLOUD = "paths_servers_cloud";
 
    // other constraints
    public static final String FORCE_SRC_DST = "force_src_dst";

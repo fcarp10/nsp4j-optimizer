@@ -45,6 +45,8 @@ public class Results {
    private double synchronizationTraffic;
    @JsonProperty("total_number_of_functions")
    private double totalNumberOfFunctions;
+   @JsonProperty("num_functions_cloud")
+   private double numFunctionsCloud;
    @JsonProperty("migrations")
    private Integer[] migrations;
    @JsonProperty("replications")
@@ -115,6 +117,7 @@ public class Results {
       migrations = countMigrations(initialPlacement);
       replications = countReplications();
       totalNumberOfFunctions = pm.getTotalNumFunctions();
+      numFunctionsCloud = countFunctionsInCloudServers();
       totalTraffic = calculateTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
       avgPathLength = Auxiliary.roundDouble(avgPathLength(), 2);
@@ -203,6 +206,23 @@ public class Results {
       }
       List<Integer> values = new ArrayList<>(replicationsMap.values());
       return values.<Integer>toArray(new Integer[0]);
+   }
+
+   private double countFunctionsInCloudServers() {
+      double numFunctionsCloud = 0;
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
+
+         for (int x = 0; x < pm.getServers().size(); x++)
+            if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+               for (int s = 0; s < pm.getServices().size(); s++)
+                  for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                     if (var[x][s][v])
+                        numFunctionsCloud++;
+      } catch (Exception e) {
+         printLog(log, ERROR, "counting num functions in cloud: " + e.getMessage());
+      }
+      return numFunctionsCloud;
    }
 
    private int calculateTotalTraffic() {
@@ -755,6 +775,10 @@ public class Results {
 
    public double getTotalNumberOfFunctions() {
       return totalNumberOfFunctions;
+   }
+
+   public double getNumFunctionsCloud() {
+      return numFunctionsCloud;
    }
 
    public List<GraphData> getLuGraph() {
