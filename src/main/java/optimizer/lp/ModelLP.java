@@ -55,11 +55,13 @@ public class ModelLP {
       return expr;
    }
 
-   public GRBLinExpr numUsedServersCloudExpr() {
+   public GRBLinExpr numFunctionsInCloudExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
-            expr.addTerm(1.0, vars.fX[x]);
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  expr.addTerm(weight, vars.fXSV[x][s][v]);
       return expr;
    }
 

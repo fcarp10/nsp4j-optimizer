@@ -125,4 +125,8 @@ public class ResultsManager {
    public String getResultsFolder() {
       return resultsFolder;
    }
+
+   public void setResultsFolder(String resultsFolder) {
+      this.resultsFolder = resultsFolder;
+   }
 }

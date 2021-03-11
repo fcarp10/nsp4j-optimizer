@@ -1,10 +1,10 @@
 # auxiliary parameters
 aux: {
-  "gap": 0.0,
+  "gap": 0.0001,
   "offset_results": 0,
   "x_scaling": 6000.0,
   "y_scaling": 6000.0,
-  "server_capacity": 2500,
+  "server_capacity": 1500,
   "link_capacity": 500,
   "cloud_server_capacity": 100000,
   "cloud_link_capacity": 100000,
@@ -12,7 +12,7 @@ aux: {
   "all_nodes_to_cloud": true,
   "num_servers_node": 1,
   "cloud_num_servers": 1,
-  "service_length": [10],
+  "service_length": [6],
   "services": [1]
 }
 # service definitions

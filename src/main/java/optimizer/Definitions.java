@@ -16,6 +16,8 @@ public class Definitions {
    public static final String REP = "REP";
    public static final String MGR_REP = "MGR_REP";
    public static final String UTILIZATION_AND_CLOUD = "UTILIZATION_AND_CLOUD";
+   public static final String NUM_SERVERS_AND_CLOUD = "NUM_SERVERS_AND_CLOUD";
+   public static final String MGR_REP_AND_CLOUD = "MGR_REP_AND_CLOUD";
 
    // scenarios
    public static final String LP = "LP";
@@ -87,6 +89,7 @@ public class Definitions {
    public static final String SERVICE_MIN_PATHS = "min_paths";
    public static final String SERVICE_MAX_PATHS = "max_paths";
    public static final String SERVICE_DOWNTIME = "downtime";
+   public static final String SERVICE_LENGTH = "service_length";
 
    // function parameters
    public static final String FUNCTION_REPLICABLE = "replicable";

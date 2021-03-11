@@ -117,7 +117,16 @@ public class LauncherLP {
       case UTILIZATION_AND_CLOUD:
          serversWeight = (double) 1.0 / pm.getServers().size();
          expr.add(modelLP.serverUtilizationExpr(-serversWeight));
-         expr.add(modelLP.numUsedServersCloudExpr());
+         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+         break;
+      case NUM_SERVERS_AND_CLOUD:
+         expr.add(modelLP.numUsedServersExpr());
+         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+         break;
+      case MGR_REP_AND_CLOUD:
+         expr.add(modelLP.numMigrations(1.0, initialPlacement));
+         expr.add(modelLP.numReplications(1.0));
+         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
          break;
       }
       return expr;
