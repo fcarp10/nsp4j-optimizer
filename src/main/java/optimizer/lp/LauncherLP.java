@@ -43,7 +43,7 @@ public class LauncherLP {
       if (objVal != null) {
          Auxiliary.printLog(log, INFO, "generating results...");
          results = generateResults(pm, modelLP, sce, initialPlacement);
-         results.setComputationTime((long) durationComputation.getSeconds());
+         results.setComputationTime((double) durationComputation.getSeconds());
          resultsManager.exportJsonObject(outputFileName, results);
          if (exportMST)
             resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
@@ -121,6 +121,16 @@ public class LauncherLP {
          break;
       case NUM_SERVERS_AND_CLOUD:
          expr.add(modelLP.numUsedServersExpr());
+         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+         break;
+      case MGR_AND_CLOUD:
+         expr.add(modelLP.numMigrations(1.0, initialPlacement));
+         expr.add(modelLP.numReplications(0.001));
+         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+         break;
+      case REP_AND_CLOUD:
+         expr.add(modelLP.numReplications(1.0));
+         expr.add(modelLP.numMigrations(0.001, initialPlacement));
          expr.add(modelLP.numFunctionsInCloudExpr(1.0));
          break;
       case MGR_REP_AND_CLOUD:

@@ -35,18 +35,12 @@ public class Results {
    private double objVal;
    @JsonProperty("computation_time")
    private double computationTime;
-   @JsonProperty("avg_path_length")
-   private double avgPathLength;
-   @JsonProperty("total_traffic")
-   private double totalTraffic;
-   @JsonProperty("traffic_on_links")
-   private double trafficLinks;
-   @JsonProperty("synchronization_traffic")
-   private double synchronizationTraffic;
-   @JsonProperty("total_number_of_functions")
-   private double totalNumberOfFunctions;
    @JsonProperty("num_functions_cloud")
    private double numFunctionsCloud;
+   @JsonProperty("total_num_functions_original")
+   private double totalNumFunctionsOriginal;
+   @JsonProperty("total_num_functions")
+   private double totalNumFunctions;
    @JsonProperty("migrations")
    private Integer[] migrations;
    @JsonProperty("replications")
@@ -59,6 +53,15 @@ public class Results {
    private double[] fpSummary;
    @JsonProperty("sd_summary")
    private double[] sdSummary;
+   @JsonProperty("avg_path_length")
+   private double avgPathLength;
+   @JsonProperty("total_traffic")
+   private double totalTraffic;
+   @JsonProperty("traffic_on_links")
+   private double trafficLinks;
+   @JsonProperty("synchronization_traffic")
+   private double synchronizationTraffic;
+
    @JsonProperty("variables")
    private LinkedHashMap<String, List<String>> variables;
    @JsonProperty("xu")
@@ -116,7 +119,8 @@ public class Results {
       // summary results
       migrations = countMigrations(initialPlacement);
       replications = countReplications();
-      totalNumberOfFunctions = pm.getTotalNumFunctions();
+      totalNumFunctionsOriginal = pm.getTotalNumFunctions();
+      totalNumFunctions = countFunctions();
       numFunctionsCloud = countFunctionsInCloudServers();
       totalTraffic = calculateTotalTraffic();
       trafficLinks = Auxiliary.roundDouble(trafficOnLinks(), 2);
@@ -208,11 +212,25 @@ public class Results {
       return values.<Integer>toArray(new Integer[0]);
    }
 
+   private double countFunctions() {
+      double numFunctions = 0;
+      try {
+         boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (var[x][s][v])
+                     numFunctions++;
+      } catch (Exception e) {
+         printLog(log, ERROR, "counting num functions: " + e.getMessage());
+      }
+      return numFunctions;
+   }
+
    private double countFunctionsInCloudServers() {
       double numFunctionsCloud = 0;
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
-
          for (int x = 0; x < pm.getServers().size(); x++)
             if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
                for (int s = 0; s < pm.getServices().size(); s++)
@@ -717,7 +735,7 @@ public class Results {
       return computationTime;
    }
 
-   public void setComputationTime(long computationTime) {
+   public void setComputationTime(double computationTime) {
       this.computationTime = computationTime;
    }
 
@@ -773,8 +791,8 @@ public class Results {
       return replications;
    }
 
-   public double getTotalNumberOfFunctions() {
-      return totalNumberOfFunctions;
+   public double getTotalNumFunctionsOriginal() {
+      return totalNumFunctionsOriginal;
    }
 
    public double getNumFunctionsCloud() {

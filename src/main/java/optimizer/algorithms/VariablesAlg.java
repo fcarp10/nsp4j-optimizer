@@ -207,13 +207,23 @@ public class VariablesAlg {
             replications += replicasTemp;
          }
 
+      int functions_cloud = 0;
+      for (int x = 0; x < pm.getServers().size(); x++)
+         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  if (fXSV[x][s][v])
+                     functions_cloud++;
+
       switch (objFunc) {
-         case MGR:
-            objVal = migrations + (0.001 * replications);
-         case REP:
-            objVal = replications + (0.001 * migrations);
-         case MGR_REP:
-            objVal = replications + migrations;
+      case MGR:
+         objVal = migrations + (0.001 * replications);
+      case REP:
+         objVal = replications + (0.001 * migrations);
+      case MGR_REP:
+         objVal = replications + migrations;
+      case MGR_REP_AND_CLOUD:
+         objVal = replications + migrations + functions_cloud;
       }
    }
 
@@ -238,18 +248,18 @@ public class VariablesAlg {
                penalties += qSDP[s][d][p];
 
       switch (objFunc) {
-         case OPEX_SERVERS:
-            objVal = opex;
-            break;
-         case FUNCTIONS_CHARGES:
-            objVal = charges;
-            break;
-         case QOS_PENALTIES:
-            objVal = penalties;
-            break;
-         default:
-            objVal = opex + charges + penalties;
-            break;
+      case OPEX_SERVERS:
+         objVal = opex;
+         break;
+      case FUNCTIONS_CHARGES:
+         objVal = charges;
+         break;
+      case QOS_PENALTIES:
+         objVal = penalties;
+         break;
+      default:
+         objVal = opex + charges + penalties;
+         break;
       }
    }
 

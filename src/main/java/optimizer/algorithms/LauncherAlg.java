@@ -25,19 +25,19 @@ public class LauncherAlg {
       VariablesAlg vars = new VariablesAlg(pm, varsInitPlacement, sce.getObjFunc());
       NetworkManager networkManager = new NetworkManager(pm, vars);
       HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
-      long startTime = System.nanoTime();
+      double startTime = System.currentTimeMillis();
       printLog(log, INFO, "starting " + sce.getName() + " algorithm...");
       if (sce.getName().equals(GRD)) {
          heuristicAlgorithm.allocateServicesGreedy(sce.getName());
       } else {
          heuristicAlgorithm.allocateServices(sce.getName());
       }
-      long elapsedTime = System.nanoTime() - startTime;
+      double elapsedTime = System.currentTimeMillis() - startTime;
       vars.generateRestOfVariablesForResults();
       Auxiliary.printLog(log, INFO, "finished [" + Auxiliary.roundDouble(vars.objVal, 4) + "]");
       Auxiliary.printLog(log, INFO, "generating results...");
       Results results = generateResults(pm, sce, vars, vars.fXSVinitial);
-      results.setComputationTime((long) elapsedTime / 1000000000);
+      results.setComputationTime((double) elapsedTime / 1000);
       resultsManager.exportJsonObject(outputFileName, results);
       if (printMST)
          exportResultsToMST(pm, resultsManager, outputFileName, vars);

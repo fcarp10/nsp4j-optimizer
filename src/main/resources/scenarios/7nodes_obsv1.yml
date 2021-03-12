@@ -1,0 +1,171 @@
+# auxiliary parameters
+aux: {
+  "gap": 0.0001,
+  "offset_results": 0,
+  "x_scaling": 6000.0,
+  "y_scaling": 6000.0,
+  "server_capacity": 500,
+  "link_capacity": 500,
+  "cloud_server_capacity": 1000000,
+  "cloud_link_capacity": 1000000,
+  "directed_edges": true,
+  "all_nodes_to_cloud": true,
+  "num_servers_node": 1,
+  "cloud_num_servers": 1,
+  "service_length": [7],
+  "services": [1]
+}
+# service definitions
+service_chains:
+  - id: 1
+    chain: [1]
+    max_propagation_delay: 5.0 # ms for 7nodes network
+    max_delay: 400 # ms
+    attributes: {
+      "downtime": 27.5, # ms for 7nodes with RTT of ~5ms (fixed)
+      "min_paths": 1,
+      "max_paths": 3
+    }
+# function definitions
+function_types: # type: 0 reserved for end-point functions
+  - type: 1 # VM function
+    attributes: {
+      "replicable": true, # (fixed)
+      "load_ratio": [0.0, 1.0],
+      "overhead_ratio": [0.01, 0.1], # percentage of ("max_bw" * "max_dem" * "load_ratio")
+      "sync_load": 0.1, # (fixed)
+      "max_dem": 3,
+      "max_bw": 100,
+      "process_traffic_delay": 3.0, # ms (fixed)
+      "process_delay": 5.0, # ms (fixed)
+      "min_process_delay": 2.0, # ms (fixed)
+      "max_delay": 10.0, # ms (fixed) !!! (INCREASE FOR TESTING)
+    }
+# traffic flow definitions [min_dem: 1, max_dem: 3, min_bw: 1, max_bw: 20 (# change "max_cap_server" accordingly)]
+traffic_flows:
+- src: '1'
+  dst: '2'
+  demands_specific: [10, 33, 4]
+- src: '1'
+  dst: '3'
+  demands_specific: [36]
+- src: '1'
+  dst: '4'
+  demands_specific: [58, 71, 4]
+- src: '1'
+  dst: '5'
+  demands_specific: [7]
+- src: '1'
+  dst: '6'
+  demands_specific: [38, 12, 91]
+- src: '1'
+  dst: '7'
+  demands_specific: [20]
+- src: '2'
+  dst: '1'
+  demands_specific: [9]
+- src: '2'
+  dst: '3'
+  demands_specific: [35, 17, 17]
+- src: '2'
+  dst: '4'
+  demands_specific: [10]
+- src: '2'
+  dst: '5'
+  demands_specific: [33]
+- src: '2'
+  dst: '6'
+  demands_specific: [21, 82, 15]
+- src: '2'
+  dst: '7'
+  demands_specific: [6, 68]
+- src: '3'
+  dst: '1'
+  demands_specific: [17, 2, 42]
+- src: '3'
+  dst: '2'
+  demands_specific: [8]
+- src: '3'
+  dst: '4'
+  demands_specific: [26, 62]
+- src: '3'
+  dst: '5'
+  demands_specific: [37]
+- src: '3'
+  dst: '6'
+  demands_specific: [30]
+- src: '3'
+  dst: '7'
+  demands_specific: [55, 27, 21]
+- src: '4'
+  dst: '1'
+  demands_specific: [51]
+- src: '4'
+  dst: '2'
+  demands_specific: [23, 57]
+- src: '4'
+  dst: '3'
+  demands_specific: [17]
+- src: '4'
+  dst: '5'
+  demands_specific: [15, 3]
+- src: '4'
+  dst: '6'
+  demands_specific: [59, 19, 39]
+- src: '4'
+  dst: '7'
+  demands_specific: [14]
+- src: '5'
+  dst: '1'
+  demands_specific: [32]
+- src: '5'
+  dst: '2'
+  demands_specific: [58, 59, 11]
+- src: '5'
+  dst: '3'
+  demands_specific: [41]
+- src: '5'
+  dst: '4'
+  demands_specific: [57]
+- src: '5'
+  dst: '6'
+  demands_specific: [9]
+- src: '5'
+  dst: '7'
+  demands_specific: [35, 43, 54]
+- src: '6'
+  dst: '1'
+  demands_specific: [19, 28, 33]
+- src: '6'
+  dst: '2'
+  demands_specific: [18, 27, 21]
+- src: '6'
+  dst: '3'
+  demands_specific: [34]
+- src: '6'
+  dst: '4'
+  demands_specific: [14, 21, 38]
+- src: '6'
+  dst: '5'
+  demands_specific: [17, 16, 10]
+- src: '6'
+  dst: '7'
+  demands_specific: [61, 52, 39]
+- src: '7'
+  dst: '1'
+  demands_specific: [24]
+- src: '7'
+  dst: '2'
+  demands_specific: [2]
+- src: '7'
+  dst: '3'
+  demands_specific: [5, 65, 3]
+- src: '7'
+  dst: '4'
+  demands_specific: [58]
+- src: '7'
+  dst: '5'
+  demands_specific: [8, 56, 7]
+- src: '7'
+  dst: '6'
+  demands_specific: [32, 65, 47]

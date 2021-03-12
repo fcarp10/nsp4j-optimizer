@@ -17,6 +17,8 @@ public class Definitions {
    public static final String MGR_REP = "MGR_REP";
    public static final String UTILIZATION_AND_CLOUD = "UTILIZATION_AND_CLOUD";
    public static final String NUM_SERVERS_AND_CLOUD = "NUM_SERVERS_AND_CLOUD";
+   public static final String MGR_AND_CLOUD = "MGR_AND_CLOUD";
+   public static final String REP_AND_CLOUD = "REP_AND_CLOUD";
    public static final String MGR_REP_AND_CLOUD = "MGR_REP_AND_CLOUD";
 
    // scenarios
@@ -27,13 +29,11 @@ public class Definitions {
    public static final String CUSTOM_1 = "CUSTOM_1";
    public static final String CUSTOM_2 = "CUSTOM_2";
    public static final String CUSTOM_3 = "CUSTOM_3";
-   public static final String HIGH = "high";
-   public static final String HIGH_PRED = "high-pred";
-   public static final String LOW = "low";
-   public static final String INIT_LOW = "init-low";
-   public static final String INIT_HIGH_PRED = "init-high-pred";
-   public static final String HIGH_MAN = "high-man";
-   public static final String INIT_HIGH_MAN = "init-high-man";
+
+   public static final String OBSV_1 = "obsv1";
+   public static final String OBSV_2 = "obsv2";
+   public static final String PRED_2 = "pred2";
+   public static final String OVER_2 = "over2";
    public static final String NULL_STRING = "";
 
    // general variables

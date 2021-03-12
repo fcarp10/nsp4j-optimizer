@@ -180,7 +180,6 @@ function generateScenario() {
     var FD1 = $("#FD1").is(":checked");
     var FD2 = $("#FD2").is(":checked");
     var FD3 = $("#FD3").is(":checked");
-    var FD4 = $("#FD4").is(":checked");
     // model specific
     var sync_traffic = $("#sync-traffic").is(":checked");
     var max_serv_delay = $("#max-serv-delay").is(":checked");
@@ -206,7 +205,6 @@ function generateScenario() {
             FD1: FD1,
             FD2: FD2,
             FD3: FD3,
-            FD4: FD4,
             // additional
             sync_traffic: sync_traffic,
             max_serv_delay: max_serv_delay,

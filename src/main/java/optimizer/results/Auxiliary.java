@@ -75,15 +75,15 @@ public class Auxiliary {
 
    public static void printLog(Logger log, String status, String message) {
       switch (status) {
-         case ERROR:
-            log.error(message);
-            break;
-         case WARNING:
-            log.warn(message);
-            break;
-         case INFO:
-            log.info(message);
-            break;
+      case ERROR:
+         log.error(message);
+         break;
+      case WARNING:
+         log.warn(message);
+         break;
+      case INFO:
+         log.info(message);
+         break;
       }
       ResultsGUI.log(status + message);
    }
@@ -138,7 +138,7 @@ public class Auxiliary {
       for (int i = 0; i < var.length; i++) {
          if (var[i] == null)
             continue;
-         if (var[i].get(GRB.DoubleAttr.X) == 1.0)
+         if (roundDouble(var[i].get(GRB.DoubleAttr.X), 1) == 1.0)
             convertedVar[i] = true;
       }
       return convertedVar;
@@ -154,7 +154,7 @@ public class Auxiliary {
          for (int j = 0; j < var[i].length; j++) {
             if (var[i][j] == null)
                continue;
-            if (var[i][j].get(GRB.DoubleAttr.X) == 1.0)
+            if (roundDouble(var[i][j].get(GRB.DoubleAttr.X), 1) == 1.0)
                convertedVar[i][j] = true;
          }
       return convertedVar;
@@ -171,7 +171,7 @@ public class Auxiliary {
             for (int k = 0; k < var[i][j].length; k++) {
                if (var[i][j][k] == null)
                   continue;
-               if (var[i][j][k].get(GRB.DoubleAttr.X) == 1.0)
+               if (roundDouble(var[i][j][k].get(GRB.DoubleAttr.X), 1) == 1.0)
                   convertedVar[i][j][k] = true;
             }
       return convertedVar;
@@ -189,7 +189,7 @@ public class Auxiliary {
                for (int l = 0; l < var[i][j][k].length; l++) {
                   if (var[i][j][k][l] == null)
                      continue;
-                  if (var[i][j][k][l].get(GRB.DoubleAttr.X) == 1.0)
+                  if (roundDouble(var[i][j][k][l].get(GRB.DoubleAttr.X), 1) == 1.0)
                      convertedVar[i][j][k][l] = true;
                }
       return convertedVar;
