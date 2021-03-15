@@ -102,38 +102,41 @@ public class LauncherLP {
          expr.add(modelLP.functionsChargesExpr());
          expr.add(modelLP.qosPenaltiesExpr());
          break;
-      case MGR:
-         expr.add(modelLP.numMigrations(1.0, initialPlacement));
-         expr.add(modelLP.numReplications(0.001));
-         break;
-      case REP:
-         expr.add(modelLP.numReplications(1.0));
-         expr.add(modelLP.numMigrations(0.001, initialPlacement));
-         break;
-      case MGR_REP:
-         expr.add(modelLP.numMigrations(1.0, initialPlacement));
-         expr.add(modelLP.numReplications(1.0));
-         break;
-      case UTILIZATION_AND_CLOUD:
+      case UTILIZATION_CLOUD:
          serversWeight = (double) 1.0 / pm.getServers().size();
          expr.add(modelLP.serverUtilizationExpr(-serversWeight));
          expr.add(modelLP.numFunctionsInCloudExpr(1.0));
          break;
-      case NUM_SERVERS_AND_CLOUD:
+      case NUM_SERVERS_CLOUD:
          expr.add(modelLP.numUsedServersExpr());
          expr.add(modelLP.numFunctionsInCloudExpr(1.0));
          break;
-      case MGR_AND_CLOUD:
+      case MGR:
          expr.add(modelLP.numMigrations(1.0, initialPlacement));
          expr.add(modelLP.numReplications(0.001));
-         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+         expr.add(modelLP.numFunctionsInCloudExpr(0.001));
          break;
-      case REP_AND_CLOUD:
+      case REP:
          expr.add(modelLP.numReplications(1.0));
          expr.add(modelLP.numMigrations(0.001, initialPlacement));
-         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+         expr.add(modelLP.numFunctionsInCloudExpr(0.001));
          break;
-      case MGR_REP_AND_CLOUD:
+      case CLOUD:
+         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+         expr.add(modelLP.numMigrations(0.001, initialPlacement));
+         expr.add(modelLP.numReplications(0.001));
+         break;
+      // case MGR_CLOUD:
+      //    expr.add(modelLP.numMigrations(1.0, initialPlacement));
+      //    expr.add(modelLP.numReplications(0.001));
+      //    expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+      //    break;
+      // case REP_CLOUD:
+      //    expr.add(modelLP.numReplications(1.0));
+      //    expr.add(modelLP.numMigrations(0.001, initialPlacement));
+      //    expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+      //    break;
+      case MGR_REP_CLOUD:
          expr.add(modelLP.numMigrations(1.0, initialPlacement));
          expr.add(modelLP.numReplications(1.0));
          expr.add(modelLP.numFunctionsInCloudExpr(1.0));

@@ -14,12 +14,13 @@ public class Definitions {
    public static final String ALL_MONETARY_COSTS = "ALL_MONETARY_COSTS";
    public static final String MGR = "MGR";
    public static final String REP = "REP";
+   public static final String CLOUD = "CLOUD";
    public static final String MGR_REP = "MGR_REP";
-   public static final String UTILIZATION_AND_CLOUD = "UTILIZATION_AND_CLOUD";
-   public static final String NUM_SERVERS_AND_CLOUD = "NUM_SERVERS_AND_CLOUD";
-   public static final String MGR_AND_CLOUD = "MGR_AND_CLOUD";
-   public static final String REP_AND_CLOUD = "REP_AND_CLOUD";
-   public static final String MGR_REP_AND_CLOUD = "MGR_REP_AND_CLOUD";
+   public static final String UTILIZATION_CLOUD = "UTILIZATION_CLOUD";
+   public static final String NUM_SERVERS_CLOUD = "NUM_SERVERS_CLOUD";
+   public static final String MGR_CLOUD = "MGR_CLOUD";
+   public static final String REP_CLOUD = "REP_CLOUD";
+   public static final String MGR_REP_CLOUD = "MGR_REP_CLOUD";
 
    // scenarios
    public static final String LP = "LP";
@@ -28,13 +29,17 @@ public class Definitions {
    public static final String GRD = "GRD";
    public static final String CUSTOM_1 = "CUSTOM_1";
    public static final String CUSTOM_2 = "CUSTOM_2";
+   public static final String CUSTOM_2_SFC_LENGTH = "CUSTOM_2_SFC_LENGTH";
+   public static final String CUSTOM_2_SERVER_CAP = "CUSTOM_2_SERVER_CAP";
    public static final String CUSTOM_3 = "CUSTOM_3";
+   public static final String CUSTOM_3_SFC_LENGTH = "CUSTOM_3_SFC_LENGTH";
+   public static final String CUSTOM_3_SERVER_CAP = "CUSTOM_3_SERVER_CAP";
 
    public static final String OBSV_1 = "obsv1";
    public static final String OBSV_2 = "obsv2";
    public static final String PRED_2 = "pred2";
    public static final String OVER_2 = "over2";
-   public static final String NULL_STRING = "";
+   public static final String NULL = "";
 
    // general variables
    public static final String zSP = "zSP";
@@ -90,6 +95,7 @@ public class Definitions {
    public static final String SERVICE_MAX_PATHS = "max_paths";
    public static final String SERVICE_DOWNTIME = "downtime";
    public static final String SERVICE_LENGTH = "service_length";
+   public static final String SERVICES = "services";
 
    // function parameters
    public static final String FUNCTION_REPLICABLE = "replicable";
@@ -115,6 +121,7 @@ public class Definitions {
    public static final String LONGITUDE_LABEL_2 = "x";
    public static final String LATITUDE_LABEL_2 = "y";
    public static final String CLOUD_SERVER_CAPACITY = "cloud_server_capacity";
+   public static final String SERVER_CAPACITY = "server_capacity";
 
    // link parameters
    public static final String LINK_CAPACITY = "capacity";

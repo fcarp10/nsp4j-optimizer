@@ -17,7 +17,7 @@ public class WebServer {
 
       post("/load", (request, response) -> {
          Scenario scenario = new Gson().fromJson(request.body(), Scenario.class);
-         Manager.readInputParameters(scenario.getInputFileName(), false, 0);
+         Manager.readParameters(scenario.getInputFileName());
          return 201;
       });
 

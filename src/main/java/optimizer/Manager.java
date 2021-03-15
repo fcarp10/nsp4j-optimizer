@@ -28,40 +28,61 @@ public class Manager {
    private static boolean interrupted;
    private static Parameters pm;
 
-   public static String readInputParameters(String graphNameForm, boolean considerSubsetOfDemands, int serviceLength) {
+   public static String readParameters(String graphNameForm, boolean considerSubsetOfDemands,
+         ArrayList<Integer> services, ArrayList<Integer> serviceLength, int serverCapacity) {
+      String path = Auxiliary.getResourcesPath(graphNameForm + ".yml", null);
+      String graphName = readYamlFile(path, graphNameForm);
+      modifyYamlParameters(services, serviceLength, serverCapacity);
+      readTopologyFiles(path, graphName);
+      determineUsedDemands(pm, considerSubsetOfDemands);
+      return graphName;
+   }
 
-      String rootPath = Auxiliary.getResourcesPath(graphNameForm + ".yml", null);
+   public static String readParameters(String graphNameForm) {
+      String path = Auxiliary.getResourcesPath(graphNameForm + ".yml", null);
+      String graphName = readYamlFile(path, graphNameForm);
+      readTopologyFiles(path, graphName);
+      determineUsedDemands(pm, false);
+      return graphName;
+   }
+
+   private static String readYamlFile(String path, String graphNameForm) {
       String[] graphName = graphNameForm.split("_");
       try {
-         pm = ConfigFiles.readParameters(rootPath + graphNameForm + ".yml");
+         pm = ConfigFiles.readParameters(path + graphNameForm + ".yml");
       } catch (Exception e) {
          printLog(log, ERROR, "error loading .yml file");
       }
-      if (serviceLength > 0) {
-         ArrayList<Integer> serviceLengthMod = new ArrayList<>();
-         serviceLengthMod.add(serviceLength);
-         pm.getAux().put(SERVICE_LENGTH, serviceLengthMod);
-      }
+      return graphName[0];
+   }
+
+   private static void modifyYamlParameters(ArrayList<Integer> services, ArrayList<Integer> serviceLength,
+         int serverCapacity) {
+      if (services.get(0) > 0)
+         pm.getAux().put(SERVICES, services);
+      if (serviceLength.get(0) > 0)
+         pm.getAux().put(SERVICE_LENGTH, serviceLength);
+      if (serverCapacity > 0)
+         pm.getAux().put(SERVER_CAPACITY, serverCapacity);
+   }
+
+   private static void readTopologyFiles(String path, String graphName) {
       String[] extensions = new String[] { ".dgs", ".gml" };
       boolean isLoaded = false;
       for (int i = 0; i < extensions.length; i++) {
-         if (pm.initialize(rootPath + graphName[0] + extensions[i], rootPath + graphName[0] + ".txt",
+         if (pm.initialize(path + graphName + extensions[i], path + graphName + ".txt",
                (boolean) pm.getAux(DIRECTED_EDGES), (boolean) pm.getAux(ALL_NODES_TO_CLOUD))) {
             isLoaded = true;
             break;
          }
-         printLog(log, WARNING, graphName[0] + extensions[i] + " file not found");
+         printLog(log, WARNING, graphName + extensions[i] + " file not found");
       }
       if (!isLoaded) {
          printLog(log, ERROR, "error loading graph or paths files");
-         return null;
       }
       checkTopologyScale(pm);
       ResultsGUI.initialize(pm);
       printLog(log, INFO, "topology loaded");
-      considerSubsetOfDemands(pm, considerSubsetOfDemands);
-      printLog(log, INFO, "traffic demands loaded");
-      return graphName[0];
    }
 
    private static void checkTopologyScale(Parameters pm) {
@@ -89,7 +110,7 @@ public class Manager {
       }
    }
 
-   private static void considerSubsetOfDemands(Parameters pm, boolean considerSubset) {
+   private static void determineUsedDemands(Parameters pm, boolean considerSubset) {
       Random rnd = new Random(pm.getSeed());
       for (TrafficFlow trafficFlow : pm.getTrafficFlows()) {
          trafficFlow.getAux().clear();
@@ -121,21 +142,21 @@ public class Manager {
          case LP:
             boolean exportMST = true;
             rm = new ResultsManager(pm.getGraphName());
-            readInputParameters(sce.getInputFileName(), false, 0);
+            readParameters(sce.getInputFileName());
             String outputFileName = pm.getGraphName() + sce.getName() + sce.getObjFunc();
             LauncherLP.run(pm, sce, rm, null, null, outputFileName, exportMST);
             break;
 
          case FF:
             rm = new ResultsManager(pm.getGraphName());
-            readInputParameters(sce.getInputFileName(), false, 0);
+            readParameters(sce.getInputFileName());
             outputFileName = pm.getGraphName() + "_" + FF + "_" + sce.getObjFunc();
             LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
             break;
 
          case RF:
             rm = new ResultsManager(pm.getGraphName());
-            readInputParameters(sce.getInputFileName(), false, 0);
+            readParameters(sce.getInputFileName());
             for (int i = 0; i < 10; i++) {
                outputFileName = pm.getGraphName() + "_" + RF + "_" + sce.getObjFunc() + "_" + i;
                LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
@@ -144,7 +165,7 @@ public class Manager {
 
          case GRD:
             rm = new ResultsManager(pm.getGraphName());
-            readInputParameters(sce.getInputFileName(), false, 0);
+            readParameters(sce.getInputFileName());
             outputFileName = pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc();
             LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
             break;
@@ -152,7 +173,7 @@ public class Manager {
          case CUSTOM_1:
             exportMST = true;
             rm = new ResultsManager(pm.getGraphName());
-            graphNameShort = readInputParameters(sce.getInputFileName(), false, 0);
+            graphNameShort = readParameters(sce.getInputFileName());
             GRBModel initModel = rm.loadInitialPlacement(
                   Auxiliary.getResourcesPath(graphNameShort + "_init-lp.mst", null) + graphNameShort + "_init-lp", pm,
                   sce);
@@ -164,101 +185,20 @@ public class Manager {
             LauncherLP.run(pm, sce, rm, initModel, initSol, outputFileName, exportMST);
             break;
 
-         case CUSTOM_2:
-
-            for (int s = 1; s <= 10; s++) {
-
-               rm = new ResultsManager(sce.getInputFileName() + "_" + s);
-               exportMST = false;
-
-               // 1 - obsv1 [LP]
-               GRBModel obsv1LP = runCustomLP(sce, MGR_REP_AND_CLOUD, OBSV_1, NULL_STRING, rm, null, exportMST, s);
-               VariablesAlg obsv1Alg = new VariablesAlg(pm, obsv1LP);
-               // 2 - pred2 [LP]
-               GRBModel pred2LP = runCustomLP(sce, MGR_REP_AND_CLOUD, PRED_2, NULL_STRING, rm, null, exportMST, s);
-               VariablesAlg pred2Alg = new VariablesAlg(pm, pred2LP);
-               // 3 - over2 [LP]
-               GRBModel over2LP = runCustomLP(sce, MGR_REP_AND_CLOUD, OVER_2, NULL_STRING, rm, null, exportMST, s);
-               VariablesAlg over2Alg = new VariablesAlg(pm, over2LP);
-
-               // 1 - obsv1 -- > obsv2 [LP]
-               runCustomLP(sce, MGR_AND_CLOUD, OBSV_2, OBSV_1, rm, obsv1LP, exportMST, s);
-               runCustomLP(sce, REP_AND_CLOUD, OBSV_2, OBSV_1, rm, obsv1LP, exportMST, s);
-               runCustomLP(sce, MGR_REP_AND_CLOUD, OBSV_2, OBSV_1, rm, obsv1LP, exportMST, s);
-               // 2 - pred2 -- > obsv2 [LP]
-               runCustomLP(sce, MGR_AND_CLOUD, OBSV_2, PRED_2, rm, pred2LP, exportMST, s);
-               runCustomLP(sce, REP_AND_CLOUD, OBSV_2, PRED_2, rm, pred2LP, exportMST, s);
-               runCustomLP(sce, MGR_REP_AND_CLOUD, OBSV_2, PRED_2, rm, pred2LP, exportMST, s);
-               // 3 - over2 -- > obsv2 [LP]
-               runCustomLP(sce, MGR_AND_CLOUD, OBSV_2, OVER_2, rm, over2LP, exportMST, s);
-               runCustomLP(sce, REP_AND_CLOUD, OBSV_2, OVER_2, rm, over2LP, exportMST, s);
-               runCustomLP(sce, MGR_REP_AND_CLOUD, OBSV_2, OVER_2, rm, over2LP, exportMST, s);
-
-               // 1 - obsv1 -- > obsv2 [FF]
-               runCustomAlg(sce, FF, MGR_REP_AND_CLOUD, OBSV_2, OBSV_1, rm, obsv1Alg, exportMST, s);
-               // 2 - pred2 -- > obsv2 [FF]
-               runCustomAlg(sce, FF, MGR_REP_AND_CLOUD, OBSV_2, PRED_2, rm, pred2Alg, exportMST, s);
-               // 3 - over2 -- > obsv2 [FF]
-               runCustomAlg(sce, FF, MGR_REP_AND_CLOUD, OBSV_2, OVER_2, rm, over2Alg, exportMST, s);
-
-               // 1 - obsv1 -- > obsv2 [RF]
-               for (int i = 0; i < 10; i++)
-                  runCustomAlg(sce, RF, MGR_REP_AND_CLOUD, OBSV_2, OBSV_1 + "_" + i, rm, obsv1Alg, exportMST, s);
-               // 2 - pred2 -- > obsv2 [RF]
-               for (int i = 0; i < 10; i++)
-                  runCustomAlg(sce, RF, MGR_REP_AND_CLOUD, OBSV_2, PRED_2 + "_" + i, rm, pred2Alg, exportMST, s);
-               // 3 - over2 -- > obsv2 [RF]
-               for (int i = 0; i < 10; i++)
-                  runCustomAlg(sce, RF, MGR_REP_AND_CLOUD, OBSV_2, OVER_2 + "_" + i, rm, over2Alg, exportMST, s);
-
-               // 1 - obsv1 -- > obsv2 [GRD]
-               runCustomAlg(sce, GRD, MGR_REP_AND_CLOUD, OBSV_2, OBSV_1, rm, obsv1Alg, exportMST, s);
-               // 2 - pred2 -- > obsv2 [GRD]
-               runCustomAlg(sce, GRD, MGR_REP_AND_CLOUD, OBSV_2, PRED_2, rm, pred2Alg, exportMST, s);
-               // 3 - over2 -- > obsv2 [GRD]
-               runCustomAlg(sce, GRD, MGR_REP_AND_CLOUD, OBSV_2, OVER_2, rm, over2Alg, exportMST, s);
-            }
+         case CUSTOM_2_SFC_LENGTH:
+            runCustomSFCLength(sce, CUSTOM_2);
             break;
 
-         case CUSTOM_3:
+         case CUSTOM_2_SERVER_CAP:
+            runCustomServerCap(sce, CUSTOM_2);
+            break;
 
-            // rm = new ResultsManager(sce.getInputFileName());
-            // exportMST = false;
+         case CUSTOM_3_SFC_LENGTH:
+            runCustomSFCLength(sce, CUSTOM_3);
+            break;
 
-            // firstPlace = true;
-            // // 1 - init-low [GRD][MGR-REP][null]
-            // initLowLPAlg = runCustomAlg(sce, GRD, MGR_REP, LOW, NULL_STRING, rm, null,
-            // exportMST, firstPlace);
-            // // 2 - init-high-pred [GRD][MGR-REP][null]
-            // initHighPredLPAlg = runCustomAlg(sce, GRD, MGR_REP, HIGH_PRED, NULL_STRING,
-            // rm, null, exportMST,
-            // firstPlace);
-
-            // firstPlace = false;
-            // // 1 - high [FF][MGR-REP][init-low]
-            // runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST,
-            // firstPlace);
-            // // 2 - high [FF][MGR-REP][init-high-pred]
-            // runCustomAlg(sce, FF, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg,
-            // exportMST, firstPlace);
-
-            // // 1 - high [RF][MGR-REP][init-low]
-            // for (int i = 0; i < 10; i++)
-            // runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_LOW + "_" + i, rm, initLowLPAlg,
-            // exportMST, firstPlace);
-            // // 2 - high [RF][MGR-REP][init-high-pred]
-            // for (int i = 0; i < 10; i++)
-            // runCustomAlg(sce, RF, MGR_REP, HIGH, INIT_HIGH_PRED + "_" + i, rm,
-            // initHighPredLPAlg, exportMST,
-            // firstPlace);
-
-            // // 1 - high [GRD][MGR-REP][init-low]
-            // runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_LOW, rm, initLowLPAlg, exportMST,
-            // firstPlace);
-            // // 2 - high [GRD][MGR-REP][init-high-pred]
-            // runCustomAlg(sce, GRD, MGR_REP, HIGH, INIT_HIGH_PRED, rm, initHighPredLPAlg,
-            // exportMST, firstPlace);
-
+         case CUSTOM_3_SERVER_CAP:
+            runCustomServerCap(sce, CUSTOM_3);
             break;
 
          default:
@@ -272,35 +212,168 @@ public class Manager {
       }
    }
 
-   public static GRBModel runCustomLP(Scenario sce, String objFunc, String inputFileExtension,
+   private static void runCustomSFCLength(Scenario sce, String customString) throws GRBException {
+      ArrayList<Integer> services = new ArrayList<>();
+      ArrayList<Integer> serviceLength = new ArrayList<>();
+      for (int s = 1; s <= 10; s++) {
+         services = new ArrayList<>();
+         services.add(1);
+         serviceLength = new ArrayList<>();
+         serviceLength.add(s);
+         if (customString.equals(CUSTOM_2))
+            runCustom2(sce, services, serviceLength, 0);
+         if (customString.equals(CUSTOM_3))
+            runCustom3(sce, services, serviceLength, 0);
+      }
+   }
+
+   private static void runCustomServerCap(Scenario sce, String customString) throws GRBException {
+      ArrayList<Integer> services = new ArrayList<>();
+      ArrayList<Integer> serviceLength = new ArrayList<>();
+      for (int s = 1; s <= 10; s++) {
+         services.add(1);
+         serviceLength.add(s);
+      }
+      int[] serverCaps = new int[] { 250, 500, 750, 1000, 1250, 1500 };
+      for (int s = 0; s < serverCaps.length; s++) {
+         if (customString.equals(CUSTOM_2))
+            runCustom2(sce, services, serviceLength, serverCaps[s]);
+         if (customString.equals(CUSTOM_3))
+            runCustom3(sce, services, serviceLength, serverCaps[s]);
+      }
+   }
+
+   private static void runCustom2(Scenario sce, ArrayList<Integer> services, ArrayList<Integer> service_lengths,
+         int serverCap) throws GRBException {
+      String resultsFolderExtension = "";
+      if (serverCap != 0)
+         resultsFolderExtension = "_" + String.valueOf(serverCap);
+      else
+         resultsFolderExtension = "_" + service_lengths.get(0);
+      ResultsManager rm = new ResultsManager(sce.getInputFileName() + resultsFolderExtension);
+      boolean toMST = false;
+
+      // 1 - obsv1 [LP]
+      GRBModel obsv1LP = runCustomLP(sce, MGR_REP_CLOUD, OBSV_1, NULL, rm, null, toMST, services, service_lengths,
+            serverCap);
+      VariablesAlg obsv1Alg = new VariablesAlg(pm, obsv1LP);
+      // 2 - pred2 [LP]
+      GRBModel pred2LP = runCustomLP(sce, MGR_REP_CLOUD, PRED_2, NULL, rm, null, toMST, services, service_lengths,
+            serverCap);
+      VariablesAlg pred2Alg = new VariablesAlg(pm, pred2LP);
+      // 3 - over2 [LP]
+      GRBModel over2LP = runCustomLP(sce, MGR_REP_CLOUD, OVER_2, NULL, rm, null, toMST, services, service_lengths,
+            serverCap);
+      VariablesAlg over2Alg = new VariablesAlg(pm, over2LP);
+
+      // 1 - obsv1 -- > obsv2 [LP]
+      runCustomLP(sce, MGR, OBSV_2, OBSV_1, rm, obsv1LP, toMST, services, service_lengths, serverCap);
+      runCustomLP(sce, REP, OBSV_2, OBSV_1, rm, obsv1LP, toMST, services, service_lengths, serverCap);
+      runCustomLP(sce, CLOUD, OBSV_2, OBSV_1, rm, obsv1LP, toMST, services, service_lengths, serverCap);
+      runCustomLP(sce, MGR_REP_CLOUD, OBSV_2, OBSV_1, rm, obsv1LP, toMST, services, service_lengths, serverCap);
+      // 2 - pred2 -- > obsv2 [LP]
+      runCustomLP(sce, MGR, OBSV_2, PRED_2, rm, pred2LP, toMST, services, service_lengths, serverCap);
+      runCustomLP(sce, REP, OBSV_2, PRED_2, rm, pred2LP, toMST, services, service_lengths, serverCap);
+      runCustomLP(sce, CLOUD, OBSV_2, PRED_2, rm, pred2LP, toMST, services, service_lengths, serverCap);
+      runCustomLP(sce, MGR_REP_CLOUD, OBSV_2, PRED_2, rm, pred2LP, toMST, services, service_lengths, serverCap);
+      // 3 - over2 -- > obsv2 [LP]
+      runCustomLP(sce, MGR, OBSV_2, OVER_2, rm, over2LP, toMST, services, service_lengths, serverCap);
+      runCustomLP(sce, REP, OBSV_2, OVER_2, rm, over2LP, toMST, services, service_lengths, serverCap);
+      runCustomLP(sce, CLOUD, OBSV_2, OVER_2, rm, over2LP, toMST, services, service_lengths, serverCap);
+      runCustomLP(sce, MGR_REP_CLOUD, OBSV_2, OVER_2, rm, over2LP, toMST, services, service_lengths, serverCap);
+
+      // 1 - obsv1 -- > obsv2 [FF]
+      runCustomAlg(sce, FF, MGR_REP_CLOUD, OBSV_2, OBSV_1, rm, obsv1Alg, toMST, services, service_lengths, serverCap);
+      // 2 - pred2 -- > obsv2 [FF]
+      runCustomAlg(sce, FF, MGR_REP_CLOUD, OBSV_2, PRED_2, rm, pred2Alg, toMST, services, service_lengths, serverCap);
+      // 3 - over2 -- > obsv2 [FF]
+      runCustomAlg(sce, FF, MGR_REP_CLOUD, OBSV_2, OVER_2, rm, over2Alg, toMST, services, service_lengths, serverCap);
+
+      // 1 - obsv1 -- > obsv2 [RF]
+      for (int i = 0; i < 10; i++)
+         runCustomAlg(sce, RF, MGR_REP_CLOUD, OBSV_2, OBSV_1 + "_" + i, rm, obsv1Alg, toMST, services, service_lengths,
+               serverCap);
+      // 2 - pred2 -- > obsv2 [RF]
+      for (int i = 0; i < 10; i++)
+         runCustomAlg(sce, RF, MGR_REP_CLOUD, OBSV_2, PRED_2 + "_" + i, rm, pred2Alg, toMST, services, service_lengths,
+               serverCap);
+      // 3 - over2 -- > obsv2 [RF]
+      for (int i = 0; i < 10; i++)
+         runCustomAlg(sce, RF, MGR_REP_CLOUD, OBSV_2, OVER_2 + "_" + i, rm, over2Alg, toMST, services, service_lengths,
+               serverCap);
+
+      // 1 - obsv1 -- > obsv2 [GRD]
+      runCustomAlg(sce, GRD, MGR_REP_CLOUD, OBSV_2, OBSV_1, rm, obsv1Alg, toMST, services, service_lengths, serverCap);
+      // 2 - pred2 -- > obsv2 [GRD]
+      runCustomAlg(sce, GRD, MGR_REP_CLOUD, OBSV_2, PRED_2, rm, pred2Alg, toMST, services, service_lengths, serverCap);
+      // 3 - over2 -- > obsv2 [GRD]
+      runCustomAlg(sce, GRD, MGR_REP_CLOUD, OBSV_2, OVER_2, rm, over2Alg, toMST, services, service_lengths, serverCap);
+   }
+
+   private static void runCustom3(Scenario sce, ArrayList<Integer> services, ArrayList<Integer> service_lengths,
+         int serverCap) {
+      String resultsFolderExtension = "";
+      if (serverCap != 0)
+         resultsFolderExtension = "_" + String.valueOf(serverCap);
+      else
+         resultsFolderExtension = "_" + service_lengths.get(0);
+      ResultsManager rm = new ResultsManager(sce.getInputFileName() + resultsFolderExtension);
+      boolean toMST = false;
+
+      // 1 - obsv1 [GRD]
+      VariablesAlg obsv1GRD = runCustomAlg(sce, GRD, MGR_REP_CLOUD, OBSV_1, NULL, rm, null, toMST, services,
+            service_lengths, serverCap);
+      // 2 - pred2 [GRD]
+      VariablesAlg pred2GRD = runCustomAlg(sce, GRD, MGR_REP_CLOUD, PRED_2, NULL, rm, null, toMST, services,
+            service_lengths, serverCap);
+      // 3 - over2 [GRD]
+      VariablesAlg over2GRD = runCustomAlg(sce, GRD, MGR_REP_CLOUD, OVER_2, NULL, rm, null, toMST, services,
+            service_lengths, serverCap);
+
+      // 1 - obsv1 -- > obsv2 [FF]
+      runCustomAlg(sce, FF, MGR_REP_CLOUD, OBSV_2, OBSV_1, rm, obsv1GRD, toMST, services, service_lengths, serverCap);
+      // 2 - pred2 -- > obsv2 [FF]
+      runCustomAlg(sce, FF, MGR_REP_CLOUD, OBSV_2, PRED_2, rm, pred2GRD, toMST, services, service_lengths, serverCap);
+      // 3 - over2 -- > obsv2 [FF]
+      runCustomAlg(sce, FF, MGR_REP_CLOUD, OBSV_2, OVER_2, rm, over2GRD, toMST, services, service_lengths, serverCap);
+
+      // 1 - obsv1 -- > obsv2 [RF]
+      for (int i = 0; i < 10; i++)
+         runCustomAlg(sce, RF, MGR_REP_CLOUD, OBSV_2, OBSV_1 + "_" + i, rm, obsv1GRD, toMST, services, service_lengths,
+               serverCap);
+      // 2 - pred2 -- > obsv2 [RF]
+      for (int i = 0; i < 10; i++)
+         runCustomAlg(sce, RF, MGR_REP_CLOUD, OBSV_2, PRED_2 + "_" + i, rm, pred2GRD, toMST, services, service_lengths,
+               serverCap);
+      // 3 - over2 -- > obsv2 [RF]
+      for (int i = 0; i < 10; i++)
+         runCustomAlg(sce, RF, MGR_REP_CLOUD, OBSV_2, OVER_2 + "_" + i, rm, over2GRD, toMST, services, service_lengths,
+               serverCap);
+
+      // 1 - obsv1 -- > obsv2 [GRD]
+      runCustomAlg(sce, GRD, MGR_REP_CLOUD, OBSV_2, OBSV_1, rm, obsv1GRD, toMST, services, service_lengths, serverCap);
+      // 2 - pred2 -- > obsv2 [GRD]
+      runCustomAlg(sce, GRD, MGR_REP_CLOUD, OBSV_2, PRED_2, rm, pred2GRD, toMST, services, service_lengths, serverCap);
+      // 3 - over2 -- > obsv2 [GRD]
+      runCustomAlg(sce, GRD, MGR_REP_CLOUD, OBSV_2, OVER_2, rm, over2GRD, toMST, services, service_lengths, serverCap);
+   }
+
+   private static GRBModel runCustomLP(Scenario sce, String objFunc, String inputFileExtension,
          String outputFileExtension, ResultsManager resultsManager, GRBModel initPlacementModel, boolean exportMST,
-         int service_length) throws GRBException {
-      readInputParameters(sce.getInputFileName() + "_" + inputFileExtension, false, service_length);
+         ArrayList<Integer> services, ArrayList<Integer> serviceLength, int serverCap) throws GRBException {
+      readParameters(sce.getInputFileName() + "_" + inputFileExtension, false, services, serviceLength, serverCap);
       sce.setObjFunc(objFunc);
       sce.setConstraint(PATHS_SERVERS_CLOUD, true);
-      // if (initPlacementModel == null) {
-      // sce.setConstraint(SINGLE_PATH, true);
-      // } else {
-      // sce.setConstraint(SINGLE_PATH, false);
-      // }
       String outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc() + "_" + outputFileExtension;
       return LauncherLP.run(pm, sce, resultsManager, initPlacementModel, null, outputFileName, exportMST);
    }
 
-   public static VariablesAlg runCustomAlg(Scenario sce, String alg, String objFunc, String inputFileExtension,
+   private static VariablesAlg runCustomAlg(Scenario sce, String alg, String objFunc, String inputFileExtension,
          String outputFileExtension, ResultsManager resultsManager, VariablesAlg initPlacementVars, boolean exportMST,
-         int service_length) {
-      readInputParameters(sce.getInputFileName() + "_" + inputFileExtension, false, service_length);
+         ArrayList<Integer> services, ArrayList<Integer> serviceLength, int serverCap) {
+      readParameters(sce.getInputFileName() + "_" + inputFileExtension, false, services, serviceLength, serverCap);
       sce.setName(alg);
       sce.setObjFunc(objFunc);
-      // if (edgeOnly) {
-      // Auxiliary.removeCapacityOfCloudServers(pm); // constraint to only edge
-      // Auxiliary.removeCapacityOfCloudLinks(pm);
-      // } else {
-      // Auxiliary.restoreCapacityOfCloudServers(pm); // remove constraint to only
-      // edge
-      // Auxiliary.restoreCapacityOfCloudLinks(pm);
-      // }
       String outputFileName = pm.getGraphName() + "_" + alg + "_" + sce.getObjFunc() + "_" + outputFileExtension;
       return LauncherAlg.run(pm, sce, resultsManager, initPlacementVars, outputFileName, exportMST);
    }

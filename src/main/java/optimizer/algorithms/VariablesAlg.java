@@ -222,7 +222,7 @@ public class VariablesAlg {
          objVal = replications + (0.001 * migrations);
       case MGR_REP:
          objVal = replications + migrations;
-      case MGR_REP_AND_CLOUD:
+      case MGR_REP_CLOUD:
          objVal = replications + migrations + functions_cloud;
       }
    }
