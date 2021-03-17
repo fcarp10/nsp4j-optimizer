@@ -70,13 +70,13 @@ public class Results {
    private transient List<Double> lu;
    @JsonProperty("sd")
    private transient List<Double> sd;
-   @JsonProperty("ox")
+   @JsonIgnore
    private transient List<Double> ox;
-   @JsonProperty("osv")
+   @JsonIgnore
    private transient List<Double> osv;
-   @JsonProperty("qsdp")
+   @JsonIgnore
    private transient List<Double> qsdp;
-   @JsonProperty("fxsv")
+   @JsonIgnore
    private transient List<Double> fxsv;
    @JsonIgnore
    private List<GraphData> luGraph;

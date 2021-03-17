@@ -27,6 +27,7 @@ public class Definitions {
    public static final String FF = "FF";
    public static final String RF = "RF";
    public static final String GRD = "GRD";
+   public static final String GRD_FIRST = "GRD_FIRST";
    public static final String CUSTOM_1 = "CUSTOM_1";
    public static final String CUSTOM_2 = "CUSTOM_2";
    public static final String CUSTOM_2_SFC_LENGTH = "CUSTOM_2_SFC_LENGTH";

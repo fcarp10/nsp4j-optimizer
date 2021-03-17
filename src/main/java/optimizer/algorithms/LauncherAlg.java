@@ -27,7 +27,7 @@ public class LauncherAlg {
       HeuristicAlgorithm heuristicAlgorithm = new HeuristicAlgorithm(pm, vars, networkManager);
       double startTime = System.currentTimeMillis();
       printLog(log, INFO, "starting " + sce.getName() + " algorithm...");
-      if (sce.getName().equals(GRD)) {
+      if (sce.getName().contains(GRD)) {
          heuristicAlgorithm.allocateServicesGreedy(sce.getName());
       } else {
          heuristicAlgorithm.allocateServices(sce.getName());
@@ -57,11 +57,11 @@ public class LauncherAlg {
       results.setVariable(fX, heu.fX);
       results.setVariable(fXSV, heu.fXSV);
       results.setVariable(zSP, heu.zSP);
-      results.setVariable(oX, heu.oX);
-      results.setVariable(oSV, heu.oSV);
-      results.setVariable(qSDP, heu.qSDP);
-      results.setVariable(hSVP, heu.hSVP);
-      results.setVariable(gSVXY, heu.gSVXY);
+      // results.setVariable(oX, heu.oX);
+      // results.setVariable(oSV, heu.oSV);
+      // results.setVariable(qSDP, heu.qSDP);
+      // results.setVariable(hSVP, heu.hSVP);
+      // results.setVariable(gSVXY, heu.gSVXY);
       results.initializeResults(heu.objVal, initialPlacement);
       return results;
    }

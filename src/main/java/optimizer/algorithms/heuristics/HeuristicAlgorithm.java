@@ -264,11 +264,11 @@ public class HeuristicAlgorithm {
     }
 
     private Integer choosePath(String algorithm, int s, int d, List<Integer> paths, boolean lastTry) {
-        if (algorithm.contains(FF))
+        if (algorithm.equals(FF))
             return paths.get(0);
-        else if (algorithm.contains(RF))
+        else if (algorithm.equals(RF))
             return paths.get(rnd.nextInt(paths.size()));
-        else if (algorithm.contains(GRD)) {
+        else if (algorithm.equals(GRD)) {
             int pChosen = getAlreadyUsedPathForDemandFromInitialPlacement(s, d, paths);
             if (pChosen != -1)
                 return pChosen;
@@ -281,7 +281,8 @@ public class HeuristicAlgorithm {
             if (!lastTry)
                 return -1; // if not last path, discard
             return getPathWithLowerServiceDelay(s, d, paths);
-        }
+        } else if (algorithm.equals(GRD_FIRST))
+            return paths.get(0);
         return -1;
     }
 
@@ -345,9 +346,9 @@ public class HeuristicAlgorithm {
 
     private Integer chooseServerForFunction(String algorithm, List<Integer> availableServers, int s, int v, int d,
             boolean lastTry) {
-        if (algorithm.contains(FF))
+        if (algorithm.equals(FF))
             return availableServers.get(0);
-        else if (algorithm.contains(RF))
+        else if (algorithm.equals(RF))
             return availableServers.get(rnd.nextInt(availableServers.size()));
         else if (algorithm.contains(GRD))
             return chooseServerForFunctionGreedy(availableServers, s, v, d, lastTry);

@@ -321,13 +321,13 @@ public class Manager {
       boolean toMST = false;
 
       // 1 - obsv1 [GRD]
-      VariablesAlg obsv1GRD = runCustomAlg(sce, GRD, MGR_REP_CLOUD, OBSV_1, NULL, rm, null, toMST, services,
+      VariablesAlg obsv1GRD = runCustomAlg(sce, GRD_FIRST, MGR_REP_CLOUD, OBSV_1, NULL, rm, null, toMST, services,
             service_lengths, serverCap);
       // 2 - pred2 [GRD]
-      VariablesAlg pred2GRD = runCustomAlg(sce, GRD, MGR_REP_CLOUD, PRED_2, NULL, rm, null, toMST, services,
+      VariablesAlg pred2GRD = runCustomAlg(sce, GRD_FIRST, MGR_REP_CLOUD, PRED_2, NULL, rm, null, toMST, services,
             service_lengths, serverCap);
       // 3 - over2 [GRD]
-      VariablesAlg over2GRD = runCustomAlg(sce, GRD, MGR_REP_CLOUD, OVER_2, NULL, rm, null, toMST, services,
+      VariablesAlg over2GRD = runCustomAlg(sce, GRD_FIRST, MGR_REP_CLOUD, OVER_2, NULL, rm, null, toMST, services,
             service_lengths, serverCap);
 
       // 1 - obsv1 -- > obsv2 [FF]
