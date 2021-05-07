@@ -18,7 +18,7 @@ function initializeGraph(cyContainer) {
                 'shape': 'data(faveShape)',
                 'width': 'data(width)',
                 'height': 'data(height)',
-                'font-size': 8,
+                'font-size': 12,
                 'text-valign': 'center',
                 'text-halign': 'center',
                 'color': 'white',
@@ -58,10 +58,10 @@ function initializeGraph(cyContainer) {
 }
 
 function areEqual(obj1, obj2) {
-    if(obj1['data']['faveColor'] !== obj2['data']['faveColor']){
+    if (obj1['data']['faveColor'] !== obj2['data']['faveColor']) {
         return false;
     }
-    if(obj1['data']['label'] !== obj2['data']['label']){
+    if (obj1['data']['label'] !== obj2['data']['label']) {
         return false;
     }
     return true;
@@ -71,34 +71,34 @@ function updateGraph() {
     var updatedServers = getServers();
     var updatedLinks = getLinks();
     var isChange = false;
-    for (var x = 0; x < updatedServers.length; x++){
-        if(!areEqual(updatedServers[x], servers[x])){
+    for (var x = 0; x < updatedServers.length; x++) {
+        if (!areEqual(updatedServers[x], servers[x])) {
             servers = updatedServers;
             isChange = true;
             break;
         }
     }
     for (var l = 0; l < links.length; l++) {
-        if(!areEqual(updatedLinks[l], links[l])){
-             links = updatedLinks;
-             isChange = true;
-             break;
+        if (!areEqual(updatedLinks[l], links[l])) {
+            links = updatedLinks;
+            isChange = true;
+            break;
         }
     }
-    if(isChange){
-        cy.batch(function(){
-        for (var x = 0; x < servers.length; x++){
-            cy.getElementById(servers[x]['data']['id'])
-              .data("faveColor", servers[x]['data']['faveColor'])
-              .data("label", servers[x]['data']['label'])
-              ;
-          }
-        for (var l = 0; l < links.length; l++) {
-            cy.getElementById(links[l]['data']['id'])
-              .data("faveColor", links[l]['data']['faveColor'])
-              .data("label", links[l]['data']['label'])
-              ;
-        }
+    if (isChange) {
+        cy.batch(function () {
+            for (var x = 0; x < servers.length; x++) {
+                cy.getElementById(servers[x]['data']['id'])
+                    .data("faveColor", servers[x]['data']['faveColor'])
+                    .data("label", servers[x]['data']['label'])
+                    ;
+            }
+            for (var l = 0; l < links.length; l++) {
+                cy.getElementById(links[l]['data']['id'])
+                    .data("faveColor", links[l]['data']['faveColor'])
+                    .data("label", links[l]['data']['label'])
+                    ;
+            }
         });
         cy.layout.run();
     }
@@ -108,14 +108,14 @@ function getNodes() {
     try {
         var message = null;
         $.ajax
-        ({
-            url: "node",
-            type: "GET",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
+            ({
+                url: "node",
+                type: "GET",
+                async: false,
+                success: function (ans) {
+                    message = ans;
+                }
+            });
         return message;
     }
     catch (e) {
@@ -127,14 +127,14 @@ function getServers() {
     try {
         var message = null;
         $.ajax
-        ({
-            url: "server",
-            type: "GET",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
+            ({
+                url: "server",
+                type: "GET",
+                async: false,
+                success: function (ans) {
+                    message = ans;
+                }
+            });
         return message;
     }
     catch (e) {
@@ -146,14 +146,14 @@ function getLinks() {
     try {
         var message = null;
         $.ajax
-        ({
-            url: "link",
-            type: "GET",
-            async: false,
-            success: function (ans) {
-                message = ans;
-            }
-        });
+            ({
+                url: "link",
+                type: "GET",
+                async: false,
+                success: function (ans) {
+                    message = ans;
+                }
+            });
         return message;
     }
     catch (e) {
