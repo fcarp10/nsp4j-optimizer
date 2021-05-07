@@ -234,7 +234,8 @@ public class Manager {
          services.add(1);
          serviceLength.add(s);
       }
-      int[] serverCaps = new int[] { 250, 500, 750, 1000, 1250, 1500 };
+
+      int[] serverCaps = new int[] { 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000 };
       for (int s = 0; s < serverCaps.length; s++) {
          if (customString.equals(CUSTOM_2))
             runCustom2(sce, services, serviceLength, serverCaps[s]);
