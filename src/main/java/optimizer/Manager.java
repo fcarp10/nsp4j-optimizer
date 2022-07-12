@@ -30,7 +30,7 @@ public class Manager {
 
    public static String readParameters(String graphNameForm, boolean considerSubsetOfDemands,
          ArrayList<Integer> services, ArrayList<Integer> serviceLength, int serverCapacity) {
-      String path = Auxiliary.getResourcesPath(graphNameForm + ".yml", null);
+      String path = Auxiliary.getResourcesPath(graphNameForm + ".yml");
       String graphName = readYamlFile(path, graphNameForm);
       modifyYamlParameters(services, serviceLength, serverCapacity);
       readTopologyFiles(path, graphName);
@@ -39,7 +39,7 @@ public class Manager {
    }
 
    public static String readParameters(String graphNameForm) {
-      String path = Auxiliary.getResourcesPath(graphNameForm + ".yml", null);
+      String path = Auxiliary.getResourcesPath(graphNameForm + ".yml");
       String graphName = readYamlFile(path, graphNameForm);
       readTopologyFiles(path, graphName);
       determineUsedDemands(pm, false);
@@ -175,10 +175,10 @@ public class Manager {
             rm = new ResultsManager(pm.getGraphName());
             graphNameShort = readParameters(sce.getInputFileName());
             GRBModel initModel = rm.loadInitialPlacement(
-                  Auxiliary.getResourcesPath(graphNameShort + "_init-lp.mst", null) + graphNameShort + "_init-lp", pm,
+                  Auxiliary.getResourcesPath(graphNameShort + "_init-lp.mst") + graphNameShort + "_init-lp", pm,
                   sce);
             GRBModel initSol = rm.loadModel(
-                  Auxiliary.getResourcesPath(pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc() + ".mst", null)
+                  Auxiliary.getResourcesPath(pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc() + ".mst")
                         + pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc(),
                   pm, sce, false);
             outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc();

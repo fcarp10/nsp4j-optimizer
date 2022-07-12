@@ -1,57 +1,54 @@
 # nsp4j-optimizer
 
-## Network and Service management Planning framework for Java - Optimizer
+Network and Service management Planning framework for Java - Optimizer
+
+Prerequisites
+
+- [Apache Maven](https://maven.apache.org/)
+- [openjdk 11](https://openjdk.org/) (or higher)
+- [Gurobi optimizer v8.1](https://www.gurobi.com/) (or higher)
 
 
-## Build and run
+### Build and run
 
-### Prerequisites
-
-- Apache Maven >= 3.5.2
-- java (openjdk) >= 11.0.8
-- git >= 2.29.2
-- Gurobi optimizer >= 8.1.1
-
-
-### Installing and running the nsp4j-optimizer tool
-
-1. After installing Gurobi Optimizer, find the `gurobi.jar` file and install it
-   on your local maven repository. Change the installation path accordingly and
-   run:
+1. Install `gurobi.jar` library on your local maven repository:
    
-   	```
+   	```shell
 	mvn install:install-file -Dfile=/opt/gurobi910/linux64/lib/gurobi.jar -DgroupId=com.gurobi -DartifactId=gurobi-optimizer -Dversion=9.1.0 -Dpackaging=jar
 	```
 
 
-2. Clone the git repository and package:
+2. Clone, install maven plugins and package:
 
-	```
+	```shell
 	git clone https://github.com/fcarp10/nsp4j-optimizer.git
-	cd /nsp4j-optimizer
+	cd nsp4j-optimizer/
+	mvn install
 	mvn package
 	```
 
-3. Change the VERSION accordingly and run the jar:
+3. Run:
 	
-	```
-	cd /target
+	```shell
+	cp src/main/resources/scenarios/{7nodes.dgs,7nodes.txt,7nodes.yml} target
+	cd target/
 	java -jar nsp4j-optimizer-${VERSION}-jar-with-dependencies.jar
 	```
 
-- This will launch the application on your local machine trough the port 8080.
-  Using a browser, you can access to the GUI in `localhost:8080`.
+4. Access to the dashboard in `localhost:8082`, `load` the default topology and
+   `run` to start the optimizer.
+
+5. Check in `target/results/` for the generated results.
 
 
 ### Troubleshooting
 
-In some Linux distributions (tested on Ubuntu and Arch based distros) and Mac OS you
-might need to specify the Java library path according to your installation path.
+You may need to specify to the Java library path, your Gurobi installation path
+as follows:
 
     -Djava.library.path=/opt/gurobi910/linux64/lib/
 
-Also, depending which Linux distros (tested on Ubuntu and Arch based distros), you
-might need to add a file named `randomLibs.conf` to the directory
+In Linux, you may need to add a file named `randomLibs.conf` to the directory
 `/etc/ld.so.conf.d/` specifying the gurobi installation path:
 
 	echo "/opt/gurobi910/linux64/lib/" > /etc/ld.so.conf.d/randomLibs.conf

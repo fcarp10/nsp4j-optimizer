@@ -88,13 +88,11 @@ public class Auxiliary {
       ResultsGUI.log(status + message);
    }
 
-   public static String getResourcesPath(String fileName, String filePath) {
+   public static String getResourcesPath(String fileName) {
       try {
-         File file;
-         if (filePath == null)
+         File file = new File("./" + fileName);
+         if(!file.exists()) 
             file = new File(Manager.class.getClassLoader().getResource(SCENARIOS_PATH + "/" + fileName).getFile());
-         else
-            file = new File(filePath + "/" + fileName);
          String absolutePath = file.getAbsolutePath();
          String path = absolutePath.substring(0, absolutePath.lastIndexOf(File.separator));
          if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))

@@ -31,8 +31,12 @@ public class ResultsManager {
       SimpleDateFormat MY_FORMAT = new SimpleDateFormat("dd-MM-yy_HH-mm-ss_", Locale.getDefault());
       Date date = new Date();
       String path = ResultsManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+      File f = new File(path);
+      if (!f.isDirectory())
+         path = f.getParent()+ "/results/";
+      else 
+         path = path + "../results/";
       path = path.replaceAll("%20", " ");
-      path = path + "../results/";
       File parentDirectory = new File(path);
       if (!parentDirectory.exists())
          parentDirectory.mkdir();
@@ -55,7 +59,7 @@ public class ResultsManager {
    }
 
    public String importConfDrlFile(String fileName) {
-      String path = Auxiliary.getResourcesPath(fileName + ".json", null);
+      String path = Auxiliary.getResourcesPath(fileName + ".json");
       ObjectMapper objectMapper = new ObjectMapper();
       String conf = null;
       try {
