@@ -70,8 +70,9 @@ public class SpecificConstraints {
             forceSrcDst();
          if (sc.getConstraints().get(CONST_REP))
             constRep();
-         if (sc.getConstraints().get(PATHS_SERVERS_CLOUD))
-            constraintPathsServersCloud();
+         if (sc.getConstraints().containsKey(PATHS_SERVERS_CLOUD))
+            if (sc.getConstraints().get(PATHS_SERVERS_CLOUD))
+               constraintPathsServersCloud();
 
          // create link and server utilization expressions
          GRBLinExpr[] luExpr = createLinkUtilizationExpr(linkLoadExpr);

@@ -108,11 +108,8 @@ public class ResultsGUI {
          Double utilization = (Double) thisEntry.getValue();
          Server server = (Server) thisEntry.getKey();
          StringBuilder u = new StringBuilder();
-         if (utilization != 0) {
+         if (utilization != 0)
             u.append(df.format(utilization));
-            if (functions.get(server).length() < 20)
-               u.append("\n").append(functions.get(server));
-         }
          serverJsonList.add(new ServerJson(server.getId(), server.getParent().getAttribute(longitudeLabel),
                server.getParent().getAttribute(latitudeLabel), getColor(utilization), u.toString()));
       }

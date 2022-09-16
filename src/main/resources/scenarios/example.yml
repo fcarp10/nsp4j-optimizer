@@ -1,0 +1,49 @@
+# auxiliary parameters
+aux: {
+  "gap": 0.0,
+  "offset_results": 0,
+  "x_scaling": 6000.0,
+  "y_scaling": 6000.0,
+  "server_capacity": 1000,
+  "link_capacity": 1000,
+  "directed_edges": true,
+  "all_nodes_to_cloud": false,
+  "num_servers_node": 1,
+  "links_weight": 1.0,
+  "servers_weight": 0.0,
+}
+# service definitions
+service_chains:
+  - id: 1
+    chain: [1]
+    max_propagation_delay: 5.0 # ms
+    max_delay: 400 # ms
+    attributes: {
+      "min_paths": 1,
+      "max_paths": 3
+    }
+# function definitions
+function_types: 
+  - type: 1 
+    attributes: {
+      "replicable": false,
+      "load_ratio": [1.0, 1.0],
+      "overhead_ratio": [0.0, 0.0],
+      # "sync_load": 0.1,
+      "max_dem": 10,
+      "max_bw": 100,
+      "process_traffic_delay": 3.0,
+      "process_delay": 5.0,
+      "min_process_delay": 2.0, 
+      "max_delay": 100.0,
+    }
+# traffic flow definitions
+traffic_flows:
+  - min_dem: 2
+    max_dem: 2
+    min_bw: 300
+    max_bw: 300 # change "max_cap_server" accordingly
+    services: [1]
+    service_length: [3]
+    src: '1'
+    dst: '4'
