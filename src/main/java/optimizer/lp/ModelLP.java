@@ -1,7 +1,7 @@
 package optimizer.lp;
 
 import gurobi.*;
-import manager.Parameters;
+import optimizer.Parameters;
 import optimizer.Manager;
 import optimizer.results.Auxiliary;
 import org.slf4j.Logger;

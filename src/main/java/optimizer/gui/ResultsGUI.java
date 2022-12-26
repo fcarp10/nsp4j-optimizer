@@ -14,8 +14,8 @@ import java.util.Map.Entry;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 
-import manager.Parameters;
-import manager.elements.Server;
+import optimizer.Parameters;
+import optimizer.elements.Server;
 import optimizer.results.Results;
 
 public class ResultsGUI {

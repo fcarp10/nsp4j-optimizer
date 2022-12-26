@@ -4,6 +4,7 @@ import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBModel;
 import gurobi.GRBVar;
+import optimizer.Parameters;
 import optimizer.Definitions;
 import optimizer.gui.Scenario;
 
@@ -37,7 +38,7 @@ public class VariablesLP {
    public GRBVar[][][][] gSVXY; // binary, aux synchronization traffic
    public GRBVar[][][] hSVP; // binary, traffic synchronization
 
-   public VariablesLP(manager.Parameters pm, GRBModel model, Scenario sc, GRBModel initialSolution) {
+   public VariablesLP(Parameters pm, GRBModel model, Scenario sc, GRBModel initialSolution) {
       try {
 
          zSP_init(pm, model, initialSolution);
@@ -105,7 +106,7 @@ public class VariablesLP {
       }
    }
 
-   private void zSP_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void zSP_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       zSP = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
@@ -117,7 +118,7 @@ public class VariablesLP {
          }
    }
 
-   private void zSPD_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void zSPD_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       zSPD = new GRBVar[pm.getServices().size()][pm.getPathsTrafficFlow()][pm.getDemandsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++)
@@ -130,7 +131,7 @@ public class VariablesLP {
             }
    }
 
-   private void fX_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void fX_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       fX = new GRBVar[pm.getServers().size()];
       for (int x = 0; x < pm.getServers().size(); x++) {
          String varName = Definitions.fX + "[" + x + "]";
@@ -141,7 +142,7 @@ public class VariablesLP {
       }
    }
 
-   private void fXSV_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void fXSV_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       fXSV = new GRBVar[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()];
       for (int x = 0; x < pm.getServers().size(); x++)
          for (int s = 0; s < pm.getServices().size(); s++)
@@ -154,7 +155,7 @@ public class VariablesLP {
             }
    }
 
-   private void fXSVD_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void fXSVD_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       fXSVD = new GRBVar[pm.getServers().size()][pm.getServices().size()][pm.getServiceLength()][pm
             .getDemandsTrafficFlow()];
       for (int x = 0; x < pm.getServers().size(); x++)
@@ -169,7 +170,7 @@ public class VariablesLP {
                }
    }
 
-   private void uL_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void uL_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       uL = new GRBVar[pm.getLinks().size()];
       for (int l = 0; l < pm.getLinks().size(); l++) {
          String varName = Definitions.uL + "[" + l + "]";
@@ -180,7 +181,7 @@ public class VariablesLP {
       }
    }
 
-   private void uX_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void uX_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       uX = new GRBVar[pm.getServers().size()];
       for (int x = 0; x < pm.getServers().size(); x++) {
          String varName = Definitions.uX + "[" + x + "]";
@@ -191,7 +192,7 @@ public class VariablesLP {
       }
    }
 
-   private void xN_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void xN_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       xN = new GRBVar[pm.getNodes().size()];
       for (int n = 0; n < pm.getNodes().size(); n++) {
          String varName = Definitions.xN + "[" + n + "]";
@@ -202,7 +203,7 @@ public class VariablesLP {
       }
    }
 
-   private void kL_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void kL_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       kL = new GRBVar[pm.getLinks().size()];
       for (int l = 0; l < pm.getLinks().size(); l++) {
          String varName = Definitions.kL + "[" + l + "]";
@@ -213,7 +214,7 @@ public class VariablesLP {
       }
    }
 
-   private void kX_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void kX_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       kX = new GRBVar[pm.getServers().size()];
       for (int x = 0; x < pm.getServers().size(); x++) {
          String varName = Definitions.kX + "[" + x + "]";
@@ -224,7 +225,7 @@ public class VariablesLP {
       }
    }
 
-   private void uMax_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void uMax_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       String varName = Definitions.uMax;
       if (initialSolution != null)
          uMax = initialSolution.getVarByName(varName);
@@ -232,7 +233,7 @@ public class VariablesLP {
          uMax = model.addVar(0.0, 1.0, 0.0, GRB.CONTINUOUS, varName);
    }
 
-   private void oX_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void oX_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       oX = new GRBVar[pm.getServers().size()];
       for (int x = 0; x < pm.getServers().size(); x++) {
          String varName = Definitions.oX + "[" + x + "]";
@@ -243,7 +244,7 @@ public class VariablesLP {
       }
    }
 
-   private void oSV_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void oSV_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       oSV = new GRBVar[pm.getServices().size()][pm.getServiceLength()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
@@ -255,7 +256,7 @@ public class VariablesLP {
          }
    }
 
-   private void qSDP_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void qSDP_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       qSDP = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
@@ -268,7 +269,7 @@ public class VariablesLP {
             }
    }
 
-   private void ySDP_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void ySDP_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       ySDP = new GRBVar[pm.getServices().size()][pm.getDemandsTrafficFlow()][pm.getPathsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
@@ -281,7 +282,7 @@ public class VariablesLP {
             }
    }
 
-   private void gSVXY_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void gSVXY_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       gSVXY = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm.getServers()
             .size()];
       for (int s = 0; s < pm.getServices().size(); s++)
@@ -297,7 +298,7 @@ public class VariablesLP {
                   }
    }
 
-   private void hSVP_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void hSVP_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       hSVP = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getPaths().size()];
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
@@ -310,7 +311,7 @@ public class VariablesLP {
             }
    }
 
-   private void dSVXD_init(manager.Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+   private void dSVXD_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
       dSVXD = new GRBVar[pm.getServices().size()][pm.getServiceLength()][pm.getServers().size()][pm
             .getDemandsTrafficFlow()];
       for (int s = 0; s < pm.getServices().size(); s++)

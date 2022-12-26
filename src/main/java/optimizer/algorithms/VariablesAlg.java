@@ -9,10 +9,8 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Path;
 
 import gurobi.GRBModel;
-import manager.Parameters;
-import manager.elements.Function;
-import manager.elements.Server;
-import manager.elements.Service;
+import optimizer.Parameters;
+import optimizer.elements.*;
 import optimizer.results.Auxiliary;
 
 public class VariablesAlg {

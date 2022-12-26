@@ -18,7 +18,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import manager.Parameters;
+import optimizer.Parameters;
 import optimizer.algorithms.NetworkManager;
 import optimizer.algorithms.VariablesAlg;
 import optimizer.results.Auxiliary;

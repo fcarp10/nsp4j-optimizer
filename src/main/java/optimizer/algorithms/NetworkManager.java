@@ -13,11 +13,8 @@ import org.graphstream.graph.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import manager.Parameters;
-import manager.elements.Function;
-import manager.elements.Server;
-import manager.elements.Service;
-import manager.elements.TrafficFlow;
+import optimizer.Parameters;
+import optimizer.elements.*;
 import optimizer.results.Auxiliary;
 
 public class NetworkManager {

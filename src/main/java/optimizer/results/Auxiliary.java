@@ -19,9 +19,8 @@ import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBModel;
 import gurobi.GRBVar;
-import manager.Parameters;
-import manager.elements.Function;
-import manager.elements.Service;
+import optimizer.Parameters;
+import optimizer.elements.*;
 import optimizer.Manager;
 import optimizer.algorithms.VariablesAlg;
 import optimizer.gui.ResultsGUI;
@@ -93,8 +92,7 @@ public class Auxiliary {
          File file = new File("./" + fileName);
          if(!file.exists()) 
             file = new File(Manager.class.getClassLoader().getResource(SCENARIOS_PATH + "/" + fileName).getFile());
-         String absolutePath = file.getAbsolutePath();
-         String path = absolutePath.substring(0, absolutePath.lastIndexOf(File.separator));
+         String path = file.getParent();
          if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
             path = path + "/";
          else

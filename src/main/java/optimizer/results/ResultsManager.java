@@ -8,7 +8,7 @@ import gurobi.GRB;
 import gurobi.GRBEnv;
 import gurobi.GRBException;
 import gurobi.GRBModel;
-import manager.Parameters;
+import optimizer.Parameters;
 import optimizer.gui.Scenario;
 import optimizer.lp.VariablesLP;
 import org.slf4j.Logger;

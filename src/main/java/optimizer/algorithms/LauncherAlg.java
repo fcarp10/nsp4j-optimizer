@@ -1,6 +1,6 @@
 package optimizer.algorithms;
 
-import manager.Parameters;
+import optimizer.Parameters;
 import optimizer.Definitions;
 import optimizer.algorithms.heuristics.HeuristicAlgorithm;
 import optimizer.gui.ResultsGUI;

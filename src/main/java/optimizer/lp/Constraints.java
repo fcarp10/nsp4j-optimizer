@@ -3,7 +3,8 @@ package optimizer.lp;
 import gurobi.GRB;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
-import manager.elements.Service;
+import optimizer.elements.Service;
+import optimizer.Parameters;
 import optimizer.gui.Scenario;
 import org.graphstream.graph.Node;
 
@@ -13,9 +14,9 @@ public class Constraints {
 
    private ModelLP modelLP;
    private VariablesLP vars;
-   private manager.Parameters pm;
+   private Parameters pm;
 
-   public Constraints(manager.Parameters pm, ModelLP modelLP, Scenario scenario, boolean[][][] initialPlacement) {
+   public Constraints(Parameters pm, ModelLP modelLP, Scenario scenario, boolean[][][] initialPlacement) {
       try {
          this.pm = pm;
          this.modelLP = modelLP;

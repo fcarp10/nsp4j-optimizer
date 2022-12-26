@@ -3,7 +3,7 @@ package optimizer.lp;
 import gurobi.GRBException;
 import gurobi.GRBLinExpr;
 import gurobi.GRBModel;
-import manager.Parameters;
+import optimizer.Parameters;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
 import optimizer.results.Auxiliary;

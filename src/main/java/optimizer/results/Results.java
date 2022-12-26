@@ -2,11 +2,8 @@ package optimizer.results;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import manager.Parameters;
-import manager.elements.Function;
-import manager.elements.Server;
-import manager.elements.Service;
-import manager.elements.TrafficFlow;
+import optimizer.Parameters;
+import optimizer.elements.*;
 import optimizer.gui.GraphData;
 import optimizer.gui.Scenario;
 import org.graphstream.graph.Edge;

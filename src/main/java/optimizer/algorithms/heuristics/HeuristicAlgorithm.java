@@ -13,7 +13,7 @@ import static optimizer.Definitions.*;
 import org.eclipse.collections.impl.list.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import manager.Parameters;
+import optimizer.Parameters;
 import optimizer.algorithms.NetworkManager;
 import optimizer.algorithms.VariablesAlg;
 import optimizer.results.Auxiliary;

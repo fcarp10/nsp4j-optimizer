@@ -2,8 +2,7 @@ package optimizer;
 
 import gurobi.GRBException;
 import gurobi.GRBModel;
-import manager.Parameters;
-import manager.elements.TrafficFlow;
+import optimizer.elements.TrafficFlow;
 import optimizer.gui.ResultsGUI;
 import optimizer.gui.Scenario;
 import optimizer.algorithms.LauncherAlg;
@@ -14,7 +13,7 @@ import optimizer.results.ResultsManager;
 import org.graphstream.graph.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import utils.ConfigFiles;
+import optimizer.utils.ConfigFiles;
 
 import java.util.ArrayList;
 import java.util.Random;
