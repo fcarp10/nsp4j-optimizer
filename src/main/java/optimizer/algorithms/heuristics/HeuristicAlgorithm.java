@@ -281,7 +281,7 @@ public class HeuristicAlgorithm {
             if (!lastTry)
                 return -1; // if not last path, discard
             return getPathWithLowerServiceDelay(s, d, paths);
-        } else if (algorithm.equals(GRD_FIRST))
+        } else if (algorithm.equals(JOURNAL_GRD_FIRST))
             return paths.get(0);
         return -1;
     }

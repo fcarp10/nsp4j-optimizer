@@ -27,14 +27,15 @@ public class Definitions {
    public static final String FF = "FF";
    public static final String RF = "RF";
    public static final String GRD = "GRD";
-   public static final String GRD_FIRST = "GRD_FIRST";
-   public static final String CUSTOM_1 = "CUSTOM_1";
-   public static final String CUSTOM_2 = "CUSTOM_2";
-   public static final String CUSTOM_2_SFC_LENGTH = "CUSTOM_2_SFC_LENGTH";
-   public static final String CUSTOM_2_SERVER_CAP = "CUSTOM_2_SERVER_CAP";
-   public static final String CUSTOM_3 = "CUSTOM_3";
-   public static final String CUSTOM_3_SFC_LENGTH = "CUSTOM_3_SFC_LENGTH";
-   public static final String CUSTOM_3_SERVER_CAP = "CUSTOM_3_SERVER_CAP";
+   // scenarios journal
+   public static final String JOURNAL_GRD_FIRST = "JOURNAL_GRD_FIRST";
+   public static final String JOURNAL_LP_INIT = "JOURNAL_LP_INIT";
+   public static final String JOURNAL_ALL = "JOURNAL_ALL";
+   public static final String JOURNAL_ALL_SFC_LENGTH = "JOURNAL_ALL_SFC_LENGTH";
+   public static final String JOURNAL_ALL_SERVER_CAP = "JOURNAL_ALL_SERVER_CAP";
+   public static final String JOURNAL_HEU = "JOURNAL_HEU";
+   public static final String JOURNAL_HEU_SFC_LENGTH = "JOURNAL_HEU_SFC_LENGTH";
+   public static final String JOURNAL_HEU_SERVER_CAP = "JOURNAL_HEU_SERVER_CAP";
 
    public static final String OBSV_1 = "obsv1";
    public static final String OBSV_2 = "obsv2";
