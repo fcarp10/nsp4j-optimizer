@@ -180,8 +180,6 @@ public class ModelLP {
          objVal = grbModel.get(GRB.DoubleAttr.ObjVal);
          double objValLog = Auxiliary.roundDouble(objVal, 4);
          printLog(log, INFO, "finished [" + objValLog + "]");
-         if (objVal > 100000)
-            return null;
          return objVal;
       } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
          grbModel.computeIIS();

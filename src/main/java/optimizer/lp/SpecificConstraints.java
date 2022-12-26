@@ -89,12 +89,14 @@ public class SpecificConstraints {
             linearUtilCostFunctions(xuExpr, vars.kX);
 
          // constraint link utilization
-         for (int l = 0; l < pm.getLinks().size(); l++)
-            modelLP.getGrbModel().addConstr(luExpr[l], GRB.EQUAL, vars.uL[l],
-                  uL + "[" + pm.getLinks().get(l).getId() + "]");
+         if (!sc.getObjFunc().equals(DIMEN_LINK_CAP)) // except when dimensioning
+            for (int l = 0; l < pm.getLinks().size(); l++)
+               modelLP.getGrbModel().addConstr(luExpr[l], GRB.EQUAL, vars.uL[l],
+                     uL + "[" + pm.getLinks().get(l).getId() + "]");
 
-         // constraint server utilization if no dimensioning
-         if (!sc.getObjFunc().equals(DIMEN_NUM_SERVERS))
+         // constraint server utilization
+         if (!sc.getObjFunc().equals(DIMEN_NUM_SERVERS)
+               || !sc.getObjFunc().equals(DIMEN_SERVER_CAP)) // except when dimensioning
             for (int x = 0; x < pm.getServers().size(); x++)
                modelLP.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX + "[x] --> " + "[" + x + "]");
 
