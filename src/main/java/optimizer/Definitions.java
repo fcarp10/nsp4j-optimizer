@@ -123,6 +123,8 @@ public class Definitions {
    public static final String LATITUDE_LABEL_2 = "y";
    public static final String CLOUD_SERVER_CAPACITY = "cloud_server_capacity";
    public static final String SERVER_CAPACITY = "server_capacity";
+   public static final String NODE_NUM_SERVERS = "num_servers_node";
+   public static final String CLOUD_NUM_SERVERS = "cloud_num_servers";
 
    // link parameters
    public static final String LINK_CAPACITY = "capacity";
@@ -130,6 +132,7 @@ public class Definitions {
    public static final String LINK_DISTANCE = "distance";
    public static final String LINK_CLOUD = "link_cloud";
    public static final String CLOUD_LINK_CAPACITY = "cloud_link_capacity";
+   public static final String LINK_CAPACITY_DEFAULT = "link_capacity";
 
    // Aux parameters
    public static final String INITIAL_TRAFFIC_LOAD = "initial_traffic_load";
@@ -172,4 +175,5 @@ public class Definitions {
    public static final String ERROR = "ERROR - ";
    public static final String INFO = "INFO - ";
    public static final String WARNING = "WARN - ";
+
 }

@@ -101,9 +101,9 @@ public class SpecificConstraints {
    private void dimensioning(GRBLinExpr[] serverLoadExpr) throws GRBException {
       for (int n = 0; n < pm.getNodes().size(); n++) {
          GRBLinExpr expr1 = new GRBLinExpr();
-         expr1.addTerm((int) pm.getAux(SERVER_DIMENSIONING_CAPACITY), vars.xN[n]);
+         expr1.addTerm((int) pm.getGlobal(SERVER_DIMENSIONING_CAPACITY), vars.xN[n]);
          GRBLinExpr expr2 = new GRBLinExpr();
-         expr2.multAdd((double) pm.getAux(OVERPROVISIONING_SERVER_CAPACITY), serverLoadExpr[n]);
+         expr2.multAdd((double) pm.getGlobal(OVERPROVISIONING_SERVER_CAPACITY), serverLoadExpr[n]);
          modelLP.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr1, DIMEN);
       }
    }
@@ -189,8 +189,8 @@ public class SpecificConstraints {
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
             GRBLinExpr expr = new GRBLinExpr();
-            expr.addTerm((double) pm.getAux().get(SERVER_IDLE_ENERGY_COST), vars.fX[x]);
-            expr.addTerm((double) pm.getAux().get(SERVER_UTIL_ENERGY_COST), vars.uX[x]);
+            expr.addTerm((double) pm.getGlobal().get(SERVER_IDLE_ENERGY_COST), vars.fX[x]);
+            expr.addTerm((double) pm.getGlobal().get(SERVER_UTIL_ENERGY_COST), vars.uX[x]);
             modelLP.getGrbModel().addConstr(expr, GRB.EQUAL, vars.oX[x], oX);
          } else {
             modelLP.getGrbModel().addConstr(vars.oX[x], GRB.EQUAL, 0, oX);
@@ -243,7 +243,7 @@ public class SpecificConstraints {
                   double profit = 0;
                   for (int v = 0; v < service.getFunctions().size(); v++)
                      profit += (double) service.getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
-                  double qosPenalty = (double) pm.getAux().get(QOS_PENALTY_RATIO) * profit; // in $/h
+                  double qosPenalty = (double) pm.getGlobal().get(QOS_PENALTY_RATIO) * profit; // in $/h
 
                   GRBLinExpr expr2 = new GRBLinExpr();
                   expr2.multAdd(qosPenalty, expr); // in $/h

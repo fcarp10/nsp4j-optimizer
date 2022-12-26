@@ -103,10 +103,10 @@ public class RoutingModel {
             if (epsilon > 0) {
                // reduce epsilon when new incumbent solution is found
                if ((float) vars.getObjVal() < bestObjVal) {
-                  epsilon = Auxiliary.roundDouble(epsilon - (double) pm.getAux(ROUTING_EPSILON_DECREMENT), 1);
+                  epsilon = Auxiliary.roundDouble(epsilon - (double) pm.getGlobal(ROUTING_EPSILON_DECREMENT), 1);
                } else if ((float) vars.getObjVal() >= bestObjVal) {
                   repetitionsWithSameValue++;
-                  if (repetitionsWithSameValue == (int) pm.getAux(ROUTING_MAX_REPETITIONS))
+                  if (repetitionsWithSameValue == (int) pm.getGlobal(ROUTING_MAX_REPETITIONS))
                      break;
                }
             } else
@@ -115,7 +115,7 @@ public class RoutingModel {
          } else {
             if ((float) vars.getObjVal() == bestObjVal) {
                repetitionsWithSameValue++;
-               if (repetitionsWithSameValue == (int) pm.getAux(ROUTING_MAX_REPETITIONS))
+               if (repetitionsWithSameValue == (int) pm.getGlobal(ROUTING_MAX_REPETITIONS))
                   break;
             } else if ((float) vars.getObjVal() < bestObjVal)
                repetitionsWithSameValue = 0;

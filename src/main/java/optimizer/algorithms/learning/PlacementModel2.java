@@ -169,13 +169,13 @@ public class PlacementModel2 {
                } else if (currentObjVal == localBestObjVal) { // same solution => reduce randomness or exit
                   if (epsilons.get(epsilonKey) > 0)
                      epsilons.put(epsilonKey,
-                           Auxiliary.roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(EPSILON_STEPPER), 1));
+                           Auxiliary.roundDouble(epsilons.get(epsilonKey) - (double) pm.getGlobal(EPSILON_STEPPER), 1));
                   else
                      break;
                } else {
                   if (epsilons.get(epsilonKey) < 1) // worse solution, increase randomness
                      epsilons.put(epsilonKey,
-                           Auxiliary.roundDouble(epsilons.get(epsilonKey) + (double) pm.getAux(EPSILON_STEPPER), 1));
+                           Auxiliary.roundDouble(epsilons.get(epsilonKey) + (double) pm.getGlobal(EPSILON_STEPPER), 1));
                }
             }
          }

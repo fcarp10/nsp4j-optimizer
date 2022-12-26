@@ -9,22 +9,21 @@ import java.net.URISyntaxException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static optimizer.utils.Definitions.*;
+import static optimizer.Definitions.*;
 
 public class ParametersTest {
 
    @Test
    public void parameters() throws URISyntaxException {
 
-      final String graphName = "palmetto-plot";
-      final String extensionGraph = ".gml";
+      final String graphName = "example";
+      final String extensionGraph = ".dgs";
       final boolean directedEdges = true;
-      final boolean allNodesToCloud = false;
       String path = new File(ConfigFiles.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath())
             .getParent() + "/";
 
       Parameters pm = ConfigFiles.readParameters(path + graphName + ".yml");
-      pm.initialize(path + graphName + extensionGraph, path + graphName + ".txt", directedEdges, allNodesToCloud);
+      pm.initialize(path + graphName + extensionGraph, path + graphName + ".txt", directedEdges);
       assertNotNull(pm.getGraphName());
       assertNotNull(pm.getServers());
       for (Service s : pm.getServices()) {
@@ -35,7 +34,6 @@ public class ParametersTest {
             assertNotNull(f.getAttribute(FUNCTION_REPLICABLE));
             assertNotNull(f.getAttribute(FUNCTION_LOAD_RATIO));
             assertNotNull(f.getAttribute(FUNCTION_OVERHEAD_RATIO));
-            assertNotNull(f.getAttribute(FUNCTION_SYNC_LOAD_RATIO));
             assertNotNull(f.getAttribute(FUNCTION_PROCESS_TRAFFIC_DELAY));
             assertNotNull(f.getAttribute(FUNCTION_MAX_DELAY));
             assertNotNull(f.getAttribute(FUNCTION_MIN_PROCESS_DELAY));

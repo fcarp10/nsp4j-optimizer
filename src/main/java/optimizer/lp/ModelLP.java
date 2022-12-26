@@ -28,7 +28,7 @@ public class ModelLP {
             grbModel = initialSolution;
          Callback cb = new Callback();
          grbModel.setCallback(cb);
-         grbModel.getEnv().set(GRB.DoubleParam.MIPGap, (double) pm.getAux().get("gap"));
+         grbModel.getEnv().set(GRB.DoubleParam.MIPGap, (double) pm.getGlobal().get("gap"));
       } catch (GRBException e) {
          e.printStackTrace();
       }

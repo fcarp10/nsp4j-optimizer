@@ -92,7 +92,9 @@ public class Results {
    public Results(Parameters pm, Scenario scenario) {
       this.pm = pm;
       this.sc = scenario;
-      this.offset = (int) pm.getAux("offset_results");
+      this.offset = 0;
+      if (pm.getGlobal().containsKey("offset_results"))
+         this.offset = (int) pm.getGlobal("offset_results");
       this.luSummary = new double[4];
       this.xuSummary = new double[4];
       this.fpSummary = new double[4];
@@ -583,7 +585,7 @@ public class Results {
 
             for (int v = 0; v < service.getFunctions().size(); v++)
                profit += (double) service.getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
-            double qosPenalty = (double) pm.getAux().get(QOS_PENALTY_RATIO) * profit; // in $/h
+            double qosPenalty = (double) pm.getGlobal().get(QOS_PENALTY_RATIO) * profit; // in $/h
 
             for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
                if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))

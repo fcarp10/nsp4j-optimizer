@@ -58,19 +58,20 @@ public class Manager {
    private static void modifyYamlParameters(ArrayList<Integer> services, ArrayList<Integer> serviceLength,
          int serverCapacity) {
       if (services.get(0) > 0)
-         pm.getAux().put(SERVICES, services);
+         pm.getGlobal().put(SERVICES, services);
       if (serviceLength.get(0) > 0)
-         pm.getAux().put(SERVICE_LENGTH, serviceLength);
+         pm.getGlobal().put(SERVICE_LENGTH, serviceLength);
       if (serverCapacity > 0)
-         pm.getAux().put(SERVER_CAPACITY, serverCapacity);
+         pm.getGlobal().put(SERVER_CAPACITY, serverCapacity);
    }
 
    private static void readTopologyFiles(String path, String graphName) {
       String[] extensions = new String[] { ".dgs", ".gml" };
       boolean isLoaded = false;
       for (int i = 0; i < extensions.length; i++) {
+
          if (pm.initialize(path + graphName + extensions[i], path + graphName + ".txt",
-               (boolean) pm.getAux(DIRECTED_EDGES), (boolean) pm.getAux(ALL_NODES_TO_CLOUD))) {
+               (boolean) pm.getGlobal(DIRECTED_EDGES))) {
             isLoaded = true;
             break;
          }
@@ -85,8 +86,8 @@ public class Manager {
    }
 
    private static void checkTopologyScale(Parameters pm) {
-      double scalingX = (double) pm.getAux(X_SCALING);
-      double scalingY = (double) pm.getAux(Y_SCALING);
+      double scalingX = (double) pm.getGlobal(X_SCALING);
+      double scalingY = (double) pm.getGlobal(Y_SCALING);
       if (scalingX != 1.0 || scalingY != 1.0) {
          String longitudeLabel, latitudeLabel;
          if (pm.getNodes().get(0).getAttribute(LONGITUDE_LABEL_1) != null) {
@@ -116,7 +117,7 @@ public class Manager {
          for (int d = 0; d < trafficFlow.getDemands().size(); d++)
             trafficFlow.getAux().add(true);
          if (considerSubset) {
-            double initialTrafficLoad = (double) pm.getAux().get(INITIAL_TRAFFIC_LOAD);
+            double initialTrafficLoad = (double) pm.getGlobal().get(INITIAL_TRAFFIC_LOAD);
             double value;
             for (int d = 0; d < trafficFlow.getDemands().size(); d++) {
                value = rnd.nextDouble();
@@ -138,71 +139,71 @@ public class Manager {
       String graphNameShort;
       try {
          switch (sce.getName()) {
-         case LP:
-            boolean exportMST = true;
-            rm = new ResultsManager(pm.getGraphName());
-            readParameters(sce.getInputFileName());
-            String outputFileName = pm.getGraphName() + sce.getName() + sce.getObjFunc();
-            LauncherLP.run(pm, sce, rm, null, null, outputFileName, exportMST);
-            break;
+            case LP:
+               boolean exportMST = true;
+               rm = new ResultsManager(pm.getGraphName());
+               readParameters(sce.getInputFileName());
+               String outputFileName = pm.getGraphName() + sce.getName() + sce.getObjFunc();
+               LauncherLP.run(pm, sce, rm, null, null, outputFileName, exportMST);
+               break;
 
-         case FF:
-            rm = new ResultsManager(pm.getGraphName());
-            readParameters(sce.getInputFileName());
-            outputFileName = pm.getGraphName() + "_" + FF + "_" + sce.getObjFunc();
-            LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
-            break;
-
-         case RF:
-            rm = new ResultsManager(pm.getGraphName());
-            readParameters(sce.getInputFileName());
-            for (int i = 0; i < 10; i++) {
-               outputFileName = pm.getGraphName() + "_" + RF + "_" + sce.getObjFunc() + "_" + i;
+            case FF:
+               rm = new ResultsManager(pm.getGraphName());
+               readParameters(sce.getInputFileName());
+               outputFileName = pm.getGraphName() + "_" + FF + "_" + sce.getObjFunc();
                LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
-            }
-            break;
+               break;
 
-         case GRD:
-            rm = new ResultsManager(pm.getGraphName());
-            readParameters(sce.getInputFileName());
-            outputFileName = pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc();
-            LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
-            break;
+            case RF:
+               rm = new ResultsManager(pm.getGraphName());
+               readParameters(sce.getInputFileName());
+               for (int i = 0; i < 10; i++) {
+                  outputFileName = pm.getGraphName() + "_" + RF + "_" + sce.getObjFunc() + "_" + i;
+                  LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
+               }
+               break;
 
-         case CUSTOM_1:
-            exportMST = true;
-            rm = new ResultsManager(pm.getGraphName());
-            graphNameShort = readParameters(sce.getInputFileName());
-            GRBModel initModel = rm.loadInitialPlacement(
-                  Auxiliary.getResourcesPath(graphNameShort + "_init-lp.mst") + graphNameShort + "_init-lp", pm,
-                  sce);
-            GRBModel initSol = rm.loadModel(
-                  Auxiliary.getResourcesPath(pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc() + ".mst")
-                        + pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc(),
-                  pm, sce, false);
-            outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc();
-            LauncherLP.run(pm, sce, rm, initModel, initSol, outputFileName, exportMST);
-            break;
+            case GRD:
+               rm = new ResultsManager(pm.getGraphName());
+               readParameters(sce.getInputFileName());
+               outputFileName = pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc();
+               LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
+               break;
 
-         case CUSTOM_2_SFC_LENGTH:
-            runCustomSFCLength(sce, CUSTOM_2);
-            break;
+            case CUSTOM_1:
+               exportMST = true;
+               rm = new ResultsManager(pm.getGraphName());
+               graphNameShort = readParameters(sce.getInputFileName());
+               GRBModel initModel = rm.loadInitialPlacement(
+                     Auxiliary.getResourcesPath(graphNameShort + "_init-lp.mst") + graphNameShort + "_init-lp", pm,
+                     sce);
+               GRBModel initSol = rm.loadModel(
+                     Auxiliary.getResourcesPath(pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc() + ".mst")
+                           + pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc(),
+                     pm, sce, false);
+               outputFileName = pm.getGraphName() + "_" + LP + "_" + sce.getObjFunc();
+               LauncherLP.run(pm, sce, rm, initModel, initSol, outputFileName, exportMST);
+               break;
 
-         case CUSTOM_2_SERVER_CAP:
-            runCustomServerCap(sce, CUSTOM_2);
-            break;
+            case CUSTOM_2_SFC_LENGTH:
+               runCustomSFCLength(sce, CUSTOM_2);
+               break;
 
-         case CUSTOM_3_SFC_LENGTH:
-            runCustomSFCLength(sce, CUSTOM_3);
-            break;
+            case CUSTOM_2_SERVER_CAP:
+               runCustomServerCap(sce, CUSTOM_2);
+               break;
 
-         case CUSTOM_3_SERVER_CAP:
-            runCustomServerCap(sce, CUSTOM_3);
-            break;
+            case CUSTOM_3_SFC_LENGTH:
+               runCustomSFCLength(sce, CUSTOM_3);
+               break;
 
-         default:
-            printLog(log, INFO, "no algorithm selected");
-            break;
+            case CUSTOM_3_SERVER_CAP:
+               runCustomServerCap(sce, CUSTOM_3);
+               break;
+
+            default:
+               printLog(log, INFO, "no algorithm selected");
+               break;
          }
          printLog(log, INFO, "backend is ready");
       } catch (Exception e) {

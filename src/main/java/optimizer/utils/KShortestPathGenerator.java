@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static optimizer.utils.Definitions.NODE_CLOUD;
+import static optimizer.Definitions.NODE_CLOUD;
 
 public class KShortestPathGenerator {
 

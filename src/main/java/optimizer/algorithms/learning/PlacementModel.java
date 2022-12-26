@@ -108,11 +108,11 @@ public class PlacementModel {
             if (epsilons.get(epsilonKey) > 0) {
                if ((float) vars.getObjVal() < bestGlobalObjVal) {
                   epsilons.put(epsilonKey,
-                        Auxiliary.roundDouble(epsilons.get(epsilonKey) - (double) pm.getAux(EPSILON_STEPPER), 1));
+                        Auxiliary.roundDouble(epsilons.get(epsilonKey) - (double) pm.getGlobal(EPSILON_STEPPER), 1));
                   repetitions = 0;
                } else if ((float) vars.getObjVal() >= bestGlobalObjVal) {
                   repetitions++;
-                  if (repetitions == (int) pm.getAux(PLACEMENT_MAX_REPETITIONS))
+                  if (repetitions == (int) pm.getGlobal(PLACEMENT_MAX_REPETITIONS))
                      break;
                }
             } else

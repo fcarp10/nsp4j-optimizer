@@ -14,13 +14,13 @@ import optimizer.utils.GraphManager;
 import java.math.BigInteger;
 import java.util.*;
 
-import static optimizer.utils.Definitions.*;
+import static optimizer.Definitions.*;
 
 public class Parameters {
 
    private static final Logger log = LoggerFactory.getLogger(Parameters.class);
-   // auxiliary parameters
-   private Map<String, Object> aux;
+   // global parameters
+   private Map<String, Object> global;
    // service definitions
    @JsonProperty("service_chains")
    private List<Service> serviceChains;
@@ -56,7 +56,7 @@ public class Parameters {
       trafficFlows = new ArrayList<>();
       functionTypes = new ArrayList<>();
       serviceChains = new ArrayList<>();
-      aux = new HashMap<String, Object>();
+      global = new HashMap<String, Object>();
    }
 
    /**
@@ -81,10 +81,13 @@ public class Parameters {
       return Math.sqrt(distance);
    }
 
-   public boolean initialize(String topologyFile, String pathsFile, boolean directedEdges, boolean allNodesToCloud) {
+   public boolean initialize(String topologyFile, String pathsFile, boolean directedEdges) {
       readSeeds();
       rnd = new Random(getSeed());
       new GraphManager();
+      boolean allNodesToCloud = false;
+      if (global.containsKey(ALL_NODES_TO_CLOUD))
+         allNodesToCloud =  (boolean) global.get(ALL_NODES_TO_CLOUD);
       graph = GraphManager.importTopology(topologyFile, directedEdges, allNodesToCloud);
       paths = GraphManager.importPaths(graph, pathsFile);
       try {
@@ -118,9 +121,9 @@ public class Parameters {
             edge.setAttribute(LINK_CLOUD, true);
          if (edge.getAttribute(LINK_CAPACITY) == null) {
             if (edge.hasAttribute(LINK_CLOUD))
-               edge.addAttribute(LINK_CAPACITY, (int) aux.get(CLOUD_LINK_CAPACITY));
+               edge.addAttribute(LINK_CAPACITY, (int) global.get(CLOUD_LINK_CAPACITY));
             else
-               edge.addAttribute(LINK_CAPACITY, (int) aux.get(LINK_CAPACITY_DEFAULT));
+               edge.addAttribute(LINK_CAPACITY, (int) global.get(LINK_CAPACITY_DEFAULT));
          }
          if (edge.getAttribute(LINK_DELAY) == null) {
             double nLon = edge.getSourceNode().getAttribute(longitudeLabel);
@@ -139,16 +142,16 @@ public class Parameters {
       for (Node node : nodes) {
          if (node.getAttribute(NODE_NUM_SERVERS) == null) {
             if (node.hasAttribute(NODE_CLOUD))
-               node.addAttribute(NODE_NUM_SERVERS, (int) aux.get(CLOUD_NUM_SERVERS));
+               node.addAttribute(NODE_NUM_SERVERS, (int) global.get(CLOUD_NUM_SERVERS));
             else
-               node.addAttribute(NODE_NUM_SERVERS, (int) aux.get(NODE_NUM_SERVERS));
+               node.addAttribute(NODE_NUM_SERVERS, (int) global.get(NODE_NUM_SERVERS));
          }
          for (int s = 0; s < (int) node.getAttribute(NODE_NUM_SERVERS); s++) {
             if (node.getAttribute(SERVER_CAPACITY) == null) {
                if (node.hasAttribute(NODE_CLOUD))
-                  node.addAttribute(SERVER_CAPACITY, (int) aux.get(CLOUD_SERVER_CAPACITY));
+                  node.addAttribute(SERVER_CAPACITY, (int) global.get(CLOUD_SERVER_CAPACITY));
                else
-                  node.addAttribute(SERVER_CAPACITY, (int) aux.get(SERVER_CAPACITY));
+                  node.addAttribute(SERVER_CAPACITY, (int) global.get(SERVER_CAPACITY));
             }
             servers.add(new Server(node.getId() + "_" + s, node, node.getAttribute(SERVER_CAPACITY)));
          }
@@ -196,7 +199,7 @@ public class Parameters {
          if (trafficFlow.getServices() != null)
             servicesArray = trafficFlow.getServices();
          else {
-            ArrayList<Integer> list = (ArrayList<Integer>) aux.get(SERVICES);
+            ArrayList<Integer> list = (ArrayList<Integer>) global.get(SERVICES);
             servicesArray = new int[list.size()];
             for (int i = 0; i < list.size(); i++)
                servicesArray[i] = list.get(i);
@@ -205,19 +208,24 @@ public class Parameters {
          int serviceId = servicesArray[rndService];
          Service service = createServiceChain(serviceId);
          List<Function> functions = new ArrayList<>();
-         int[] serviceLengthArray = null;
+         int[] serviceLengthArray = new int[]{0};
          if (trafficFlow.getServiceLength() != null)
             serviceLengthArray = trafficFlow.getServiceLength();
-         else {
-            ArrayList<Integer> list = (ArrayList<Integer>) aux.get(SERVICE_LENGTH);
+         else if (global.containsKey(SERVICE_LENGTH)){
+            ArrayList<Integer> list = (ArrayList<Integer>) global.get(SERVICE_LENGTH);
             serviceLengthArray = new int[list.size()];
             for (int i = 0; i < list.size(); i++)
                serviceLengthArray[i] = list.get(i);
-         }
+         } 
          int serviceLength = serviceLengthArray[rndService];
-         int[] chain = new int[serviceLength];
-         for (int i = 0; i < serviceLength; i++)
-            chain[i] = service.getChain()[rnd.nextInt(service.getChain().length)];
+         int[] chain;
+         if (serviceLength > 0){
+            chain = new int[serviceLength];
+            for (int i = 0; i < serviceLength; i++)
+               chain[i] = service.getChain()[rnd.nextInt(service.getChain().length)];
+         } else {
+            chain = service.getChain();
+         }
          for (Integer type : chain)
             functions.add(createFunction(type));
          StringBuilder id = new StringBuilder();
@@ -307,8 +315,8 @@ public class Parameters {
       return seeds.get(seedCounter);
    }
 
-   public Object getAux(String key) {
-      return aux.get(key);
+   public Object getGlobal(String key) {
+      return global.get(key);
    }
 
    public String getGraphName() {
@@ -383,7 +391,7 @@ public class Parameters {
       return totalNumFunctions;
    }
 
-   public Map<String, Object> getAux() {
-      return aux;
+   public Map<String, Object> getGlobal() {
+      return global;
    }
 }

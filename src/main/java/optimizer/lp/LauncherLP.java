@@ -70,21 +70,21 @@ public class LauncherLP {
          expr.add(modelLP.serverCostsExpr(serversWeight));
          break;
       case UTIL_COSTS:
-         linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
-         serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
+         linksWeight = (double) pm.getGlobal().get(LINKS_WEIGHT) / pm.getLinks().size();
+         serversWeight = (double) pm.getGlobal().get(SERVERS_WEIGHT) / pm.getServers().size();
          expr.add(modelLP.linkCostsExpr(linksWeight));
          expr.add(modelLP.serverCostsExpr(serversWeight));
          break;
       case UTIL_COSTS_AND_MAX_UTIL:
-         linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
-         serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
+         linksWeight = (double) pm.getGlobal().get(LINKS_WEIGHT) / pm.getLinks().size();
+         serversWeight = (double) pm.getGlobal().get(SERVERS_WEIGHT) / pm.getServers().size();
          expr.add(modelLP.linkUtilizationExpr(linksWeight));
          expr.add(modelLP.serverUtilizationExpr(serversWeight));
-         expr.add(modelLP.maxUtilizationExpr((double) pm.getAux().get(MAXU_WEIGHT)));
+         expr.add(modelLP.maxUtilizationExpr((double) pm.getGlobal().get(MAXU_WEIGHT)));
          break;
       case UTILIZATION:
-         linksWeight = (double) pm.getAux().get(LINKS_WEIGHT) / pm.getLinks().size();
-         serversWeight = (double) pm.getAux().get(SERVERS_WEIGHT) / pm.getServers().size();
+         linksWeight = (double) pm.getGlobal().get(LINKS_WEIGHT) / pm.getLinks().size();
+         serversWeight = (double) pm.getGlobal().get(SERVERS_WEIGHT) / pm.getServers().size();
          expr.add(modelLP.linkUtilizationExpr(linksWeight));
          expr.add(modelLP.serverUtilizationExpr(serversWeight));
          break;

@@ -107,8 +107,8 @@ public class VariablesAlg {
       for (int x = 0; x < pm.getServers().size(); x++)
          if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
             if (fX[x])
-               oX[x] = (double) pm.getAux().get(SERVER_IDLE_ENERGY_COST)
-                     + (uX.get(pm.getServers().get(x).getId()) * (double) pm.getAux().get(SERVER_UTIL_ENERGY_COST));
+               oX[x] = (double) pm.getGlobal().get(SERVER_IDLE_ENERGY_COST)
+                     + (uX.get(pm.getServers().get(x).getId()) * (double) pm.getGlobal().get(SERVER_UTIL_ENERGY_COST));
          } else
             oX[x] = 0.0;
    }
@@ -137,7 +137,7 @@ public class VariablesAlg {
                   double profit = 0;
                   for (int v = 0; v < service.getFunctions().size(); v++)
                      profit += (double) service.getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
-                  double qosPenalty = (double) pm.getAux().get(QOS_PENALTY_RATIO) * profit; // in $/h
+                  double qosPenalty = (double) pm.getGlobal().get(QOS_PENALTY_RATIO) * profit; // in $/h
                   if (serviceDelay > maxDelay)
                      qSDP[s][d][p] = ((serviceDelay / maxDelay) - 1) * qosPenalty; // in $/h
                }

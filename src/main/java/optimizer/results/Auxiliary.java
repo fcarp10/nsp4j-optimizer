@@ -352,7 +352,7 @@ public class Auxiliary {
    public static void restoreCapacityOfCloudServers(Parameters pm) {
       for (int i = 0; i < pm.getServers().size(); i++)
          if (pm.getServers().get(i).getParent().getAttribute(NODE_CLOUD) != null)
-            pm.getServers().get(i).setCapacity((int) pm.getAux().get(CLOUD_SERVER_CAPACITY));
+            pm.getServers().get(i).setCapacity((int) pm.getGlobal().get(CLOUD_SERVER_CAPACITY));
    }
 
    public static void removeCapacityOfCloudLinks(Parameters pm) {
@@ -366,7 +366,7 @@ public class Auxiliary {
       for (int i = 0; i < pm.getLinks().size(); i++)
          if (pm.getLinks().get(i).getSourceNode().getAttribute(NODE_CLOUD) != null
                || pm.getLinks().get(i).getTargetNode().getAttribute(NODE_CLOUD) != null)
-            pm.getLinks().get(i).setAttribute(LINK_CAPACITY, (int) pm.getAux().get(CLOUD_LINK_CAPACITY));
+            pm.getLinks().get(i).setAttribute(LINK_CAPACITY, (int) pm.getGlobal().get(CLOUD_LINK_CAPACITY));
 
    }
 

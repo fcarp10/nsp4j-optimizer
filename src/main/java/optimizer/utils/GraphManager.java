@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-import static optimizer.utils.Definitions.NODE_CLOUD;
+import static optimizer.Definitions.NODE_CLOUD;
 
 public class GraphManager {
 
