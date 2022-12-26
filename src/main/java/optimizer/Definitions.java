@@ -2,7 +2,9 @@ package optimizer;
 
 public class Definitions {
    // objective functions
-   public static final String DIMEN = "DIMEN";
+   public static final String DIMEN_NUM_SERVERS = "DIMEN_NUM_SERVERS";
+   public static final String DIMEN_LINK_CAP = "DIMEN_LINK_CAP";
+   public static final String DIMEN_SERVER_CAP = "DIMEN_SERVER_CAP";
    public static final String NUM_SERVERS = "NUM_SERVERS";
    public static final String NUM_SERVERS_AND_UTIL_COSTS = "NUM_SERVERS_AND_UTIL_COSTS";
    public static final String UTIL_COSTS = "UTIL_COSTS";
@@ -54,6 +56,8 @@ public class Definitions {
 
    // model specific variables
    public static final String xN = "xN";
+   public static final String cLT = "cLT";
+   public static final String cXT = "cXT";
    public static final String kL = "kL";
    public static final String kX = "kX";
    public static final String uMax = "uMax";
@@ -115,9 +119,10 @@ public class Definitions {
    // node and server parameters
    public static final String NODE_CLOUD = "node_cloud";
    public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
+   public static final String OVERPROVISIONING_NUM_SERVERS = "overprovisioning_num_servers";
+   public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
    public static final String SERVER_IDLE_ENERGY_COST = "server_idle_energy_cost";
    public static final String SERVER_UTIL_ENERGY_COST = "server_util_energy_cost";
-   public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
    public static final String LONGITUDE_LABEL_1 = "Longitude";
    public static final String LATITUDE_LABEL_1 = "Latitude";
    public static final String LONGITUDE_LABEL_2 = "x";
@@ -129,6 +134,7 @@ public class Definitions {
 
    // link parameters
    public static final String LINK_CAPACITY = "capacity";
+   public static final String OVERPROVISIONING_LINK_CAPACITY = "overprovisioning_link_capacity";
    public static final String LINK_DELAY = "delay";
    public static final String LINK_DISTANCE = "distance";
    public static final String LINK_CLOUD = "link_cloud";
@@ -145,6 +151,8 @@ public class Definitions {
    public static final String DIRECTED_EDGES = "directed_edges";
    public static final String ALL_NODES_TO_CLOUD = "all_nodes_to_cloud";
    public static final String SCENARIOS_PATH = "scenarios";
+   public static final String LINK_CAPACITY_TYPES = "link_capacity_types";
+   public static final String SERVER_CAPACITY_TYPES = "server_capacity_types";
 
    // GUI parameters
    public static final String NODE_COLOR = "Black";

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.*;
@@ -38,7 +39,11 @@ public class SpecificConstraints {
 
          // dimensioning
          if (vars.xN != null)
-            dimensioning(serverLoadExpr);
+            dimensioning_num_servers(serverLoadExpr);
+         if (vars.cLT != null)
+            dimensioning_link_capacity(linkLoadExpr);
+         if (vars.cXT != null)
+            dimensioning_server_capacity(serverLoadExpr);
 
          // max utilization
          if (vars.uMax != null)
@@ -89,7 +94,7 @@ public class SpecificConstraints {
                   uL + "[" + pm.getLinks().get(l).getId() + "]");
 
          // constraint server utilization if no dimensioning
-         if (!sc.getObjFunc().equals(DIMEN))
+         if (!sc.getObjFunc().equals(DIMEN_NUM_SERVERS))
             for (int x = 0; x < pm.getServers().size(); x++)
                modelLP.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX + "[x] --> " + "[" + x + "]");
 
@@ -98,13 +103,49 @@ public class SpecificConstraints {
       }
    }
 
-   private void dimensioning(GRBLinExpr[] serverLoadExpr) throws GRBException {
+   private void dimensioning_num_servers(GRBLinExpr[] serverLoadExpr) throws GRBException {
       for (int n = 0; n < pm.getNodes().size(); n++) {
          GRBLinExpr expr1 = new GRBLinExpr();
          expr1.addTerm((int) pm.getGlobal(SERVER_DIMENSIONING_CAPACITY), vars.xN[n]);
          GRBLinExpr expr2 = new GRBLinExpr();
-         expr2.multAdd((double) pm.getGlobal(OVERPROVISIONING_SERVER_CAPACITY), serverLoadExpr[n]);
-         modelLP.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr1, DIMEN);
+         expr2.multAdd((double) pm.getGlobal(OVERPROVISIONING_NUM_SERVERS), serverLoadExpr[n]);
+         modelLP.getGrbModel().addConstr(expr2, GRB.LESS_EQUAL, expr1, DIMEN_NUM_SERVERS);
+      }
+   }
+
+   private void dimensioning_link_capacity(GRBLinExpr[] linkLoadExpr) throws GRBException {
+      ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(LINK_CAPACITY_TYPES);
+      for (int l = 0; l < pm.getLinks().size(); l++) {
+         GRBLinExpr expr1 = new GRBLinExpr();
+         expr1.multAdd(1.0, linkLoadExpr[l]);
+         GRBLinExpr expr2 = new GRBLinExpr();
+         for (int t = 0; t < types.size(); t++)
+            expr2.addTerm((double) pm.getGlobal(OVERPROVISIONING_LINK_CAPACITY) * types.get(t), vars.cLT[l][t]);
+         modelLP.getGrbModel().addConstr(expr1, GRB.LESS_EQUAL, expr2, DIMEN_LINK_CAP);
+      }
+      for (int l = 0; l < pm.getLinks().size(); l++) {
+         GRBLinExpr expr1 = new GRBLinExpr();
+         for (int t = 0; t < types.size(); t++)
+            expr1.addTerm(1.0, vars.cLT[l][t]);
+         modelLP.getGrbModel().addConstr(expr1, GRB.EQUAL, 1.0, DIMEN_LINK_CAP);
+      }
+   }
+
+   private void dimensioning_server_capacity(GRBLinExpr[] serverLoadExpr) throws GRBException {
+      ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(SERVER_CAPACITY_TYPES);
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         GRBLinExpr expr1 = new GRBLinExpr();
+         expr1.multAdd(1.0, serverLoadExpr[x]);
+         GRBLinExpr expr2 = new GRBLinExpr();
+         for (int t = 0; t < types.size(); t++)
+            expr2.addTerm((double) pm.getGlobal(OVERPROVISIONING_SERVER_CAPACITY) * types.get(t), vars.cXT[x][t]);
+         modelLP.getGrbModel().addConstr(expr1, GRB.LESS_EQUAL, expr2, DIMEN_SERVER_CAP);
+      }
+      for (int x = 0; x < pm.getServers().size(); x++) {
+         GRBLinExpr expr1 = new GRBLinExpr();
+         for (int t = 0; t < types.size(); t++)
+            expr1.addTerm(1.0, vars.cXT[x][t]);
+         modelLP.getGrbModel().addConstr(expr1, GRB.EQUAL, 1.0, DIMEN_SERVER_CAP);
       }
    }
 

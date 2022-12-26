@@ -10,6 +10,8 @@ import optimizer.gui.Scenario;
 
 import static optimizer.Definitions.*;
 
+import java.util.ArrayList;
+
 public class VariablesLP {
 
    // general variables
@@ -20,21 +22,19 @@ public class VariablesLP {
    public GRBVar[][][][] fXSVD; // binary, placement per demand
    public GRBVar[] uL; // link utilization
    public GRBVar[] uX; // server utilization
-
-   // model specific variables
-   public GRBVar[] xN; // integer, num servers per node
    public GRBVar[] kL; // link cost utilization
    public GRBVar[] kX; // server cost utilization
+
+   // model specific variables
+   public GRBVar[] xN; // integer, dimensioning, num servers per node
+   public GRBVar[][] cLT; // boolean, dimensioning, link capacity
+   public GRBVar[][] cXT; // boolean, dimensioning, server capacity
    public GRBVar uMax; // max utilization
    public GRBVar[] oX; // operational server cost
    public GRBVar[][] oSV; // operational function cost
    public GRBVar[][][] qSDP; // qos penalty cost
    public GRBVar[][][] ySDP; // aux variable for delay qos penalty cost
-
-   // service delay variables
-   public GRBVar[][][][] dSVXD; // continuous, aux variable for processing delay
-
-   // synchronization traffic variables
+   public GRBVar[][][][] dSVXD; // continuous, service delay variable
    public GRBVar[][][][] gSVXY; // binary, aux synchronization traffic
    public GRBVar[][][] hSVP; // binary, traffic synchronization
 
@@ -51,8 +51,14 @@ public class VariablesLP {
 
          /************ additional variables **********/
          // model dimension number of servers
-         if (sc.getObjFunc().equals(DIMEN))
+         if (sc.getObjFunc().equals(DIMEN_NUM_SERVERS))
             xN_init(pm, model, initialSolution);
+         // model dimension link capacity
+         if (sc.getObjFunc().equals(DIMEN_LINK_CAP))
+            cLT_init(pm, model, initialSolution);
+         // model dimension server capacity
+         if (sc.getObjFunc().equals(DIMEN_SERVER_CAP))
+            cXT_init(pm, model, initialSolution);
          // model optimizes utilization costs
          if (sc.getObjFunc().equals(NUM_SERVERS_AND_UTIL_COSTS) || sc.getObjFunc().equals(UTIL_COSTS)
                || sc.getObjFunc().equals(UTIL_COSTS_AND_MAX_UTIL)) {
@@ -201,6 +207,26 @@ public class VariablesLP {
          else
             xN[n] = model.addVar(0.0, GRB.INFINITY, 0.0, GRB.INTEGER, varName);
       }
+   }
+
+   private void cLT_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+      ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(LINK_CAPACITY_TYPES);
+      cLT = new GRBVar[pm.getLinks().size()][types.size()];
+      for (int l = 0; l < pm.getLinks().size(); l++)
+         for (int t = 0; t < types.size(); t++) {
+            String varName = Definitions.cLT + "[" + l + "][" + t + "]";
+            cLT[l][t] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, varName);
+         }
+   }
+
+   private void cXT_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {
+      ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(SERVER_CAPACITY_TYPES);
+      cXT = new GRBVar[pm.getServers().size()][types.size()];
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int t = 0; t < types.size(); t++) {
+            String varName = Definitions.cXT + "[" + x + "][" + t + "]";
+            cXT[x][t] = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, varName);
+         }
    }
 
    private void kL_init(Parameters pm, GRBModel model, GRBModel initialSolution) throws GRBException {

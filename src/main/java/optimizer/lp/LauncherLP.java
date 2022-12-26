@@ -58,89 +58,85 @@ public class LauncherLP {
       GRBLinExpr expr = new GRBLinExpr();
       double serversWeight, linksWeight;
       switch (objectiveFunction) {
-      case DIMEN:
-         expr.add(modelLP.dimensioningExpr());
-         break;
-      case NUM_SERVERS:
-         expr.add(modelLP.numUsedServersExpr());
-         break;
-      case NUM_SERVERS_AND_UTIL_COSTS:
-         expr.add(modelLP.numUsedServersExpr());
-         serversWeight = 1.0 / pm.getServers().size();
-         expr.add(modelLP.serverCostsExpr(serversWeight));
-         break;
-      case UTIL_COSTS:
-         linksWeight = (double) pm.getGlobal().get(LINKS_WEIGHT) / pm.getLinks().size();
-         serversWeight = (double) pm.getGlobal().get(SERVERS_WEIGHT) / pm.getServers().size();
-         expr.add(modelLP.linkCostsExpr(linksWeight));
-         expr.add(modelLP.serverCostsExpr(serversWeight));
-         break;
-      case UTIL_COSTS_AND_MAX_UTIL:
-         linksWeight = (double) pm.getGlobal().get(LINKS_WEIGHT) / pm.getLinks().size();
-         serversWeight = (double) pm.getGlobal().get(SERVERS_WEIGHT) / pm.getServers().size();
-         expr.add(modelLP.linkUtilizationExpr(linksWeight));
-         expr.add(modelLP.serverUtilizationExpr(serversWeight));
-         expr.add(modelLP.maxUtilizationExpr((double) pm.getGlobal().get(MAXU_WEIGHT)));
-         break;
-      case UTILIZATION:
-         linksWeight = (double) pm.getGlobal().get(LINKS_WEIGHT) / pm.getLinks().size();
-         serversWeight = (double) pm.getGlobal().get(SERVERS_WEIGHT) / pm.getServers().size();
-         expr.add(modelLP.linkUtilizationExpr(linksWeight));
-         expr.add(modelLP.serverUtilizationExpr(serversWeight));
-         break;
-      case OPEX_SERVERS:
-         expr.add(modelLP.opexServersExpr());
-         break;
-      case FUNCTIONS_CHARGES:
-         expr.add(modelLP.functionsChargesExpr());
-         break;
-      case QOS_PENALTIES:
-         expr.add(modelLP.qosPenaltiesExpr());
-         break;
-      case ALL_MONETARY_COSTS:
-         expr.add(modelLP.opexServersExpr());
-         expr.add(modelLP.functionsChargesExpr());
-         expr.add(modelLP.qosPenaltiesExpr());
-         break;
-      case UTILIZATION_CLOUD:
-         serversWeight = (double) 1.0 / pm.getServers().size();
-         expr.add(modelLP.serverUtilizationExpr(-serversWeight));
-         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
-         break;
-      case NUM_SERVERS_CLOUD:
-         expr.add(modelLP.numUsedServersExpr());
-         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
-         break;
-      case MGR:
-         expr.add(modelLP.numMigrations(1.0, initialPlacement));
-         expr.add(modelLP.numReplications(0.001));
-         expr.add(modelLP.numFunctionsInCloudExpr(0.001));
-         break;
-      case REP:
-         expr.add(modelLP.numReplications(1.0));
-         expr.add(modelLP.numMigrations(0.001, initialPlacement));
-         expr.add(modelLP.numFunctionsInCloudExpr(0.001));
-         break;
-      case CLOUD:
-         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
-         expr.add(modelLP.numMigrations(0.001, initialPlacement));
-         expr.add(modelLP.numReplications(0.001));
-         break;
-      // case MGR_CLOUD:
-      //    expr.add(modelLP.numMigrations(1.0, initialPlacement));
-      //    expr.add(modelLP.numReplications(0.001));
-      //    expr.add(modelLP.numFunctionsInCloudExpr(1.0));
-      //    break;
-      // case REP_CLOUD:
-      //    expr.add(modelLP.numReplications(1.0));
-      //    expr.add(modelLP.numMigrations(0.001, initialPlacement));
-      //    expr.add(modelLP.numFunctionsInCloudExpr(1.0));
-      //    break;
-      case MGR_REP_CLOUD:
-         expr.add(modelLP.numMigrations(1.0, initialPlacement));
-         expr.add(modelLP.numReplications(1.0));
-         expr.add(modelLP.numFunctionsInCloudExpr(1.0));
-         break;
+         case DIMEN_NUM_SERVERS:
+            expr.add(modelLP.dimensioningNumServersExpr());
+            break;
+         case DIMEN_LINK_CAP:
+            expr.add(modelLP.dimensioningLinkCapacityExpr());
+            break;
+         case DIMEN_SERVER_CAP:
+            expr.add(modelLP.dimensioningServerCapacityExpr());
+            break;
+         case NUM_SERVERS:
+            expr.add(modelLP.numUsedServersExpr());
+            break;
+         case NUM_SERVERS_AND_UTIL_COSTS:
+            expr.add(modelLP.numUsedServersExpr());
+            serversWeight = 1.0 / pm.getServers().size();
+            expr.add(modelLP.serverCostsExpr(serversWeight));
+            break;
+         case UTIL_COSTS:
+            linksWeight = (double) pm.getGlobal().get(LINKS_WEIGHT) / pm.getLinks().size();
+            serversWeight = (double) pm.getGlobal().get(SERVERS_WEIGHT) / pm.getServers().size();
+            expr.add(modelLP.linkCostsExpr(linksWeight));
+            expr.add(modelLP.serverCostsExpr(serversWeight));
+            break;
+         case UTIL_COSTS_AND_MAX_UTIL:
+            linksWeight = (double) pm.getGlobal().get(LINKS_WEIGHT) / pm.getLinks().size();
+            serversWeight = (double) pm.getGlobal().get(SERVERS_WEIGHT) / pm.getServers().size();
+            expr.add(modelLP.linkUtilizationExpr(linksWeight));
+            expr.add(modelLP.serverUtilizationExpr(serversWeight));
+            expr.add(modelLP.maxUtilizationExpr((double) pm.getGlobal().get(MAXU_WEIGHT)));
+            break;
+         case UTILIZATION:
+            linksWeight = (double) pm.getGlobal().get(LINKS_WEIGHT) / pm.getLinks().size();
+            serversWeight = (double) pm.getGlobal().get(SERVERS_WEIGHT) / pm.getServers().size();
+            expr.add(modelLP.linkUtilizationExpr(linksWeight));
+            expr.add(modelLP.serverUtilizationExpr(serversWeight));
+            break;
+         case OPEX_SERVERS:
+            expr.add(modelLP.opexServersExpr());
+            break;
+         case FUNCTIONS_CHARGES:
+            expr.add(modelLP.functionsChargesExpr());
+            break;
+         case QOS_PENALTIES:
+            expr.add(modelLP.qosPenaltiesExpr());
+            break;
+         case ALL_MONETARY_COSTS:
+            expr.add(modelLP.opexServersExpr());
+            expr.add(modelLP.functionsChargesExpr());
+            expr.add(modelLP.qosPenaltiesExpr());
+            break;
+         case UTILIZATION_CLOUD:
+            serversWeight = (double) 1.0 / pm.getServers().size();
+            expr.add(modelLP.serverUtilizationExpr(-serversWeight));
+            expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+            break;
+         case NUM_SERVERS_CLOUD:
+            expr.add(modelLP.numUsedServersExpr());
+            expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+            break;
+         case MGR:
+            expr.add(modelLP.numMigrations(1.0, initialPlacement));
+            expr.add(modelLP.numReplications(0.001));
+            expr.add(modelLP.numFunctionsInCloudExpr(0.001));
+            break;
+         case REP:
+            expr.add(modelLP.numReplications(1.0));
+            expr.add(modelLP.numMigrations(0.001, initialPlacement));
+            expr.add(modelLP.numFunctionsInCloudExpr(0.001));
+            break;
+         case CLOUD:
+            expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+            expr.add(modelLP.numMigrations(0.001, initialPlacement));
+            expr.add(modelLP.numReplications(0.001));
+            break;
+         case MGR_REP_CLOUD:
+            expr.add(modelLP.numMigrations(1.0, initialPlacement));
+            expr.add(modelLP.numReplications(1.0));
+            expr.add(modelLP.numFunctionsInCloudExpr(1.0));
+            break;
       }
       return expr;
    }
@@ -158,8 +154,13 @@ public class LauncherLP {
       results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModelLP.getVars().uX));
 
       // model specific variables
-      if (sc.getObjFunc().equals(DIMEN))
+      if (sc.getObjFunc().equals(DIMEN_NUM_SERVERS))
          results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModelLP.getVars().xN));
+      if (sc.getObjFunc().equals(DIMEN_LINK_CAP))
+         results.setVariable(cLT, Auxiliary.grbVarsToBooleans(optModelLP.getVars().cLT));
+      if (sc.getObjFunc().equals(DIMEN_SERVER_CAP))
+         results.setVariable(cXT, Auxiliary.grbVarsToBooleans(optModelLP.getVars().cXT));
+
       if (sc.getObjFunc().equals(OPEX_SERVERS) || sc.getObjFunc().equals(FUNCTIONS_CHARGES)
             || sc.getObjFunc().equals(QOS_PENALTIES) || sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {
          results.setVariable(oX, Auxiliary.grbVarsToDoubles(optModelLP.getVars().oX));

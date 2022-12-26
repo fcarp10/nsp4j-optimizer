@@ -144,8 +144,12 @@ public class Results {
       Auxiliary.printLog(log, INFO, "general variables results completed");
 
       // model specific variables
-      if (sc.getObjFunc().equals(DIMEN))
+      if (sc.getObjFunc().equals(DIMEN_NUM_SERVERS))
          xN(); // integer, num servers per node
+      if (sc.getObjFunc().equals(DIMEN_LINK_CAP))
+         cLT();
+      if (sc.getObjFunc().equals(DIMEN_SERVER_CAP))
+         cXT();
       if (sc.getObjFunc().equals(OPEX_SERVERS) || sc.getObjFunc().equals(FUNCTIONS_CHARGES)
             || sc.getObjFunc().equals(QOS_PENALTIES) || sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {
          oX(); // opex per server
@@ -532,6 +536,38 @@ public class Results {
          variables.put(xN, strings);
       } catch (Exception e) {
          printLog(log, WARNING, xN + " var results: " + e.getMessage());
+      }
+   }
+
+   private void cLT() {
+      try {
+         boolean[][] var = (boolean[][]) rawVariables.get(cLT);
+         ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(LINK_CAPACITY_TYPES);
+         List<String> strings = new ArrayList<>();
+         for (int l = 0; l < pm.getLinks().size(); l++)
+            for (int t = 0; t < types.size(); t++)
+               if (var[l][t])
+                  strings.add("(" + (l + this.offset) + "): [" + pm.getLinks().get(l).getId() + "]["
+                        + types.get(t) + "]");
+         variables.put(cLT, strings);
+      } catch (Exception e) {
+         printLog(log, WARNING, cLT + " var results: " + e.getMessage());
+      }
+   }
+
+   private void cXT() {
+      try {
+         boolean[][] var = (boolean[][]) rawVariables.get(cXT);
+         ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(SERVER_CAPACITY_TYPES);
+         List<String> strings = new ArrayList<>();
+         for (int x = 0; x < pm.getServers().size(); x++)
+            for (int t = 0; t < types.size(); t++)
+               if (var[x][t])
+                  strings.add(
+                        "(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "][" + types.get(t) + "]");
+         variables.put(cXT, strings);
+      } catch (Exception e) {
+         printLog(log, WARNING, cXT + " var results: " + e.getMessage());
       }
    }
 

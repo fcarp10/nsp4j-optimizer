@@ -8,6 +8,10 @@ global: {
   "num_servers_node": 1,
   "links_weight": 0.0,
   "servers_weight": 1.0,
+  # "link_capacity_types": [0, 1000],
+  # "server_capacity_types": [0, 1000],
+  # "overprovisioning_link_capacity": 1.0,
+  # "overprovisioning_server_capacity": 1.0,
 }
 service_chains:
   - id: 1

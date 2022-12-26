@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import static optimizer.Definitions.*;
 import static optimizer.results.Auxiliary.printLog;
 
+import java.util.ArrayList;
+
 public class ModelLP {
 
    private static final Logger log = LoggerFactory.getLogger(ModelLP.class);
@@ -41,10 +43,28 @@ public class ModelLP {
          grbModel.setObjective(expr, GRB.MAXIMIZE);
    }
 
-   public GRBLinExpr dimensioningExpr() {
+   public GRBLinExpr dimensioningNumServersExpr() {
       GRBLinExpr expr = new GRBLinExpr();
       for (int n = 0; n < pm.getNodes().size(); n++)
          expr.addTerm(1.0, vars.xN[n]);
+      return expr;
+   }
+
+   public GRBLinExpr dimensioningLinkCapacityExpr() {
+      ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(LINK_CAPACITY_TYPES);
+      GRBLinExpr expr = new GRBLinExpr();
+      for (int l = 0; l < pm.getLinks().size(); l++)
+         for (int t = 0; t < types.size(); t++)
+            expr.addTerm(types.get(t), vars.cLT[l][t]);
+      return expr;
+   }
+
+   public GRBLinExpr dimensioningServerCapacityExpr() {
+      ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(SERVER_CAPACITY_TYPES);
+      GRBLinExpr expr = new GRBLinExpr();
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int t = 0; t < types.size(); t++)
+            expr.addTerm(types.get(t), vars.cXT[x][t]);
       return expr;
    }
 
