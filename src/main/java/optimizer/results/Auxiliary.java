@@ -74,15 +74,15 @@ public class Auxiliary {
 
    public static void printLog(Logger log, String status, String message) {
       switch (status) {
-      case ERROR:
-         log.error(message);
-         break;
-      case WARNING:
-         log.warn(message);
-         break;
-      case INFO:
-         log.info(message);
-         break;
+         case ERROR:
+            log.error(message);
+            break;
+         case WARNING:
+            log.warn(message);
+            break;
+         case INFO:
+            log.info(message);
+            break;
       }
       ResultsGUI.log(status + message);
    }
@@ -90,7 +90,7 @@ public class Auxiliary {
    public static String getResourcesPath(String fileName) {
       try {
          File file = new File("./" + fileName);
-         if(!file.exists()) 
+         if (!file.exists())
             file = new File(Manager.class.getClassLoader().getResource(SCENARIOS_PATH + "/" + fileName).getFile());
          String path = file.getParent();
          if (System.getProperty("os.name").equals("Mac OS X") || System.getProperty("os.name").equals("Linux"))
@@ -105,8 +105,11 @@ public class Auxiliary {
    }
 
    public static double getMaxServiceDowntime(Service service) {
-      double downtime = (double) service.getAttribute(SERVICE_DOWNTIME);
-      return downtime * service.getFunctions().size();
+      if (service.getAttributes().containsKey(SERVICE_DOWNTIME)) {
+         double downtime = (double) service.getAttribute(SERVICE_DOWNTIME);
+         return downtime * service.getFunctions().size();
+      } else
+         return 0.0;
    }
 
    public static double getMaxPathDelay(List<Path> paths) {
