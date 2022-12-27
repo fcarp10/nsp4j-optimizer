@@ -564,7 +564,8 @@ public class Results {
             for (int t = 0; t < types.size(); t++)
                if (var[x][t])
                   strings.add(
-                        "(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "][" + types.get(t) + "]");
+                        "(" + (x + this.offset) + "): [" + pm.getServers().get(x).getParent().getId() + "]["
+                              + pm.getServers().get(x).getId() + "][" + types.get(t) + "]");
          variables.put(cXT, strings);
       } catch (Exception e) {
          printLog(log, WARNING, cXT + " var results: " + e.getMessage());

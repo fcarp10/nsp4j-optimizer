@@ -56,7 +56,6 @@ an 48 x:0.17979 y:0.20983 tier:0 num_servers_node:3
 an 49 x:0.24853 y:0.13476 tier:0 num_servers_node:3 
 an 50 x:0.22961 y:0.03314 tier:0 num_servers_node:3 
 an 51 x:0.34318 y:0.05078 tier:0 num_servers_node:3 
-an 99 x:1.05324 y:0.03870 tier:99 num_servers_node:0 server_capacity:0
 
 # Intra Tier3 (s and Gbps)
 ae n1n2 1 > 2 delay:0.0025 
@@ -211,56 +210,3 @@ ae n49n50 49 > 50 delay:0.0001
 ae n50n49 50 > 49 delay:0.0001 
 ae n50n51 50 > 51 delay:0.0001
 ae n51n50 51 > 50 delay:0.0001
-
-# Fake nodes
-ae n1n99 1 > 99 delay:0.000 
-ae n2n99 2 > 99 delay:0.000 
-ae n3n99 3 > 99 delay:0.000 
-ae n4n99 4 > 99 delay:0.000 
-ae n5n99 5 > 99 delay:0.000 
-ae n6n99 6 > 99 delay:0.000 
-ae n7n99 7 > 99 delay:0.000 
-ae n8n99 8 > 99 delay:0.000 
-ae n9n99 9 > 99 delay:0.000 
-ae n10n99 10 > 99 delay:0.000 
-ae n11n99 11 > 99 delay:0.000 
-ae n12n99 12 > 99 delay:0.000 
-ae n13n99 13 > 99 delay:0.000 
-ae n14n99 14 > 99 delay:0.000 
-ae n15n99 15 > 99 delay:0.000 
-ae n16n99 16 > 99 delay:0.000 
-ae n17n99 17 > 99 delay:0.000 
-ae n18n99 18 > 99 delay:0.000 
-ae n19n99 19 > 99 delay:0.000 
-ae n20n99 20 > 99 delay:0.000 
-ae n21n99 21 > 99 delay:0.000 
-ae n22n99 22 > 99 delay:0.000 
-ae n23n99 23 > 99 delay:0.000 
-ae n24n99 24 > 99 delay:0.000 
-ae n25n99 25 > 99 delay:0.000 
-ae n26n99 26 > 99 delay:0.000 
-ae n27n99 27 > 99 delay:0.000 
-ae n28n99 28 > 99 delay:0.000 
-ae n29n99 29 > 99 delay:0.000 
-ae n30n99 30 > 99 delay:0.000 
-ae n31n99 31 > 99 delay:0.000 
-ae n32n99 32 > 99 delay:0.000 
-ae n33n99 33 > 99 delay:0.000 
-ae n34n99 34 > 99 delay:0.000 
-ae n35n99 35 > 99 delay:0.000 
-ae n36n99 36 > 99 delay:0.000 
-ae n37n99 37 > 99 delay:0.000 
-ae n38n99 38 > 99 delay:0.000 
-ae n39n99 39 > 99 delay:0.000 
-ae n40n99 40 > 99 delay:0.000 
-ae n41n99 41 > 99 delay:0.000 
-ae n42n99 42 > 99 delay:0.000 
-ae n43n99 43 > 99 delay:0.000 
-ae n44n99 44 > 99 delay:0.000 
-ae n45n99 45 > 99 delay:0.000 
-ae n46n99 46 > 99 delay:0.000 
-ae n47n99 47 > 99 delay:0.000 
-ae n48n99 48 > 99 delay:0.000 
-ae n49n99 49 > 99 delay:0.000 
-ae n50n99 50 > 99 delay:0.000 
-ae n51n99 51 > 99 delay:0.000 

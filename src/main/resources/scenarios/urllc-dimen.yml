@@ -9,9 +9,9 @@ global: {
   "links_weight": 5.0,   # beta
   "link_capacity": 10000000,
   "server_capacity": 10000000,
-  "link_capacity_types": [250, 500, 3000, 75000],
+  "link_capacity_types": [2500, 5000, 30000, 750000],
   "overprovisioning_link_capacity": 1.0,
-  "server_capacity_types": [400000, 800000, 1600000, 3200000],
+  "server_capacity_types": [8000, 16000, 32000, 64000, 128000],
   "overprovisioning_server_capacity": 1.0,
 }
 # service definitions
@@ -157,499 +157,499 @@ traffic_flows:
     services: [2]
     service_length: [0]
     src: '24'
-    dst: '99'
+    dst: '1'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '48'
-    dst: '99'
+    dst: '1'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '34'
-    dst: '99'
+    dst: '1'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '36'
-    dst: '99'
+    dst: '1'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '30'
-    dst: '99'
+    dst: '1'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '39'
-    dst: '99'
+    dst: '1'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '25'
-    dst: '99'
+    dst: '1'
   - demands: [4.0]
     services: [1]
     service_length: [0]
     src: '29'
-    dst: '99'
+    dst: '1'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '35'
-    dst: '99'
+    dst: '1'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '37'
-    dst: '99'
+    dst: '1'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '32'
-    dst: '99'
+    dst: '1'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '47'
-    dst: '99'
+    dst: '1'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '27'
-    dst: '99'
+    dst: '1'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '28'
-    dst: '99'
+    dst: '1'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '22'
-    dst: '99'
+    dst: '1'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '23'
-    dst: '99'
+    dst: '1'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '37'
-    dst: '99'
+    dst: '1'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '39'
-    dst: '99'
+    dst: '1'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '21'
-    dst: '99'
+    dst: '1'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '23'
-    dst: '99'
+    dst: '1'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '25'
-    dst: '99'
+    dst: '1'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '24'
-    dst: '99'
+    dst: '1'
   - demands: [4.0]
     services: [1]
     service_length: [0]
     src: '40'
-    dst: '99'
+    dst: '1'
   - demands: [4.0]
     services: [1]
     service_length: [0]
     src: '30'
-    dst: '99'
+    dst: '1'
   - demands: [4.0]
     services: [1]
     service_length: [0]
     src: '25'
-    dst: '99'
+    dst: '1'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '34'
-    dst: '99'
+    dst: '2'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '40'
-    dst: '99'
+    dst: '2'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '39'
-    dst: '99'
+    dst: '2'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '38'
-    dst: '99'
+    dst: '2'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '46'
-    dst: '99'
+    dst: '2'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '30'
-    dst: '99'
+    dst: '2'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '38'
-    dst: '99'
+    dst: '2'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '39'
-    dst: '99'
+    dst: '2'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '32'
-    dst: '99'
+    dst: '2'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '39'
-    dst: '99'
+    dst: '2'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '23'
-    dst: '99'
+    dst: '2'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '48'
-    dst: '99'
+    dst: '2'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '34'
-    dst: '99'
+    dst: '2'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '25'
-    dst: '99'
+    dst: '2'
   - demands: [4.0]
     services: [1]
     service_length: [0]
     src: '29'
-    dst: '99'
+    dst: '2'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '30'
-    dst: '99'
+    dst: '2'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '44'
-    dst: '99'
+    dst: '2'
   - demands: [4.0]
     services: [1]
     service_length: [0]
     src: '27'
-    dst: '99'
+    dst: '2'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '49'
-    dst: '99'
+    dst: '2'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '21'
-    dst: '99'
+    dst: '2'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '47'
-    dst: '99'
+    dst: '2'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '23'
-    dst: '99'
+    dst: '2'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '27'
-    dst: '99'
+    dst: '2'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '27'
-    dst: '99'
+    dst: '2'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '32'
-    dst: '99'
+    dst: '2'
   - demands: [4.0]
     services: [1]
     service_length: [0]
     src: '30'
-    dst: '99'
+    dst: '3'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '29'
-    dst: '99'
+    dst: '3'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '29'
-    dst: '99'
+    dst: '3'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '44'
-    dst: '99'
+    dst: '3'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '45'
-    dst: '99'
+    dst: '3'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '29'
-    dst: '99'
+    dst: '3'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '30'
-    dst: '99'
+    dst: '3'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '33'
-    dst: '99'
+    dst: '3'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '50'
-    dst: '99'
+    dst: '3'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '44'
-    dst: '99'
+    dst: '3'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '49'
-    dst: '99'
+    dst: '3'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '29'
-    dst: '99'
+    dst: '3'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '35'
-    dst: '99'
+    dst: '3'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '25'
-    dst: '99'
+    dst: '3'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '27'
-    dst: '99'
+    dst: '3'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '49'
-    dst: '99'
+    dst: '3'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '34'
-    dst: '99'
+    dst: '3'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '38'
-    dst: '99'
+    dst: '3'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '29'
-    dst: '99'
+    dst: '3'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '41'
-    dst: '99'
+    dst: '3'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '27'
-    dst: '99'
+    dst: '3'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '22'
-    dst: '99'
+    dst: '3'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '33'
-    dst: '99'
+    dst: '3'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '46'
-    dst: '99'
+    dst: '3'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '44'
-    dst: '99'
+    dst: '3'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '35'
-    dst: '99'
+    dst: '4'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '22'
-    dst: '99'
+    dst: '4'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '42'
-    dst: '99'
+    dst: '4'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '36'
-    dst: '99'
+    dst: '4'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '33'
-    dst: '99'
+    dst: '4'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '26'
-    dst: '99'
+    dst: '4'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '36'
-    dst: '99'
+    dst: '4'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '28'
-    dst: '99'
+    dst: '4'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '43'
-    dst: '99'
+    dst: '4'
   - demands: [4.0]
     services: [1]
     service_length: [0]
     src: '45'
-    dst: '99'
+    dst: '4'
   - demands: [4.0]
     services: [1]
     service_length: [0]
     src: '27'
-    dst: '99'
+    dst: '4'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '43'
-    dst: '99'
+    dst: '4'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '32'
-    dst: '99'
+    dst: '4'
   - demands: [20000.0]
     services: [2]
     service_length: [0]
     src: '50'
-    dst: '99'
+    dst: '4'
   - demands: [1.0]
     services: [3]
     service_length: [0]
     src: '45'
-    dst: '99'
+    dst: '4'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '31'
-    dst: '99'
+    dst: '4'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '44'
-    dst: '99'
+    dst: '4'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '45'
-    dst: '99'
+    dst: '4'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '23'
-    dst: '99'
+    dst: '4'
   - demands: [25.0]
     services: [1]
     service_length: [0]
     src: '34'
-    dst: '99'
+    dst: '4'
   - demands: [100.0]
     services: [1]
     service_length: [0]
     src: '25'
-    dst: '99'
+    dst: '4'
   - demands: [2.0]
     services: [3]
     service_length: [0]
     src: '50'
-    dst: '99'
+    dst: '4'
   - demands: [1000.0]
     services: [1]
     service_length: [0]
     src: '45'
-    dst: '99'
+    dst: '4'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '47'
-    dst: '99'
+    dst: '4'
   - demands: [10000.0]
     services: [2]
     service_length: [0]
     src: '30'
-    dst: '99'
+    dst: '4'

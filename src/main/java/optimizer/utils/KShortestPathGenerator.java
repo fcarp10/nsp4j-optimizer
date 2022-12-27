@@ -24,7 +24,7 @@ public class KShortestPathGenerator {
       this.maxLength = maxLength;
    }
 
-   public void run(int numOfKPaths) {
+   public void runAll(int numOfKPaths) {
       List<Node> nodes = new ArrayList<>(graph.getNodeSet());
       for (Node src : nodes)
          for (Node dst : nodes)
@@ -51,21 +51,30 @@ public class KShortestPathGenerator {
             }
    }
 
-   public void runFromAndToSpecificNode(String specificNodeString, int numOfKPaths) {
+   public void runFromNode(String[] srcNodesStr, int numOfKPaths) {
       List<Node> nodes = new ArrayList<>(graph.getNodeSet());
-      Node specificNode = null;
-      for (Node n : nodes)
-         if (n.getId().equals(specificNodeString))
-            specificNode = n;
+      for (int i = 0; i < srcNodesStr.length; i++) {
+         Node srcNode = graph.getNode(srcNodesStr[i]);
+         if (srcNode != null)
+            for (Node n : nodes)
+               if (!n.equals(srcNode)) {
+                  List<Path> paths = generatePaths(n, srcNode);
+                  printKPaths(paths, numOfKPaths);
+               }
+      }
+   }
 
-      if (specificNode != null)
-         for (Node n : nodes)
-            if (!n.equals(specificNode)) {
-               List<Path> paths = generatePaths(n, specificNode);
-               printKPaths(paths, numOfKPaths);
-               paths = generatePaths(specificNode, n);
-               printKPaths(paths, numOfKPaths);
-            }
+   public void runToNode(String[] dstNodesStr, int numOfKPaths) {
+      List<Node> nodes = new ArrayList<>(graph.getNodeSet());
+      for (int i = 0; i < dstNodesStr.length; i++) {
+         Node dstNode = graph.getNode(dstNodesStr[i]);
+         if (dstNode != null)
+            for (Node n : nodes)
+               if (!n.equals(dstNode)) {
+                  List<Path> paths = generatePaths(dstNode, n);
+                  printKPaths(paths, numOfKPaths);
+               }
+      }
    }
 
    public void runFromNtoM(Node src, Node dst, int numOfKPaths) {
