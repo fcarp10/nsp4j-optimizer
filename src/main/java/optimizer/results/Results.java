@@ -542,13 +542,26 @@ public class Results {
    private void cLT() {
       try {
          boolean[][] var = (boolean[][]) rawVariables.get(cLT);
+         boolean[][][] var2 = (boolean[][][]) rawVariables.get(zSPD);
          ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(LINK_CAPACITY_TYPES);
          List<String> strings = new ArrayList<>();
-         for (int l = 0; l < pm.getLinks().size(); l++)
+         for (int l = 0; l < pm.getLinks().size(); l++) {
+            double linkLoad = 0;
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int p = 0; p < pm.getServices().get(s).getTrafficFlow().getPaths().size(); p++) {
+                  if (!pm.getServices().get(s).getTrafficFlow().getPaths().get(p).contains(pm.getLinks().get(l)))
+                     continue;
+                  for (int d = 0; d < pm.getServices().get(s).getTrafficFlow().getDemands().size(); d++)
+                     if (pm.getServices().get(s).getTrafficFlow().getAux().get(d))
+                        if (var2[s][p][d])
+                           linkLoad += (double) pm.getServices().get(s).getTrafficFlow().getDemands().get(d);
+               }
+
             for (int t = 0; t < types.size(); t++)
                if (var[l][t])
                   strings.add("(" + (l + this.offset) + "): [" + pm.getLinks().get(l).getId() + "]["
-                        + types.get(t) + "]");
+                        + types.get(t) + "][" + linkLoad / types.get(t) + "]");
+         }
          variables.put(cLT, strings);
       } catch (Exception e) {
          printLog(log, WARNING, cLT + " var results: " + e.getMessage());
