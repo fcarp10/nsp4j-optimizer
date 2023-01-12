@@ -57,7 +57,7 @@ public class VariablesLP {
          if (sc.getObjFunc().equals(DIMEN_LINK_CAP))
             cLT_init(pm, model, initialSolution);
          // model dimension server capacity
-         if (sc.getObjFunc().equals(DIMEN_SERVER_CAP))
+         if (sc.getObjFunc().equals(DIMEN_SERVER_CAP) || sc.getObjFunc().equals(DIMEN_SERVER_COSTS))
             cXT_init(pm, model, initialSolution);
          // model optimizes utilization costs
          if (sc.getObjFunc().equals(NUM_SERVERS_AND_UTIL_COSTS) || sc.getObjFunc().equals(UTIL_COSTS)

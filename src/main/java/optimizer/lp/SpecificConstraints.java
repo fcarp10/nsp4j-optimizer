@@ -95,8 +95,8 @@ public class SpecificConstraints {
                      uL + "[" + pm.getLinks().get(l).getId() + "]");
 
          // constraint server utilization
-         if (!sc.getObjFunc().equals(DIMEN_NUM_SERVERS)
-               || !sc.getObjFunc().equals(DIMEN_SERVER_CAP)) // except when dimensioning
+         if (!sc.getObjFunc().equals(DIMEN_NUM_SERVERS) // except when dimensioning
+               || !sc.getObjFunc().equals(DIMEN_SERVER_CAP) || !sc.getObjFunc().equals(DIMEN_SERVER_COSTS))
             for (int x = 0; x < pm.getServers().size(); x++)
                modelLP.getGrbModel().addConstr(xuExpr[x], GRB.EQUAL, vars.uX[x], uX + "[x] --> " + "[" + x + "]");
 
@@ -230,7 +230,7 @@ public class SpecificConstraints {
 
    private void opexServers() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
-         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
+         if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) != NODE_TYPE_CLOUD) {
             GRBLinExpr expr = new GRBLinExpr();
             expr.addTerm((double) pm.getGlobal().get(SERVER_IDLE_ENERGY_COST), vars.fX[x]);
             expr.addTerm((double) pm.getGlobal().get(SERVER_UTIL_ENERGY_COST), vars.uX[x]);
@@ -244,7 +244,7 @@ public class SpecificConstraints {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
-               if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null) {
+               if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD) {
                   GRBLinExpr expr = new GRBLinExpr();
                   expr.addTerm((double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_CHARGES),
                         vars.fXSV[x][s][v]); // in $/h
@@ -505,14 +505,14 @@ public class SpecificConstraints {
    // use only cloud servers
    private void useOnlyCloudServers() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
-         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null)
+         if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) != NODE_TYPE_CLOUD)
             modelLP.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, CLOUD_ONLY);
    }
 
    // use only edge servers
    private void useOnlyEdgeServers() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
-         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+         if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             modelLP.getGrbModel().addConstr(vars.fX[x], GRB.EQUAL, 0.0, EDGE_ONLY);
    }
 
@@ -540,7 +540,7 @@ public class SpecificConstraints {
    // Constraint paths servers cloud
    private void constraintPathsServersCloud() throws GRBException {
       for (int x = 0; x < pm.getServers().size(); x++)
-         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+         if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++) {
                   GRBLinExpr expr = new GRBLinExpr();

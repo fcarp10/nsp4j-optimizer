@@ -345,27 +345,27 @@ public class Auxiliary {
 
    public static void removeCapacityOfCloudServers(Parameters pm) {
       for (int i = 0; i < pm.getServers().size(); i++)
-         if (pm.getServers().get(i).getParent().getAttribute(NODE_CLOUD) != null)
+         if ((int) pm.getServers().get(i).getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             pm.getServers().get(i).setCapacity(1);
    }
 
    public static void restoreCapacityOfCloudServers(Parameters pm) {
       for (int i = 0; i < pm.getServers().size(); i++)
-         if (pm.getServers().get(i).getParent().getAttribute(NODE_CLOUD) != null)
+         if ((int) pm.getServers().get(i).getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             pm.getServers().get(i).setCapacity((int) pm.getGlobal().get(CLOUD_SERVER_CAPACITY));
    }
 
    public static void removeCapacityOfCloudLinks(Parameters pm) {
       for (int i = 0; i < pm.getLinks().size(); i++)
-         if (pm.getLinks().get(i).getSourceNode().getAttribute(NODE_CLOUD) != null
-               || pm.getLinks().get(i).getTargetNode().getAttribute(NODE_CLOUD) != null)
+         if ((int) pm.getLinks().get(i).getSourceNode().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD
+               || (int) pm.getLinks().get(i).getTargetNode().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             pm.getLinks().get(i).setAttribute(LINK_CAPACITY, 1);
    }
 
    public static void restoreCapacityOfCloudLinks(Parameters pm) {
       for (int i = 0; i < pm.getLinks().size(); i++)
-         if (pm.getLinks().get(i).getSourceNode().getAttribute(NODE_CLOUD) != null
-               || pm.getLinks().get(i).getTargetNode().getAttribute(NODE_CLOUD) != null)
+         if ((int) pm.getLinks().get(i).getSourceNode().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD
+               || (int) pm.getLinks().get(i).getTargetNode().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             pm.getLinks().get(i).setAttribute(LINK_CAPACITY, (int) pm.getGlobal().get(CLOUD_LINK_CAPACITY));
 
    }

@@ -235,7 +235,7 @@ public class Results {
       try {
          boolean[][][] var = (boolean[][][]) rawVariables.get(fXSV);
          for (int x = 0; x < pm.getServers().size(); x++)
-            if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+            if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
                for (int s = 0; s < pm.getServices().size(); s++)
                   for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                      if (var[x][s][v])
@@ -591,7 +591,7 @@ public class Results {
          double[] var = (double[]) rawVariables.get(oX);
          List<String> strings = new ArrayList<>();
          for (int x = 0; x < pm.getServers().size(); x++)
-            if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
+            if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) != NODE_TYPE_CLOUD) {
                strings.add("(" + (x + this.offset) + "): [" + pm.getServers().get(x).getId() + "][" + var[x] + "]");
                ox.add(var[x]);
             }

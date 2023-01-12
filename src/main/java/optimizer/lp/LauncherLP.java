@@ -67,6 +67,9 @@ public class LauncherLP {
          case DIMEN_SERVER_CAP:
             expr.add(modelLP.dimensioningServerCapacityExpr());
             break;
+         case DIMEN_SERVER_COSTS:
+            expr.add(modelLP.dimensioningServerCostsExpr());
+            break;
          case NUM_SERVERS:
             expr.add(modelLP.numUsedServersExpr());
             break;

@@ -359,7 +359,7 @@ public class HeuristicAlgorithm {
             boolean lastTry) {
         int xCloudIndex = -1;
         for (int x = 0; x < availableServers.size(); x++)
-            if (pm.getServers().get(availableServers.get(x)).getParent().getAttribute(NODE_CLOUD) != null)
+            if ((int) pm.getServers().get(availableServers.get(x)).getParent().getAttribute(NODE_TYPE) == 0)
                 xCloudIndex = x;
         int xChosen = -1;
         // reduce migrations by choosing servers from initial placement

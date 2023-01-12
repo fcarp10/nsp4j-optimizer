@@ -5,6 +5,7 @@ public class Definitions {
    public static final String DIMEN_NUM_SERVERS = "DIMEN_NUM_SERVERS";
    public static final String DIMEN_LINK_CAP = "DIMEN_LINK_CAP";
    public static final String DIMEN_SERVER_CAP = "DIMEN_SERVER_CAP";
+   public static final String DIMEN_SERVER_COSTS = "DIMEN_SERVER_COSTS";
    public static final String NUM_SERVERS = "NUM_SERVERS";
    public static final String NUM_SERVERS_AND_UTIL_COSTS = "NUM_SERVERS_AND_UTIL_COSTS";
    public static final String UTIL_COSTS = "UTIL_COSTS";
@@ -117,7 +118,8 @@ public class Definitions {
    public static final String FUNCTION_CHARGES = "charges";
 
    // node and server parameters
-   public static final String NODE_CLOUD = "node_cloud";
+   public static final String NODE_TYPE = "node_type";
+   public static final int NODE_TYPE_CLOUD = 0;
    public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
    public static final String OVERPROVISIONING_NUM_SERVERS = "overprovisioning_num_servers";
    public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";
@@ -131,6 +133,7 @@ public class Definitions {
    public static final String SERVER_CAPACITY = "server_capacity";
    public static final String NODE_NUM_SERVERS = "num_servers_node";
    public static final String CLOUD_NUM_SERVERS = "cloud_num_servers";
+   public static final String SERVER_TYPES_COSTS = "server_types_costs";
 
    // link parameters
    public static final String LINK_CAPACITY = "capacity";

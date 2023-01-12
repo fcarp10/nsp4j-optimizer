@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static optimizer.Definitions.NODE_CLOUD;
+import static optimizer.Definitions.*;
 
 public class KShortestPathGenerator {
 
@@ -36,7 +36,7 @@ public class KShortestPathGenerator {
       List<Node> intermediateNodes = new ArrayList<>();
 
       for (Node node : graph.getNodeSet()) {
-         if (node.getAttribute(NODE_CLOUD) == null)
+         if ((int) node.getAttribute(NODE_TYPE) != NODE_TYPE_CLOUD)
             nodes.add(node);
          else
             intermediateNodes.add(node);

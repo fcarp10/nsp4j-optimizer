@@ -68,6 +68,17 @@ public class ModelLP {
       return expr;
    }
 
+   public GRBLinExpr dimensioningServerCostsExpr() {
+      ArrayList<Integer> types = (ArrayList<Integer>) pm.getGlobal().get(SERVER_CAPACITY_TYPES);
+      ArrayList<Integer> costs = (ArrayList<Integer>) pm.getGlobal().get(SERVER_TYPES_COSTS);
+      GRBLinExpr expr = new GRBLinExpr();
+      for (int x = 0; x < pm.getServers().size(); x++)
+         for (int t = 0; t < types.size(); t++)
+            expr.addTerm(types.get(t) * costs.get((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE)),
+                  vars.cXT[x][t]);
+      return expr;
+   }
+
    public GRBLinExpr numUsedServersExpr() {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < pm.getServers().size(); x++)
@@ -78,7 +89,7 @@ public class ModelLP {
    public GRBLinExpr numFunctionsInCloudExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < pm.getServers().size(); x++)
-         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+         if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   expr.addTerm(weight, vars.fXSV[x][s][v]);

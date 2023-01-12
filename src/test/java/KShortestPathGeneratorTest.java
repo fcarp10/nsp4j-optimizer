@@ -12,7 +12,7 @@ public class KShortestPathGeneratorTest {
    @Test
    public void inputParameters() throws URISyntaxException {
 
-      final String graphName = "urllc-dimen";
+      final String graphName = "example";
       final String extensionGraph = ".dgs";
       final boolean directedEdges = true;
       final boolean allNodesToCloud = false;
@@ -25,7 +25,7 @@ public class KShortestPathGeneratorTest {
       KShortestPathGenerator generator = new KShortestPathGenerator(path, graphName, graph, MAX_LENGTH);
 
       // - generate k-shortest paths from N to M
-      // generator.runAll(3); // num k-paths
+      generator.runAll(3); // num k-paths
 
       // - generate paths traversing intermediate node
       // generator.runTraversingIntermediateNode();
@@ -35,8 +35,8 @@ public class KShortestPathGeneratorTest {
       // generator.runFromNode(srcNodes, 5);
 
       // - generate paths to specific destination nodes
-      String[] dstNodes = new String[] { "1", "2", "3", "4" };
-      generator.runFromNode(dstNodes, 5);
+      // String[] dstNodes = new String[] { "1", "2", "3", "4" };
+      // generator.runFromNode(dstNodes, 5);
 
    }
 }

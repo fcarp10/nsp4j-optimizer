@@ -46,7 +46,7 @@ public class ResultsGUI {
          latitudeLabel = LATITUDE_LABEL_2;
       }
       for (Node n : pm.getNodes()) {
-         if (n.getAttribute(NODE_CLOUD) != null && n.getAttribute(longitudeLabel + "_gui") != null)
+         if ((int) n.getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD && n.getAttribute(longitudeLabel + "_gui") != null)
             nodeList.add(new NodeJson(n.getId(), n.getAttribute(longitudeLabel + "_gui"),
                   n.getAttribute(latitudeLabel + "_gui"), NODE_COLOR, n.getId(), NODE_SHAPE));
          else
@@ -54,7 +54,7 @@ public class ResultsGUI {
                   NODE_COLOR, n.getId(), NODE_SHAPE));
       }
       for (Server s : pm.getServers()) {
-         if (s.getParent().getAttribute(NODE_CLOUD) != null
+         if ((int) s.getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD
                && s.getParent().getAttribute(longitudeLabel + "_gui") != null)
             serverJsonMap.put(s.getId(), new ServerJson(s.getId(), s.getParent().getAttribute(longitudeLabel + "_gui"),
                   s.getParent().getAttribute(latitudeLabel + "_gui"), SERVER_COLOR, s.getId()));
@@ -64,7 +64,8 @@ public class ResultsGUI {
       }
       for (Edge e : pm.getLinks()) {
          String color = LINK_COLOR;
-         if (e.getSourceNode().getAttribute(NODE_CLOUD) != null || e.getTargetNode().getAttribute(NODE_CLOUD) != null)
+         if ((int) e.getSourceNode().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD
+               || (int) e.getTargetNode().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             color = LINK_CLOUD_COLOR;
          linkJsonMap.put(e.getId(),
                new LinkJson(e.getId(), e.getSourceNode().getId(), e.getTargetNode().getId(), "", color));

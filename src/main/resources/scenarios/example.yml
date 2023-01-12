@@ -8,10 +8,11 @@ global: {
   "num_servers_node": 1,
   "links_weight": 0.0,
   "servers_weight": 1.0,
-  # "link_capacity_types": [0, 1000],
-  # "server_capacity_types": [0, 1000],
-  # "overprovisioning_link_capacity": 1.0,
-  # "overprovisioning_server_capacity": 1.0,
+  "link_capacity_types": [0, 100, 1000],
+  "overprovisioning_link_capacity": 1.0,
+  "server_capacity_types": [0, 100, 1000],
+  "overprovisioning_server_capacity": 1.0,
+  "server_types_costs": [5, 0],
 }
 service_chains:
   - id: 1
@@ -63,10 +64,7 @@ function_types:
       "max_delay": 100.0,
     }
 traffic_flows:
-  - min_dem: 2
-    max_dem: 2
-    min_bw: 500
-    max_bw: 500 
+  - demands: [100.0, 300.0]
     services: [1]
     src: '1'
     dst: '4'

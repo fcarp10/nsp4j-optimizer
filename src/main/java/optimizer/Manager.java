@@ -75,7 +75,8 @@ public class Manager {
             latitudeLabel = LATITUDE_LABEL_2;
          }
          for (Node node : pm.getNodes()) {
-            if (node.getAttribute(NODE_CLOUD) != null && node.getAttribute(longitudeLabel + "_gui") != null) {
+            if ((int) node.getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD
+                  && node.getAttribute(longitudeLabel + "_gui") != null) {
                node.setAttribute(longitudeLabel + "_gui",
                      (double) node.getAttribute(longitudeLabel + "_gui") * scalingX);
                node.setAttribute(latitudeLabel + "_gui", (double) node.getAttribute(latitudeLabel + "_gui") * scalingY);

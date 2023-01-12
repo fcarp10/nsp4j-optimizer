@@ -105,7 +105,7 @@ public class VariablesAlg {
 
    private void oXgenerate() {
       for (int x = 0; x < pm.getServers().size(); x++)
-         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) == null) {
+         if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) != NODE_TYPE_CLOUD) {
             if (fX[x])
                oX[x] = (double) pm.getGlobal().get(SERVER_IDLE_ENERGY_COST)
                      + (uX.get(pm.getServers().get(x).getId()) * (double) pm.getGlobal().get(SERVER_UTIL_ENERGY_COST));
@@ -117,7 +117,7 @@ public class VariablesAlg {
       for (int s = 0; s < pm.getServices().size(); s++)
          for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
             for (int x = 0; x < pm.getServers().size(); x++)
-               if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+               if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
                   if (fXSV[x][s][v])
                      oSV[s][v] = (double) pm.getServices().get(s).getFunctions().get(v).getAttribute(FUNCTION_CHARGES);
    }
@@ -207,7 +207,7 @@ public class VariablesAlg {
 
       int functions_cloud = 0;
       for (int x = 0; x < pm.getServers().size(); x++)
-         if (pm.getServers().get(x).getParent().getAttribute(NODE_CLOUD) != null)
+         if ((int) pm.getServers().get(x).getParent().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             for (int s = 0; s < pm.getServices().size(); s++)
                for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
                   if (fXSV[x][s][v])

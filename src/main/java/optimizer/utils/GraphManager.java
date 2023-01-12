@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-import static optimizer.Definitions.NODE_CLOUD;
+import static optimizer.Definitions.*;
 
 public class GraphManager {
 
@@ -42,9 +42,9 @@ public class GraphManager {
             Set<Node> nodes = new HashSet<>();
             nodes.addAll(graph.getNodeSet());
             for (Node cloudNode : nodes) {
-               if (cloudNode.getAttribute(NODE_CLOUD) != null)
+               if ((int) cloudNode.getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
                   for (Node node : nodes) {
-                     if (node.getAttribute(NODE_CLOUD) == null) {
+                     if ((int) node.getAttribute(NODE_TYPE) != NODE_TYPE_CLOUD) {
                         graph.addEdge("e" + node.getId() + cloudNode.getId() + "-1", node.getId(), cloudNode.getId(),
                               true);
                         graph.addEdge("e" + cloudNode.getId() + node.getId() + "-2", cloudNode.getId(), node.getId(),

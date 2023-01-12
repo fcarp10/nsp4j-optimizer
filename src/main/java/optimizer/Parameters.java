@@ -87,7 +87,7 @@ public class Parameters {
       new GraphManager();
       boolean allNodesToCloud = false;
       if (global.containsKey(ALL_NODES_TO_CLOUD))
-         allNodesToCloud =  (boolean) global.get(ALL_NODES_TO_CLOUD);
+         allNodesToCloud = (boolean) global.get(ALL_NODES_TO_CLOUD);
       graph = GraphManager.importTopology(topologyFile, directedEdges, allNodesToCloud);
       paths = GraphManager.importPaths(graph, pathsFile);
       try {
@@ -117,13 +117,11 @@ public class Parameters {
       }
 
       for (Edge edge : edges) {
-         if (edge.getSourceNode().hasAttribute(NODE_CLOUD) || edge.getTargetNode().hasAttribute(NODE_CLOUD))
+         if ((int) edge.getSourceNode().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD
+               || (int) edge.getTargetNode().getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
             edge.setAttribute(LINK_CLOUD, true);
          if (edge.getAttribute(LINK_CAPACITY) == null) {
-            if (edge.hasAttribute(LINK_CLOUD))
-               edge.addAttribute(LINK_CAPACITY, (int) global.get(CLOUD_LINK_CAPACITY));
-            else
-               edge.addAttribute(LINK_CAPACITY, (int) global.get(LINK_CAPACITY_DEFAULT));
+            edge.addAttribute(LINK_CAPACITY, (int) global.get(LINK_CAPACITY_DEFAULT));
          }
          if (edge.getAttribute(LINK_DELAY) == null) {
             double nLon = edge.getSourceNode().getAttribute(longitudeLabel);
@@ -140,19 +138,12 @@ public class Parameters {
 
    private void generateServers() {
       for (Node node : nodes) {
-         if (node.getAttribute(NODE_NUM_SERVERS) == null) {
-            if (node.hasAttribute(NODE_CLOUD))
-               node.addAttribute(NODE_NUM_SERVERS, (int) global.get(CLOUD_NUM_SERVERS));
-            else
-               node.addAttribute(NODE_NUM_SERVERS, (int) global.get(NODE_NUM_SERVERS));
-         }
+         if (node.getAttribute(NODE_NUM_SERVERS) == null)
+            node.addAttribute(NODE_NUM_SERVERS, (int) global.get(NODE_NUM_SERVERS));
          for (int s = 0; s < (int) node.getAttribute(NODE_NUM_SERVERS); s++) {
-            if (node.getAttribute(SERVER_CAPACITY) == null) {
-               if (node.hasAttribute(NODE_CLOUD))
-                  node.addAttribute(SERVER_CAPACITY, (int) global.get(CLOUD_SERVER_CAPACITY));
-               else
-                  node.addAttribute(SERVER_CAPACITY, (int) global.get(SERVER_CAPACITY));
-            }
+            if (node.getAttribute(SERVER_CAPACITY) == null)
+               node.addAttribute(SERVER_CAPACITY, (int) global.get(SERVER_CAPACITY));
+
             servers.add(new Server(node.getId() + "_" + s, node, node.getAttribute(SERVER_CAPACITY)));
          }
       }
@@ -165,7 +156,8 @@ public class Parameters {
             for (Node dst : nodes) {
                if (src == dst)
                   continue;
-               if (src.getAttribute(NODE_CLOUD) != null || dst.getAttribute(NODE_CLOUD) != null)
+               if ((int) src.getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD
+                     || (int) dst.getAttribute(NODE_TYPE) == NODE_TYPE_CLOUD)
                   continue;
                TrafficFlow trafficFlow = new TrafficFlow(src.getId(), dst.getId(), dtf.getServices(),
                      dtf.getServiceLength());
@@ -208,18 +200,18 @@ public class Parameters {
          int serviceId = servicesArray[rndService];
          Service service = createServiceChain(serviceId);
          List<Function> functions = new ArrayList<>();
-         int[] serviceLengthArray = new int[]{0};
+         int[] serviceLengthArray = new int[] { 0 };
          if (trafficFlow.getServiceLength() != null)
             serviceLengthArray = trafficFlow.getServiceLength();
-         else if (global.containsKey(SERVICE_LENGTH)){
+         else if (global.containsKey(SERVICE_LENGTH)) {
             ArrayList<Integer> list = (ArrayList<Integer>) global.get(SERVICE_LENGTH);
             serviceLengthArray = new int[list.size()];
             for (int i = 0; i < list.size(); i++)
                serviceLengthArray[i] = list.get(i);
-         } 
+         }
          int serviceLength = serviceLengthArray[rndService];
          int[] chain;
-         if (serviceLength > 0){
+         if (serviceLength > 0) {
             chain = new int[serviceLength];
             for (int i = 0; i < serviceLength; i++)
                chain[i] = service.getChain()[rnd.nextInt(service.getChain().length)];
