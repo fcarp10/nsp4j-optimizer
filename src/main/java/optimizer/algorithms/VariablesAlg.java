@@ -175,7 +175,7 @@ public class VariablesAlg {
          pathDelay += (double) link.getAttribute(LINK_DELAY) * 1000; // in ms
       serviceDelay += pathDelay;
       // migration delay
-      if (fXSVinitial != null) {
+      if (fXSVinitial != null && service.getAttributes().containsKey(SERVICE_DOWNTIME)) {
          double downtime = (double) service.getAttribute(SERVICE_DOWNTIME);
          double totalServiceDowntime = 0;
          for (int x = 0; x < pm.getServers().size(); x++)
