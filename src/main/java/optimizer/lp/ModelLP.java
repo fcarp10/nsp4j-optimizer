@@ -192,7 +192,7 @@ public class ModelLP {
          double objValLog = Auxiliary.roundDouble(objVal, 4);
          printLog(log, INFO, "finished [" + objValLog + "]");
          return objVal;
-      } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE) {
+      } else if (grbModel.get(GRB.IntAttr.Status) == GRB.Status.INFEASIBLE && COMPUTE_ISS) {
          grbModel.computeIIS();
          printISS();
          printLog(log, ERROR, "model is infeasible");

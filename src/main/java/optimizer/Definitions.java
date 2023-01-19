@@ -188,4 +188,6 @@ public class Definitions {
    public static final String INFO = "INFO - ";
    public static final String WARNING = "WARN - ";
 
+   // Software and optimizer general parameters
+   public static final boolean COMPUTE_ISS = false;
 }
