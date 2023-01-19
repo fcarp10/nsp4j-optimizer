@@ -176,7 +176,12 @@ public class VariablesAlg {
       serviceDelay += pathDelay;
       // migration delay
       if (fXSVinitial != null) {
-         double downtime = (double) service.getAttribute(SERVICE_DOWNTIME);
+         double downtime;
+         try {
+            downtime = (double) service.getAttribute(SERVICE_DOWNTIME);
+         } catch (NullPointerException e) {
+            downtime = 0;
+         }
          double totalServiceDowntime = 0;
          for (int x = 0; x < pm.getServers().size(); x++)
             for (int v = 0; v < service.getFunctions().size(); v++)
