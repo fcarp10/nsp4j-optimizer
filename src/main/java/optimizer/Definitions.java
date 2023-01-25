@@ -120,6 +120,7 @@ public class Definitions {
    // node and server parameters
    public static final String NODE_TYPE = "node_type";
    public static final int NODE_TYPE_CLOUD = 0;
+   public static final int NODE_TYPE_UNKNOWN = -1;
    public static final String SERVER_DIMENSIONING_CAPACITY = "server_dimensioning_capacity";
    public static final String OVERPROVISIONING_NUM_SERVERS = "overprovisioning_num_servers";
    public static final String OVERPROVISIONING_SERVER_CAPACITY = "overprovisioning_server_capacity";

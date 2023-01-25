@@ -93,6 +93,7 @@ public class Parameters {
       try {
          nodes.addAll(graph.getNodeSet());
          edges.addAll(graph.getEdgeSet());
+         checkNodeType();
          setLinkParameters();
          generateServers();
          generateTrafficFlows();
@@ -103,6 +104,12 @@ public class Parameters {
          log.warn("error generating parameters: " + e.toString());
          return false;
       }
+   }
+
+   private void checkNodeType() {
+      for (Node node : nodes)
+         if (!node.hasAttribute(NODE_TYPE))
+            node.addAttribute(NODE_TYPE, NODE_TYPE_UNKNOWN);
    }
 
    private void setLinkParameters() {
