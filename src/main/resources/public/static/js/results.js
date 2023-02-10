@@ -17,7 +17,6 @@ initializeGraphs(initialData);
 
 function getResults() {
     try {
-        var results = null;
         $.ajax
         ({
             url: "results",

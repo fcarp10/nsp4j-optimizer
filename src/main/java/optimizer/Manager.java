@@ -120,22 +120,22 @@ public class Manager {
          try {
             switch (sce.getName()) {
                case LP:
-                  rm = new ResultsManager(pm.getGraphName());
                   readParameters(sce.getInputFileName());
+                  rm = new ResultsManager(pm.getGraphName());
                   outputFileName = pm.getGraphName() + sce.getName() + sce.getObjFunc();
                   LauncherLP.run(pm, sce, rm, null, null, outputFileName, true);
                   break;
 
                case FF:
-                  rm = new ResultsManager(pm.getGraphName());
                   readParameters(sce.getInputFileName());
+                  rm = new ResultsManager(pm.getGraphName());
                   outputFileName = pm.getGraphName() + "_" + FF + "_" + sce.getObjFunc();
                   LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
                   break;
 
                case RF:
-                  rm = new ResultsManager(pm.getGraphName());
                   readParameters(sce.getInputFileName());
+                  rm = new ResultsManager(pm.getGraphName());
                   for (int i = 0; i < 10; i++) {
                      outputFileName = pm.getGraphName() + "_" + RF + "_" + sce.getObjFunc() + "_" + i;
                      LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
@@ -143,8 +143,8 @@ public class Manager {
                   break;
 
                case GRD:
-                  rm = new ResultsManager(pm.getGraphName());
                   readParameters(sce.getInputFileName());
+                  rm = new ResultsManager(pm.getGraphName());
                   outputFileName = pm.getGraphName() + "_" + GRD + "_" + sce.getObjFunc();
                   LauncherAlg.run(pm, sce, rm, null, outputFileName, false);
                   break;

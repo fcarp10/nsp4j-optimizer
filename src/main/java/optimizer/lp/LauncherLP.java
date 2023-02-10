@@ -41,15 +41,15 @@ public class LauncherLP {
       Duration durationComputation = Duration.between(startTime, LocalDateTime.now());
       Results results;
       if (objVal != null) {
-         Auxiliary.printLog(log, INFO, "generating results...");
+         Auxiliary.printLog(log, INFO, "generating results");
          results = generateResults(pm, modelLP, sce, initialPlacement);
          results.setComputationTime((double) durationComputation.getSeconds());
          resultsManager.exportJsonObject(outputFileName, results);
          if (exportMST)
             resultsManager.exportModel(modelLP.getGrbModel(), outputFileName);
          ResultsGUI.updateResults(results);
-         Auxiliary.printLog(log, INFO, "done");
       }
+      Auxiliary.printLog(log, INFO, "done");
       return modelLP.getGrbModel();
    }
 

@@ -131,7 +131,6 @@ public class Results {
       setSummaryResults(xuSummary, xu);
       luGraph(lu);
       xuGraph(xu);
-      Auxiliary.printLog(log, INFO, "summary results completed");
 
       // general variables
       zSP(); // binary, routing per path
@@ -141,7 +140,6 @@ public class Results {
       fXSVD(); // binary, placement per demand
       uX(); // link utilization
       uL(); // server utilization
-      Auxiliary.printLog(log, INFO, "general variables results completed");
 
       // model specific variables
       if (sc.getObjFunc().equals(DIMEN_NUM_SERVERS))
@@ -162,14 +160,12 @@ public class Results {
          gSVXY(); // binary, aux synchronization traffic
          hSVP(); // binary, traffic synchronization
          synchronizationTraffic = Auxiliary.roundDouble(synchronizationTraffic(), 2);
-         Auxiliary.printLog(log, INFO, "synchronization traffic results completed");
       }
 
       sd = serviceDelayList(initialPlacement);
       setSummaryResults(sdSummary, sd);
       sdGraph(sd);
       dSVXD();
-      Auxiliary.printLog(log, INFO, "service delay results completed");
    }
 
    private Integer[] countMigrations(boolean[][][] initialPlacement) {

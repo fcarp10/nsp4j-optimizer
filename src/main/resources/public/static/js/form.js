@@ -6,8 +6,6 @@ var numMessages = 7;
 
 function getMessage() {
     try {
-        var message = null;
-        var error = false;
         $.ajax
             ({
                 url: "message",
@@ -38,19 +36,18 @@ function successConnection(message) {
         document.getElementById("message").innerText = messages.join("");
         if (messages.length >= numMessages)
             messages.shift();
-        if (message == "INFO - backend is ready") {
-            document.getElementById("run_button").removeAttribute("disabled");
-            document.getElementById("stop_button").setAttribute("disabled", "true");
-            longRefresh();
-        } else if (message == "INFO - done") { // model finished
+        if (message == "INFO - done") { 
             getResults();
             document.getElementById("run_button").removeAttribute("disabled");
             document.getElementById("stop_button").setAttribute("disabled", "true");
         }
-
-        else {  // receiving logs
+        else { 
             shortRefresh();
         }
+    } else {
+        document.getElementById("run_button").removeAttribute("disabled");
+        document.getElementById("stop_button").setAttribute("disabled", "true");
+        longRefresh();
     }
 }
 
@@ -90,6 +87,7 @@ function loadTopology() {
 }
 
 function runOpt() {
+    loadTopology();
     shortRefresh();
     var scenario = generateScenario();
     try {
@@ -135,30 +133,6 @@ function stopOpt() {
     catch (e) {
         return 0;
     }
-}
-
-function checkScenario(elem) {
-    var scenario = document.getElementById("scenario");
-    var objFunc = document.getElementById("objFunc");
-
-    if (objFunc.value === "DIMEN") {
-        document.getElementById("PF3").checked = false;
-        document.getElementById("single-path").checked = true;
-        document.getElementById("set-init-plc").checked = false;
-        document.getElementById("sync-traffic").checked = false;
-    } else {
-        document.getElementById("PF3").checked = true;
-        document.getElementById("single-path").checked = false;
-        document.getElementById("set-init-plc").checked = false;
-        document.getElementById("sync-traffic").checked = true;
-    }
-
-    if (scenario.value === "CUSTOM_2") {
-        objFunc.disabled = true;
-    } else {
-        objFunc.disabled = false;
-    }
-
 }
 
 function setDecimals(value) {
