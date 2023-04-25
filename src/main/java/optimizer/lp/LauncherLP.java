@@ -73,6 +73,9 @@ public class LauncherLP {
          case NUM_SERVERS:
             expr.add(modelLP.numUsedServersExpr());
             break;
+         case NUM_FUNCTIONS:
+            expr.add(modelLP.numFunctionsExpr(1.0));
+            break;
          case NUM_SERVERS_AND_UTIL_COSTS:
             expr.add(modelLP.numUsedServersExpr());
             serversWeight = 1.0 / pm.getServers().size();

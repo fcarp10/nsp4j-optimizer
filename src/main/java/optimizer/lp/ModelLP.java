@@ -86,6 +86,15 @@ public class ModelLP {
       return expr;
    }
 
+   public GRBLinExpr numFunctionsExpr(double weight) {
+      GRBLinExpr expr = new GRBLinExpr();
+      for (int x = 0; x < pm.getServers().size(); x++)
+            for (int s = 0; s < pm.getServices().size(); s++)
+               for (int v = 0; v < pm.getServices().get(s).getFunctions().size(); v++)
+                  expr.addTerm(weight, vars.fXSV[x][s][v]);
+      return expr;
+   }
+
    public GRBLinExpr numFunctionsInCloudExpr(double weight) {
       GRBLinExpr expr = new GRBLinExpr();
       for (int x = 0; x < pm.getServers().size(); x++)

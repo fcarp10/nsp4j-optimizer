@@ -7,6 +7,7 @@ public class Definitions {
    public static final String DIMEN_SERVER_CAP = "DIMEN_SERVER_CAP";
    public static final String DIMEN_SERVER_COSTS = "DIMEN_SERVER_COSTS";
    public static final String NUM_SERVERS = "NUM_SERVERS";
+   public static final String NUM_FUNCTIONS= "NUM_FUNCTIONS";
    public static final String NUM_SERVERS_AND_UTIL_COSTS = "NUM_SERVERS_AND_UTIL_COSTS";
    public static final String UTIL_COSTS = "UTIL_COSTS";
    public static final String UTIL_COSTS_AND_MAX_UTIL = "UTIL_COSTS_AND_MAX_UTIL";
