@@ -88,6 +88,10 @@ public class Parameters {
       boolean allNodesToCloud = false;
       if (global.containsKey(ALL_NODES_TO_CLOUD))
          allNodesToCloud = (boolean) global.get(ALL_NODES_TO_CLOUD);
+      // Always compute ISS unless "compute_iss" is set to false in the yml file
+      if (!global.containsKey(COMPUTE_ISS)){
+         global.put(COMPUTE_ISS, true);
+      }
       graph = GraphManager.importTopology(topologyFile, directedEdges, allNodesToCloud);
       paths = GraphManager.importPaths(graph, pathsFile);
       try {

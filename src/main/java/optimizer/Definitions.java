@@ -158,6 +158,7 @@ public class Definitions {
    public static final String SCENARIOS_PATH = "scenarios";
    public static final String LINK_CAPACITY_TYPES = "link_capacity_types";
    public static final String SERVER_CAPACITY_TYPES = "server_capacity_types";
+   public static final String COMPUTE_ISS = "compute_iss";
 
    // GUI parameters
    public static final String NODE_COLOR = "Black";
@@ -189,7 +190,4 @@ public class Definitions {
    public static final String ERROR = "ERROR - ";
    public static final String INFO = "INFO - ";
    public static final String WARNING = "WARN - ";
-
-   // Software and optimizer general parameters
-   public static final boolean COMPUTE_ISS = false;
 }
