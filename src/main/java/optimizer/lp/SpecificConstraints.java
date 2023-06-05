@@ -70,8 +70,10 @@ public class SpecificConstraints {
             singlePath();
          if (sc.getConstraints().get(SET_INIT_PLC))
             setInitPlc(initialPlacement);
-         if (sc.getConstraints().get(FORCE_SRC_DST))
-            forceSrcDst();
+         if (sc.getConstraints().get(FORCE_SRC))
+            forceSrc();
+         if (sc.getConstraints().get(FORCE_DST))
+            forceDst();
          if (sc.getConstraints().get(CONST_REP))
             constRep();
          if (sc.getConstraints().containsKey(PATHS_SERVERS_CLOUD))
@@ -553,21 +555,29 @@ public class SpecificConstraints {
    }
 
    // Fix src-dst functions
-   private void forceSrcDst() throws GRBException {
+   private void forceSrc() throws GRBException {
       for (int s = 0; s < pm.getServices().size(); s++) {
          Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(0);
          Node srcNode = path.getNodePath().get(0);
-         Node dstNode = path.getNodePath().get(path.getNodePath().size() - 1);
          GRBLinExpr exprSrc = new GRBLinExpr();
-         GRBLinExpr exprDst = new GRBLinExpr();
          for (int x = 0; x < pm.getServers().size(); x++) {
             if (pm.getServers().get(x).getParent().getId().equals(srcNode.getId()))
                exprSrc.addTerm(1.0, vars.fXSV[x][s][0]);
+         }
+         modelLP.getGrbModel().addConstr(exprSrc, GRB.EQUAL, 1.0, FORCE_SRC);
+      }
+   }
+
+   private void forceDst() throws GRBException {
+      for (int s = 0; s < pm.getServices().size(); s++) {
+         Path path = pm.getServices().get(s).getTrafficFlow().getPaths().get(0);
+         Node dstNode = path.getNodePath().get(path.getNodePath().size() - 1);
+         GRBLinExpr exprDst = new GRBLinExpr();
+         for (int x = 0; x < pm.getServers().size(); x++) {
             if (pm.getServers().get(x).getParent().getId().equals(dstNode.getId()))
                exprDst.addTerm(1.0, vars.fXSV[x][s][pm.getServices().get(s).getFunctions().size() - 1]);
          }
-         modelLP.getGrbModel().addConstr(exprSrc, GRB.EQUAL, 1.0, FORCE_SRC_DST);
-         modelLP.getGrbModel().addConstr(exprDst, GRB.EQUAL, 1.0, FORCE_SRC_DST);
+         modelLP.getGrbModel().addConstr(exprDst, GRB.EQUAL, 1.0, FORCE_DST);
       }
    }
 

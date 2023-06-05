@@ -95,7 +95,8 @@ public class Definitions {
    public static final String PATHS_SERVERS_CLOUD = "paths_servers_cloud";
 
    // other constraints
-   public static final String FORCE_SRC_DST = "force_src_dst";
+   public static final String FORCE_SRC = "force_src";
+   public static final String FORCE_DST = "force_dst";
    public static final String CONST_REP = "const_rep";
 
    // service parameters
