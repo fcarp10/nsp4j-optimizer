@@ -9,7 +9,7 @@ Prerequisites
 - [Gurobi optimizer](https://www.gurobi.com/)
 
 
-### Build and run
+## Build and run
 
 1. Install `gurobi.jar` library on your local maven repository:
    
@@ -35,19 +35,68 @@ Prerequisites
 	java -jar nsp4j-optimizer-${VERSION}-jar-with-dependencies.jar
 	```
 
-4. Access to the GUI in `localhost:8082`.
+4. By default, GUI runs in: `localhost:8082`.
 
 5. Check in `target/results/` for the generated results.
 
+## API
 
-### Configuration files
+Upload a file:
+```
+curl -s -X POST http://SERVER:PORT/upload -F 'file=@test.txt'
+```
+
+Delete a file:
+```
+curl -s -X DELETE http://localhost:8082/delete/test.txt
+```
+
+Run a model (example):
+```
+curl -s -X POST http://localhost:8082/run -d '{ 
+  "inputFileName":"example",
+  "objFunc":"UTIL_COSTS",
+  "maximization":false,
+  "name":"LP",
+  "constraints":{
+    "RP1":true,
+    "RP2":true,
+    "PF1":true,
+    "PF2":true,
+    "PF3":true,
+    "FD1":true,
+    "FD2":true,
+    "FD3":true,
+    "sync_traffic":false,
+    "max_serv_delay":false,
+    "cloud_only":false,
+    "edge_only":false,
+    "single_path":false,
+    "set_init_plc":false,
+    "force_src_dst":false,
+    "const_rep":false
+    }
+  }'
+```
+
+Stop the optimizer:
+```
+curl -s -X GET http://localhost:8082/stop 
+```
+
+Retrieve results:
+```
+curl -s -X GET http://localhost:8082/results 
+```
+
+## Configuration files
 
 - `*.dgs`: topology description file
 - `*.txt`: paths file
 - `*.yml`: parameters file
 
 
-#### Topology description file
+### Topology description file
 
 The network topology is specified using GraphStream guidelines:
 
@@ -79,7 +128,7 @@ For further information, see
 documentation.
 
 
-#### Paths file
+### Paths file
 
 File containing all admissible paths:
 
@@ -90,7 +139,7 @@ File containing all admissible paths:
 ```
 
 
-#### Parameters file
+### Parameters file
 
 Parameters for the optimization model:
 
