@@ -158,7 +158,7 @@ public class LauncherLP {
       results.setVariable(fXSVD, Auxiliary.grbVarsToBooleans(optModelLP.getVars().fXSVD));
       results.setVariable(uL, Auxiliary.grbVarsToDoubles(optModelLP.getVars().uL));
       results.setVariable(uX, Auxiliary.grbVarsToDoubles(optModelLP.getVars().uX));
-
+   
       // model specific variables
       if (sc.getObjFunc().equals(DIMEN_NUM_SERVERS))
          results.setVariable(xN, Auxiliary.grbVarsToDoubles(optModelLP.getVars().xN));
@@ -166,6 +166,9 @@ public class LauncherLP {
          results.setVariable(cLT, Auxiliary.grbVarsToBooleans(optModelLP.getVars().cLT));
       if (sc.getObjFunc().equals(DIMEN_SERVER_CAP))
          results.setVariable(cXT, Auxiliary.grbVarsToBooleans(optModelLP.getVars().cXT));
+      if (sc.getObjFunc().equals(DIMEN_SERVER_COSTS)) {
+         results.setVariable(cXT, Auxiliary.grbVarsToBooleans(optModelLP.getVars().cXT));
+      }
 
       if (sc.getObjFunc().equals(OPEX_SERVERS) || sc.getObjFunc().equals(FUNCTIONS_CHARGES)
             || sc.getObjFunc().equals(QOS_PENALTIES) || sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {
@@ -186,6 +189,11 @@ public class LauncherLP {
             || sc.getObjFunc().equals(FUNCTIONS_CHARGES) || sc.getObjFunc().equals(QOS_PENALTIES)
             || sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {
          results.setVariable(dSVXD, Auxiliary.grbVarsToDoubles(optModelLP.getVars().dSVXD));
+      }
+
+      // variable propagation delay
+      if(sc.getConstraints().get(CONST_VLD)) {
+         results.setVariable(qSDPNM, Auxiliary.grbVarsToBooleans(optModelLP.getVars().qSDPNM));
       }
       results.initializeResults(optModelLP.getObjVal(), initialPlacement);
       return results;
