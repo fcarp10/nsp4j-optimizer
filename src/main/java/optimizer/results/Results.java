@@ -146,7 +146,7 @@ public class Results {
          xN(); // integer, num servers per node
       if (sc.getObjFunc().equals(DIMEN_LINK_CAP))
          cLT();
-      if (sc.getObjFunc().equals(DIMEN_SERVER_CAP))
+      if (sc.getObjFunc().equals(DIMEN_SERVER_CAP) || sc.getObjFunc().equals(DIMEN_SERVER_COSTS))
          cXT();
       if (sc.getObjFunc().equals(OPEX_SERVERS) || sc.getObjFunc().equals(FUNCTIONS_CHARGES)
             || sc.getObjFunc().equals(QOS_PENALTIES) || sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {

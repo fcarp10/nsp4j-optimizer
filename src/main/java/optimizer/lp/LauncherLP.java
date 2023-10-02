@@ -166,6 +166,9 @@ public class LauncherLP {
          results.setVariable(cLT, Auxiliary.grbVarsToBooleans(optModelLP.getVars().cLT));
       if (sc.getObjFunc().equals(DIMEN_SERVER_CAP))
          results.setVariable(cXT, Auxiliary.grbVarsToBooleans(optModelLP.getVars().cXT));
+      if (sc.getObjFunc().equals(DIMEN_SERVER_COSTS)) {
+         results.setVariable(cXT, Auxiliary.grbVarsToBooleans(optModelLP.getVars().cXT));
+      }
 
       if (sc.getObjFunc().equals(OPEX_SERVERS) || sc.getObjFunc().equals(FUNCTIONS_CHARGES)
             || sc.getObjFunc().equals(QOS_PENALTIES) || sc.getObjFunc().equals(ALL_MONETARY_COSTS)) {
